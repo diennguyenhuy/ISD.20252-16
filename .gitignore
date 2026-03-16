@@ -1,3 +1,4 @@
 *.png.bak
 *.asta.lock
 ~$*
+.idea
