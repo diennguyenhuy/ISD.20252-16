@@ -2,3 +2,5 @@
 *.asta.lock
 ~$*
 .idea
+.vscode
+~WRL*.tmp
