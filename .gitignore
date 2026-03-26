@@ -1,0 +1,6 @@
+*.png.bak
+*.asta.lock
+~$*
+.idea
+.vscode
+~WRL*.tmp
