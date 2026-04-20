@@ -4,3 +4,5 @@
 .idea
 .vscode
 ~WRL*.tmp
+node_modules
+HELP.md
