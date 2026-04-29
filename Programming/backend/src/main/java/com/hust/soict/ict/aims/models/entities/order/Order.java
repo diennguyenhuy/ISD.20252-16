@@ -1,6 +1,9 @@
 package com.hust.soict.ict.aims.models.entities.order;
 
+import com.hust.soict.ict.aims.models.cart.Cart;
+import com.hust.soict.ict.aims.models.cart.CartItem;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,7 +19,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "order")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -34,7 +37,7 @@ public class Order {
     private DeliveryInformation deliveryInformation;
 
     @Setter
-    private long deliveryFee;
+    private Long deliveryFee;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private Invoice invoice;
@@ -50,12 +53,12 @@ public class Order {
     private Instant updatedAt;
 
     @Transient
-    public long getTotalPriceWithoutVAT() {
+    public Long getTotalPriceWithoutVAT() {
         return items.stream().mapToLong(OrderItem::getItemTotalPrice).sum();
     }
 
     @Transient
-    public long getTotalPriceWithVAT() {
+    public Long getTotalPriceWithVAT() {
         return Math.round(getTotalPriceWithoutVAT() * 1.1);
     }
 
@@ -65,7 +68,27 @@ public class Order {
     }
 
     @Transient
-    public long getTotalAmount() {
+    public Long getTotalAmount() {
         return deliveryFee + getTotalPriceWithVAT();
+    }
+
+    public void addItem(OrderItem orderItem) {
+        items.add(orderItem);
+    }
+
+    public static Order from(Cart cart) throws IllegalArgumentException {
+        if (cart == null || cart.isEmpty()) {
+            throw new IllegalArgumentException("Cart is null or empty. Cannot create order.");
+        }
+
+        Order order = new Order();
+
+        for (CartItem item : cart.getItems()) {
+            order.addItem(OrderItem.from(item, order));
+        }
+
+        order.status = OrderStatus.DRAFT;
+
+        return order;
     }
 }

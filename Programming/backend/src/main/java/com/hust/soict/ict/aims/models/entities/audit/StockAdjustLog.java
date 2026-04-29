@@ -3,6 +3,7 @@ package com.hust.soict.ict.aims.models.entities.audit;
 import com.hust.soict.ict.aims.models.entities.product.Product;
 import com.hust.soict.ict.aims.models.entities.user.User;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "stock_adjust_log")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StockAdjustLog {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -24,9 +25,9 @@ public class StockAdjustLog {
     private UUID id;
 
     @Column(nullable = false, updatable = false)
-    private int oldStock;
+    private Integer oldStock;
     @Column(nullable = false, updatable = false)
-    private int newStock;
+    private Integer newStock;
 
     @Column(columnDefinition = "TEXT", nullable = false, updatable = false)
     private String reason;
@@ -56,5 +57,23 @@ public class StockAdjustLog {
                 + "'s stock from " + oldStock + " to " + newStock
                 + " at " + localTimestamp
                 + " with reason: " + reason;
+    }
+
+    public static StockAdjustLog of(
+            int oldStock,
+            int newStock,
+            String reason,
+            User manager,
+            Product product
+    ) {
+        StockAdjustLog l = new StockAdjustLog();
+
+        l.oldStock = oldStock;
+        l.newStock = newStock;
+        l.reason = reason;
+        l.manager = manager;
+        l.product = product;
+
+        return l;
     }
 }

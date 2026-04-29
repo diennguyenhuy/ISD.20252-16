@@ -2,15 +2,16 @@ package com.hust.soict.ict.aims.models.entities.product;
 
 import java.time.LocalDate;
 
+import com.hust.soict.ict.aims.exceptions.ProductValidationException;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @MappedSuperclass
-@Getter @Setter
-@NoArgsConstructor
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class PrintableProduct extends Product {
     @Column(nullable = false)
     private String publisher;
@@ -20,4 +21,55 @@ public abstract class PrintableProduct extends Product {
 
     @Column(length = 50)
     private String language;
+
+    protected PrintableProduct(Builder<?> builder) throws ProductValidationException {
+        super(builder);
+        PrintableProductValidator.validatePublisher(builder.publisher);
+        PrintableProductValidator.validatePublicationDate(builder.publicationDate);
+
+        this.publisher = builder.publisher;
+        this.publicationDate = builder.publicationDate;
+        this.language = builder.language;
+    }
+
+    public static abstract class Builder<B extends Builder<B>> extends Product.Builder<B> {
+        private String publisher;
+        private LocalDate publicationDate;
+        private String language;
+
+        public B publisher(String publisher) {
+            this.publisher = publisher;
+            return self();
+        }
+
+        public B publicationDate(LocalDate publicationDate) {
+            this.publicationDate = publicationDate;
+            return self();
+        }
+
+        public B language(String language) {
+            this.language = language;
+            return self();
+        }
+    }
+}
+
+final class PrintableProductValidator {
+    private PrintableProductValidator() {}
+
+    static void validatePublisher(String publisher) throws ProductValidationException {
+        if (publisher == null || publisher.isBlank()) {
+            throw new ProductValidationException("Publisher is required", "publisher");
+        }
+    }
+
+    static void validatePublicationDate(LocalDate publicationDate) throws ProductValidationException {
+        if (publicationDate == null) {
+            throw new ProductValidationException("Publication Date is required", "publicationDate");
+        }
+
+        if (publicationDate.isAfter(LocalDate.now())) {
+            throw new ProductValidationException("Publication Date must not be in the future", "publicationDate");
+        }
+    }
 }

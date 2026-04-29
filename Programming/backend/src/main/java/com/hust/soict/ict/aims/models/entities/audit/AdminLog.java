@@ -2,6 +2,7 @@ package com.hust.soict.ict.aims.models.entities.audit;
 
 import com.hust.soict.ict.aims.models.entities.user.User;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,7 +15,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "admin_log")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AdminLog {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -65,5 +66,21 @@ public class AdminLog {
         return "[ADMIN_LOG #" + id + "] " + adminInfo + " "
                 + actionName + " user #" + affectedUser.getId()
                 + " at " + localTimestamp;
+    }
+
+    public static AdminLog of(
+            AdminAction action,
+            User admin,
+            User affectedUser,
+            Instant timestamp
+    ) {
+        AdminLog l = new AdminLog();
+
+        l.action = action;
+        l.admin = admin;
+        l.affectedUser = affectedUser;
+        l.timestamp = timestamp;
+
+        return l;
     }
 }

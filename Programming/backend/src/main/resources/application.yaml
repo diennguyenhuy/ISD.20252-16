@@ -3,8 +3,8 @@ spring:
     name: backend
   datasource:
     url: jdbc:postgresql://localhost:5432/aims
-    username: user
-    password: 123456789
+    username: postgres
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:

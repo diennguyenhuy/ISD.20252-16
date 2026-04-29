@@ -18,14 +18,16 @@ public class Cart {
      */
     public void addItem(Product product, int quantity) throws IllegalArgumentException {
         if (quantity <= 0) {
-            throw new IllegalArgumentException("Quantity must be greater than zero.");
+            throw new IllegalArgumentException("Quantity must be positive.");
         }
 
-        CartItem item = new CartItem(product, quantity);
+        if (product == null) {
+            throw new IllegalArgumentException("Product cannot be null.");
+        }
 
         items.merge(
                 product.getId(),
-                item,
+                new CartItem(product, quantity),
                 (existing, incoming) -> {
                     existing.setQuantity(existing.getQuantity() + incoming.getQuantity());
                     return existing;
@@ -66,8 +68,8 @@ public class Cart {
         items.clear();
     }
 
-    public int getItemCount() {
-        return items.size();
+    public boolean isEmpty() {
+        return items.isEmpty();
     }
 
     public int getQuantity(UUID productId) throws NoSuchElementException {

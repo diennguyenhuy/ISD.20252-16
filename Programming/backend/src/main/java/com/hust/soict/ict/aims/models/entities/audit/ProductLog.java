@@ -3,6 +3,7 @@ package com.hust.soict.ict.aims.models.entities.audit;
 import com.hust.soict.ict.aims.models.entities.product.Product;
 import com.hust.soict.ict.aims.models.entities.user.User;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "product_log")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductLog {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -57,5 +58,21 @@ public class ProductLog {
         return "[PRODUCT_LOG #" + id + "] " + managerInfo + " "
                 + actionName + " product #" + product.getId()
                 + " at " + localTimestamp;
+    }
+
+    public static ProductLog of(
+            ManagerAction action,
+            User manager,
+            Product product,
+            Instant timestamp
+    ) {
+        ProductLog l = new ProductLog();
+
+        l.action = action;
+        l.manager = manager;
+        l.product = product;
+        l.timestamp = timestamp;
+
+        return l;
     }
 }

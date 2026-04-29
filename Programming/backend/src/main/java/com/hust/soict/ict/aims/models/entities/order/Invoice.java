@@ -1,6 +1,7 @@
 package com.hust.soict.ict.aims.models.entities.order;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -13,7 +14,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "invoice")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Invoice {
     @Id
     @Column(updatable = false, name = "order_id")
@@ -25,24 +26,26 @@ public class Invoice {
     private Order order;
 
     @CreationTimestamp
-    @UpdateTimestamp
     private Instant issuedAt;
 
     @Column(name = "total_price_without_vat", nullable = false)
-    private long totalPriceWithoutVAT;
+    private Long totalPriceWithoutVAT;
     @Column(name = "total_price_with_vat", nullable = false)
-    private long totalPriceWithVAT;
+    private Long totalPriceWithVAT;
     @Column(nullable = false)
-    private long deliveryFee;
+    private Long deliveryFee;
     @Column(nullable = false)
-    private long totalAmount;
+    private Long totalAmount;
 
-    public Invoice(Order order) {
-        this.id = order.getId();
-        this.order = order;
-        this.totalPriceWithoutVAT = order.getTotalPriceWithoutVAT();
-        this.totalPriceWithVAT = order.getTotalPriceWithVAT();
-        this.deliveryFee = order.getDeliveryFee();
-        this.totalAmount = order.getTotalAmount();
+    public static Invoice from(Order order) {
+        Invoice invoice = new Invoice();
+
+        invoice.order = order;
+        invoice.totalPriceWithoutVAT = order.getTotalPriceWithoutVAT();
+        invoice.totalPriceWithVAT = order.getTotalPriceWithVAT();
+        invoice.deliveryFee = order.getDeliveryFee();
+        invoice.totalAmount = order.getTotalAmount();
+
+        return invoice;
     }
 }

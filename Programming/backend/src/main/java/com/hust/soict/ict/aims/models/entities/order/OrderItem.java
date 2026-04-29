@@ -1,7 +1,9 @@
 package com.hust.soict.ict.aims.models.entities.order;
 
+import com.hust.soict.ict.aims.models.cart.CartItem;
 import com.hust.soict.ict.aims.models.entities.product.Product;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +12,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "order_item")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderItem {
     @EmbeddedId
     private OrderItemKey id;
@@ -27,30 +29,33 @@ public class OrderItem {
 
     private String productName;
 
-    private int quantity;
-    private long unitPrice;
+    private Integer quantity;
+    private Long unitPrice;
 
     @Column(precision = 10, scale = 3)
     private BigDecimal unitWeight;
 
-    public OrderItem(Order order, Product product, int quantity) {
-        this.order = order;
-        this.product = product;
-        this.quantity = quantity;
-
-        this.id = new OrderItemKey(order.getId(), product.getId());
-        this.productName = product.getTitle();
-        this.unitPrice = product.getCurrentPrice();
-        this.unitWeight = product.getWeight();
-    }
-
     @Transient
-    long getItemTotalPrice() {
+    Long getItemTotalPrice() {
         return unitPrice * quantity;
     }
 
     @Transient
     BigDecimal getItemTotalWeight() {
         return unitWeight.multiply(BigDecimal.valueOf(quantity));
+    }
+
+    public static OrderItem from(CartItem cartItem, Order order) {
+        OrderItem item = new OrderItem();
+
+        item.order = order;
+        item.product = cartItem.getProduct();
+
+        item.productName = cartItem.getProduct().getTitle();
+        item.unitPrice = cartItem.getProduct().getCurrentPrice();
+        item.unitWeight = cartItem.getProduct().getWeight();
+        item.quantity = cartItem.getQuantity();
+
+        return item;
     }
 }
