@@ -3,13 +3,15 @@ spring:
     name: backend
   datasource:
     url: jdbc:postgresql://localhost:5432/aims
-    username: user
-    password: 123456789
+    username: postgres
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
 
   flyway:
-    enabled: false
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true

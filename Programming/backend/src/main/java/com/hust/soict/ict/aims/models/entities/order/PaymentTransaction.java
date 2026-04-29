@@ -1,0 +1,53 @@
+package com.hust.soict.ict.aims.models.entities.order;
+
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.time.Instant;
+import java.util.UUID;
+
+@Entity
+@Table(name = "payment_transaction")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class PaymentTransaction {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(updatable = false)
+    private UUID id;
+
+    @Column(columnDefinition = "TEXT")
+    private String transactionContent;
+    private Instant transactionTimestamp;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TransactionMethod transactionMethod;
+
+    @Column(nullable = false)
+    private Long amountPaid;
+
+    @OneToOne
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
+
+    public static PaymentTransaction of(
+            String transactionContent,
+            Instant transactionTimestamp,
+            TransactionMethod transactionMethod,
+            Long amountPaid,
+            Order order
+    ) {
+        PaymentTransaction pt = new PaymentTransaction();
+
+        pt.transactionContent = transactionContent;
+        pt.transactionTimestamp = transactionTimestamp;
+        pt.transactionMethod = transactionMethod;
+        pt.amountPaid = amountPaid;
+        pt.order = order;
+
+        return pt;
+    }
+}
