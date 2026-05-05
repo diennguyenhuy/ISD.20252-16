@@ -34,12 +34,14 @@ public class Order {
     private OrderStatus status;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    @Setter
     private DeliveryInformation deliveryInformation;
 
     @Setter
     private Long deliveryFee;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    @Setter
     private Invoice invoice;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
@@ -76,16 +78,9 @@ public class Order {
         items.add(orderItem);
     }
 
-    public static Order from(Cart cart) throws IllegalArgumentException {
-        if (cart == null || cart.isEmpty()) {
-            throw new IllegalArgumentException("Cart is null or empty. Cannot create order.");
-        }
-
+    public static Order from(Cart cart) {
         Order order = new Order();
-
-        for (CartItem item : cart.getItems()) {
-            order.addItem(OrderItem.from(item, order));
-        }
+        cart.getItems().forEach(item -> order.addItem(OrderItem.from(item, order)));
 
         order.status = OrderStatus.DRAFT;
 

@@ -4,11 +4,9 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -25,7 +23,6 @@ public class Invoice {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    @CreationTimestamp
     private Instant issuedAt;
 
     @Column(name = "total_price_without_vat", nullable = false)
@@ -38,13 +35,17 @@ public class Invoice {
     private Long totalAmount;
 
     public static Invoice from(Order order) {
+        Objects.requireNonNull(order, "order cannot be null");
+
         Invoice invoice = new Invoice();
 
+        order.setInvoice(invoice);
         invoice.order = order;
         invoice.totalPriceWithoutVAT = order.getTotalPriceWithoutVAT();
         invoice.totalPriceWithVAT = order.getTotalPriceWithVAT();
         invoice.deliveryFee = order.getDeliveryFee();
         invoice.totalAmount = order.getTotalAmount();
+        invoice.issuedAt = Instant.now();
 
         return invoice;
     }

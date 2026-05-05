@@ -45,17 +45,11 @@ public class DeliveryInformation {
             String commune,
             String address,
             String deliveryMethod
-    ) throws DeliveryValidationException {
+    ) {
         Objects.requireNonNull(order, "order cannot be null");
-        DeliveryInformationValidator.validateCustomerName(customerName);
-        DeliveryInformationValidator.validateCustomerEmail(customerEmail);
-        DeliveryInformationValidator.validatePhoneNumber(phoneNumber);
-        DeliveryInformationValidator.validateProvinceAndCommune(province, commune);
-        DeliveryInformationValidator.validateAddress(address);
-        DeliveryInformationValidator.validateDeliveryMethod(deliveryMethod);
-
         DeliveryInformation di = new DeliveryInformation();
 
+        order.setDeliveryInformation(di);
         di.order = order;
         di.customerName = customerName;
         di.customerEmail = customerEmail;
@@ -66,53 +60,5 @@ public class DeliveryInformation {
         di.deliveryMethod = deliveryMethod;
 
         return di;
-    }
-}
-
-final class DeliveryInformationValidator {
-    private DeliveryInformationValidator() {}
-
-    static void validateCustomerName(String customerName) throws DeliveryValidationException {
-        if (customerName == null || customerName.isBlank()) {
-            throw new DeliveryValidationException("Customer Name is required", "customerName");
-        }
-    }
-
-    static void validateCustomerEmail(String customerEmail) throws DeliveryValidationException {
-        if (customerEmail == null || customerEmail.isBlank()) {
-            throw new DeliveryValidationException("Customer Email is required", "customerEmail");
-        }
-    }
-
-    static void validatePhoneNumber(String phoneNumber) throws DeliveryValidationException {
-        if (phoneNumber == null || phoneNumber.isBlank()) {
-            throw new DeliveryValidationException("Phone Number is required", "phoneNumber");
-        }
-
-        if (!phoneNumber.matches("0\\d{9}")) {
-            throw new DeliveryValidationException("Phone Number is not valid", "phoneNumber");
-        }
-    }
-
-    static void validateProvinceAndCommune(String province, String commune) throws DeliveryValidationException {
-        if (province == null || province.isBlank()) {
-            throw new DeliveryValidationException("Province is required", "province");
-        }
-
-        if (commune == null || commune.isBlank()) {
-            throw new DeliveryValidationException("Commune is required", "commune");
-        }
-    }
-
-    static void validateAddress(String address) throws DeliveryValidationException {
-        if (address == null || address.isBlank()) {
-            throw new DeliveryValidationException("Address is required", "address");
-        }
-    }
-
-    static void validateDeliveryMethod(String deliveryMethod) throws DeliveryValidationException {
-        if (deliveryMethod == null || deliveryMethod.isBlank()) {
-            throw new DeliveryValidationException("Delivery Method is required", "deliveryMethod");
-        }
     }
 }

@@ -18,7 +18,7 @@ public class CartItem {
         this.quantity = quantity;
     }
 
-    long getItemTotalPrice() {
+    public long getItemTotalPrice() {
         return quantity * product.getCurrentPrice();
     }
 

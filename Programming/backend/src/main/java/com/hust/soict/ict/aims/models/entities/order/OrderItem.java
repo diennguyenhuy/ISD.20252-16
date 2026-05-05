@@ -36,7 +36,7 @@ public class OrderItem {
     private BigDecimal unitWeight;
 
     @Transient
-    Long getItemTotalPrice() {
+    public Long getItemTotalPrice() {
         return unitPrice * quantity;
     }
 
