@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.models.entities.product;
 
+import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
 import com.hust.soict.ict.aims.exceptions.ProductValidationException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -36,15 +37,19 @@ public class Book extends PrintableProduct {
         return Collections.unmodifiableList(authors);
     }
 
-    public Book(Builder builder) throws ProductValidationException {
+    private Book(Builder builder) throws ProductConstructionException {
         super(builder);
-        BookValidator.validateAuthors(builder.authors);
-        BookValidator.validateCoverType(builder.coverType);
+        validateBuilder(builder);
+        builder.throwProductConstructionExceptionIfAny();
 
         this.authors = new ArrayList<>(builder.authors);
         this.numberOfPages = builder.numberOfPages;
         this.genre = builder.genre;
         this.coverType = builder.coverType;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static class Builder extends PrintableProduct.Builder<Builder> {
@@ -53,13 +58,15 @@ public class Book extends PrintableProduct {
         private int numberOfPages;
         private String genre;
 
+        private Builder() {}
+
         @Override
         protected Builder self() {
             return this;
         }
 
         @Override
-        public Book build() throws ProductValidationException {
+        public Book build() throws ProductConstructionException {
             return new Book(this);
         }
 
@@ -83,26 +90,9 @@ public class Book extends PrintableProduct {
             return this;
         }
     }
-}
 
-final class BookValidator {
-    private BookValidator() {}
-
-    static void validateAuthors(List<String> authors) throws ProductValidationException {
-        if (authors == null || authors.isEmpty()) {
-            throw new ProductValidationException("Authors are required", "authors");
-        }
-
-        for (String author : authors) {
-            if (author == null || author.isBlank()) {
-                throw new ProductValidationException("Some authors in list are null or blank", "authors");
-            }
-        }
-    }
-
-    static void validateCoverType(CoverType coverType) throws ProductValidationException {
-        if (coverType == null) {
-            throw new ProductValidationException("Cover type is required", "coverType");
-        }
+    private static void validateBuilder(Builder builder) {
+        builder.validate(() -> requireNotEmpty(builder.authors, "authors"));
+        builder.validate(() -> requireNotNull(builder.coverType, "coverType"));
     }
 }

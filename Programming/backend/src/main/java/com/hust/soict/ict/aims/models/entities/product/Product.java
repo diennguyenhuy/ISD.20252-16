@@ -2,13 +2,12 @@ package com.hust.soict.ict.aims.models.entities.product;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.UUID;
+import java.util.*;
 
+import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
 import com.hust.soict.ict.aims.exceptions.ProductValidationException;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -86,24 +85,34 @@ public abstract class Product {
     @Column(nullable = false)
     private Instant updatedAt;
 
-    public void setCurrentPrice(Long currentPrice) throws IllegalArgumentException {
-        ProductValidator.validatePriceRange(originalValue, currentPrice);
-        this.currentPrice = currentPrice;
+    private static final double MIN_PRICE_RELATIVE = 0.3;
+    private static final double MAX_PRICE_RELATIVE = 1.5;
+
+    public void changePrice(long newPrice) throws ProductValidationException {
+        if (newPrice < 0) {
+            throw new ProductValidationException("New price must not be negative", "currentPrice");
+        }
+
+        double minPrice = MIN_PRICE_RELATIVE * originalValue;
+        double maxPrice = MAX_PRICE_RELATIVE * originalValue;
+
+        if (newPrice < minPrice || newPrice > maxPrice) {
+            throw new ProductValidationException("Current price must be between " + (long)minPrice + "VND and " + (long)maxPrice + "VND", "currentPrice");
+        }
+
+        this.currentPrice = newPrice;
     }
 
-    protected Product(Builder<?> builder) throws ProductValidationException {
-        ProductValidator.validateTitle(builder.title);
-        ProductValidator.validateCategory(builder.category);
-        ProductValidator.validateDescription(builder.description);
-        ProductValidator.validateHeight(builder.height);
-        ProductValidator.validateWidth(builder.width);
-        ProductValidator.validateLength(builder.length);
-        ProductValidator.validateWeight(builder.weight);
-        ProductValidator.validateBarcode(builder.barcode);
-        ProductValidator.validateOriginalValue(builder.originalValue);
-        ProductValidator.validatePriceRange(builder.currentPrice, builder.originalValue);
-        ProductValidator.validateStockQuantity(builder.stockQuantity);
-        ProductValidator.validateStatus(builder.status, builder.stockQuantity);
+    public void updateStatus(@NonNull ProductStatus status) {
+        if (status == ProductStatus.DELETED && stockQuantity > 0) {
+            status = ProductStatus.DEACTIVATED;
+        }
+
+        this.status = status;
+    }
+
+    protected Product(Builder<?> builder) throws ProductConstructionException {
+        validateBuilder(builder);
 
         this.title = builder.title;
         this.category = builder.category;
@@ -129,15 +138,15 @@ public abstract class Product {
         private BigDecimal length;
         private BigDecimal weight;
         private String barcode;
-        private long originalValue;
-        private long currentPrice;
-        private int stockQuantity;
+        private Long originalValue;
+        private Long currentPrice;
+        private Integer stockQuantity;
         private ProductStatus status = ProductStatus.ACTIVE;
         private String imageURL;
 
         protected abstract B self();
 
-        public abstract Product build() throws ProductValidationException;
+        public abstract Product build() throws ProductConstructionException;
 
         public B title(String title) {
             this.title = title;
@@ -203,123 +212,93 @@ public abstract class Product {
             this.imageURL = imageURL;
             return self();
         }
-    }
-}
 
-final class ProductValidator {
-    private ProductValidator() {}
+        private final Map<String, List<String>> invalidFields = new HashMap<>();
 
-    static final double MIN_PRICE_RELATIVE = 0.3;
-    static final double MAX_PRICE_RELATIVE = 1.5;
+        protected final void collectExceptions(ProductValidationException exception) {
+            invalidFields.computeIfAbsent(exception.getInvalidFieldName(), k -> new ArrayList<>()).add(exception.getMessage());
+        }
 
-    static void validateTitle(String title) throws ProductValidationException {
-        if (title == null || title.isBlank()) {
-            throw new ProductValidationException("Title is required", "title");
+        protected final void throwProductConstructionExceptionIfAny() throws ProductConstructionException {
+            if (!this.invalidFields.isEmpty()) {
+                throw new ProductConstructionException(this.invalidFields);
+            }
+        }
+
+        @FunctionalInterface
+        protected interface ValidationStep {
+            void validate() throws ProductValidationException;
+        }
+
+        protected final void validate(ValidationStep step) {
+            try {
+                step.validate();
+            } catch (ProductValidationException e) {
+                collectExceptions(e);
+            }
         }
     }
 
-    static void validateCategory(String category) throws ProductValidationException {
-        if (category == null || category.isBlank()) {
-            throw new ProductValidationException("Category is required", "category");
+    protected static void requireNonBlank(String value, String field) throws ProductValidationException {
+        if (value == null || value.isBlank()) {
+            throw new ProductValidationException(field + " must not be blank", field);
         }
     }
 
-    static void validateDescription(String description) throws ProductValidationException {
-        if (description == null || description.isBlank()) {
-            throw new ProductValidationException("Description is required", "description");
+    protected static void requireNonNegative(long value, String field) throws ProductValidationException {
+        if (value < 0) {
+            throw new ProductValidationException(field + " must not be negative", field);
         }
     }
 
-    static void validateHeight(BigDecimal height) throws ProductValidationException {
-        if (height == null) {
-            throw new ProductValidationException("Height is required", "height");
-        }
-        if (height.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ProductValidationException("Height must be required", "height");
+    protected static void requirePositive(BigDecimal value, String field) throws ProductValidationException {
+        if (value.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ProductValidationException(field + " must be positive", field);
         }
     }
 
-    static void validateWidth(BigDecimal width) throws ProductValidationException {
-        if (width == null) {
-            throw new ProductValidationException("Width is required", "width");
-        }
-        if (width.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ProductValidationException("Width must be positive", "width");
+    protected static void requirePositive(long value, String field) throws ProductValidationException {
+        if (value <= 0) {
+            throw new ProductValidationException(field + " must be positive", field);
         }
     }
 
-    static void validateLength(BigDecimal length) throws ProductValidationException {
-        if (length == null) {
-            throw new ProductValidationException("Length is required", "length");
-        }
-        if (length.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ProductValidationException("Length must be positive", "length");
+    protected static void requireNotEmpty(List<?> list, String field) throws ProductValidationException {
+        if (list == null || list.isEmpty()) {
+            throw new ProductValidationException(field + " must not be empty", field);
         }
     }
 
-    static void validateWeight(BigDecimal weight) throws ProductValidationException {
-        if (weight == null) {
-            throw new ProductValidationException("Weight is required", "weight");
-        }
-        if (weight.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ProductValidationException("Weight must be positive", "weight");
+    protected static void requireNotNull(Object value, String field) throws ProductValidationException {
+        if (value == null) {
+            throw new ProductValidationException(field + " must not be null", field);
         }
     }
 
-    static void validateBarcode(String barcode) throws ProductValidationException {
-        if (barcode == null || barcode.isBlank()) {
-            throw new ProductValidationException("Barcode is required", "barcode");
-        }
+    private static void validateBuilder(Builder<?> builder) {
+        builder.validate(() -> requireNonBlank(builder.title, "title"));
+        builder.validate(() -> requireNonBlank(builder.category, "category"));
+        builder.validate(() -> requireNonBlank(builder.description, "description"));
 
-        if (barcode.length() > 32) {
-            throw new ProductValidationException("Barcode cannot be longer than 32 characters", "barcode");
-        }
-    }
+        builder.validate(() -> requirePositive(builder.height, "height"));
+        builder.validate(() -> requirePositive(builder.width, "width"));
+        builder.validate(() -> requirePositive(builder.length, "length"));
+        builder.validate(() -> requirePositive(builder.weight, "weight"));
 
-    static void validateOriginalValue(Long originalValue) throws ProductValidationException {
-        if (originalValue == null) {
-            throw new ProductValidationException("Original value is required", "originalValue");
-        }
+        builder.validate(() -> requireNonBlank(builder.barcode, "barcode"));
 
-        if (originalValue < 0) {
-            throw new ProductValidationException("Original value must not be negative", "originalValue");
-        }
-    }
+        builder.validate(() -> requireNotNull(builder.originalValue, "originalValue"));
+        builder.validate(() -> requireNonNegative(builder.originalValue, "originalValue"));
+        builder.validate(() -> requireNotNull(builder.currentPrice, "currentPrice"));
+        builder.validate(() -> requireNonNegative(builder.currentPrice, "currentPrice"));
+        builder.validate(() -> requireNotNull(builder.stockQuantity, "stockQuantity"));
+        builder.validate(() -> requireNonNegative(builder.stockQuantity, "stockQuantity"));
 
-    static void validatePriceRange(Long currentPrice, Long originalValue) throws ProductValidationException {
-        if (currentPrice == null) {
-            throw new ProductValidationException("Current price is required", "currentPrice");
-        }
+        double minPrice = MIN_PRICE_RELATIVE * builder.originalValue;
+        double maxPrice = MAX_PRICE_RELATIVE * builder.originalValue;
 
-        if (currentPrice < 0) {
-            throw new ProductValidationException("Current price must not be negative", "currentPrice");
-        }
-
-        double minPrice = MIN_PRICE_RELATIVE * originalValue;
-        double maxPrice = MAX_PRICE_RELATIVE * originalValue;
-
-        if (currentPrice < minPrice || currentPrice > maxPrice) {
-            throw new ProductValidationException("Current price must be between " + (long)minPrice + "VND and " + (long)maxPrice + "VND", "currentPrice");
-        }
-    }
-
-    static void validateStockQuantity(Integer stockQuantity) throws ProductValidationException {
-        if (stockQuantity == null) {
-            throw new ProductValidationException("Stock quantity is required", "stockQuantity");
-        }
-
-        if (stockQuantity < 0) {
-            throw new ProductValidationException("Stock quantity must not be negative", "stockQuantity");
-        }
-    }
-
-    static void validateStatus(ProductStatus status, Integer stockQuantity) throws ProductValidationException {
-        if (status == null) {
-            throw new ProductValidationException("Status is required", "status");
-        }
-
-        if (status == ProductStatus.DELETED && stockQuantity != 0) {
-            throw new ProductValidationException("Status can only be DELETED when stock quantity is 0", "status");
+        if (builder.currentPrice < minPrice || builder.currentPrice > maxPrice) {
+            builder.collectExceptions(new ProductValidationException("Current price must be between " + (long)minPrice + "VND and " + (long)maxPrice + "VND", "currentPrice"));
         }
     }
 }
