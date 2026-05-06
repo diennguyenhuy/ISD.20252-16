@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.models.entities.product;
 
+import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
 import com.hust.soict.ict.aims.exceptions.ProductValidationException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -49,14 +50,10 @@ public class DVD extends Product {
         return Collections.unmodifiableList(subtitles);
     }
 
-    public DVD(Builder builder) throws ProductValidationException {
+    private DVD(Builder builder) throws ProductConstructionException {
         super(builder);
-        DVDValidator.validateDiscType(builder.discType);
-        DVDValidator.validateDirector(builder.director);
-        DVDValidator.validateRuntime(builder.runtime);
-        DVDValidator.validateStudio(builder.studio);
-        DVDValidator.validateLanguage(builder.language);
-        DVDValidator.validateSubtitles(builder.subtitles);
+        validateBuilder(builder);
+        builder.throwProductConstructionExceptionIfAny();
 
         this.releaseDate = builder.releaseDate;
         this.genre = builder.genre;
@@ -66,6 +63,10 @@ public class DVD extends Product {
         this.studio = builder.studio;
         this.language = builder.language;
         this.subtitles = new ArrayList<>(builder.subtitles);
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static class Builder extends Product.Builder<Builder> {
@@ -84,7 +85,7 @@ public class DVD extends Product {
         }
 
         @Override
-        public DVD build() throws ProductValidationException {
+        public DVD build() throws ProductConstructionException {
             return new DVD(this);
         }
 
@@ -128,47 +129,13 @@ public class DVD extends Product {
             return this;
         }
     }
-}
-
-final class DVDValidator {
-    private DVDValidator() {}
-
-    static void validateDiscType(DiscType discType) throws ProductValidationException {
-        if (discType == null) {
-            throw new ProductValidationException("Disc Type is required", "discType");
-        }
-    }
-
-    static void validateDirector(String director) throws ProductValidationException {
-        if (director == null || director.isBlank()) {
-            throw new ProductValidationException("Director is required", "director");
-        }
-    }
-
-    static void validateRuntime(Integer runtime) {
-        if (runtime == null) {
-            throw new ProductValidationException("Runtime is required", "runtime");
-        }
-        if (runtime < 0) {
-            throw new ProductValidationException("Runtime must be positive", "runtime");
-        }
-    }
-
-    static void validateStudio(String studio) throws ProductValidationException {
-        if (studio == null || studio.isBlank()) {
-            throw new ProductValidationException("Studio is required", "studio");
-        }
-    }
-
-    static void validateLanguage(String language) throws ProductValidationException {
-        if (language == null || language.isBlank()) {
-            throw new ProductValidationException("Language is required", "language");
-        }
-    }
-
-    static void validateSubtitles(List<String> subtitles) throws ProductValidationException {
-        if (subtitles == null || subtitles.isEmpty()) {
-            throw new ProductValidationException("Subtitles are required", "subtitles");
-        }
+    
+    private static void validateBuilder(Builder builder) {
+        builder.validate(() -> requireNotNull(builder.discType, "discType"));
+        builder.validate(() -> requireNonBlank(builder.director, "director"));
+        builder.validate(() -> requirePositive(builder.runtime, "runtime"));
+        builder.validate(() -> requireNonBlank(builder.studio, "studio"));
+        builder.validate(() -> requireNonBlank(builder.language, "language"));
+        builder.validate(() -> requireNotEmpty(builder.subtitles, "subtitles"));
     }
 }

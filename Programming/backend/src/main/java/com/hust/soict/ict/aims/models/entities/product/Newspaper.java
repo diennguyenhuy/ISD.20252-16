@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
 import com.hust.soict.ict.aims.exceptions.ProductValidationException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -39,15 +40,20 @@ public class Newspaper extends PrintableProduct {
         return Collections.unmodifiableList(sections);
     }
 
-    public Newspaper(Builder builder) throws ProductValidationException {
+    private Newspaper(Builder builder) throws ProductValidationException {
         super(builder);
-        NewspaperValidator.validateEditorInChief(builder.editorInChief);
+        validateBuilder(builder);
+        builder.throwProductConstructionExceptionIfAny();
 
         this.editorInChief = builder.editorInChief;
         this.issueNumber = builder.issueNumber;
         this.publicationFrequency = builder.publicationFrequency;
         this.ISSN = builder.ISSN;
         this.sections = builder.sections == null ? new ArrayList<>() : new ArrayList<>(builder.sections);
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static class Builder extends PrintableProduct.Builder<Builder> {
@@ -63,7 +69,7 @@ public class Newspaper extends PrintableProduct {
         }
 
         @Override
-        public Newspaper build() throws ProductValidationException {
+        public Newspaper build() throws ProductConstructionException {
             return new Newspaper(this);
         }
 
@@ -92,14 +98,8 @@ public class Newspaper extends PrintableProduct {
             return this;
         }
     }
-}
 
-final class NewspaperValidator {
-    private NewspaperValidator() {}
-
-    static void validateEditorInChief(String editorInChief) throws ProductValidationException {
-        if (editorInChief == null || editorInChief.isBlank()) {
-            throw new ProductValidationException("Editor-in-chief is required", "editorInChief");
-        }
+    private static void validateBuilder(Builder builder) {
+        builder.validate(() -> requireNonBlank(builder.editorInChief, "editorInChief"));
     }
 }

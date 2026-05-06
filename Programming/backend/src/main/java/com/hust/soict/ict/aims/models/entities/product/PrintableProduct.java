@@ -2,6 +2,7 @@ package com.hust.soict.ict.aims.models.entities.product;
 
 import java.time.LocalDate;
 
+import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
 import com.hust.soict.ict.aims.exceptions.ProductValidationException;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
@@ -22,10 +23,9 @@ public abstract class PrintableProduct extends Product {
     @Column(length = 50)
     private String language;
 
-    protected PrintableProduct(Builder<?> builder) throws ProductValidationException {
+    protected PrintableProduct(Builder<?> builder) throws ProductConstructionException {
         super(builder);
-        PrintableProductValidator.validatePublisher(builder.publisher);
-        PrintableProductValidator.validatePublicationDate(builder.publicationDate);
+        validateBuilder(builder);
 
         this.publisher = builder.publisher;
         this.publicationDate = builder.publicationDate;
@@ -52,24 +52,9 @@ public abstract class PrintableProduct extends Product {
             return self();
         }
     }
-}
 
-final class PrintableProductValidator {
-    private PrintableProductValidator() {}
-
-    static void validatePublisher(String publisher) throws ProductValidationException {
-        if (publisher == null || publisher.isBlank()) {
-            throw new ProductValidationException("Publisher is required", "publisher");
-        }
-    }
-
-    static void validatePublicationDate(LocalDate publicationDate) throws ProductValidationException {
-        if (publicationDate == null) {
-            throw new ProductValidationException("Publication Date is required", "publicationDate");
-        }
-
-        if (publicationDate.isAfter(LocalDate.now())) {
-            throw new ProductValidationException("Publication Date must not be in the future", "publicationDate");
-        }
+    private static void validateBuilder(Builder<?> builder) {
+        builder.validate(() -> requireNonBlank(builder.publisher, "publisher"));
+        builder.validate(() -> requireNotNull(builder.publicationDate, "publicationDate"));
     }
 }

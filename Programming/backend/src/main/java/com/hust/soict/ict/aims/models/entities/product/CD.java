@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.models.entities.product;
 
+import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
 import com.hust.soict.ict.aims.exceptions.ProductValidationException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -52,18 +53,20 @@ public class CD extends Product {
         tracks.add(track);
     }
 
-    public CD(Builder builder) throws ProductValidationException {
+    private CD(Builder builder) throws ProductConstructionException {
         super(builder);
-        CDValidator.validateGenre(builder.genre);
-        CDValidator.validateArtists(builder.artists);
-        CDValidator.validateRecordLabel(builder.recordLabel);
-        CDValidator.validateTracks(builder.tracks);
-
+        validateBuilder(builder);
+        builder.throwProductConstructionExceptionIfAny();
+        
         this.releaseDate = builder.releaseDate;
         this.genre = builder.genre;
         this.artists = new ArrayList<>(builder.artists);
         this.recordLabel = builder.recordLabel;
         this.tracks = new ArrayList<>(builder.tracks);
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static class Builder extends Product.Builder<Builder> {
@@ -73,13 +76,15 @@ public class CD extends Product {
         private String recordLabel;
         private List<Track> tracks = new ArrayList<>();
 
+        private Builder() {}
+
         @Override
         protected Builder self() {
             return this;
         }
 
         @Override
-        public CD build() throws ProductValidationException {
+        public CD build() throws ProductConstructionException {
             return new CD(this);
         }
 
@@ -108,39 +113,19 @@ public class CD extends Product {
             return this;
         }
     }
+    
+    private static void validateBuilder(Builder builder) {
+        builder.validate(() -> requireNonBlank(builder.genre, "genre"));
+        builder.validate(() -> requireNotEmpty(builder.artists, "artists"));
+        builder.validate(() -> requireNonBlank(builder.recordLabel, "recordLabel"));
+        builder.validate(() -> requireNotEmpty(builder.tracks, "tracks"));
 
-}
-
-final class CDValidator {
-    private CDValidator() {}
-
-    static void validateArtists(List<String> artists) throws ProductValidationException {
-        if (artists == null || artists.isEmpty()) {
-            throw new ProductValidationException("Artists are required", "artists");
-        }
-
-        for (String artist : artists) {
-            if (artist == null || artist.isBlank()) {
-                throw new ProductValidationException("Some artists are null or blank", "artist");
-            }
-        }
-    }
-
-    static void validateRecordLabel(String recordLabel) throws ProductValidationException {
-        if (recordLabel == null || recordLabel.isEmpty()) {
-            throw new ProductValidationException("Record label is required", "recordLabel");
-        }
-    }
-
-    static void validateTracks(List<Track> tracks) throws ProductValidationException {
-        if (tracks == null || tracks.isEmpty()) {
-            throw new ProductValidationException("Tracks are required", "tracks");
-        }
-    }
-
-    static void validateGenre(String genre) throws ProductValidationException {
-        if (genre == null || genre.isEmpty()) {
-            throw new ProductValidationException("Genre is required", "genre");
+        int i = 0;
+        for (Track track : builder.tracks) {
+            int finalI = i;
+            builder.validate(() -> requireNonBlank(track.getTitle(), "track[" + finalI + "].title"));
+            builder.validate(() -> requirePositive(track.getLength(), "track[" + finalI + "].length"));
+            i++;
         }
     }
 }
