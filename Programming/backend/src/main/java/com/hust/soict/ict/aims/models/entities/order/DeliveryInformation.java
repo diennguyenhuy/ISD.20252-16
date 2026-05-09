@@ -1,13 +1,12 @@
 package com.hust.soict.ict.aims.models.entities.order;
 
+import com.hust.soict.ict.aims.exceptions.DeliveryConstructionException;
 import com.hust.soict.ict.aims.exceptions.DeliveryValidationException;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -23,39 +22,58 @@ public class DeliveryInformation {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    @Setter @NonNull
     private String customerName;
+    @Setter @NonNull
     private String customerEmail;
+    @Setter @NonNull
     @Column(length = 10)
     private String phoneNumber;
+    @Setter @NonNull
     @Column(length = 50)
     private String province;
+    @Setter @NonNull
     @Column(length = 50)
     private String commune;
+    @Setter @NonNull
     @Column(columnDefinition = "TEXT")
     private String address;
+    @Setter @NonNull
     @Column(length = 50)
     private String deliveryMethod;
 
     public static DeliveryInformation of(
-            Order order,
             String customerName,
             String customerEmail,
             String phoneNumber,
             String province,
             String commune,
             String address,
-            String deliveryMethod
-    ) throws DeliveryValidationException {
-        Objects.requireNonNull(order, "order cannot be null");
-        DeliveryInformationValidator.validateCustomerName(customerName);
-        DeliveryInformationValidator.validateCustomerEmail(customerEmail);
-        DeliveryInformationValidator.validatePhoneNumber(phoneNumber);
-        DeliveryInformationValidator.validateProvinceAndCommune(province, commune);
-        DeliveryInformationValidator.validateAddress(address);
-        DeliveryInformationValidator.validateDeliveryMethod(deliveryMethod);
+            String deliveryMethod,
+            @NonNull Order order
+    ) throws DeliveryConstructionException {
+        Map<String, String> invalidFields = new HashMap<>();
+
+        try { requireNonBlank(customerName, "customerName"); }
+        catch (DeliveryValidationException e) { invalidFields.put(e.getInvalidFieldName(), e.getMessage()); }
+        try { requireNonBlank(customerEmail, "customerEmail"); }
+        catch (DeliveryValidationException e) { invalidFields.put(e.getInvalidFieldName(), e.getMessage()); }
+        try { requireNonBlank(phoneNumber, "phoneNumber"); }
+        catch (DeliveryValidationException e) { invalidFields.put(e.getInvalidFieldName(), e.getMessage()); }
+        try { requireNonBlank(province, "province"); }
+        catch (DeliveryValidationException e) { invalidFields.put(e.getInvalidFieldName(), e.getMessage()); }
+        try { requireNonBlank(commune, "commune"); }
+        catch (DeliveryValidationException e) { invalidFields.put(e.getInvalidFieldName(), e.getMessage()); }
+        try { requireNonBlank(address, "address"); }
+        catch (DeliveryValidationException e) { invalidFields.put(e.getInvalidFieldName(), e.getMessage()); }
+        try { requireNonBlank(deliveryMethod, "deliveryMethod"); }
+        catch (DeliveryValidationException e) { invalidFields.put(e.getInvalidFieldName(), e.getMessage()); }
+
+        if (!invalidFields.isEmpty()) throw new DeliveryConstructionException(invalidFields);
 
         DeliveryInformation di = new DeliveryInformation();
 
+        order.setDeliveryInformation(di);
         di.order = order;
         di.customerName = customerName;
         di.customerEmail = customerEmail;
@@ -67,52 +85,10 @@ public class DeliveryInformation {
 
         return di;
     }
-}
 
-final class DeliveryInformationValidator {
-    private DeliveryInformationValidator() {}
-
-    static void validateCustomerName(String customerName) throws DeliveryValidationException {
-        if (customerName == null || customerName.isBlank()) {
-            throw new DeliveryValidationException("Customer Name is required", "customerName");
-        }
-    }
-
-    static void validateCustomerEmail(String customerEmail) throws DeliveryValidationException {
-        if (customerEmail == null || customerEmail.isBlank()) {
-            throw new DeliveryValidationException("Customer Email is required", "customerEmail");
-        }
-    }
-
-    static void validatePhoneNumber(String phoneNumber) throws DeliveryValidationException {
-        if (phoneNumber == null || phoneNumber.isBlank()) {
-            throw new DeliveryValidationException("Phone Number is required", "phoneNumber");
-        }
-
-        if (!phoneNumber.matches("0\\d{9}")) {
-            throw new DeliveryValidationException("Phone Number is not valid", "phoneNumber");
-        }
-    }
-
-    static void validateProvinceAndCommune(String province, String commune) throws DeliveryValidationException {
-        if (province == null || province.isBlank()) {
-            throw new DeliveryValidationException("Province is required", "province");
-        }
-
-        if (commune == null || commune.isBlank()) {
-            throw new DeliveryValidationException("Commune is required", "commune");
-        }
-    }
-
-    static void validateAddress(String address) throws DeliveryValidationException {
-        if (address == null || address.isBlank()) {
-            throw new DeliveryValidationException("Address is required", "address");
-        }
-    }
-
-    static void validateDeliveryMethod(String deliveryMethod) throws DeliveryValidationException {
-        if (deliveryMethod == null || deliveryMethod.isBlank()) {
-            throw new DeliveryValidationException("Delivery Method is required", "deliveryMethod");
+    private static void requireNonBlank(String value, String field) throws DeliveryValidationException {
+        if (value == null || value.isBlank()) {
+            throw new DeliveryValidationException(field + " cannot be blank", field);
         }
     }
 }

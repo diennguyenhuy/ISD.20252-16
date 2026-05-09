@@ -1,9 +1,8 @@
 package com.hust.soict.ict.aims.models.entities.order;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -38,7 +37,7 @@ public class PaymentTransaction {
             Instant transactionTimestamp,
             TransactionMethod transactionMethod,
             Long amountPaid,
-            Order order
+            @NotNull Order order
     ) {
         PaymentTransaction pt = new PaymentTransaction();
 
@@ -47,6 +46,7 @@ public class PaymentTransaction {
         pt.transactionMethod = transactionMethod;
         pt.amountPaid = amountPaid;
         pt.order = order;
+        order.setPaymentTransaction(pt);
 
         return pt;
     }

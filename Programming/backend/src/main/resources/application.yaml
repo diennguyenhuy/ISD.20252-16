@@ -5,6 +5,11 @@ spring:
     url: jdbc:postgresql://localhost:5432/aims
     username: postgres
     password: ${DB_PASSWORD}
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: test@aims.com
+    password: test
 
   jpa:
     hibernate:
