@@ -1,6 +1,6 @@
-package com.hust.soict.ict.aims.services.context.provider;
+package com.hust.soict.ict.aims.context.provider;
 
-import com.hust.soict.ict.aims.services.context.OrderDraftContext;
+import com.hust.soict.ict.aims.context.OrderDraftContext;
 import com.hust.soict.ict.aims.exceptions.OrderNotPlacedException;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import jakarta.servlet.http.HttpSession;

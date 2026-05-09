@@ -1,16 +1,20 @@
-package com.hust.soict.ict.aims.controllers.order;
+package com.hust.soict.ict.aims.controllers.customer;
 
 import com.hust.soict.ict.aims.exceptions.EmptyCartException;
 import com.hust.soict.ict.aims.exceptions.NotEnoughStockException;
+import com.hust.soict.ict.aims.exceptions.OrderNotFoundException;
 import com.hust.soict.ict.aims.models.dto.request.DeliveryRequest;
 import com.hust.soict.ict.aims.models.dto.response.order.DeliveryResponse;
 import com.hust.soict.ict.aims.models.dto.response.order.InvoiceResponse;
 import com.hust.soict.ict.aims.models.dto.response.order.OrderDraftResponse;
+import com.hust.soict.ict.aims.models.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.services.order.PlaceOrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 /**
  * Provide API endpoints for customer delivery screen and invoice screen
@@ -34,12 +38,12 @@ public class OrderController {
     }
 
     /**
-     * POST /order/delivery endpoint for submitting or updating delivery information. Status 200 if OK
+     * POST /order/delivery endpoint for submitting or updating delivery information. Return status 202
      * @param deliveryRequest the request body from the user interface. If not valid, return status 400
      * @return a response of the validated delivery information (same as request)
      */
     @PostMapping("/delivery")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.ACCEPTED)
     public @ResponseBody DeliveryResponse submitDeliveryInformation(
             @Valid @RequestBody DeliveryRequest deliveryRequest
     ) {
@@ -47,14 +51,44 @@ public class OrderController {
     }
 
     /**
-     * GET /order/invoice endpoint for getting invoice info, which also consists of the entire
-     * draft order so far. Return status 201
-     * @return response of draft order
+     * GET /order/invoice endpoint for getting invoice info. Return status 202
+     * @return response of invoice
      */
     @GetMapping("/invoice")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public @ResponseBody InvoiceResponse getInvoice() {
         return placeOrderService.getInvoice();
     }
 
+    /**
+     * DELETE /order endpoint for cancelling order mid-placing. Return status 204
+     */
+    @DeleteMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public @ResponseBody void cancelOrder() {
+        placeOrderService.cancelOrder();
+    }
+
+    /**
+     * GET /order/{orderId} endpoint for getting order information
+     * @param orderId the order id to be requested
+     * @return a response of the order
+     */
+    @GetMapping("/{orderId}")
+    @ResponseStatus(HttpStatus.OK)
+    public @ResponseBody OrderResponse getOrder(@PathVariable UUID orderId) {
+        return placeOrderService.getOrder(orderId);
+    }
+
+    /**
+     * DELETE /order/{orderId} endpoint for cancelling order. Return status 204 if success
+     * @param orderId the requested order id of order to be canceled
+     * @throws OrderNotFoundException if the order is somehow not found in database
+     * @throws IllegalStateException if the order status cannot be set to canceled
+     */
+    @DeleteMapping("/{orderId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public @ResponseBody void cancelOrder(@PathVariable UUID orderId) throws OrderNotFoundException, IllegalStateException {
+        placeOrderService.cancelOrder(orderId);
+    }
 }

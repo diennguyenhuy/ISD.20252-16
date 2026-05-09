@@ -1,9 +1,6 @@
 package com.hust.soict.ict.aims.controllers;
 
-import com.hust.soict.ict.aims.exceptions.EmptyCartException;
-import com.hust.soict.ict.aims.exceptions.NotEnoughStockException;
-import com.hust.soict.ict.aims.exceptions.OrderNotPlacedException;
-import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
+import com.hust.soict.ict.aims.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -28,6 +25,10 @@ public class GlobalExceptionHandler {
     public @ResponseBody String productNotFound(ProductNotFoundException e) {
         return e.getMessage();
     }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public @ResponseBody String orderNotFound(OrderNotFoundException e) { return e.getMessage(); }
 
     @ExceptionHandler(OrderNotPlacedException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -76,6 +77,19 @@ public class GlobalExceptionHandler {
                 "details", e.getInsufficientQuantity()
         );
     }
+
+    @ExceptionHandler(DeliveryConstructionException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public @ResponseBody Map<String, Object> deliveryConstruction(DeliveryConstructionException e) {
+        return Map.of(
+                "message", e.getMessage(),
+                "details", e.getInvalidFields()
+        );
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public @ResponseBody String illegalState(IllegalStateException e) { return e.getMessage(); }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

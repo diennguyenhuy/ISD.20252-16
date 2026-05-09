@@ -1,6 +1,6 @@
-package com.hust.soict.ict.aims.services.context.provider;
+package com.hust.soict.ict.aims.context.provider;
 
-import com.hust.soict.ict.aims.services.context.CartContext;
+import com.hust.soict.ict.aims.context.CartContext;
 import com.hust.soict.ict.aims.models.cart.Cart;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;

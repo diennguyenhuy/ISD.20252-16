@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.time.Instant;
 import java.util.Objects;
@@ -34,9 +35,7 @@ public class Invoice {
     @Column(nullable = false)
     private Long totalAmount;
 
-    public static Invoice from(Order order) {
-        Objects.requireNonNull(order, "order cannot be null");
-
+    public static Invoice from(@NonNull Order order) {
         Invoice invoice = new Invoice();
 
         order.setInvoice(invoice);

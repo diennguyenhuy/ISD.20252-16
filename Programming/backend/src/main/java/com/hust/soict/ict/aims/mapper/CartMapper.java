@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.models.mapper;
+package com.hust.soict.ict.aims.mapper;
 
 import com.hust.soict.ict.aims.models.cart.Cart;
 import com.hust.soict.ict.aims.models.cart.CartItem;

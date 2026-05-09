@@ -4,7 +4,7 @@ import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.dto.response.product.ProductDetail;
 import com.hust.soict.ict.aims.models.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
-import com.hust.soict.ict.aims.models.mapper.ProductMapper;
+import com.hust.soict.ict.aims.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

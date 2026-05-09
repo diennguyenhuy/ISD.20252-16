@@ -36,7 +36,7 @@ public class DeliveryFeeCalculator {
         fee += UNIT_FEE_PER_WEIGHT_DEDUCTION * weight.divide(UNIT_WEIGHT_DEDUCTION, 0, RoundingMode.CEILING).longValueExact();
 
         if (totalPrice > FREE_SHIPPING_THRESHOLD) {
-            fee -= MAX_FREE_SHIPPING_SUBSIDY;
+            fee = Math.max(fee - MAX_FREE_SHIPPING_SUBSIDY, 0);
         }
         return fee;
     }

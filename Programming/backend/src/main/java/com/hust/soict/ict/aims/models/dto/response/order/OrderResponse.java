@@ -15,5 +15,6 @@ public class OrderResponse {
     private String status;
     private DeliveryResponse deliveryInformation;
     private InvoiceResponse invoice;
+    private PaymentTransactionResponse paymentTransaction;
     private Instant createdAt;
 }

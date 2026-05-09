@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.models.mapper;
+package com.hust.soict.ict.aims.mapper;
 
 import com.hust.soict.ict.aims.models.dto.response.product.*;
 import com.hust.soict.ict.aims.models.entities.product.*;

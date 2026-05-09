@@ -3,10 +3,7 @@ package com.hust.soict.ict.aims.models.entities.order;
 import com.hust.soict.ict.aims.models.cart.Cart;
 import com.hust.soict.ict.aims.models.cart.CartItem;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -29,22 +26,22 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
 
-    @Setter
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
-    @Setter
+    @Setter(AccessLevel.PACKAGE)
     private DeliveryInformation deliveryInformation;
 
     @Setter
     private Long deliveryFee;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
-    @Setter
+    @Setter(AccessLevel.PACKAGE)
     private Invoice invoice;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    @Setter(AccessLevel.PACKAGE)
     private PaymentTransaction paymentTransaction;
 
     @CreationTimestamp
@@ -76,6 +73,16 @@ public class Order {
 
     public void addItem(OrderItem orderItem) {
         items.add(orderItem);
+    }
+
+    public void changeStatus(@NonNull OrderStatus orderStatus) throws IllegalStateException {
+        if (orderStatus == status) return;
+
+        if (!OrderStatus.transitions.get(status).contains(orderStatus)) {
+            throw new IllegalStateException("Cannot transition order status from " + status.name() + " to " + orderStatus.name());
+        }
+
+        this.status = orderStatus;
     }
 
     public static Order from(Cart cart) {

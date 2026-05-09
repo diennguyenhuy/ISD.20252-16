@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.context;
+package com.hust.soict.ict.aims.context;
 
 import com.hust.soict.ict.aims.exceptions.OrderNotPlacedException;
 import com.hust.soict.ict.aims.models.entities.order.Order;

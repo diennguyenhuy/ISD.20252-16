@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.controllers.order;
+package com.hust.soict.ict.aims.controllers.customer;
 
 import com.hust.soict.ict.aims.models.dto.response.product.ProductDetail;
 import com.hust.soict.ict.aims.models.dto.response.product.ProductSummary;
