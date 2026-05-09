@@ -40,20 +40,14 @@ public class Newspaper extends PrintableProduct {
         return Collections.unmodifiableList(sections);
     }
 
-    private Newspaper(Builder builder) throws ProductValidationException {
+    private Newspaper(Builder builder) {
         super(builder);
-        validateBuilder(builder);
-        builder.throwProductConstructionExceptionIfAny();
 
         this.editorInChief = builder.editorInChief;
         this.issueNumber = builder.issueNumber;
         this.publicationFrequency = builder.publicationFrequency;
         this.ISSN = builder.ISSN;
         this.sections = builder.sections == null ? new ArrayList<>() : new ArrayList<>(builder.sections);
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public static class Builder extends PrintableProduct.Builder<Builder> {
@@ -70,6 +64,7 @@ public class Newspaper extends PrintableProduct {
 
         @Override
         public Newspaper build() throws ProductConstructionException {
+            this.validate().throwProductConstructionExceptionIfAny();
             return new Newspaper(this);
         }
 
@@ -97,9 +92,13 @@ public class Newspaper extends PrintableProduct {
             this.sections = sections;
             return this;
         }
-    }
 
-    private static void validateBuilder(Builder builder) {
-        builder.validate(() -> requireNonBlank(builder.editorInChief, "editorInChief"));
+        @Override
+        protected Builder validate() {
+            super.validate();
+            this.validate(() -> requireNonBlank(this.editorInChief, "editorInChief"));
+
+            return this;
+        }
     }
 }

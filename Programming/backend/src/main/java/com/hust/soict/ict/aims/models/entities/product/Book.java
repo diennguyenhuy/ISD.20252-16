@@ -1,7 +1,6 @@
 package com.hust.soict.ict.aims.models.entities.product;
 
 import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
-import com.hust.soict.ict.aims.exceptions.ProductValidationException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -39,17 +38,11 @@ public class Book extends PrintableProduct {
 
     private Book(Builder builder) throws ProductConstructionException {
         super(builder);
-        validateBuilder(builder);
-        builder.throwProductConstructionExceptionIfAny();
 
         this.authors = new ArrayList<>(builder.authors);
         this.numberOfPages = builder.numberOfPages;
         this.genre = builder.genre;
         this.coverType = builder.coverType;
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public static class Builder extends PrintableProduct.Builder<Builder> {
@@ -58,8 +51,6 @@ public class Book extends PrintableProduct {
         private int numberOfPages;
         private String genre;
 
-        private Builder() {}
-
         @Override
         protected Builder self() {
             return this;
@@ -67,6 +58,7 @@ public class Book extends PrintableProduct {
 
         @Override
         public Book build() throws ProductConstructionException {
+            this.validate().throwProductConstructionExceptionIfAny();
             return new Book(this);
         }
 
@@ -89,10 +81,14 @@ public class Book extends PrintableProduct {
             this.genre = genre;
             return this;
         }
-    }
 
-    private static void validateBuilder(Builder builder) {
-        builder.validate(() -> requireNotEmpty(builder.authors, "authors"));
-        builder.validate(() -> requireNotNull(builder.coverType, "coverType"));
+        @Override
+        protected Builder validate() {
+            super.validate();
+            this.validate(() -> requireNotEmpty(this.authors, "authors"));
+            this.validate(() -> requireNotNull(this.coverType, "coverType"));
+
+            return this;
+        }
     }
 }

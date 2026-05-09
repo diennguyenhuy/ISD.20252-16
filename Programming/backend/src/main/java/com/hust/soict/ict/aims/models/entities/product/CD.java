@@ -1,7 +1,6 @@
 package com.hust.soict.ict.aims.models.entities.product;
 
 import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
-import com.hust.soict.ict.aims.exceptions.ProductValidationException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -53,20 +52,14 @@ public class CD extends Product {
         tracks.add(track);
     }
 
-    private CD(Builder builder) throws ProductConstructionException {
+    private CD(Builder builder) {
         super(builder);
-        validateBuilder(builder);
-        builder.throwProductConstructionExceptionIfAny();
-        
+
         this.releaseDate = builder.releaseDate;
         this.genre = builder.genre;
         this.artists = new ArrayList<>(builder.artists);
         this.recordLabel = builder.recordLabel;
         this.tracks = new ArrayList<>(builder.tracks);
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public static class Builder extends Product.Builder<Builder> {
@@ -76,8 +69,6 @@ public class CD extends Product {
         private String recordLabel;
         private List<Track> tracks = new ArrayList<>();
 
-        private Builder() {}
-
         @Override
         protected Builder self() {
             return this;
@@ -85,6 +76,7 @@ public class CD extends Product {
 
         @Override
         public CD build() throws ProductConstructionException {
+            this.validate().throwProductConstructionExceptionIfAny();
             return new CD(this);
         }
 
@@ -112,20 +104,24 @@ public class CD extends Product {
             this.tracks = tracks;
             return this;
         }
-    }
-    
-    private static void validateBuilder(Builder builder) {
-        builder.validate(() -> requireNonBlank(builder.genre, "genre"));
-        builder.validate(() -> requireNotEmpty(builder.artists, "artists"));
-        builder.validate(() -> requireNonBlank(builder.recordLabel, "recordLabel"));
-        builder.validate(() -> requireNotEmpty(builder.tracks, "tracks"));
 
-        int i = 0;
-        for (Track track : builder.tracks) {
-            int finalI = i;
-            builder.validate(() -> requireNonBlank(track.getTitle(), "track[" + finalI + "].title"));
-            builder.validate(() -> requirePositive(track.getLength(), "track[" + finalI + "].length"));
-            i++;
+        @Override
+        protected Builder validate() throws ProductConstructionException {
+            super.validate();
+            this.validate(() -> requireNonBlank(this.genre, "genre"));
+            this.validate(() -> requireNotEmpty(this.artists, "artists"));
+            this.validate(() -> requireNonBlank(this.recordLabel, "recordLabel"));
+            this.validate(() -> requireNotEmpty(this.tracks, "tracks"));
+
+            int i = 0;
+            for (Track track : this.tracks) {
+                int finalI = i;
+                this.validate(() -> requireNonBlank(track.getTitle(), "track[" + finalI + "].title"));
+                this.validate(() -> requirePositive(track.getLength(), "track[" + finalI + "].length"));
+                i++;
+            }
+
+            return this;
         }
     }
 }

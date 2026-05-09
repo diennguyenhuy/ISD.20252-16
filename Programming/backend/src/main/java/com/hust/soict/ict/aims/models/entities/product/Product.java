@@ -31,27 +31,19 @@ public abstract class Product {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 
-    /**
-     * Unit: centimeters cm
-     */
+    /// Unit: centimeters cm
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal height;
 
-    /**
-     * Unit: centimeters cm
-     */
+    /// Unit: centimeters cm
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal width;
 
-    /**
-     * Unit: centimeters cm
-     */
+    /// Unit: centimeters cm
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal length;
 
-    /**
-     * Unit: kilograms kg
-     */
+    ///Unit: kilograms kg
     @Column(nullable = false, precision = 10, scale = 3)
     private BigDecimal weight;
 
@@ -111,9 +103,7 @@ public abstract class Product {
         this.status = status;
     }
 
-    protected Product(Builder<?> builder) throws ProductConstructionException {
-        validateBuilder(builder);
-
+    protected Product(Builder<?> builder) {
         this.title = builder.title;
         this.category = builder.category;
         this.description = builder.description;
@@ -215,27 +205,51 @@ public abstract class Product {
 
         private final Map<String, List<String>> invalidFields = new HashMap<>();
 
-        protected final void collectExceptions(ProductValidationException exception) {
-            invalidFields.computeIfAbsent(exception.getInvalidFieldName(), k -> new ArrayList<>()).add(exception.getMessage());
-        }
-
         protected final void throwProductConstructionExceptionIfAny() throws ProductConstructionException {
             if (!this.invalidFields.isEmpty()) {
                 throw new ProductConstructionException(this.invalidFields);
             }
         }
 
-        @FunctionalInterface
-        protected interface ValidationStep {
-            void validate() throws ProductValidationException;
+        protected final void validate(Runnable step) {
+            try {
+                step.run();
+            } catch (ProductValidationException e) {
+                invalidFields.computeIfAbsent(e.getInvalidFieldName(), k -> new ArrayList<>()).add(e.getMessage());
+            }
         }
 
-        protected final void validate(ValidationStep step) {
-            try {
-                step.validate();
-            } catch (ProductValidationException e) {
-                collectExceptions(e);
-            }
+        protected B validate() {
+            this.validate(() -> requireNonBlank(this.title, "title"));
+            this.validate(() -> requireNonBlank(this.category, "category"));
+            this.validate(() -> requireNonBlank(this.description, "description"));
+
+            this.validate(() -> requirePositive(this.height, "height"));
+            this.validate(() -> requirePositive(this.width, "width"));
+            this.validate(() -> requirePositive(this.length, "length"));
+            this.validate(() -> requirePositive(this.weight, "weight"));
+
+            this.validate(() -> requireNonBlank(this.barcode, "barcode"));
+
+            this.validate(() -> requireNotNull(this.originalValue, "originalValue"));
+            this.validate(() -> requireNonNegative(this.originalValue, "originalValue"));
+            this.validate(() -> requireNotNull(this.currentPrice, "currentPrice"));
+            this.validate(() -> requireNonNegative(this.currentPrice, "currentPrice"));
+            this.validate(() -> requireNotNull(this.stockQuantity, "stockQuantity"));
+            this.validate(() -> requireNonNegative(this.stockQuantity, "stockQuantity"));
+
+            this.validate(() -> {
+                if (this.originalValue != null && this.currentPrice != null && this.stockQuantity != null) {
+                    double minPrice = MIN_PRICE_RELATIVE * this.originalValue;
+                    double maxPrice = MAX_PRICE_RELATIVE * this.originalValue;
+
+                    if (this.currentPrice < minPrice || this.currentPrice > maxPrice) {
+                        throw new ProductValidationException("Current price must be between " + (long)minPrice + "VND and " + (long)maxPrice + "VND", "currentPrice");
+                    }
+                }
+            });
+
+            return self();
         }
     }
 
@@ -272,33 +286,6 @@ public abstract class Product {
     protected static void requireNotNull(Object value, String field) throws ProductValidationException {
         if (value == null) {
             throw new ProductValidationException(field + " must not be null", field);
-        }
-    }
-
-    private static void validateBuilder(Builder<?> builder) {
-        builder.validate(() -> requireNonBlank(builder.title, "title"));
-        builder.validate(() -> requireNonBlank(builder.category, "category"));
-        builder.validate(() -> requireNonBlank(builder.description, "description"));
-
-        builder.validate(() -> requirePositive(builder.height, "height"));
-        builder.validate(() -> requirePositive(builder.width, "width"));
-        builder.validate(() -> requirePositive(builder.length, "length"));
-        builder.validate(() -> requirePositive(builder.weight, "weight"));
-
-        builder.validate(() -> requireNonBlank(builder.barcode, "barcode"));
-
-        builder.validate(() -> requireNotNull(builder.originalValue, "originalValue"));
-        builder.validate(() -> requireNonNegative(builder.originalValue, "originalValue"));
-        builder.validate(() -> requireNotNull(builder.currentPrice, "currentPrice"));
-        builder.validate(() -> requireNonNegative(builder.currentPrice, "currentPrice"));
-        builder.validate(() -> requireNotNull(builder.stockQuantity, "stockQuantity"));
-        builder.validate(() -> requireNonNegative(builder.stockQuantity, "stockQuantity"));
-
-        double minPrice = MIN_PRICE_RELATIVE * builder.originalValue;
-        double maxPrice = MAX_PRICE_RELATIVE * builder.originalValue;
-
-        if (builder.currentPrice < minPrice || builder.currentPrice > maxPrice) {
-            builder.collectExceptions(new ProductValidationException("Current price must be between " + (long)minPrice + "VND and " + (long)maxPrice + "VND", "currentPrice"));
         }
     }
 }

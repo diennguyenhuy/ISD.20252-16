@@ -87,6 +87,15 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(ProductConstructionException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public @ResponseBody Map<String, Object> productConstruction(ProductConstructionException e) {
+        return Map.of(
+                "message", e.getMessage(),
+                "details", e.getInvalidFields()
+        );
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public @ResponseBody String illegalState(IllegalStateException e) { return e.getMessage(); }

@@ -2,8 +2,6 @@ package com.hust.soict.ict.aims.models.entities.product;
 
 import java.time.LocalDate;
 
-import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
-import com.hust.soict.ict.aims.exceptions.ProductValidationException;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import lombok.AccessLevel;
@@ -23,9 +21,8 @@ public abstract class PrintableProduct extends Product {
     @Column(length = 50)
     private String language;
 
-    protected PrintableProduct(Builder<?> builder) throws ProductConstructionException {
+    protected PrintableProduct(Builder<?> builder) {
         super(builder);
-        validateBuilder(builder);
 
         this.publisher = builder.publisher;
         this.publicationDate = builder.publicationDate;
@@ -51,10 +48,14 @@ public abstract class PrintableProduct extends Product {
             this.language = language;
             return self();
         }
-    }
 
-    private static void validateBuilder(Builder<?> builder) {
-        builder.validate(() -> requireNonBlank(builder.publisher, "publisher"));
-        builder.validate(() -> requireNotNull(builder.publicationDate, "publicationDate"));
+        @Override
+        protected B validate() {
+            super.validate();
+            this.validate(() -> requireNonBlank(this.publisher, "publisher"));
+            this.validate(() -> requireNotNull(this.publicationDate, "publicationDate"));
+
+            return self();
+        }
     }
 }

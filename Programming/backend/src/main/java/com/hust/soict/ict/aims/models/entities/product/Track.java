@@ -18,9 +18,7 @@ public class Track {
     @Column(nullable = false)
     private String title;
 
-    /**
-     * Units: seconds s
-     */
+    /// Units: seconds s
     @Column(nullable = false)
     private Integer length;
 

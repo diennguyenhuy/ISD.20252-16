@@ -1,7 +1,6 @@
 package com.hust.soict.ict.aims.models.entities.product;
 
 import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
-import com.hust.soict.ict.aims.exceptions.ProductValidationException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -29,9 +28,7 @@ public class DVD extends Product {
     @Column(nullable = false)
     private String director;
 
-    /**
-     * Units: minutes min
-     */
+    /// Units: minutes min
     @Column(nullable = false)
     private Integer runtime;
 
@@ -50,10 +47,8 @@ public class DVD extends Product {
         return Collections.unmodifiableList(subtitles);
     }
 
-    private DVD(Builder builder) throws ProductConstructionException {
+    private DVD(Builder builder) {
         super(builder);
-        validateBuilder(builder);
-        builder.throwProductConstructionExceptionIfAny();
 
         this.releaseDate = builder.releaseDate;
         this.genre = builder.genre;
@@ -63,10 +58,6 @@ public class DVD extends Product {
         this.studio = builder.studio;
         this.language = builder.language;
         this.subtitles = new ArrayList<>(builder.subtitles);
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     public static class Builder extends Product.Builder<Builder> {
@@ -86,6 +77,7 @@ public class DVD extends Product {
 
         @Override
         public DVD build() throws ProductConstructionException {
+            this.validate().throwProductConstructionExceptionIfAny();
             return new DVD(this);
         }
 
@@ -128,14 +120,18 @@ public class DVD extends Product {
             this.subtitles = subtitles;
             return this;
         }
-    }
-    
-    private static void validateBuilder(Builder builder) {
-        builder.validate(() -> requireNotNull(builder.discType, "discType"));
-        builder.validate(() -> requireNonBlank(builder.director, "director"));
-        builder.validate(() -> requirePositive(builder.runtime, "runtime"));
-        builder.validate(() -> requireNonBlank(builder.studio, "studio"));
-        builder.validate(() -> requireNonBlank(builder.language, "language"));
-        builder.validate(() -> requireNotEmpty(builder.subtitles, "subtitles"));
+
+        @Override
+        protected Builder validate() throws ProductConstructionException {
+            super.validate();
+            this.validate(() -> requireNotNull(this.discType, "discType"));
+            this.validate(() -> requireNonBlank(this.director, "director"));
+            this.validate(() -> requirePositive(this.runtime, "runtime"));
+            this.validate(() -> requireNonBlank(this.studio, "studio"));
+            this.validate(() -> requireNonBlank(this.language, "language"));
+            this.validate(() -> requireNotEmpty(this.subtitles, "subtitles"));
+
+            return this;
+        }
     }
 }
