@@ -28,7 +28,7 @@ public class PaymentTransaction {
     @Column(nullable = false)
     private Long amountPaid;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 

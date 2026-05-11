@@ -19,7 +19,7 @@ public class Invoice {
     @Column(updatable = false, name = "order_id")
     private UUID id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "order_id")
     private Order order;

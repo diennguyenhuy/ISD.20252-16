@@ -17,7 +17,7 @@ public class DeliveryInformation {
     @Column(name = "order_id", updatable = false)
     private UUID id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "order_id")
     private Order order;

@@ -12,7 +12,7 @@ import java.util.List;
         unmappedTargetPolicy = ReportingPolicy.ERROR
 )
 public interface ProductMapper {
-    @Mapping(target = "productType", expression = "java(product.getClass().getSimpleName())")
+    @Mapping(target = "productType", ignore = true)
     @SubclassMapping(target = BookDetail.class, source = Book.class)
     @SubclassMapping(target = NewspaperDetail.class, source = Newspaper.class)
     @SubclassMapping(target = CDDetail.class, source = CD.class)

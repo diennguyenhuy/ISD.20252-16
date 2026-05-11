@@ -15,6 +15,31 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "order")
+@NamedEntityGraphs({
+        @NamedEntityGraph(
+                name = "Order-aggregate",
+                attributeNodes = {
+                        @NamedAttributeNode(value = "items", subgraph = "OrderItem::product"),
+                        @NamedAttributeNode("deliveryInformation"),
+                        @NamedAttributeNode("invoice"),
+                        @NamedAttributeNode("paymentTransaction")
+                },
+                subgraphs = {
+                        @NamedSubgraph(
+                                name = "OrderItem::product",
+                                attributeNodes = {
+                                        @NamedAttributeNode("product")
+                                }
+                        )
+                }
+        ),
+        @NamedEntityGraph(
+                name = "Order-summary",
+                attributeNodes = {
+                        @NamedAttributeNode("items")
+                }
+        )
+})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order {
@@ -23,7 +48,7 @@ public class Order {
     @Column(updatable = false)
     private UUID id;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<OrderItem> items = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)

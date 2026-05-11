@@ -3,6 +3,7 @@ package com.hust.soict.ict.aims.mapper;
 import com.hust.soict.ict.aims.models.dto.response.order.*;
 import com.hust.soict.ict.aims.models.entities.order.*;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.ReportingPolicy;
 
@@ -16,6 +17,7 @@ public interface OrderMapper {
 
     OrderDraftResponse toOrderDraftResponse(Order order);
 
+    @Mapping(target = "productId", expression = "java(orderItem.getProduct().getId())")
     OrderItemResponse toOrderItemResponse(OrderItem orderItem);
 
     DeliveryResponse toDeliveryResponse(DeliveryInformation deliveryInformation);
