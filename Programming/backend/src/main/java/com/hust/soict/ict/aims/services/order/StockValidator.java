@@ -7,6 +7,7 @@ import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.cart.Cart;
 import com.hust.soict.ict.aims.models.cart.CartItem;
 import com.hust.soict.ict.aims.models.entities.product.Product;
+import com.hust.soict.ict.aims.models.entities.product.ProductStatus;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -32,7 +33,7 @@ public class StockValidator {
      * @return the cart instance
      * @throws NotEnoughStockException if some products do not satisfy stock availability
      * @throws EmptyCartException if cart is empty
-     * @throws ProductNotFoundException if product "vanishes" during checkout
+     * @throws ProductNotFoundException if product "vanishes" (gets deactivated) during checkout
      */
     @Transactional
     public Cart checkStockAvailability() throws NotEnoughStockException, EmptyCartException, ProductNotFoundException {
@@ -46,7 +47,7 @@ public class StockValidator {
                 .map(i -> i.getProduct().getId())
                 .toList();
 
-        List<Product> products = productRepository.findAllById(productIds);
+        List<Product> products = productRepository.findAllByIdInAndStatus(productIds, ProductStatus.ACTIVE);
 
         Map<UUID, Product> productMap = products.stream()
                 .collect(Collectors.toMap(Product::getId, p -> p));
@@ -59,7 +60,7 @@ public class StockValidator {
             if (managedProduct != null) {
                 item = new CartItem(managedProduct, item.getQuantity());
                 if (item.getProduct().getStockQuantity() < item.getQuantity()) {
-                    insufficientQuantity.put(item.getProduct().getId(), item.getQuantity());
+                    insufficientQuantity.put(item.getProduct().getId(), item.getProduct().getStockQuantity());
                 }
             } else {
                 throw new ProductNotFoundException(item.getProduct().getId());

@@ -19,23 +19,34 @@ public interface ProductMapper {
     @SubclassMapping(target = DVDDetail.class, source = DVD.class)
     ProductDetail toProductDetail(Product product);
 
-    @Mapping(target = "productType", expression = "java(book.getClass().getSimpleName())")
+    @Mapping(target = "productType", expression = "java(Book.class.getSimpleName())")
     BookDetail toBookDetail(Book book);
 
-    @Mapping(target = "productType", expression = "java(newspaper.getClass().getSimpleName())")
+    @Mapping(target = "productType", expression = "java(Newspaper.class.getSimpleName())")
     NewspaperDetail toNewspaperDetail(Newspaper newspaper);
 
-    @Mapping(target = "productType", expression = "java(cd.getClass().getSimpleName())")
+    @Mapping(target = "productType", expression = "java(CD.class.getSimpleName())")
     CDDetail toCDDetail(CD cd);
 
-    @Mapping(target = "productType", expression = "java(dvd.getClass().getSimpleName())")
+    @Mapping(target = "productType", expression = "java(DVD.class.getSimpleName())")
     DVDDetail toDVDDetail(DVD dvd);
 
     TrackDetail toTrackDetail(Track track);
 
     @Mapping(target = "creators", qualifiedByName = "mapCreators")
-    @Mapping(target = "productType", expression = "java(product.getClass().getSimpleName())")
+    @Mapping(target = "productType", qualifiedByName = "mapProductType")
     ProductSummary toProductSummary(Product product);
+
+    @Named("mapProductType")
+    default String mapProductType(Product product) {
+        return switch (product) {
+            case Book ignored -> Book.class.getSimpleName();
+            case Newspaper ignored -> Newspaper.class.getSimpleName();
+            case CD ignored -> CD.class.getSimpleName();
+            case DVD ignored -> DVD.class.getSimpleName();
+            default -> "NotYetOrUnsupportedType";
+        };
+    }
 
     @Named("mapCreators")
     default List<String> mapCreators(Product product) {
@@ -45,5 +56,4 @@ public interface ProductMapper {
             default -> Collections.emptyList();
         };
     }
-
 }

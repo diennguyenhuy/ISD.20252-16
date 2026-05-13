@@ -19,8 +19,8 @@ public class ProductListController {
     private final ProductListService productListService;
 
     @GetMapping
-    public @ResponseBody List<ProductSummary> getAllProducts() {
-        return productListService.getAllProducts();
+    public @ResponseBody List<ProductSummary> get20RandomProducts() {
+        return productListService.get20RandomProducts();
     }
 
     @GetMapping("/{id}")

@@ -41,13 +41,7 @@ public class PlaceOrderService {
         Order draftOrder = orderDraftContext.getDraftOrder();
         var deliveryInformation = draftOrder.getDeliveryInformation();
         if (deliveryInformation != null) {
-            deliveryInformation.setCustomerName(deliveryRequest.getCustomerName());
-            deliveryInformation.setCustomerEmail(deliveryRequest.getCustomerEmail());
-            deliveryInformation.setPhoneNumber(deliveryRequest.getPhoneNumber());
-            deliveryInformation.setProvince(deliveryRequest.getProvince());
-            deliveryInformation.setCommune(deliveryRequest.getCommune());
-            deliveryInformation.setAddress(deliveryRequest.getAddress());
-            deliveryInformation.setAddress(deliveryRequest.getAddress());
+            updateDeliveryInformation(deliveryInformation, deliveryRequest);
 
             return orderMapper.toDeliveryResponse(deliveryInformation);
         }
@@ -66,6 +60,16 @@ public class PlaceOrderService {
         orderDraftContext.saveDraftOrder(draftOrder);
 
         return orderMapper.toDeliveryResponse(di);
+    }
+
+    private void updateDeliveryInformation(DeliveryInformation deliveryInformation, DeliveryRequest deliveryRequest) {
+        deliveryInformation.setCustomerName(deliveryRequest.getCustomerName());
+        deliveryInformation.setCustomerEmail(deliveryRequest.getCustomerEmail());
+        deliveryInformation.setPhoneNumber(deliveryRequest.getPhoneNumber());
+        deliveryInformation.setProvince(deliveryRequest.getProvince());
+        deliveryInformation.setCommune(deliveryRequest.getCommune());
+        deliveryInformation.setAddress(deliveryRequest.getAddress());
+        deliveryInformation.setAddress(deliveryRequest.getAddress());
     }
 
     public InvoiceResponse getInvoice() {
