@@ -52,7 +52,7 @@ function InfoRow({label, value}: { label: string; value: string | number | undef
     );
 }
 
-export default function ProductDetail() {
+export default function CustomerProductDetail() {
     const {id} = useParams<{ id: string }>();
     const navigate = useNavigate();
 
@@ -61,6 +61,7 @@ export default function ProductDetail() {
     const [loading, setLoading] = useState(true);
     const [qty, setQty] = useState(1);
     const [added, setAdded] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const { addToCart } = useCart();
 
@@ -75,6 +76,17 @@ export default function ProductDetail() {
             })
             .catch(err => {
                 console.error("Failed to fetch product:", err);
+
+                if (err.response) {
+                    if (err.response.status === 404) {
+                        setError(err.response.data || "Product not found or has been removed");
+                    } else {
+                        setError("An unexpected server error occurred. Please try again later.");
+                    }
+                } else {
+                    setError("Network Error. Please check your connection to the server.");
+                }
+
                 setLoading(false);
             });
     }, [id]);
@@ -88,13 +100,17 @@ export default function ProductDetail() {
         );
     }
 
-    if (!product) {
+    if (error || !product) {
         return (
             <div className="max-w-7xl mx-auto px-4 py-20 text-center animate-in fade-in duration-500">
-                <p className="text-muted-foreground text-lg mb-4">Product not found or has been removed.</p>
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-destructive/10 mb-6">
+                    <Package size={32} className="text-destructive" />
+                </div>
+                <p className="text-foreground text-xl font-bold mb-2">Oops!</p>
+                <p className="text-muted-foreground text-lg mb-8">{error || "Product not found."}</p>
                 <button
                     onClick={() => navigate('/')}
-                    className="text-primary font-semibold hover:text-accent-foreground transition-colors underline underline-offset-4"
+                    className="bg-primary text-primary-foreground px-8 py-3.5 rounded-xl font-bold hover:bg-accent hover:text-accent-foreground transition-all shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5"
                 >
                     Back to Home
                 </button>
@@ -110,9 +126,9 @@ export default function ProductDetail() {
             await addToCart(product.id, qty);
             setAdded(true);
             setTimeout(() => setAdded(false), 2000);
-        } catch (err) {
+        } catch (err: any) {
             console.error("Failed to add to cart:", err);
-            alert("Could not add item to cart.");
+            alert(err.message || "Could not add item to cart.");
         }
     };
 

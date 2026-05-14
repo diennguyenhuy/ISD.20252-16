@@ -16,7 +16,7 @@ const TYPE_LABELS: Record<ProductTypeName, string> = {
 export default function CartScreen() {
     const navigate = useNavigate();
 
-    const {cart, loading, updateQuantity, removeFromCart} = useCart();
+    const {cart, fetchCart, loading, updateQuantity, removeFromCart} = useCart();
 
     // Local API State
     const [isPlacingOrder, setIsPlacingOrder] = useState(false);
@@ -28,8 +28,8 @@ export default function CartScreen() {
         setUpdatingId(productId);
         try {
             await updateQuantity(productId, newQuantity);
-        } catch (error) {
-            alert("Failed to update quantity.");
+        } catch (error: any) {
+            alert(`Failed to update quantity: ${error?.message || "Unknown server error"}`);
         } finally {
             setUpdatingId(null);
         }
@@ -53,8 +53,10 @@ export default function CartScreen() {
             await OrderService.placeOrder();
             // Only navigate if the API succeeds
             navigate('/checkout/delivery');
-        } catch (error) {
-            alert("Failed to initiate order. Please check your cart and try again.");
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || error.response?.data || "Failed to initiate place order process. Please check your cart.";
+            alert(`Checkout paused: ${errorMessage}`);
+            if (error.response?.status === 409) await fetchCart();
             setIsPlacingOrder(false);
         }
     };

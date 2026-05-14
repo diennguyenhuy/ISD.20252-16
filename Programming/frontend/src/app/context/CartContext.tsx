@@ -1,4 +1,3 @@
-// src/context/CartContext.tsx
 import React, {createContext, useContext, useState, useEffect, type ReactNode} from 'react';
 import CartService from '../api/cartService';
 import type {Cart} from '../models/cart.interface';
@@ -14,6 +13,20 @@ interface CartContextType {
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
+
+const extractErrorMessage = (error: any, fallback: string): string => {
+    if (error.response) {
+        if (typeof error.response.data === 'string' && error.response.data.length < 200) {
+            return error.response.data;
+        }
+        if (error.response.data?.message) {
+            return error.response.data.message;
+        }
+        if (error.response.status === 400) return "Invalid input. Please check your request.";
+        if (error.response.status === 404) return "The requested item was not found on the server.";
+    }
+    return fallback;
+};
 
 export function CartProvider({children}: { children: ReactNode }) {
     const [cart, setCart] = useState<Cart | null>(null);
@@ -36,13 +49,21 @@ export function CartProvider({children}: { children: ReactNode }) {
     }, []);
 
     const addToCart = async (productId: string, quantity: number) => {
-        const updatedCart = await CartService.addToCart(productId, quantity);
-        setCart(updatedCart); // Global state updates instantly!
+        try {
+            const updatedCart = await CartService.addToCart(productId, quantity);
+            setCart(updatedCart);
+        } catch (e) {
+            throw new Error(extractErrorMessage(e, "Failed to add item to cart"));
+        }
     };
 
     const updateQuantity = async (productId: string, quantity: number) => {
-        const updatedCart = await CartService.updateCartItem(productId, quantity);
-        setCart(updatedCart);
+        try {
+            const updatedCart = await CartService.updateCartItem(productId, quantity);
+            setCart(updatedCart);
+        } catch (e) {
+            throw new Error(extractErrorMessage(e, "Failed to update item to cart"));
+        }
     };
 
     const removeFromCart = async (productId: string) => {

@@ -1,6 +1,7 @@
 package com.hust.soict.ict.aims.services.order;
 
 import com.hust.soict.ict.aims.exceptions.OrderNotFoundException;
+import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.dto.response.order.*;
 import com.hust.soict.ict.aims.models.entities.order.*;
 import com.hust.soict.ict.aims.context.OrderDraftContext;
@@ -29,7 +30,7 @@ public class PlaceOrderService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public OrderDraftResponse placeOrder() throws EmptyCartException, NotEnoughStockException {
+    public OrderDraftResponse placeOrder() throws EmptyCartException, NotEnoughStockException, ProductNotFoundException {
         Order draftOrder = Order.from(stockValidator.checkStockAvailability());
 
         orderDraftContext.saveDraftOrder(draftOrder);

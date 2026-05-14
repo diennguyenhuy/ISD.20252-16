@@ -63,6 +63,7 @@ public class StockValidator {
                     insufficientQuantity.put(item.getProduct().getId(), item.getProduct().getStockQuantity());
                 }
             } else {
+                cart.removeItem(item.getProduct().getId());
                 throw new ProductNotFoundException(item.getProduct().getId());
             }
 

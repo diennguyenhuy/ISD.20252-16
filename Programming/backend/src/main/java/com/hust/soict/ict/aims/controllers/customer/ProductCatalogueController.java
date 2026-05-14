@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.controllers.customer;
 
+import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.dto.response.product.ProductDetail;
 import com.hust.soict.ict.aims.models.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.services.order.ProductListService;
@@ -15,16 +16,16 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
-public class ProductListController {
+public class ProductCatalogueController {
     private final ProductListService productListService;
 
     @GetMapping
-    public @ResponseBody List<ProductSummary> get20RandomProducts() {
+    public List<ProductSummary> get20RandomProducts() {
         return productListService.get20RandomProducts();
     }
 
     @GetMapping("/{id}")
-    public @ResponseBody ProductDetail getProductById(@PathVariable UUID id) {
+    public ProductDetail getProductById(@PathVariable UUID id) throws ProductNotFoundException {
         return productListService.getProductById(id);
     }
 }

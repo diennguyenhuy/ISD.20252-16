@@ -201,9 +201,9 @@ export default function HomePage() {
             await addToCart(productId, quantity);
             setAddedId(productId);
             setTimeout(() => setAddedId(null), 1500);
-        } catch (err) {
+        } catch (err: any) {
             console.error("Failed to add to cart:", err);
-            alert("Failed to add item to cart. Please make sure the backend is running.");
+            alert(err.message ?? "Failed to add item to cart. Please make sure the backend is running.");
         }
     };
 

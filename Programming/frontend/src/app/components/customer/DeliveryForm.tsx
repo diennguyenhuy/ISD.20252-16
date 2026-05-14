@@ -8,14 +8,8 @@ import {formatVND} from '../../data/mockData';
 import {provinces, provinceToWards} from '../../data/provinceData';
 import type {DeliveryInformation} from '../../models/order.interface';
 
-interface FieldError {
-    customerName?: string | undefined;
-    customerEmail?: string | undefined;
-    phoneNumber?: string | undefined;
-    province?: string | undefined;
-    commune?: string | undefined;
-    address?: string | undefined;
-    deliveryMethod?: string | undefined;
+type FieldError = {
+    [K in keyof DeliveryInformation]?: DeliveryInformation[K] | undefined;
 }
 
 export default function DeliveryForm() {

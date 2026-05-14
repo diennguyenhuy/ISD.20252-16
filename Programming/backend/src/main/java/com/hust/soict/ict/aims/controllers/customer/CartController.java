@@ -28,7 +28,7 @@ public class CartController {
      * @return the response of cart instance
      */
     @GetMapping
-    public @ResponseBody CartResponse getOrCreateCart() {
+    public CartResponse getOrCreateCart() {
         return cartService.getOrCreateCart();
     }
 
@@ -41,10 +41,10 @@ public class CartController {
      * @throws ProductNotFoundException if product is not found in store
      */
     @PostMapping("/items/{productId}")
-    public @ResponseBody CartResponse addItemToCart(
+    public CartResponse addItemToCart(
             @PathVariable UUID productId,
             @RequestParam(name = "quantity") @Positive int quantity
-    ) throws ProductNotFoundException {
+    ) throws ProductNotFoundException, IllegalArgumentException {
         return cartService.addItem(productId, quantity);
     }
 
@@ -57,10 +57,10 @@ public class CartController {
      * @throws NoSuchElementException if the item does not exist in cart
      */
     @PutMapping("/items/{productId}")
-    public @ResponseBody CartResponse updateItem(
+    public CartResponse updateItem(
             @PathVariable UUID productId,
             @RequestParam(name = "quantity") @PositiveOrZero int quantity
-    ) throws NoSuchElementException {
+    ) throws NoSuchElementException, IllegalArgumentException {
         return cartService.updateItem(productId, quantity);
     }
 
@@ -71,7 +71,7 @@ public class CartController {
      * @return the response of cart instance
      */
     @DeleteMapping("/items/{productId}")
-    public @ResponseBody CartResponse deleteItem(
+    public CartResponse deleteItem(
             @PathVariable UUID productId
     ) {
         return cartService.removeItem(productId);
@@ -83,7 +83,7 @@ public class CartController {
      * @return the response of cart instance
      */
     @DeleteMapping
-    public @ResponseBody CartResponse clearCart() {
+    public CartResponse clearCart() {
         return cartService.clearCart();
     }
 }

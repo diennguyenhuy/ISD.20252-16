@@ -1,7 +1,6 @@
 package com.hust.soict.ict.aims.models.entities.order;
 
 import com.hust.soict.ict.aims.models.cart.Cart;
-import com.hust.soict.ict.aims.models.cart.CartItem;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -100,14 +99,14 @@ public class Order {
         items.add(orderItem);
     }
 
-    public void changeStatus(@NonNull OrderStatus orderStatus) throws IllegalStateException {
-        if (orderStatus == status) return;
+    public void changeStatus(@NonNull OrderStatus newStatus) throws IllegalStateException {
+        if (newStatus == status) return;
 
-        if (!OrderStatus.transitions.get(status).contains(orderStatus)) {
-            throw new IllegalStateException("Cannot transition order status from " + status.name() + " to " + orderStatus.name());
+        if (!OrderStatus.transitions.get(status).contains(newStatus)) {
+            throw new IllegalStateException("Cannot transition order status from " + status.name() + " to " + newStatus.name());
         }
 
-        this.status = orderStatus;
+        this.status = newStatus;
     }
 
     public static Order from(Cart cart) {
