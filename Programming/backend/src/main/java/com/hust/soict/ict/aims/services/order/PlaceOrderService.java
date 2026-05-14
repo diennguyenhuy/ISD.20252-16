@@ -1,6 +1,7 @@
 package com.hust.soict.ict.aims.services.order;
 
 import com.hust.soict.ict.aims.exceptions.OrderNotFoundException;
+import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.dto.response.order.*;
 import com.hust.soict.ict.aims.models.entities.order.*;
 import com.hust.soict.ict.aims.context.OrderDraftContext;
@@ -29,7 +30,7 @@ public class PlaceOrderService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public OrderDraftResponse placeOrder() throws EmptyCartException, NotEnoughStockException {
+    public OrderDraftResponse placeOrder() throws EmptyCartException, NotEnoughStockException, ProductNotFoundException {
         Order draftOrder = Order.from(stockValidator.checkStockAvailability());
 
         orderDraftContext.saveDraftOrder(draftOrder);
@@ -41,13 +42,7 @@ public class PlaceOrderService {
         Order draftOrder = orderDraftContext.getDraftOrder();
         var deliveryInformation = draftOrder.getDeliveryInformation();
         if (deliveryInformation != null) {
-            deliveryInformation.setCustomerName(deliveryRequest.getCustomerName());
-            deliveryInformation.setCustomerEmail(deliveryRequest.getCustomerEmail());
-            deliveryInformation.setPhoneNumber(deliveryRequest.getPhoneNumber());
-            deliveryInformation.setProvince(deliveryRequest.getProvince());
-            deliveryInformation.setCommune(deliveryRequest.getCommune());
-            deliveryInformation.setAddress(deliveryRequest.getAddress());
-            deliveryInformation.setAddress(deliveryRequest.getAddress());
+            updateDeliveryInformation(deliveryInformation, deliveryRequest);
 
             return orderMapper.toDeliveryResponse(deliveryInformation);
         }
@@ -66,6 +61,16 @@ public class PlaceOrderService {
         orderDraftContext.saveDraftOrder(draftOrder);
 
         return orderMapper.toDeliveryResponse(di);
+    }
+
+    private void updateDeliveryInformation(DeliveryInformation deliveryInformation, DeliveryRequest deliveryRequest) {
+        deliveryInformation.setCustomerName(deliveryRequest.getCustomerName());
+        deliveryInformation.setCustomerEmail(deliveryRequest.getCustomerEmail());
+        deliveryInformation.setPhoneNumber(deliveryRequest.getPhoneNumber());
+        deliveryInformation.setProvince(deliveryRequest.getProvince());
+        deliveryInformation.setCommune(deliveryRequest.getCommune());
+        deliveryInformation.setAddress(deliveryRequest.getAddress());
+        deliveryInformation.setAddress(deliveryRequest.getAddress());
     }
 
     public InvoiceResponse getInvoice() {

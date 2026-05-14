@@ -1,7 +1,6 @@
 package com.hust.soict.ict.aims.models.entities.order;
 
 import com.hust.soict.ict.aims.models.cart.Cart;
-import com.hust.soict.ict.aims.models.cart.CartItem;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -15,6 +14,31 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "order")
+@NamedEntityGraphs({
+        @NamedEntityGraph(
+                name = "Order-aggregate",
+                attributeNodes = {
+                        @NamedAttributeNode(value = "items", subgraph = "OrderItem::product"),
+                        @NamedAttributeNode("deliveryInformation"),
+                        @NamedAttributeNode("invoice"),
+                        @NamedAttributeNode("paymentTransaction")
+                },
+                subgraphs = {
+                        @NamedSubgraph(
+                                name = "OrderItem::product",
+                                attributeNodes = {
+                                        @NamedAttributeNode("product")
+                                }
+                        )
+                }
+        ),
+        @NamedEntityGraph(
+                name = "Order-summary",
+                attributeNodes = {
+                        @NamedAttributeNode("items")
+                }
+        )
+})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order {
@@ -23,7 +47,7 @@ public class Order {
     @Column(updatable = false)
     private UUID id;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<OrderItem> items = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
@@ -75,14 +99,14 @@ public class Order {
         items.add(orderItem);
     }
 
-    public void changeStatus(@NonNull OrderStatus orderStatus) throws IllegalStateException {
-        if (orderStatus == status) return;
+    public void changeStatus(@NonNull OrderStatus newStatus) throws IllegalStateException {
+        if (newStatus == status) return;
 
-        if (!OrderStatus.transitions.get(status).contains(orderStatus)) {
-            throw new IllegalStateException("Cannot transition order status from " + status.name() + " to " + orderStatus.name());
+        if (!OrderStatus.transitions.get(status).contains(newStatus)) {
+            throw new IllegalStateException("Cannot transition order status from " + status.name() + " to " + newStatus.name());
         }
 
-        this.status = orderStatus;
+        this.status = newStatus;
     }
 
     public static Order from(Cart cart) {

@@ -1,4 +1,4 @@
-const tinhthanhvietnam_moi = [
+[
     {
         "name": "Thành phố Hà Nội",
         "wards": [
@@ -3490,16 +3490,4 @@ const tinhthanhvietnam_moi = [
             "Xã Đất Mũi"
         ]
     }
-] as const;
-
-
-export type Province = typeof tinhthanhvietnam_moi[number]['name'];
-type ProvinceToWards = {
-    [P in Province]: Extract<typeof tinhthanhvietnam_moi[number], { name: P }>['wards'];
-};
-export type Ward<P extends Province> = ProvinceToWards[P][number];
-
-export const provinces: Province[] = tinhthanhvietnam_moi.map(p => p.name);
-export const provinceToWards = Object.fromEntries(
-    tinhthanhvietnam_moi.map(p => [p.name, p.wards])
-) as ProvinceToWards;
+]

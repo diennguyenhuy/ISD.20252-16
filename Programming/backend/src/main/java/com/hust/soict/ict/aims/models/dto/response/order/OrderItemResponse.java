@@ -6,6 +6,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class OrderItemResponse {
+    private String productId;
     private String productName;
     private int quantity;
     private long unitPrice;

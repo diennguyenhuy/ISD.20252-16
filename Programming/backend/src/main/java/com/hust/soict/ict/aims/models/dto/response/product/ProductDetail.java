@@ -18,9 +18,12 @@ public abstract class ProductDetail {
     private BigDecimal length;
     private BigDecimal weight;
     private String barcode;
+    private long originalValue;
     private long currentPrice;
+    private int stockQuantity;
     private String status;
     private String imageURL;
     private Instant addedAt;
+    private Instant updatedAt;
     private String productType;
 }

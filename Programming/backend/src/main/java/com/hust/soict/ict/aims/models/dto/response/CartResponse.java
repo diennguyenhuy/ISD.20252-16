@@ -1,11 +1,14 @@
 package com.hust.soict.ict.aims.models.dto.response;
 
-import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.util.List;
+import java.util.Collection;
 
-@AllArgsConstructor
+@NoArgsConstructor
+@Setter
 public class CartResponse {
-    private List<CartItemResponse> items;
+    private Collection<CartItemResponse> items;
+    private int totalQuantity;
     private long totalPrice;
 }

@@ -1,5 +1,3 @@
-import type {Province, Ward} from "../data/tinhthanhvietnam_moi";
-
 export type OrderStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'REFUNDED';
 
 export interface Order {
@@ -22,12 +20,12 @@ export interface OrderItem {
     unitWeight: number;
 }
 
-export interface DeliveryInformation<P extends Province = Province> {
+export interface DeliveryInformation {
     customerName: string;
     customerEmail: string;
     phoneNumber: string;
-    province: P;
-    commune: Ward<P>;
+    province: string;
+    commune: string;
     address: string;
     deliveryMethod: string;
 }

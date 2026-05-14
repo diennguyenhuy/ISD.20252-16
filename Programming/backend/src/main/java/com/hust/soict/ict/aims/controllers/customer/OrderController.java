@@ -3,6 +3,7 @@ package com.hust.soict.ict.aims.controllers.customer;
 import com.hust.soict.ict.aims.exceptions.EmptyCartException;
 import com.hust.soict.ict.aims.exceptions.NotEnoughStockException;
 import com.hust.soict.ict.aims.exceptions.OrderNotFoundException;
+import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.dto.request.DeliveryRequest;
 import com.hust.soict.ict.aims.models.dto.response.order.DeliveryResponse;
 import com.hust.soict.ict.aims.models.dto.response.order.InvoiceResponse;
@@ -33,7 +34,7 @@ public class OrderController {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody OrderDraftResponse placeOrder() throws NotEnoughStockException, EmptyCartException {
+    public OrderDraftResponse placeOrder() throws NotEnoughStockException, EmptyCartException, ProductNotFoundException {
         return placeOrderService.placeOrder();
     }
 
@@ -44,7 +45,7 @@ public class OrderController {
      */
     @PostMapping("/delivery")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public @ResponseBody DeliveryResponse submitDeliveryInformation(
+    public DeliveryResponse submitDeliveryInformation(
             @Valid @RequestBody DeliveryRequest deliveryRequest
     ) {
         return placeOrderService.submitDeliveryInformation(deliveryRequest);
@@ -56,7 +57,7 @@ public class OrderController {
      */
     @GetMapping("/invoice")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody InvoiceResponse getInvoice() {
+    public InvoiceResponse getInvoice() {
         return placeOrderService.getInvoice();
     }
 
@@ -65,7 +66,7 @@ public class OrderController {
      */
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public @ResponseBody void cancelOrder() {
+    public void cancelOrder() {
         placeOrderService.cancelOrder();
     }
 
@@ -76,7 +77,7 @@ public class OrderController {
      */
     @GetMapping("/{orderId}")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody OrderResponse getOrder(@PathVariable UUID orderId) {
+    public OrderResponse getOrder(@PathVariable UUID orderId) {
         return placeOrderService.getOrder(orderId);
     }
 
@@ -88,7 +89,7 @@ public class OrderController {
      */
     @DeleteMapping("/{orderId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public @ResponseBody void cancelOrder(@PathVariable UUID orderId) throws OrderNotFoundException, IllegalStateException {
+    public void cancelOrder(@PathVariable UUID orderId) throws OrderNotFoundException, IllegalStateException {
         placeOrderService.cancelOrder(orderId);
     }
 }
