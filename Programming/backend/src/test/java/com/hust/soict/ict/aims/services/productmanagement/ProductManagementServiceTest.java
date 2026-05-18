@@ -49,7 +49,6 @@ class ProductManagementServiceTest {
     void setUp() {
         sampleId = UUID.randomUUID();
 
-        // 1. Dữ liệu Request mẫu cho Use Case Create
         sampleCreateRequest = new CreateProductRequest();
         sampleCreateRequest.setTitle("Clean Code");
         sampleCreateRequest.setBarcode("9780132350884");
@@ -58,16 +57,13 @@ class ProductManagementServiceTest {
         sampleCreateRequest.setCurrentPrice(220000L);
         sampleCreateRequest.setStockQuantity(5);
 
-        // 2. Dữ liệu Request mẫu cho Use Case Update
         sampleUpdateRequest = new UpdateProductRequest();
         sampleUpdateRequest.setTitle("Clean Code - Ed.2");
         sampleUpdateRequest.setCurrentPrice(210000L);
         sampleUpdateRequest.setStockQuantity(12);
 
-        // 3. Giả lập Entity đa hình bằng Mockito
         mockProduct = mock(Book.class);
 
-        // SỬA: Thêm lenient() vào trước các hàm khi khai báo Mock dùng chung trong setUp()
         org.mockito.Mockito.lenient().when(mockProduct.getId()).thenReturn(sampleId);
         org.mockito.Mockito.lenient().when(mockProduct.getTitle()).thenReturn("Clean Code");
         org.mockito.Mockito.lenient().when(mockProduct.getBarcode()).thenReturn("9780132350884");
@@ -78,22 +74,17 @@ class ProductManagementServiceTest {
         org.mockito.Mockito.lenient().when(mockProduct.getStatus()).thenReturn(ProductStatus.ACTIVE);
     }
 
-    // =========================================================================
-    // 1. TEST CASE CHO USE CASE: CREATE PRODUCT
-    // =========================================================================
+    // 1. USE CASE: CREATE PRODUCT
 
     @Test
     @DisplayName("Create Product - Success Flow")
     void createProduct_Success() {
-        // Given
         when(productRepo.existsByBarcode(sampleCreateRequest.getBarcode())).thenReturn(false);
         when(productMapper.toEntity(any(CreateProductRequest.class))).thenReturn(mockProduct);
         when(productRepo.save(any(Product.class))).thenReturn(mockProduct);
 
-        // When
         ProductDetail result = productManagementService.createProduct(sampleCreateRequest);
 
-        // Then
         assertNotNull(result);
         assertEquals(sampleId.toString(), result.getId());
         assertEquals("BOOK", result.getCategory());
@@ -103,34 +94,26 @@ class ProductManagementServiceTest {
     @Test
     @DisplayName("Create Product - Fail Due To Duplicate Barcode Exception")
     void createProduct_ThrowsException_WhenBarcodeExists() {
-        // Given
         when(productRepo.existsByBarcode(sampleCreateRequest.getBarcode())).thenReturn(true);
 
-        // When & Then
         ProductValidationException exception = assertThrows(ProductValidationException.class, () -> {
             productManagementService.createProduct(sampleCreateRequest);
         });
 
-        // Kiểm tra xem message và tên trường dữ liệu lỗi đính kèm đúng không
         assertTrue(exception.getMessage().contains("Barcode already exists"));
         verify(productRepo, never()).save(any(Product.class));
     }
 
-    // =========================================================================
-    // 2. TEST CASE CHO USE CASE: UPDATE PRODUCT
-    // =========================================================================
+    // 2. USE CASE: UPDATE PRODUCT
 
     @Test
     @DisplayName("Update Product - Success Flow")
     void updateProduct_Success() {
-        // Given
         when(productRepo.findById(sampleId)).thenReturn(Optional.of(mockProduct));
         when(productRepo.save(any(Product.class))).thenReturn(mockProduct);
 
-        // When
         ProductDetail result = productManagementService.updateProduct(sampleId, sampleUpdateRequest);
 
-        // Then
         assertNotNull(result);
         verify(productMapper, times(1)).updateEntityFromDto(eq(sampleUpdateRequest), eq(mockProduct));
         verify(productRepo, times(1)).save(mockProduct);
@@ -139,11 +122,9 @@ class ProductManagementServiceTest {
     @Test
     @DisplayName("Update Product - Fail When Target Product Id Not Found")
     void updateProduct_ThrowsException_WhenProductNotFound() {
-        // Given
         UUID missingId = UUID.randomUUID();
         when(productRepo.findById(missingId)).thenReturn(Optional.empty());
 
-        // When & Then
         assertThrows(ProductNotFoundException.class, () -> {
             productManagementService.updateProduct(missingId, sampleUpdateRequest);
         });
@@ -153,11 +134,9 @@ class ProductManagementServiceTest {
     @Test
     @DisplayName("Update Product - Boundary Failure When New Price Too Low (< 30%)")
     void updateProduct_ThrowsException_WhenPriceBelowThirtyPercent() {
-        // Given
-        sampleUpdateRequest.setCurrentPrice(50000L); // 50k thấp hơn mức sàn 60k (30% của giá gốc 200k)
+        sampleUpdateRequest.setCurrentPrice(50000L); // 50k < 60k (30% of 200k)
         when(productRepo.findById(sampleId)).thenReturn(Optional.of(mockProduct));
 
-        // When & Then
         ProductValidationException exception = assertThrows(ProductValidationException.class, () -> {
             productManagementService.updateProduct(sampleId, sampleUpdateRequest);
         });
@@ -167,27 +146,22 @@ class ProductManagementServiceTest {
     @Test
     @DisplayName("Update Product - Boundary Failure When New Price Too High (> 150%)")
     void updateProduct_ThrowsException_WhenPriceAboveOneHundredFiftyPercent() {
-        // Given
-        sampleUpdateRequest.setCurrentPrice(350000L); // 350k vượt trần 300k (150% của giá gốc 200k)
+        sampleUpdateRequest.setCurrentPrice(350000L); // 350k > 300k (150% of 200k)
         when(productRepo.findById(sampleId)).thenReturn(Optional.of(mockProduct));
 
-        // When & Then
         assertThrows(ProductValidationException.class, () -> {
             productManagementService.updateProduct(sampleId, sampleUpdateRequest);
         });
     }
 
-    // =========================================================================
-    // 3. TEST CASE CHO USE CASE: DELETE PRODUCT
-    // =========================================================================
+    // 3. USE CASE: DELETE PRODUCT
 
     @Test
     @DisplayName("Delete Product - Fail When Selecting More Than 10 Products")
     void deleteProducts_ThrowsException_WhenBatchSizeIsEleven() {
-        // Given: Tạo một mảng gồm 11 ID ngẫu nhiên để test dải biên tối đa
+        // Given: 11 ID-array
         List<UUID> invalidSizeList = new ArrayList<>(Collections.nCopies(11, UUID.randomUUID()));
 
-        // When & Then
         assertThrows(ProductValidationException.class, () -> {
             productManagementService.deleteProducts(invalidSizeList);
         });
@@ -196,15 +170,12 @@ class ProductManagementServiceTest {
     @Test
     @DisplayName("Delete Product - Success Via Hard Delete (Stock Equals 0)")
     void deleteProducts_ExecutesHardDelete_WhenStockIsEmpty() {
-        // Given
-        when(mockProduct.getStockQuantity()).thenReturn(0); // Cấu hình sản phẩm đã hết sạch trong kho
+        when(mockProduct.getStockQuantity()).thenReturn(0); // out of stock
         when(productRepo.findAllByStatus(ProductStatus.DEACTIVATED)).thenReturn(Collections.emptyList());
         when(productRepo.findById(sampleId)).thenReturn(Optional.of(mockProduct));
 
-        // When
         productManagementService.deleteProducts(List.of(sampleId));
 
-        // Then: Đảm bảo luồng đi đúng vào nhánh gọi hàm xóa cứng
         verify(productRepo, times(1)).deleteById(sampleId);
         verify(productMapper, never()).deactivateProduct(any(Product.class));
     }
@@ -212,15 +183,12 @@ class ProductManagementServiceTest {
     @Test
     @DisplayName("Delete Product - Success Via Soft Delete / Deactivate (Stock Greater Than 0)")
     void deleteProducts_ExecutesSoftDelete_WhenStockStillExists() {
-        // Given
-        when(mockProduct.getStockQuantity()).thenReturn(8); // Vẫn còn tồn 8 sản phẩm trong kho
+        when(mockProduct.getStockQuantity()).thenReturn(8); // 8 products remaining in stock
         when(productRepo.findAllByStatus(ProductStatus.DEACTIVATED)).thenReturn(Collections.emptyList());
         when(productRepo.findById(sampleId)).thenReturn(Optional.of(mockProduct));
 
-        // When
         productManagementService.deleteProducts(List.of(sampleId));
 
-        // Then: Đảm bảo luồng đi đúng nhánh hủy kích hoạt và cập nhật thực thể
         verify(productRepo, never()).deleteById(sampleId);
         verify(productMapper, times(1)).deactivateProduct(mockProduct);
         verify(productRepo, times(1)).save(mockProduct);
