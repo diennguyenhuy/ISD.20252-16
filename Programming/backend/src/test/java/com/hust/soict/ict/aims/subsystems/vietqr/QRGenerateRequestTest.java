@@ -37,7 +37,7 @@ class QRGenerateRequestTest {
                 "ORDER@#123456789012345"
         );
 
-        assertEquals("ORDER1234567", result);
+        assertEquals("ORDER12345678", result);
         assertEquals(13, result.length());
     }
 }
