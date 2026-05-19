@@ -39,10 +39,6 @@ public interface ProductMapper {
     @Mapping(target = "productType", qualifiedByName = "mapProductType")
     ProductSummary toProductSummary(Product product);
 
-// =========================================================================
-    // 1. LUỒNG TẠO MỚI (Create Product)
-    // =========================================================================
-
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     @Mapping(target = "id", ignore = true) // ID tự sinh ở DB hoặc Service
     @Mapping(target = "status", expression = "java(ProductStatus.ACTIVE)")
@@ -63,7 +59,6 @@ public interface ProductMapper {
     @Mapping(target = "status", expression = "java(ProductStatus.ACTIVE)")
     Newspaper toNewspaper(CreateProductRequest dto);
 
-    // Hàm điều phối đa hình (Factory Method) sử dụng tính năng Java Pattern Matching Switch
     default Product toEntity(CreateProductRequest dto) {
         if (dto == null) return null;
         return switch (dto.getCategory().toUpperCase()) {
@@ -74,12 +69,6 @@ public interface ProductMapper {
             default -> throw new IllegalArgumentException("Unknown category: " + dto.getCategory());
         };
     }
-
-    // =========================================================================
-    // 2. LUỒNG CẬP NHẬT (Update Product)
-    // Do Entity là Immutable, MapStruct hỗ trợ truyền 2 đối tượng nguồn (product cũ + dto mới)
-    // để sinh ra một thực thể mới mang ID cũ giúp Hibernate hiểu đây là lệnh UPDATE.
-    // =========================================================================
 
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     Book updateBook(Book product, UpdateProductRequest dto);
@@ -104,9 +93,6 @@ public interface ProductMapper {
         };
     }
 
-    // =========================================================================
-    // 3. LUỒNG HỦY KÍCH HOẠT (Delete Product - Chuyển trạng thái mềm)
-    // =========================================================================
 
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     @Mapping(target = "status", expression = "java(ProductStatus.DEACTIVATED)")

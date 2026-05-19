@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 public class UpdateProductRequest {
-    @NotBlank(message = "Title cannot be blank")
+    @NotBlank(message = "Title is required")
     private String title;
 
     @NotNull(message = "Current price is required")
@@ -18,9 +18,6 @@ public class UpdateProductRequest {
     @PositiveOrZero
     private Integer stockQuantity;
 
+    @NotBlank(message = "Description is required")
     private String description;
-    private Double weight;
-    private Double height;
-    private Double width;
-    private Double length;
 }
