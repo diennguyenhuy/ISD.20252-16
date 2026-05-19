@@ -8,13 +8,16 @@ import com.hust.soict.ict.aims.repositories.PaymentTransactionRepository;
 import com.hust.soict.ict.aims.services.payment.PaymentService;
 import com.hust.soict.ict.aims.services.payment.PaymentServiceImpl;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
 
     @Test
@@ -25,8 +28,9 @@ class PaymentServiceTest {
 
         PaymentService service = new PaymentServiceImpl(orderRepo, transRepo);
 
-        Order order = new Order();
-        order.changeStatus(OrderStatus.DRAFT);
+        Order order = Mockito.mock(Order.class);
+
+        Mockito.when(order.getStatus()).thenReturn(OrderStatus.DRAFT);
 
         UUID id = UUID.randomUUID();
 
@@ -44,7 +48,10 @@ class PaymentServiceTest {
                 service.initiatePayment(TransactionMethod.PAYPAL, request);
 
         assertTrue(res.success());
-        assertEquals(OrderStatus.APPROVED, order.getStatus());
+
+        Mockito.verify(order).changeStatus(OrderStatus.APPROVED);
+
+        Mockito.verify(orderRepo).save(order);
     }
 
     @Test
@@ -55,8 +62,9 @@ class PaymentServiceTest {
 
         PaymentService service = new PaymentServiceImpl(orderRepo, transRepo);
 
-        Order order = new Order();
-        order.changeStatus(OrderStatus.DRAFT);
+        Order order = Mockito.mock(Order.class);
+
+        Mockito.when(order.getStatus()).thenReturn(OrderStatus.DRAFT);
 
         UUID id = UUID.randomUUID();
 
@@ -74,7 +82,10 @@ class PaymentServiceTest {
                 service.initiatePayment(TransactionMethod.PAYPAL, request);
 
         assertFalse(res.success());
-        assertEquals(OrderStatus.REJECTED, order.getStatus());
+
+        Mockito.verify(order).changeStatus(OrderStatus.REJECTED);
+
+        Mockito.verify(orderRepo).save(order);
     }
 
     @Test
