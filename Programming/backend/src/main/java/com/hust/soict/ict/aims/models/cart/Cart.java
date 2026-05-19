@@ -60,8 +60,16 @@ public class Cart {
         item.setQuantity(quantity);
     }
 
+    /**
+     * Remove the item from cart. Do nothing if it does not exist.
+     * @param productId the product ID of the item
+     */
     public void removeItem(UUID productId) {
         items.remove(productId);
+    }
+
+    public void replaceItem(UUID productId, CartItem item) {
+        items.replace(productId, item);
     }
 
     public void clear() {

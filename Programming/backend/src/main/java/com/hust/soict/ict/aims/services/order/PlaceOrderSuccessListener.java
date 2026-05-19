@@ -10,7 +10,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 @RequiredArgsConstructor
-class PlaceOrderSuccessListener {
+public class PlaceOrderSuccessListener {
     private final CartContext cartContext;
     private final OrderDraftContext orderDraftContext;
 

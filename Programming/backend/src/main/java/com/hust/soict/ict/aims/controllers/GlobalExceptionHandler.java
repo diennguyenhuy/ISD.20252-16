@@ -80,9 +80,9 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(DeliveryConstructionException.class)
+    @ExceptionHandler(InvalidDeliveryException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, Object> handle(DeliveryConstructionException e) {
+    public Map<String, Object> handle(InvalidDeliveryException e) {
         return Map.of(
                 "message", e.getMessage(),
                 "details", e.getInvalidFields()
