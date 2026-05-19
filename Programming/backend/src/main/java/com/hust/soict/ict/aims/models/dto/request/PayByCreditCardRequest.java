@@ -1,16 +1,23 @@
 package com.hust.soict.ict.aims.models.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-
-@Getter
 public class PayByCreditCardRequest {
-    @NotBlank
+
+    private String orderId;
+    private double amount;
     private String cardNumber;
-    @NotBlank
     private String cardHolderName;
-    @NotBlank
     private String expirationDate;
-    @NotBlank
     private String cvv;
+
+    public String getOrderId() { return orderId; }
+    public void setOrderId(String orderId) { this.orderId = orderId; }
+
+    public double getAmount() { return amount; }
+    public void setAmount(double amount) { this.amount = amount; }
+
+    public String getCardNumber() { return cardNumber; }
+    public void setCardNumber(String cardNumber) { this.cardNumber = cardNumber; }
+
+    public String getCvv() { return cvv; }
+    public void setCvv(String cvv) { this.cvv = cvv; }
 }
