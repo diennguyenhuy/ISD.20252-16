@@ -59,6 +59,8 @@ public class StockValidator {
 
             if (managedProduct != null) {
                 item = new CartItem(managedProduct, item.getQuantity());
+                cart.replaceItem(item.getProduct().getId(), item);
+
                 if (item.getProduct().getStockQuantity() < item.getQuantity()) {
                     insufficientQuantity.put(item.getProduct().getId(), item.getProduct().getStockQuantity());
                 }
