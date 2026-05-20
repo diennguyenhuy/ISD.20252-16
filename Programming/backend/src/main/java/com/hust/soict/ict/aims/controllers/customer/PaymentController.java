@@ -8,36 +8,17 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Provide API endpoints for payment
- */
-//TODO: Complete and refine the payment controller in accordance to the unimplemented Payment Service
 @RestController
 @RequestMapping("/order/payment")
 @RequiredArgsConstructor
 public class PaymentController {
+
     private final PaymentService paymentService;
 
-    /**
-     * GET /order/payment initiate the (default) VietQR payment session
-     * @return a QR code response
-     */
-    @PostMapping
-    public @ResponseBody PaymentInitiationResponse initiatePayment() {
-        return paymentService.initiatePayment(TransactionMethod.VIETQR);
-    }
-
-    /**
-     * GET /order/payment/paypal initiate the PayPal payment session
-     * @param payByCreditCardRequest the credit card info
-     * @return a response
-     */
-    @PostMapping("/paypal")
-    public @ResponseBody PaymentInitiationResponse initiatePayment(
-            @Valid @RequestBody PayByCreditCardRequest payByCreditCardRequest
+    @PostMapping("/credit-card")
+    public PaymentInitiationResponse payByCreditCard(
+            @Valid @RequestBody PayByCreditCardRequest request
     ) {
-        return paymentService.initiatePayment(TransactionMethod.PAYPAL, payByCreditCardRequest);
+        return paymentService.initiatePayment(TransactionMethod.PAYPAL, request);
     }
-
-
 }

@@ -7,6 +7,7 @@ import com.hust.soict.ict.aims.models.entities.product.ProductStatus;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import com.hust.soict.ict.aims.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class ProductListService {
+public class ProductCatalogueService {
     private final ProductRepository productRepository;
 
     private final ProductMapper productMapper;
@@ -27,5 +28,10 @@ public class ProductListService {
         return productRepository.findByIdAndStatus(productId, ProductStatus.ACTIVE)
                 .map(productMapper::toProductDetail)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
+    }
+
+    public List<ProductSummary> getProductsBy(String title, String category, long minPrice, long maxPrice, Pageable pageable) {
+        return productRepository.searchActiveProductsBy(title, category, minPrice, maxPrice, pageable)
+                .stream().map(productMapper::toProductSummary).toList();
     }
 }
