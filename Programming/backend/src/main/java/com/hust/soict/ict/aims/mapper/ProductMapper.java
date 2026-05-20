@@ -9,42 +9,45 @@ import java.util.List;
 
 @Mapper(
         componentModel = MappingConstants.ComponentModel.SPRING,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE // 🔥 FIX
+        unmappedTargetPolicy = ReportingPolicy.ERROR
 )
 public interface ProductMapper {
-
-    // ===== FIX: dùng default method thay vì MapStruct =====
     default ProductDetail toProductDetail(Product product) {
-        if (product instanceof Book b) return toBookDetail(b);
-        if (product instanceof Newspaper n) return toNewspaperDetail(n);
-        if (product instanceof CD cd) return toCDDetail(cd);
-        if (product instanceof DVD dvd) return toDVDDetail(dvd);
-        throw new RuntimeException("Unknown product type");
+        return switch (product) {
+            case Book b -> toBookDetail(b);
+            case Newspaper n -> toNewspaperDetail(n);
+            case CD cd -> toCDDetail(cd);
+            case DVD dvd -> toDVDDetail(dvd);
+            default -> throw new IllegalArgumentException("Unsupported product type: " + product.getClass());
+        };
     }
 
-    // ===== REMOVE productType mapping =====
+    @Mapping(target = "productType", expression = "java(Book.class.getSimpleName())")
     BookDetail toBookDetail(Book book);
 
+    @Mapping(target = "productType", expression = "java(Newspaper.class.getSimpleName())")
     NewspaperDetail toNewspaperDetail(Newspaper newspaper);
 
+    @Mapping(target = "productType", expression = "java(CD.class.getSimpleName())")
     CDDetail toCDDetail(CD cd);
 
+    @Mapping(target = "productType", expression = "java(DVD.class.getSimpleName())")
     DVDDetail toDVDDetail(DVD dvd);
 
     TrackDetail toTrackDetail(Track track);
 
-    // ===== FIX: remove creators + productType nếu không tồn tại =====
+    @Mapping(target = "creators", expression = "java(mapCreators(product))")
+    @Mapping(target = "productType", expression = "java(mapProductType(product))")
     ProductSummary toProductSummary(Product product);
 
-    // ===== OPTIONAL: giữ lại nếu bạn thực sự có field =====
     @Named("mapProductType")
     default String mapProductType(Product product) {
         return switch (product) {
-            case Book ignored -> "Book";
-            case Newspaper ignored -> "Newspaper";
-            case CD ignored -> "CD";
-            case DVD ignored -> "DVD";
-            default -> "Unknown";
+            case Book ignored -> Book.class.getSimpleName();
+            case Newspaper ignored -> Newspaper.class.getSimpleName();
+            case CD ignored -> CD.class.getSimpleName();
+            case DVD ignored -> DVD.class.getSimpleName();
+            default -> "NotYetOrUnsupportedType";
         };
     }
 
