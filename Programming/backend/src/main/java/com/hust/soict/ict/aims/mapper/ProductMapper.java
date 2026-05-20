@@ -12,12 +12,15 @@ import java.util.List;
         unmappedTargetPolicy = ReportingPolicy.ERROR
 )
 public interface ProductMapper {
-    @Mapping(target = "productType", ignore = true)
-    @SubclassMapping(target = BookDetail.class, source = Book.class)
-    @SubclassMapping(target = NewspaperDetail.class, source = Newspaper.class)
-    @SubclassMapping(target = CDDetail.class, source = CD.class)
-    @SubclassMapping(target = DVDDetail.class, source = DVD.class)
-    ProductDetail toProductDetail(Product product);
+    default ProductDetail toProductDetail(Product product) {
+        return switch (product) {
+            case Book b -> toBookDetail(b);
+            case Newspaper n -> toNewspaperDetail(n);
+            case CD cd -> toCDDetail(cd);
+            case DVD dvd -> toDVDDetail(dvd);
+            default -> throw new IllegalArgumentException("Unsupported product type: " + product.getClass());
+        };
+    }
 
     @Mapping(target = "productType", expression = "java(Book.class.getSimpleName())")
     BookDetail toBookDetail(Book book);
@@ -33,8 +36,8 @@ public interface ProductMapper {
 
     TrackDetail toTrackDetail(Track track);
 
-    @Mapping(target = "creators", qualifiedByName = "mapCreators")
-    @Mapping(target = "productType", qualifiedByName = "mapProductType")
+    @Mapping(target = "creators", expression = "java(mapCreators(product))")
+    @Mapping(target = "productType", expression = "java(mapProductType(product))")
     ProductSummary toProductSummary(Product product);
 
     @Named("mapProductType")

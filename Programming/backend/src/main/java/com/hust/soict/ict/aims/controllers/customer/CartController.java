@@ -78,11 +78,11 @@ public class CartController {
     }
 
     /**
-     * DELETE /cart <br>
+     * DELETE /cart/items <br>
      * Clear cart
      * @return the response of cart instance
      */
-    @DeleteMapping
+    @DeleteMapping("/items")
     public CartResponse clearCart() {
         return cartService.clearCart();
     }

@@ -17,7 +17,7 @@ public class DeliveryService {
     private final OrderMapper orderMapper;
     private final DeliveryFeeCalculator deliveryFeeCalculator;
 
-    public DeliveryResponse submitDeliveryInformation(@Valid DeliveryRequest deliveryRequest) {
+    public DeliveryResponse submitDeliveryInformation(DeliveryRequest deliveryRequest) {
         Order draftOrder = orderDraftContext.getDraftOrder();
         var deliveryInformation = draftOrder.getDeliveryInformation();
         if (deliveryInformation != null) {

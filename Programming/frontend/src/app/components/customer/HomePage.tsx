@@ -119,81 +119,101 @@ function ProductCard({product, onAddToCart}: {
 }
 
 export default function HomePage() {
+    const { addToCart } = useCart();
+
+    // Core Data State
     const [products, setProducts] = useState<ProductSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    // Split-Mode State
+    const [isSearching, setIsSearching] = useState(false);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+
+    // Filter State
     const [search, setSearch] = useState('');
     const [filterType, setFilterType] = useState<ProductTypeName | 'all'>('all');
-    const [sortBy, setSortBy] = useState<'default' | 'price_asc' | 'price_desc' | 'name'>('default');
     const [priceMin, setPriceMin] = useState('');
     const [priceMax, setPriceMax] = useState('');
     const [showFilter, setShowFilter] = useState(false);
     const [addedId, setAddedId] = useState<string | null>(null);
 
-    const { addToCart } = useCart();
+    // 1. DISCOVERY MODE (Initial Load)
+    const loadDiscoveryMode = async () => {
+        setLoading(true);
+        try {
+            const data = await HomepageService.get20RandomProducts();
+            setProducts(data);
+            setHasMore(false); // No pagination in random mode
+        } catch (err) {
+            console.error("Error fetching random products:", err);
+            setError("Could not load products. Please try again later.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    // Trigger Discovery Mode when not searching
     useEffect(() => {
-        HomepageService.getProductList()
-            .then(data => {
-                setProducts(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error("Error fetching products:", err);
-                setError("Could not load products. Please try again later.");
-                setLoading(false);
+        if (!isSearching) {
+            loadDiscoveryMode();
+        }
+    }, [isSearching]);
+
+    // 2. SEARCH MODE (Hits the paginated backend)
+    const executeSearch = async (pageNum: number) => {
+        const isFirstPage = pageNum === 0;
+        if (isFirstPage) setLoading(true);
+        else setLoadingMore(true);
+
+        try {
+            const data = await HomepageService.filterProductsBy({
+                page: pageNum,
+                title: search.trim() || undefined,
+                category: filterType !== 'all' ? filterType : undefined,
+                minPrice: priceMin ? Number(priceMin) : undefined,
+                maxPrice: priceMax ? Number(priceMax) : undefined,
             });
-    }, []);
 
-    const randomProducts = useMemo(() => {
-        const shuffled = [...products].sort(() => Math.random() - 0.5);
-        return shuffled.slice(0, 20);
-    }, [products]);
+            if (isFirstPage) {
+                setProducts(data);
+            } else {
+                setProducts(prev => [...prev, ...data]); // Append new page!
+            }
 
-    const [displayProducts, setDisplayProducts] = useState<ProductSummary[]>([]);
-
-    useEffect(() => {
-        if (search.trim() || filterType !== 'all' || priceMin || priceMax) {
-            setDisplayProducts(products);
-        } else {
-            setDisplayProducts(randomProducts);
+            // If backend returned 20 items, there MIGHT be more. If less, we hit the end.
+            setHasMore(data.length === 20);
+        } catch (err) {
+            console.error("Error executing search:", err);
+            setError("Search failed. Please try again.");
+        } finally {
+            setLoading(false);
+            setLoadingMore(false);
         }
-    }, [search, filterType, priceMin, priceMax, products, randomProducts]);
+    };
 
-    const filtered = useMemo(() => {
-        let list = [...displayProducts];
+    // UI Event Handlers
+    const handleSearchSubmit = () => {
+        setIsSearching(true);
+        setPage(0);
+        executeSearch(0);
+    };
 
-        if (search.trim()) {
-            const q = search.toLowerCase();
-            list = list.filter(p =>
-                p.title.toLowerCase().includes(q) ||
-                (p.creators && p.creators.some(c => c.toLowerCase().includes(q)))
-            );
-        }
+    const handleClearSearch = () => {
+        setSearch('');
+        setFilterType('all');
+        setPriceMin('');
+        setPriceMax('');
+        setIsSearching(false); // Triggers loadDiscoveryMode via useEffect
+        setPage(0);
+    };
 
-        if (filterType !== 'all') list = list.filter(p => p.productType === filterType);
-        if (priceMin) list = list.filter(p => p.currentPrice >= Number(priceMin));
-        if (priceMax) list = list.filter(p => p.currentPrice <= Number(priceMax));
-
-        switch (sortBy) {
-            case 'price_asc':
-                return list.sort((a, b) => a.currentPrice - b.currentPrice);
-            case 'price_desc':
-                return list.sort((a, b) => b.currentPrice - a.currentPrice);
-            case 'name':
-                return list.sort((a, b) => a.title.localeCompare(b.title));
-            default:
-                return list;
-        }
-    }, [displayProducts, search, filterType, sortBy, priceMin, priceMax]);
-
-    const handleSearch = () => {
-        if (!search.trim() && filterType === 'all' && !priceMin && !priceMax) {
-            setDisplayProducts(randomProducts);
-        } else {
-            setDisplayProducts(products);
-        }
+    const handleLoadMore = () => {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        executeSearch(nextPage);
     };
 
     const handleAddToCart = async (productId: string, quantity: number) => {
@@ -202,12 +222,11 @@ export default function HomePage() {
             setAddedId(productId);
             setTimeout(() => setAddedId(null), 1500);
         } catch (err: any) {
-            console.error("Failed to add to cart:", err);
-            alert(err.message ?? "Failed to add item to cart. Please make sure the backend is running.");
+            alert(err.message ?? "Failed to add item to cart.");
         }
     };
 
-    if (loading) {
+    if (loading && page === 0) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh]">
                 <Loader2 className="w-10 h-10 animate-spin text-primary mb-4"/>
@@ -221,37 +240,33 @@ export default function HomePage() {
             <div className="flex flex-col items-center justify-center min-h-[60vh] text-destructive">
                 <X className="w-12 h-12 mb-4"/>
                 <p className="font-medium text-lg">{error}</p>
+                <button onClick={handleClearSearch} className="mt-4 text-primary hover:underline">Reset Store</button>
             </div>
         );
     }
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-6">
-            {/* Hero Banner */}
-            <div
-                className="bg-gradient-to-br from-primary to-accent/80 rounded-2xl p-8 mb-8 text-primary-foreground shadow-lg relative overflow-hidden">
-                <div
-                    className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
-
+            {/* Hero Banner (Same as before) */}
+            <div className="bg-gradient-to-br from-primary to-accent/80 rounded-2xl p-8 mb-8 text-primary-foreground shadow-lg relative overflow-hidden">
+                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
                 <div className="relative z-10">
                     <h1 className="text-3xl sm:text-4xl mb-3 font-bold drop-shadow-sm">Welcome to AIMS! 🎉</h1>
-                    <p className="text-primary-foreground/80 mb-6 text-lg">Discover thousands of books, CDs, DVDs, and
-                        newspapers</p>
+                    <p className="text-primary-foreground/80 mb-6 text-lg">Discover thousands of books, CDs, DVDs, and newspapers</p>
                     <div className="flex flex-col sm:flex-row gap-3 max-w-xl">
                         <div className="flex-1 relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-                                    size={18}/>
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18}/>
                             <input
                                 type="text"
                                 placeholder="Search products..."
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
-                                onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                                onKeyDown={e => e.key === 'Enter' && handleSearchSubmit()}
                                 className="w-full bg-background text-foreground placeholder:text-muted-foreground pl-12 pr-4 py-3.5 rounded-xl outline-none focus:ring-2 focus:ring-primary/50 shadow-inner text-sm transition-all"
                             />
                         </div>
                         <button
-                            onClick={handleSearch}
+                            onClick={handleSearchSubmit}
                             className="bg-foreground text-background px-8 py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition-opacity shadow-md"
                         >
                             Search
@@ -266,7 +281,13 @@ export default function HomePage() {
                     {(['all', 'Book', 'CD', 'DVD', 'Newspaper'] as const).map(type => (
                         <button
                             key={type}
-                            onClick={() => setFilterType(type as ProductTypeName | 'all')}
+                            onClick={() => {
+                                setFilterType(type as ProductTypeName | 'all');
+                                // UX Bonus: Clicking a category automatically triggers a search!
+                                setIsSearching(true);
+                                setPage(0);
+                                executeSearch(0);
+                            }}
                             className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
                                 filterType === type
                                     ? 'bg-primary text-primary-foreground shadow-md'
@@ -279,23 +300,12 @@ export default function HomePage() {
                 </div>
 
                 <div className="flex items-center gap-2 ml-auto">
-                    {/* Sort */}
-                    <div className="relative">
-                        <select
-                            value={sortBy}
-                            onChange={e => setSortBy(e.target.value as typeof sortBy)}
-                            className="appearance-none bg-card border border-border text-foreground text-sm pl-4 pr-10 py-2.5 rounded-xl cursor-pointer outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all hover:border-primary/50"
-                        >
-                            <option value="default">Default</option>
-                            <option value="price_asc">Price: Low to High</option>
-                            <option value="price_desc">Price: High to Low</option>
-                            <option value="name">Name: A to Z</option>
-                        </select>
-                        <ChevronDown size={14}
-                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"/>
-                    </div>
+                    {isSearching && (
+                        <button onClick={handleClearSearch} className="text-sm text-destructive hover:underline mr-4">
+                            Clear Filters
+                        </button>
+                    )}
 
-                    {/* Price filter toggle */}
                     <button
                         onClick={() => setShowFilter(o => !o)}
                         className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
@@ -312,67 +322,77 @@ export default function HomePage() {
 
             {/* Price filter panel */}
             {showFilter && (
-                <div
-                    className="bg-card border border-border rounded-xl p-5 mb-6 flex flex-wrap items-center gap-4 shadow-sm animate-in slide-in-from-top-2">
+                <div className="bg-card border border-border rounded-xl p-5 mb-6 flex flex-wrap items-center gap-4 shadow-sm animate-in slide-in-from-top-2">
                     <span className="text-sm text-foreground font-medium">Price Range:</span>
                     <input
                         type="number"
-                        placeholder="Minimum Price"
+                        placeholder="Min Price"
                         value={priceMin}
                         onChange={e => setPriceMin(e.target.value)}
-                        className="bg-input-background border border-border text-foreground rounded-lg px-3 py-2 text-sm w-36 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                        className="bg-input-background border border-border text-foreground rounded-lg px-3 py-2 text-sm w-36 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                     />
                     <span className="text-muted-foreground">–</span>
                     <input
                         type="number"
-                        placeholder="Maximum Price"
+                        placeholder="Max Price"
                         value={priceMax}
                         onChange={e => setPriceMax(e.target.value)}
-                        className="bg-input-background border border-border text-foreground rounded-lg px-3 py-2 text-sm w-36 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                        className="bg-input-background border border-border text-foreground rounded-lg px-3 py-2 text-sm w-36 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                     />
                     <button
-                        onClick={() => {
-                            setPriceMin('');
-                            setPriceMax('');
-                        }}
-                        className="text-sm text-destructive hover:text-destructive-foreground hover:bg-destructive/10 px-3 py-1.5 rounded-md flex items-center gap-1 transition-colors"
+                        onClick={handleSearchSubmit}
+                        className="text-sm bg-primary text-primary-foreground px-4 py-1.5 rounded-md font-medium"
                     >
-                        <X size={14}/> Clear Filters
+                        Apply
                     </button>
                 </div>
             )}
 
-            {/* Products Grid */}
+            {/* Title / Status */}
             <div className="flex items-center justify-between mb-4">
                 <p className="text-sm text-muted-foreground">
-                    Showing <strong className="text-foreground">{filtered.length}</strong> products
+                    {isSearching ? `Showing search results...` : `Showing 20 random products. Use search to find more.`}
                 </p>
             </div>
 
-            {filtered.length === 0 ? (
-                <div
-                    className="text-center py-20 text-muted-foreground bg-card rounded-2xl border border-border border-dashed">
+            {/* Products Grid */}
+            {products.length === 0 ? (
+                <div className="text-center py-20 text-muted-foreground bg-card rounded-2xl border border-border border-dashed">
                     <Search size={48} className="mx-auto mb-4 opacity-30"/>
                     <p className="text-lg font-medium text-foreground">No matching products found</p>
                     <p className="text-sm mt-1">Try adjusting your search or filter criteria</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
-                    {filtered.map(product => (
-                        <div key={product.id} className="relative">
-                            <ProductCard product={product} onAddToCart={handleAddToCart}/>
-                            {addedId === product.id && (
-                                <div
-                                    className="absolute inset-0 bg-primary/20 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10 animate-in fade-in zoom-in duration-200">
-                          <span
-                              className="bg-primary text-primary-foreground font-semibold text-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
-                            ✓ Added to Cart
-                          </span>
-                                </div>
-                            )}
+                <>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 mb-8">
+                        {products.map(product => (
+                            <div key={product.id} className="relative">
+                                <ProductCard product={product} onAddToCart={handleAddToCart}/>
+                                {addedId === product.id && (
+                                    <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10 animate-in fade-in zoom-in duration-200">
+                                      <span className="bg-primary text-primary-foreground font-semibold text-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
+                                        ✓ Added to Cart
+                                      </span>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Pagination: Load More Button */}
+                    {hasMore && isSearching && (
+                        <div className="flex justify-center mt-8 mb-12">
+                            <button
+                                onClick={handleLoadMore}
+                                disabled={loadingMore}
+                                className="px-8 py-3 rounded-xl border-2 border-primary text-primary font-bold hover:bg-primary/10 transition-colors flex items-center gap-2 disabled:opacity-50"
+                            >
+                                {loadingMore && <Loader2 size={18} className="animate-spin" />}
+                                {loadingMore ? 'Loading...' : 'Load More Products'}
+                            </button>
                         </div>
-                    ))}
-                </div>
+                    )}
+                </>
             )}
         </div>
     );

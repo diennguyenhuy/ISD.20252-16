@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.context;
+package com.hust.soict.ict.aims.constraints;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,7 +26,7 @@ public class LocationProvider {
     private final Map<String, Set<String>> locations;
 
     public LocationProvider(ObjectMapper objectMapper) throws IOException {
-        InputStream is = this.getClass().getResourceAsStream("static/tinhthanhvietnam_moi.json");
+        InputStream is = this.getClass().getResourceAsStream("/static/tinhthanhvietnam_moi.json");
 
         if (is == null) {
             throw new IOException("Resource not found");

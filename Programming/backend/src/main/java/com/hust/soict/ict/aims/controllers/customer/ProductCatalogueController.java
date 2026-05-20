@@ -21,11 +21,26 @@ import java.util.UUID;
 public class ProductCatalogueController {
     private final ProductCatalogueService productCatalogueService;
 
-    @GetMapping
+    /**
+     * GET /products/initiate
+     * <br>Fetch 20 random products
+     * @return the list of summaries of the products
+     */
+    @GetMapping("/initiate")
     public List<ProductSummary> get20RandomProducts() {
         return productCatalogueService.get20RandomProducts();
     }
 
+    /**
+     * GET /products?page={?}&title={?}&category={?}&minPrice={?}&maxPrice={?}
+     * <br>Filter products by title, category, and price range. Also support pagination with page
+     * @param title title to search for
+     * @param category category to search for
+     * @param minPrice minimum price
+     * @param maxPrice maximum price
+     * @param pageable page number
+     * @return the list of summaries of the products
+     */
     @GetMapping
     public List<ProductSummary> filterProductsBy(
             @RequestParam(required = false) String title,
@@ -37,6 +52,13 @@ public class ProductCatalogueController {
         return productCatalogueService.getProductsBy(title, category, minPrice, maxPrice, pageable);
     }
 
+    /**
+     * GET products/{id}
+     * <br>Return the details of the product
+     * @param id the product ID to request
+     * @return the details of the product
+     * @throws ProductNotFoundException if product does not exist
+     */
     @GetMapping("/{id}")
     public ProductDetail getProductById(@PathVariable UUID id) throws ProductNotFoundException {
         return productCatalogueService.getProductById(id);
