@@ -1,4 +1,4 @@
-import data from './tinhthanhvietnam_moi.json';
+import data from '../../../../backend/src/main/resources/static/tinhthanhvietnam_moi.json';
 
 export const provinces = data.map(p => p.name);
 export const provinceToWards = Object.fromEntries(

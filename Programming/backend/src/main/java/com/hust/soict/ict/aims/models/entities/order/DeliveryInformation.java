@@ -1,12 +1,8 @@
 package com.hust.soict.ict.aims.models.entities.order;
 
-import com.hust.soict.ict.aims.exceptions.DeliveryConstructionException;
-import com.hust.soict.ict.aims.exceptions.DeliveryValidationException;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @Entity
@@ -51,26 +47,7 @@ public class DeliveryInformation {
             String address,
             String deliveryMethod,
             @NonNull Order order
-    ) throws DeliveryConstructionException {
-        Map<String, String> invalidFields = new HashMap<>();
-
-        try { requireNonBlank(customerName, "customerName"); }
-        catch (DeliveryValidationException e) { invalidFields.put(e.getInvalidFieldName(), e.getMessage()); }
-        try { requireNonBlank(customerEmail, "customerEmail"); }
-        catch (DeliveryValidationException e) { invalidFields.put(e.getInvalidFieldName(), e.getMessage()); }
-        try { requireNonBlank(phoneNumber, "phoneNumber"); }
-        catch (DeliveryValidationException e) { invalidFields.put(e.getInvalidFieldName(), e.getMessage()); }
-        try { requireNonBlank(province, "province"); }
-        catch (DeliveryValidationException e) { invalidFields.put(e.getInvalidFieldName(), e.getMessage()); }
-        try { requireNonBlank(commune, "commune"); }
-        catch (DeliveryValidationException e) { invalidFields.put(e.getInvalidFieldName(), e.getMessage()); }
-        try { requireNonBlank(address, "address"); }
-        catch (DeliveryValidationException e) { invalidFields.put(e.getInvalidFieldName(), e.getMessage()); }
-        try { requireNonBlank(deliveryMethod, "deliveryMethod"); }
-        catch (DeliveryValidationException e) { invalidFields.put(e.getInvalidFieldName(), e.getMessage()); }
-
-        if (!invalidFields.isEmpty()) throw new DeliveryConstructionException(invalidFields);
-
+    ) {
         DeliveryInformation di = new DeliveryInformation();
 
         order.setDeliveryInformation(di);
@@ -84,11 +61,5 @@ public class DeliveryInformation {
         di.deliveryMethod = deliveryMethod;
 
         return di;
-    }
-
-    private static void requireNonBlank(String value, String field) throws DeliveryValidationException {
-        if (value == null || value.isBlank()) {
-            throw new DeliveryValidationException(field + " cannot be blank", field);
-        }
     }
 }

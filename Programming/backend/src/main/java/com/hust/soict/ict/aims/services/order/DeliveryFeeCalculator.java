@@ -7,8 +7,6 @@ import java.math.RoundingMode;
 
 @Component
 public class DeliveryFeeCalculator {
-    public DeliveryFeeCalculator() {}
-
     private static final long UNIT_FEE_PER_WEIGHT_DEDUCTION = 2_500;
     private static final BigDecimal UNIT_WEIGHT_DEDUCTION = BigDecimal.valueOf(0.5);
     private static final long INITIAL_FEE = 30_000;
@@ -33,11 +31,14 @@ public class DeliveryFeeCalculator {
             weight = totalWeight.subtract(INITIAL_WEIGHT_DEDUCTION);
         }
 
+        weight = weight.max(BigDecimal.ZERO);
+
         fee += UNIT_FEE_PER_WEIGHT_DEDUCTION * weight.divide(UNIT_WEIGHT_DEDUCTION, 0, RoundingMode.CEILING).longValueExact();
 
         if (totalPrice > FREE_SHIPPING_THRESHOLD) {
-            fee = Math.max(fee - MAX_FREE_SHIPPING_SUBSIDY, 0);
+            fee -= Math.min(fee, MAX_FREE_SHIPPING_SUBSIDY);
         }
+
         return fee;
     }
 
