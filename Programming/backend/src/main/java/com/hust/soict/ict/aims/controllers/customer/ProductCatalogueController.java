@@ -3,7 +3,7 @@ package com.hust.soict.ict.aims.controllers.customer;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.dto.response.product.ProductDetail;
 import com.hust.soict.ict.aims.models.dto.response.product.ProductSummary;
-import com.hust.soict.ict.aims.services.order.ProductCatalogueService;
+import com.hust.soict.ict.aims.services.customer.ProductCatalogueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -45,8 +45,8 @@ public class ProductCatalogueController {
     public List<ProductSummary> filterProductsBy(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) long minPrice,
-            @RequestParam(required = false) long maxPrice,
+            @RequestParam(required = false) Long minPrice,
+            @RequestParam(required = false) Long maxPrice,
             @PageableDefault(size = 20) Pageable pageable
     ) {
         return productCatalogueService.getProductsBy(title, category, minPrice, maxPrice, pageable);

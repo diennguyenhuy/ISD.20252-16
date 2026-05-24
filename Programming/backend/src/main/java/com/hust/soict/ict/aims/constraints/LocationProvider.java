@@ -42,7 +42,7 @@ public class LocationProvider {
 
     public boolean isValidProvince(@NonNull String province) {
         return locations.containsKey(province);
-    };
+    }
 
     public boolean isValid(@NonNull String province, @NonNull String commune) {
         return isValidProvince(province) && locations.get(province).contains(commune);

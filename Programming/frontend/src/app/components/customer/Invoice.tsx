@@ -1,13 +1,13 @@
-import {useState, useEffect} from 'react';
-import {useNavigate, useLocation} from 'react-router';
-import {ArrowLeft, Truck, ShoppingBag, User, MapPin, FileText, Loader2, AlertCircle} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router';
+import { ArrowLeft, Truck, ShoppingBag, User, MapPin, FileText, Loader2, AlertCircle } from 'lucide-react';
 
-import {useCart} from '../../context/CartContext';
+import { useCart } from '../../context/CartContext';
 import OrderService from '../../api/orderService';
-import {formatVND} from '../../data/mockData';
+import { formatVND } from '../../data/mockData';
 
-import type {DeliveryInformation, Invoice as InvoiceType} from '../../models/order.interface';
-import type {ProductTypeName} from '../../models/product.interface';
+import type { DeliveryInformation, Invoice as InvoiceType } from '../../models/order.interface';
+import type { ProductTypeName } from '../../models/product.interface';
 
 const TYPE_LABELS: Record<ProductTypeName, string> = {
     Book: 'Book', CD: 'CD', DVD: 'DVD', Newspaper: 'Newspaper'
@@ -16,7 +16,7 @@ const TYPE_LABELS: Record<ProductTypeName, string> = {
 export default function Invoice() {
     const navigate = useNavigate();
     const location = useLocation();
-    const {cart} = useCart();
+    const { cart } = useCart();
 
     // Extract deliveryInfo passed from DeliveryForm.tsx
     const deliveryInfo = location.state?.deliveryInformation as DeliveryInformation | undefined;
@@ -48,7 +48,7 @@ export default function Invoice() {
     if (loading || !cart) {
         return (
             <div className="max-w-3xl mx-auto px-4 py-32 flex flex-col items-center justify-center animate-in fade-in">
-                <Loader2 className="w-10 h-10 animate-spin text-primary mb-4"/>
+                <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
                 <p className="text-muted-foreground">Calculating taxes and delivery fees...</p>
             </div>
         );
@@ -57,7 +57,7 @@ export default function Invoice() {
     if (error || !invoice || !deliveryInfo) {
         return (
             <div className="max-w-3xl mx-auto px-4 py-20 text-center animate-in fade-in">
-                <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4"/>
+                <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
                 <p className="text-lg font-medium mb-4">{error || "Missing invoice data."}</p>
                 <button onClick={() => navigate('/checkout/delivery')} className="text-primary hover:underline">
                     Return to Delivery Form
@@ -90,7 +90,7 @@ export default function Invoice() {
                         className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
                     <div className="flex items-center gap-3 relative z-10">
                         <div className="p-3 bg-primary/20 rounded-xl text-primary backdrop-blur-sm">
-                            <FileText size={24}/>
+                            <FileText size={24} />
                         </div>
                         <div>
                             <h1 className="text-2xl text-foreground font-bold tracking-tight">INVOICE
@@ -104,7 +104,7 @@ export default function Invoice() {
                 {/* Delivery Info */}
                 <div className="px-6 py-6 sm:px-8 border-b border-border bg-muted/10">
                     <h2 className="text-foreground font-bold text-base mb-4 flex items-center gap-2">
-                        <User size={18} className="text-primary"/>
+                        <User size={18} className="text-primary" />
                         Delivery Information
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm">
@@ -120,14 +120,14 @@ export default function Invoice() {
                         <div className="bg-card p-4 rounded-xl border border-border shadow-sm sm:col-span-2">
                             <p className="text-muted-foreground text-xs font-medium mb-1">Delivery Address</p>
                             <p className="text-foreground font-semibold flex items-start gap-1.5">
-                                <MapPin size={16} className="text-primary shrink-0 mt-0.5"/>
+                                <MapPin size={16} className="text-primary shrink-0 mt-0.5" />
                                 {deliveryInfo.address}, {deliveryInfo.commune}, {deliveryInfo.province}
                             </p>
                         </div>
                         <div
                             className="bg-primary/5 p-4 rounded-xl border border-primary/20 shadow-sm sm:col-span-2 flex items-center gap-3">
                             <div className="bg-primary/20 p-2 rounded-lg text-primary">
-                                <Truck size={18}/>
+                                <Truck size={18} />
                             </div>
                             <div>
                                 <p className="text-muted-foreground text-xs font-medium mb-0.5">Delivery Method</p>
@@ -140,57 +140,54 @@ export default function Invoice() {
                 {/* Product List */}
                 <div className="px-6 py-6 sm:px-8">
                     <h2 className="text-foreground font-bold text-base mb-4 flex items-center gap-2">
-                        <ShoppingBag size={18} className="text-primary"/>
+                        <ShoppingBag size={18} className="text-primary" />
                         Product List
                     </h2>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                            <tr className="text-muted-foreground text-xs border-b border-border">
-                                <th className="text-left pb-3 font-semibold uppercase tracking-wider">Product</th>
-                                <th className="text-center pb-3 font-semibold uppercase tracking-wider w-16">Quantity</th>
-                                <th className="text-right pb-3 font-semibold uppercase tracking-wider w-28">Unit Price
-                                </th>
-                                <th className="text-right pb-3 font-semibold uppercase tracking-wider w-32">Total</th>
-                            </tr>
+                                <tr className="text-muted-foreground text-xs border-b border-border">
+                                    <th className="text-left pb-3 font-semibold uppercase tracking-wider">Product</th>
+                                    <th className="text-center pb-3 font-semibold uppercase tracking-wider w-16">Quantity</th>
+                                    <th className="text-right pb-3 font-semibold uppercase tracking-wider w-28">Unit Price
+                                    </th>
+                                    <th className="text-right pb-3 font-semibold uppercase tracking-wider w-32">Total</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            {cart.items.map(item => (
-                                <tr key={item.product.id}
-                                    className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                                    <td className="py-4">
-                                        <div className="flex items-center gap-4">
-                                            <div
-                                                className="w-12 h-12 rounded-xl overflow-hidden bg-muted shrink-0 border border-border">
-                                                {/* FIXED: Uses imageURL */}
-                                                <img
-                                                    src={item.product.imageURL}
-                                                    alt={item.product.title}
-                                                    className="w-full h-full object-cover"
-                                                />
+                                {cart.items.map(item => (
+                                    <tr key={item.product.id}
+                                        className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                                        <td className="py-4">
+                                            <div className="flex items-center gap-4">
+                                                <div
+                                                    className="w-12 h-12 rounded-xl overflow-hidden bg-muted shrink-0 border border-border">
+                                                    {/* FIXED: Uses imageURL */}
+                                                    <img
+                                                        src={item.product.imageURL}
+                                                        alt={item.product.title}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-foreground line-clamp-2 font-bold leading-tight mb-1">{item.product.title}</p>
+                                                    <span
+                                                        className="text-xs font-semibold px-2 py-0.5 rounded-md bg-muted text-muted-foreground capitalize">
+                                                        {TYPE_LABELS[item.product.productType]}
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <div className="min-w-0">
-                                                <p className="text-foreground line-clamp-2 font-bold leading-tight mb-1">{item.product.title}</p>
-                                                <span
-                                                    className="text-xs font-semibold px-2 py-0.5 rounded-md bg-muted text-muted-foreground capitalize">
-                            {/* FIXED: Strict mapping of ProductType */}
-                                                    {TYPE_LABELS[item.product.productType]}
-                          </span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="text-center py-4 text-foreground font-semibold">{item.quantity}</td>
-                                    {/* FIXED: Uses currentPrice and itemTotalPrice */}
-                                    <td className="text-right py-4 text-muted-foreground font-medium">{formatVND(item.product.currentPrice)}</td>
-                                    <td className="text-right py-4 text-foreground font-bold">{formatVND(item.itemTotalPrice)}</td>
-                                </tr>
-                            ))}
+                                        </td>
+                                        <td className="text-center py-4 text-foreground font-semibold">{item.quantity}</td>
+                                        <td className="text-right py-4 text-muted-foreground font-medium">{formatVND(item.product.currentPrice)}</td>
+                                        <td className="text-right py-4 text-foreground font-bold">{formatVND(item.itemTotalPrice)}</td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                {/* Price Summary - Powered ENTIRELY by the Backend API */}
                 <div className="px-6 py-6 sm:px-8 bg-muted/20 border-t border-border">
                     <div className="max-w-sm ml-auto space-y-3">
                         <div className="flex justify-between text-sm">
@@ -228,18 +225,18 @@ export default function Invoice() {
                     onClick={() => navigate('/checkout/delivery')}
                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl border border-border bg-card text-foreground font-semibold hover:bg-muted transition-colors shadow-sm"
                 >
-                    <ArrowLeft size={18}/>
+                    <ArrowLeft size={18} />
                     Edit Delivery
                 </button>
                 <button
                     onClick={() => navigate('/cart')}
                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl border border-border bg-card text-foreground font-semibold hover:bg-muted transition-colors shadow-sm"
                 >
-                    <ShoppingBag size={18}/>
+                    <ShoppingBag size={18} />
                     Edit Cart
                 </button>
                 <button
-                    onClick={() => navigate('/checkout/payment/qr')} // Adjust if you have a payment selector screen
+                    onClick={() => navigate('/checkout/payment/qr')}
                     className="flex-1 py-3.5 px-6 rounded-xl bg-primary text-primary-foreground font-bold text-base hover:bg-accent hover:text-accent-foreground transition-all shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 flex items-center justify-center gap-2"
                 >
                     Proceed to Payment →

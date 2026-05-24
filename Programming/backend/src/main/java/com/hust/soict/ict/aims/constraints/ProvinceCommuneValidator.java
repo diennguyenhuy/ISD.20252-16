@@ -17,14 +17,14 @@ public class ProvinceCommuneValidator implements ConstraintValidator<ValidProvin
             return true;
         }
 
-        if (locationProvider.isValidProvince(value.getProvince())) {
+        if (!locationProvider.isValidProvince(value.getProvince())) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate("Province does not exist").addPropertyNode("province").addConstraintViolation();
             return false;
         }
 
         boolean valid = locationProvider.isValid(value.getProvince(), value.getCommune());
-        if (valid) {
+        if (!valid) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate("Commune does not exist in " + value.getProvince()).addPropertyNode("commune").addConstraintViolation();
         }

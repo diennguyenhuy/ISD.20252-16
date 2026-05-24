@@ -1,13 +1,13 @@
-import {useState, useEffect} from 'react';
-import {useNavigate} from 'react-router';
-import {Trash2, ShoppingCart, ArrowLeft, AlertTriangle, ShoppingBag, Loader2} from 'lucide-react';
-import {formatVND} from '../../data/mockData';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
+import { Trash2, ShoppingCart, ArrowLeft, AlertTriangle, ShoppingBag, Loader2 } from 'lucide-react';
+import { formatVND } from '../../data/mockData';
 
 // Import Services and Interfaces
-import {useCart} from "../../context/CartContext";
+import { useCart } from "../../context/CartContext";
 import OrderService from '../../api/orderService';
-import type {Cart} from '../../models/cart.interface';
-import type {ProductTypeName} from '../../models/product.interface';
+import type { Cart } from '../../models/cart.interface';
+import type { ProductTypeName } from '../../models/product.interface';
 
 const TYPE_LABELS: Record<ProductTypeName, string> = {
     Book: 'Book', CD: 'CD', DVD: 'DVD', Newspaper: 'Newspaper'
@@ -16,7 +16,7 @@ const TYPE_LABELS: Record<ProductTypeName, string> = {
 export default function CartScreen() {
     const navigate = useNavigate();
 
-    const {cart, fetchCart, loading, updateQuantity, removeFromCart} = useCart();
+    const { cart, fetchCart, loading, updateQuantity, removeFromCart } = useCart();
 
     // Local API State
     const [isPlacingOrder, setIsPlacingOrder] = useState(false);
@@ -64,7 +64,7 @@ export default function CartScreen() {
     if (loading) {
         return (
             <div className="max-w-4xl mx-auto px-4 py-32 flex flex-col items-center justify-center animate-in fade-in">
-                <Loader2 className="w-10 h-10 animate-spin text-primary mb-4"/>
+                <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
                 <p className="text-muted-foreground">Loading your cart...</p>
             </div>
         );
@@ -75,7 +75,7 @@ export default function CartScreen() {
             <div
                 className="max-w-4xl mx-auto px-4 py-20 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="bg-muted/30 w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <ShoppingCart size={48} className="text-muted-foreground opacity-50"/>
+                    <ShoppingCart size={48} className="text-muted-foreground opacity-50" />
                 </div>
                 <h2 className="text-2xl text-foreground font-bold mb-2">Empty cart</h2>
                 <p className="text-muted-foreground text-sm mb-8">Add products to your cart to continue</p>
@@ -100,7 +100,7 @@ export default function CartScreen() {
                     onClick={() => navigate('/')}
                     className="p-2.5 bg-card border border-border rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shadow-sm"
                 >
-                    <ArrowLeft size={20}/>
+                    <ArrowLeft size={20} />
                 </button>
                 <div>
                     <h1 className="text-2xl text-foreground font-bold">Your Shopping Cart</h1>
@@ -109,9 +109,9 @@ export default function CartScreen() {
                 {isPlacingOrder && (
                     <span
                         className="ml-auto bg-primary/10 border border-primary/20 text-primary text-xs px-4 py-1.5 rounded-full font-semibold flex items-center gap-1.5 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-            Processing...
-          </span>
+                        <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                        Processing...
+                    </span>
                 )}
             </div>
 
@@ -119,7 +119,7 @@ export default function CartScreen() {
             {hasInsufficient && (
                 <div
                     className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 mb-6 flex items-start gap-3 shadow-sm">
-                    <AlertTriangle size={18} className="text-destructive shrink-0 mt-0.5"/>
+                    <AlertTriangle size={18} className="text-destructive shrink-0 mt-0.5" />
                     <p className="text-sm text-destructive font-medium">
                         Some products in your cart exceed available stock. Please adjust quantities before proceeding
                         with checkout.
@@ -137,9 +137,8 @@ export default function CartScreen() {
                         return (
                             <div
                                 key={item.product.id}
-                                className={`bg-card rounded-2xl border shadow-sm p-4 flex gap-5 transition-all duration-200 hover:shadow-md ${
-                                    isInsufficient ? 'border-destructive/50 ring-1 ring-destructive/20' : 'border-border hover:border-primary/30'
-                                } ${isUpdating ? 'opacity-50 pointer-events-none' : ''}`}
+                                className={`bg-card rounded-2xl border shadow-sm p-4 flex gap-5 transition-all duration-200 hover:shadow-md ${isInsufficient ? 'border-destructive/50 ring-1 ring-destructive/20' : 'border-border hover:border-primary/30'
+                                    } ${isUpdating ? 'opacity-50 pointer-events-none' : ''}`}
                             >
                                 <div
                                     className="w-24 h-24 bg-muted rounded-xl shrink-0 cursor-pointer overflow-hidden relative group"
@@ -170,7 +169,7 @@ export default function CartScreen() {
                                             className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-2 rounded-lg transition-colors shrink-0"
                                             title="Remove product"
                                         >
-                                            <Trash2 size={18}/>
+                                            <Trash2 size={18} />
                                         </button>
                                     </div>
 
@@ -187,8 +186,8 @@ export default function CartScreen() {
                                             {/* Read-only input for safety, forced strictly via API */}
                                             <span
                                                 className="w-12 text-center py-1.5 bg-transparent text-sm text-foreground font-medium">
-                        {item.quantity}
-                      </span>
+                                                {item.quantity}
+                                            </span>
 
                                             <button
                                                 onClick={() => handleUpdateQuantity(item.product.id, item.quantity + 1)}
@@ -206,7 +205,7 @@ export default function CartScreen() {
                                     {isInsufficient && (
                                         <div
                                             className="mt-3 flex items-center gap-1.5 text-destructive bg-destructive/5 px-3 py-1.5 rounded-md text-xs font-medium w-fit">
-                                            <AlertTriangle size={14}/>
+                                            <AlertTriangle size={14} />
                                             <span>Exceeds stock! (Only {item.product.stockQuantity} left)</span>
                                         </div>
                                     )}
@@ -225,9 +224,9 @@ export default function CartScreen() {
                         <div className="space-y-4 mb-6">
                             {cart.items.map(item => (
                                 <div key={item.product.id} className="flex justify-between text-sm">
-                  <span className="truncate pr-3 flex-1 text-muted-foreground">
-                    {item.product.title} <span className="text-foreground font-medium ml-1">×{item.quantity}</span>
-                  </span>
+                                    <span className="truncate pr-3 flex-1 text-muted-foreground">
+                                        {item.product.title} <span className="text-foreground font-medium ml-1">×{item.quantity}</span>
+                                    </span>
                                     <span
                                         className="shrink-0 text-foreground font-medium">{formatVND(item.itemTotalPrice)}</span>
                                 </div>
@@ -244,16 +243,15 @@ export default function CartScreen() {
                         <button
                             onClick={handlePlaceOrder}
                             disabled={hasInsufficient || isPlacingOrder}
-                            className={`w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md ${
-                                hasInsufficient || isPlacingOrder
-                                    ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-70'
-                                    : 'bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground'
-                            }`}
+                            className={`w-full py-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md ${hasInsufficient || isPlacingOrder
+                                ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-70'
+                                : 'bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground'
+                                }`}
                         >
                             {isPlacingOrder ? (
-                                <Loader2 size={18} className="animate-spin"/>
+                                <Loader2 size={18} className="animate-spin" />
                             ) : (
-                                <ShoppingBag size={18}/>
+                                <ShoppingBag size={18} />
                             )}
                             {isPlacingOrder ? 'Starting Order...' : 'Place Order'}
                         </button>

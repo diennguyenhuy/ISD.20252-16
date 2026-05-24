@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.order;
+package com.hust.soict.ict.aims.services.customer;
 
 import com.hust.soict.ict.aims.context.CartContext;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
@@ -9,6 +9,7 @@ import com.hust.soict.ict.aims.models.entities.product.ProductStatus;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import com.hust.soict.ict.aims.mapper.CartMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
@@ -19,6 +20,7 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CartService {
     private final ProductRepository productRepository;
     private final CartContext cartContext;
@@ -29,29 +31,38 @@ public class CartService {
     }
 
     public CartResponse addItem(UUID productId, int quantity) throws ProductNotFoundException, IllegalArgumentException {
+        log.debug("Adding item to cart with quantity {} for product #{}...", quantity, productId);
         Product product = productRepository.findByIdAndStatus(productId, ProductStatus.ACTIVE)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
 
         Cart cart = cartContext.getOrCreateCart();
         cart.addItem(product, quantity);
+
+        log.debug("Item added successfully!");
         return cartMapper.toCartResponse(cart);
     }
 
     public CartResponse updateItem(UUID productId, int quantity) throws NoSuchElementException, IllegalArgumentException {
+        log.debug("Updating item with product id #{} to quantity {}...", productId, quantity);
         Cart cart = cartContext.getOrCreateCart();
         cart.updateItem(productId, quantity);
+        log.debug("Item updated successfully!");
         return cartMapper.toCartResponse(cart);
     }
 
     public CartResponse removeItem(UUID productId) {
+        log.debug("Removing item from product with id #{}...", productId);
         Cart cart = cartContext.getOrCreateCart();
         cart.removeItem(productId);
+        log.debug("Item removed successfully!");
         return cartMapper.toCartResponse(cart);
     }
 
     public CartResponse clearCart() {
+        log.debug("Clearing cart...");
         Cart cart = cartContext.getOrCreateCart();
         cart.clear();
+        log.debug("Cart cleared successfully!");
         return cartMapper.toCartResponse(cart);
     }
 }

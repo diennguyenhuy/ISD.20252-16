@@ -1,14 +1,14 @@
 package com.hust.soict.ict.aims.models.dto.response.order;
 
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor
-@Setter
+@Data
 public class OrderResponse {
     private UUID id;
     private List<OrderItemResponse> items;

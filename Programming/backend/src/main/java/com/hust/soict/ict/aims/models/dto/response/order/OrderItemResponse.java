@@ -1,10 +1,10 @@
 package com.hust.soict.ict.aims.models.dto.response.order;
 
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Setter
 @NoArgsConstructor
+@Data
 public class OrderItemResponse {
     private String productId;
     private String productName;

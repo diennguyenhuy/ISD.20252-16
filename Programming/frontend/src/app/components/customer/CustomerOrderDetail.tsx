@@ -1,26 +1,26 @@
-import {useParams, useNavigate, useLocation} from 'react-router';
-import {useState, useEffect} from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router';
+import { useState, useEffect } from 'react';
 import {
     ArrowLeft, Package, User, MapPin, Phone, CreditCard, Hash, Calendar,
     Truck, CheckCircle, Clock, XCircle, X, FileText, Loader2, AlertCircle
 } from 'lucide-react';
 
 import OrderService from '../../api/orderService';
-import {formatVND, formatDateTime} from '../../data/mockData';
-import type {Order, OrderStatus} from '../../models/order.interface';
+import { formatVND, formatDateTime } from '../../data/mockData';
+import type { Order, OrderStatus } from '../../models/order.interface';
 
 // UPDATED: Theme-safe status badges matching the strict OrderStatus type
 const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; icon: any }> = {
-    DRAFT: {label: 'Draft', color: 'bg-muted text-muted-foreground border-border', icon: FileText},
-    PENDING: {label: 'Pending Processing', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20', icon: Clock},
-    APPROVED: {label: 'Approved', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20', icon: CheckCircle},
-    REJECTED: {label: 'Rejected', color: 'bg-destructive/10 text-destructive border-destructive/20', icon: XCircle},
-    CANCELLED: {label: 'Cancelled', color: 'bg-muted text-muted-foreground border-border', icon: X},
-    REFUNDED: {label: 'Refunded', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20', icon: CreditCard},
+    DRAFT: { label: 'Draft', color: 'bg-muted text-muted-foreground border-border', icon: FileText },
+    PENDING: { label: 'Pending Processing', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20', icon: Clock },
+    APPROVED: { label: 'Approved', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20', icon: CheckCircle },
+    REJECTED: { label: 'Rejected', color: 'bg-destructive/10 text-destructive border-destructive/20', icon: XCircle },
+    CANCELLED: { label: 'Cancelled', color: 'bg-muted text-muted-foreground border-border', icon: X },
+    REFUNDED: { label: 'Refunded', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20', icon: CreditCard },
 };
 
 export default function CustomerOrderDetail() {
-    const {id} = useParams<{ id: string }>();
+    const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const location = useLocation();
     const passedOrder = location.state?.order as Order | undefined;
@@ -52,7 +52,7 @@ export default function CustomerOrderDetail() {
         try {
             await OrderService.cancelOrder(order.id);
             // Optimistically update the UI to show it's cancelled
-            setOrder({...order, status: 'CANCELLED'});
+            setOrder({ ...order, status: 'CANCELLED' });
             setConfirmCancel(false);
         } catch (error) {
             console.error("Failed to cancel order", error);
@@ -65,7 +65,7 @@ export default function CustomerOrderDetail() {
     if (loading) {
         return (
             <div className="max-w-3xl mx-auto px-4 py-32 flex flex-col items-center justify-center animate-in fade-in">
-                <Loader2 className="w-10 h-10 animate-spin text-primary mb-4"/>
+                <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
                 <p className="text-muted-foreground">Loading order details...</p>
             </div>
         );
@@ -74,7 +74,7 @@ export default function CustomerOrderDetail() {
     if (!order) {
         return (
             <div className="max-w-3xl mx-auto px-4 py-20 text-center animate-in fade-in duration-500">
-                <Package size={64} className="mx-auto mb-6 text-muted-foreground opacity-30"/>
+                <Package size={64} className="mx-auto mb-6 text-muted-foreground opacity-30" />
                 <p className="text-xl text-foreground font-bold mb-2">Order not found</p>
                 <p className="text-muted-foreground mb-6">This order does not exist or you do not have permission to
                     access it.</p>
@@ -92,7 +92,7 @@ export default function CustomerOrderDetail() {
     const StatusIcon = statusCfg.icon;
 
     // Destructure for cleaner JSX mapping
-    const {deliveryInformation, invoice, paymentTransaction} = order;
+    const { deliveryInformation, invoice, paymentTransaction } = order;
 
     return (
         <div className="max-w-3xl mx-auto px-4 py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -103,7 +103,7 @@ export default function CustomerOrderDetail() {
                     onClick={() => navigate(-1)}
                     className="p-2.5 bg-card border border-border rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shadow-sm shrink-0"
                 >
-                    <ArrowLeft size={20}/>
+                    <ArrowLeft size={20} />
                 </button>
                 <div>
                     <h1 className="text-2xl text-foreground font-bold tracking-tight">Details of Order #{order.id}</h1>
@@ -111,16 +111,16 @@ export default function CustomerOrderDetail() {
                 </div>
                 <span
                     className={`ml-auto flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold border shadow-sm ${statusCfg.color}`}>
-          <StatusIcon size={16}/>
+                    <StatusIcon size={16} />
                     {statusCfg.label}
-        </span>
+                </span>
             </div>
 
             {/* Warning if Rejected */}
             {order.status === 'REJECTED' && (
                 <div
                     className="bg-destructive/10 border border-destructive/20 rounded-2xl p-4 mb-6 flex items-start gap-3 shadow-sm">
-                    <AlertCircle size={20} className="text-destructive shrink-0 mt-0.5"/>
+                    <AlertCircle size={20} className="text-destructive shrink-0 mt-0.5" />
                     <div>
                         <p className="text-sm text-destructive font-bold">This order has been rejected by the
                             Manager.</p>
@@ -134,26 +134,26 @@ export default function CustomerOrderDetail() {
             {/* Products Card */}
             <div className="bg-card rounded-3xl border border-border shadow-lg overflow-hidden mb-6 relative">
                 <div className="px-6 py-4 border-b border-border bg-muted/30 flex items-center gap-2">
-                    <Package size={18} className="text-primary"/>
+                    <Package size={18} className="text-primary" />
                     <span className="text-base font-bold text-foreground">Products in Order</span>
                 </div>
                 <div className="p-6 space-y-4">
                     {order.items.map((item, idx) => (
                         <div key={idx}
-                             className="flex items-center gap-4 pb-4 border-b border-border/50 last:border-0 last:pb-0">
+                            className="flex items-center gap-4 pb-4 border-b border-border/50 last:border-0 last:pb-0">
 
                             {/* Fallback Icon Box since OrderItem is a snapshot and doesn't store imageURL */}
                             <div
                                 className="w-16 h-16 rounded-xl bg-primary/5 flex items-center justify-center shrink-0 border border-primary/10">
-                                <Package size={24} className="text-primary/50"/>
+                                <Package size={24} className="text-primary/50" />
                             </div>
 
                             <div className="flex-1 min-w-0">
                                 <p className="text-base text-foreground font-bold line-clamp-2 mb-1">{item.productName}</p>
                                 <span
                                     className="text-xs font-semibold px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
-                  Weight: {item.unitWeight} kg
-                </span>
+                                    Weight: {item.unitWeight} kg
+                                </span>
                             </div>
                             <div className="text-right shrink-0">
                                 <p className="text-sm text-muted-foreground font-medium mb-1">Qty: <span
@@ -194,13 +194,13 @@ export default function CustomerOrderDetail() {
                 {/* Shipping Info mapped to DeliveryInformation */}
                 <div className="bg-card rounded-3xl border border-border shadow-md overflow-hidden flex flex-col">
                     <div className="px-6 py-4 border-b border-border bg-muted/30 flex items-center gap-2">
-                        <Truck size={18} className="text-primary"/>
+                        <Truck size={18} className="text-primary" />
                         <span className="text-base font-bold text-foreground">Shipping Information</span>
                     </div>
                     <div className="p-6 grid grid-cols-1 gap-4 flex-1">
                         <div className="flex items-start gap-3 bg-muted/30 p-3.5 rounded-2xl border border-border/50">
                             <div className="p-2 bg-background rounded-lg shadow-sm shrink-0"><User size={16}
-                                                                                                   className="text-primary"/>
+                                className="text-primary" />
                             </div>
                             <div>
                                 <p className="text-xs text-muted-foreground font-medium mb-0.5">Recipient</p>
@@ -209,7 +209,7 @@ export default function CustomerOrderDetail() {
                         </div>
                         <div className="flex items-start gap-3 bg-muted/30 p-3.5 rounded-2xl border border-border/50">
                             <div className="p-2 bg-background rounded-lg shadow-sm shrink-0"><Phone size={16}
-                                                                                                    className="text-primary"/>
+                                className="text-primary" />
                             </div>
                             <div>
                                 <p className="text-xs text-muted-foreground font-medium mb-0.5">Phone Number</p>
@@ -218,7 +218,7 @@ export default function CustomerOrderDetail() {
                         </div>
                         <div className="flex items-start gap-3 bg-muted/30 p-3.5 rounded-2xl border border-border/50">
                             <div className="p-2 bg-background rounded-lg shadow-sm shrink-0"><MapPin size={16}
-                                                                                                     className="text-primary"/>
+                                className="text-primary" />
                             </div>
                             <div>
                                 <p className="text-xs text-muted-foreground font-medium mb-0.5">Address</p>
@@ -229,7 +229,7 @@ export default function CustomerOrderDetail() {
                         </div>
                         <div className="flex items-start gap-3 bg-primary/5 p-3.5 rounded-2xl border border-primary/20">
                             <div className="p-2 bg-primary/20 rounded-lg shadow-sm shrink-0"><Truck size={16}
-                                                                                                    className="text-primary"/>
+                                className="text-primary" />
                             </div>
                             <div>
                                 <p className="text-xs text-muted-foreground font-medium mb-0.5">Delivery Method</p>
@@ -244,13 +244,13 @@ export default function CustomerOrderDetail() {
                 {/* Transaction Info mapped to PaymentTransaction */}
                 <div className="bg-card rounded-3xl border border-border shadow-md overflow-hidden flex flex-col">
                     <div className="px-6 py-4 border-b border-border bg-muted/30 flex items-center gap-2">
-                        <CreditCard size={18} className="text-primary"/>
+                        <CreditCard size={18} className="text-primary" />
                         <span className="text-base font-bold text-foreground">Transaction Receipt</span>
                     </div>
                     <div className="p-6 space-y-4 flex-1">
                         <div className="flex items-center justify-between border-b border-border/50 pb-3">
                             <div className="flex items-center gap-2 text-muted-foreground">
-                                <Hash size={16}/>
+                                <Hash size={16} />
                                 <span className="text-sm font-medium">Transaction ID</span>
                             </div>
                             <p className="text-sm text-foreground font-mono font-bold bg-muted px-2 py-0.5 rounded border border-border">{paymentTransaction.id}</p>
@@ -258,7 +258,7 @@ export default function CustomerOrderDetail() {
 
                         <div className="flex items-center justify-between border-b border-border/50 pb-3">
                             <div className="flex items-center gap-2 text-muted-foreground">
-                                <CreditCard size={16}/>
+                                <CreditCard size={16} />
                                 <span className="text-sm font-medium">Payment Method</span>
                             </div>
                             <p className="text-sm text-foreground font-bold flex items-center gap-1.5">
@@ -268,7 +268,7 @@ export default function CustomerOrderDetail() {
 
                         <div className="flex items-center justify-between border-b border-border/50 pb-3">
                             <div className="flex items-center gap-2 text-muted-foreground">
-                                <Calendar size={16}/>
+                                <Calendar size={16} />
                                 <span className="text-sm font-medium">Payment Date</span>
                             </div>
                             <p className="text-sm text-foreground font-semibold">{formatDateTime(paymentTransaction.transactionTimestamp)}</p>
@@ -276,7 +276,7 @@ export default function CustomerOrderDetail() {
 
                         <div className="flex items-center justify-between pt-1">
                             <div className="flex items-center gap-2 text-muted-foreground shrink-0">
-                                <FileText size={16}/>
+                                <FileText size={16} />
                                 <span className="text-sm font-medium">Transaction Content</span>
                             </div>
                             <p className="text-sm text-foreground font-bold text-right truncate pl-4">{paymentTransaction.transactionContent}</p>
@@ -291,7 +291,7 @@ export default function CustomerOrderDetail() {
                     onClick={() => navigate(-1)}
                     className="flex-1 py-3.5 px-6 rounded-xl border border-border bg-card text-foreground font-semibold hover:bg-muted transition-colors flex items-center justify-center gap-2 shadow-sm"
                 >
-                    <ArrowLeft size={18}/>
+                    <ArrowLeft size={18} />
                     Back
                 </button>
 
@@ -302,15 +302,15 @@ export default function CustomerOrderDetail() {
                             onClick={() => setConfirmCancel(true)}
                             className="flex-1 py-3.5 px-6 rounded-xl border border-destructive/30 text-destructive font-semibold hover:bg-destructive/10 transition-colors flex items-center justify-center gap-2 shadow-sm"
                         >
-                            <X size={18}/>
+                            <X size={18} />
                             Cancel Order
                         </button>
                     ) : (
                         <div
                             className="flex-1 bg-destructive/10 border border-destructive/20 rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-3 animate-in fade-in zoom-in-95 duration-200">
-              <span className="text-sm text-destructive font-bold text-center sm:text-left flex-1">
-                Confirm Cancellation?
-              </span>
+                            <span className="text-sm text-destructive font-bold text-center sm:text-left flex-1">
+                                Confirm Cancellation?
+                            </span>
                             <div className="flex gap-2 w-full sm:w-auto">
                                 <button
                                     onClick={() => setConfirmCancel(false)}
@@ -324,7 +324,7 @@ export default function CustomerOrderDetail() {
                                     disabled={isCanceling}
                                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-destructive text-destructive-foreground font-bold hover:opacity-90 transition-opacity shadow-sm disabled:opacity-70"
                                 >
-                                    {isCanceling && <Loader2 size={16} className="animate-spin"/>}
+                                    {isCanceling && <Loader2 size={16} className="animate-spin" />}
                                     Yes, Cancel
                                 </button>
                             </div>
