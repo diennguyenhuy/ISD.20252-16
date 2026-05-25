@@ -6,7 +6,15 @@ import lombok.*;
 
 import java.time.Instant;
 import java.util.UUID;
-
+/**
+ * Entity representing a payment transaction
+ *
+ * Cohesion:
+ * - Functional: stores transaction data
+ *
+ * Relationship:
+ * - One-to-one with Order
+ */
 @Entity
 @Table(name = "payment_transaction")
 @Getter
@@ -31,7 +39,15 @@ public class PaymentTransaction {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
-
+    /**
+     * Factory method to create PaymentTransaction
+     *
+     * Cohesion:
+     * - Functional: encapsulates creation logic
+     *
+     * Design:
+     * - Ensures consistency between Order and PaymentTransaction
+     */
     public static PaymentTransaction of(
             String transactionContent,
             Instant transactionTimestamp,

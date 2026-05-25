@@ -1,16 +1,17 @@
 package com.hust.soict.ict.aims.models.dto.response.order;
 
+/**
+ * Response DTO for Payment Result
+ *
+ * Cohesion:
+ * - Functional: represents only payment output
+ */
 public record PaymentInitiationResponse(
 
-        // VietQR
         String paymentInstruction,
-
-        // PayPal
         String checkoutURL,
 
-        // Credit Card
         Boolean success,
         String message
 
-) {
-}
+) {}
