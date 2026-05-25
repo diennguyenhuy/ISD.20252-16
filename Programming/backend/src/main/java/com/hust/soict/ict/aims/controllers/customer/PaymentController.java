@@ -8,10 +8,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Provide API endpoints for payment
- */
-//TODO: Complete and refine the payment controller in accordance to the unimplemented Payment Service
 @RestController
 @RequestMapping("/order/payment")
 @RequiredArgsConstructor

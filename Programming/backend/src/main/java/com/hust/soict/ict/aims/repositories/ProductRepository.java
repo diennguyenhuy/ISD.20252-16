@@ -24,6 +24,9 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     Optional<Product> findByIdAndStatus(UUID id, ProductStatus status);
 
+    boolean existsByBarcode(String barcode);
+    long countByStatusIn(Collection<ProductStatus> statuses);
+  
     @Query("SELECT p FROM Product p WHERE " +
     "(:title IS NULL OR LOWER(p.title) LIKE :title) AND " +
     "(:category IS NULL OR LOWER(p.category) LIKE :category) AND " +
