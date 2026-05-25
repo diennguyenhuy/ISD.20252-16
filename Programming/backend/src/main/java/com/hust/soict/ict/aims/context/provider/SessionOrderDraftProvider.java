@@ -5,10 +5,12 @@ import com.hust.soict.ict.aims.exceptions.OrderNotPlacedException;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class SessionOrderDraftProvider implements OrderDraftContext {
     private final HttpSession session;
 
@@ -16,6 +18,8 @@ public class SessionOrderDraftProvider implements OrderDraftContext {
 
     @Override
     public Order getDraftOrder() throws OrderNotPlacedException {
+        log.debug("getDraftOrder: sessionId={}", session.getId());
+
         Order order = (Order) session.getAttribute(DRAFT_ORDER_SESSION_KEY);
 
         if (order == null) {
@@ -27,11 +31,13 @@ public class SessionOrderDraftProvider implements OrderDraftContext {
 
     @Override
     public void saveDraftOrder(Order order) {
+        log.debug("saveDraftOrder: sessionId={}", session.getId());
         session.setAttribute(DRAFT_ORDER_SESSION_KEY, order);
     }
 
     @Override
     public void clearDraftOrder() {
+        log.debug("clearDraftOrder: sessionId={}", session.getId());
         session.removeAttribute(DRAFT_ORDER_SESSION_KEY);
     }
 }

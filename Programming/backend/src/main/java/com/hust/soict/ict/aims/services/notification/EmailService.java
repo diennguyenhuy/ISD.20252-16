@@ -6,7 +6,10 @@ import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailAuthenticationException;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmailService implements NotificationService {
     private final JavaMailSender mailSender;
 
@@ -24,6 +28,7 @@ public class EmailService implements NotificationService {
 
     @Override
     public void sendOrderConfirmation(Order order, PaymentTransaction paymentTransaction) {
+        log.debug("Sending order confirmation email...");
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -33,8 +38,13 @@ public class EmailService implements NotificationService {
             helper.setText(buildOrderEmail(order, paymentTransaction), true);
             mailSender.send(mimeMessage);
         } catch (MessagingException e) {
-            System.err.println("Could not send email: " + e.getMessage());
+            log.warn("Multipart creation failed: {}", e.getMessage());
+        } catch (MailAuthenticationException e) {
+            log.warn("Mail authentication failed: {}", e.getMessage());
+        } catch (MailSendException e) {
+            log.warn("Could not send email: {}", e.getMessage());
         }
+        log.debug("Order confirmation email sent successfully!");
     }
 
     private String buildOrderEmail(Order order, PaymentTransaction paymentTransaction) {

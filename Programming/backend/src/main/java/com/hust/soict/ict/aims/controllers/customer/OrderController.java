@@ -9,6 +9,7 @@ import com.hust.soict.ict.aims.models.dto.response.order.DeliveryResponse;
 import com.hust.soict.ict.aims.models.dto.response.order.InvoiceResponse;
 import com.hust.soict.ict.aims.models.dto.response.order.OrderDraftResponse;
 import com.hust.soict.ict.aims.models.dto.response.order.OrderResponse;
+import com.hust.soict.ict.aims.services.order.DeliveryService;
 import com.hust.soict.ict.aims.services.order.PlaceOrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderController {
     private final PlaceOrderService placeOrderService;
+    private final DeliveryService deliveryService;
 
     /**
      * POST /order - endpoint for request to place order. Return 201 if success
@@ -48,7 +50,7 @@ public class OrderController {
     public DeliveryResponse submitDeliveryInformation(
             @Valid @RequestBody DeliveryRequest deliveryRequest
     ) {
-        return placeOrderService.submitDeliveryInformation(deliveryRequest);
+        return deliveryService.submitDeliveryInformation(deliveryRequest);
     }
 
     /**

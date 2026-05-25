@@ -1,4 +1,4 @@
-import {createBrowserRouter} from 'react-router';
+import { createBrowserRouter } from 'react-router';
 
 // Layouts
 import CustomerLayout from './components/layout/CustomerLayout';
@@ -12,27 +12,26 @@ import Invoice from './components/customer/Invoice';
 // import PaypalPayment from './components/customer/PaypalPayment';
 import SuccessOrder from './components/customer/SuccessOrder';
 import CustomerOrderDetail from './components/customer/CustomerOrderDetail';
-import {CartProvider} from "./context/CartContext";
+import { CartProvider } from "./context/CartContext";
 
 export const router = createBrowserRouter([
     {
         path: '/',
-        Component: CustomerLayout,
         element: (
             <CartProvider>
-                <CustomerLayout/>
+                <CustomerLayout />
             </CartProvider>
         ),
         children: [
-            {index: true, Component: HomePage},
-            {path: 'product/:id', Component: CustomerProductDetail},
-            {path: 'cart', Component: CartScreen},
-            {path: 'checkout/delivery', Component: DeliveryForm},
-            {path: 'checkout/invoice', Component: Invoice},
+            { index: true, Component: HomePage },
+            { path: 'product/:id', Component: CustomerProductDetail },
+            { path: 'cart', Component: CartScreen },
+            { path: 'checkout/delivery', Component: DeliveryForm },
+            { path: 'checkout/invoice', Component: Invoice },
             // { path: 'checkout/payment/qr', Component: QRPayment },
             // { path: 'checkout/payment/paypal', Component: PaypalPayment },
-            {path: 'checkout/success/:id', Component: SuccessOrder},
-            {path: 'order/:id', Component: CustomerOrderDetail},
+            { path: 'checkout/success/:id', Component: SuccessOrder },
+            { path: 'order/:id', Component: CustomerOrderDetail },
         ],
     },
     {

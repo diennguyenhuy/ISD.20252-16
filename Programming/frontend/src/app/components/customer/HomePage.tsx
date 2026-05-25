@@ -1,10 +1,10 @@
-import {Search, SlidersHorizontal, ShoppingCart, ChevronDown, X, Loader2} from 'lucide-react';
-import {useState, useMemo, useEffect} from 'react';
-import {useNavigate} from 'react-router';
-import type {ProductSummary, ProductTypeName} from "../../models/product.interface";
-import {formatVND} from '../../data/mockData';
+import { Search, SlidersHorizontal, ShoppingCart, X, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router';
+import type { ProductSummary, ProductTypeName } from "../../models/product.interface";
+import { formatVND } from '../../data/mockData';
 import HomepageService from '../../api/homepageService';
-import {useCart} from "../../context/CartContext";
+import { useCart } from "../../context/CartContext";
 
 const TYPE_LABELS: Record<ProductTypeName, string> = {
     Book: 'Book', CD: 'CD', DVD: 'DVD', Newspaper: 'Newspaper/Magazine',
@@ -17,7 +17,7 @@ const TYPE_COLORS: Record<ProductTypeName, string> = {
     Newspaper: 'bg-muted text-muted-foreground border border-border',
 };
 
-function ProductCard({product, onAddToCart}: {
+function ProductCard({ product, onAddToCart }: {
     product: ProductSummary;
     onAddToCart: (productId: string, quantity: number) => void
 }) {
@@ -29,7 +29,7 @@ function ProductCard({product, onAddToCart}: {
             className="bg-card text-card-foreground rounded-2xl shadow-sm border border-border hover:shadow-md hover:border-primary/50 transition-all duration-200 flex flex-col overflow-hidden group">
             <div
                 className="relative overflow-hidden cursor-pointer bg-muted"
-                style={{aspectRatio: '4/3'}}
+                style={{ aspectRatio: '4/3' }}
                 onClick={() => navigate(`/product/${product.id}`)}
             >
                 <img
@@ -39,24 +39,24 @@ function ProductCard({product, onAddToCart}: {
                 />
                 <span
                     className={`absolute top-2 left-2 text-xs px-2 py-1 rounded-full font-medium backdrop-blur-sm ${TYPE_COLORS[product.productType]}`}>
-            {TYPE_LABELS[product.productType]}
-          </span>
+                    {TYPE_LABELS[product.productType]}
+                </span>
 
-                {/* ADDED: Low Stock Warning */}
-                {product.stockQuantity <= 5 && product.stockQuantity > 0 && (
+                {/* Low Stock Warning */}
+                {product.stockQuantity <= 10 && product.stockQuantity > 0 && (
                     <span
                         className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-xs px-2 py-1 rounded-full shadow-md animate-in zoom-in">
-              {product.stockQuantity} left
-            </span>
+                        {product.stockQuantity} left
+                    </span>
                 )}
 
-                {/* ADDED: Out of Stock Overlay */}
+                {/* Out of Stock Overlay */}
                 {product.stockQuantity === 0 && (
                     <div
                         className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-10">
-              <span className="bg-background text-foreground px-4 py-1.5 rounded-full text-sm font-bold shadow-lg">
-                Out of stock
-              </span>
+                        <span className="bg-background text-foreground px-4 py-1.5 rounded-full text-sm font-bold shadow-lg">
+                            Out of stock
+                        </span>
                     </div>
                 )}
             </div>
@@ -69,14 +69,14 @@ function ProductCard({product, onAddToCart}: {
                     {product.title}
                 </h3>
                 <p className="text-muted-foreground text-xs mb-2">
-                    {product.creators?.length > 0 ? product.creators.join(', ') : 'Unknown'}
+                    {product.creators?.length > 0 ? product.creators.join(', ') : ''}
                 </p>
 
                 <div className="flex items-center justify-between mt-auto pt-3 border-t border-border">
                     <div className="flex items-end gap-2">
                         <p className="text-primary font-bold text-sm">{formatVND(product.currentPrice)}</p>
 
-                        {/* ADDED: Psychological Pricing (Strikethrough) */}
+                        {/* Psychological Pricing (Strikethrough) */}
                         {product.originalValue && product.originalValue > product.currentPrice && (
                             <p className="text-muted-foreground text-xs line-through mb-[1px]">
                                 {formatVND(product.originalValue)}
@@ -96,7 +96,6 @@ function ProductCard({product, onAddToCart}: {
                         <span
                             className="px-2 py-1.5 text-foreground font-medium text-sm min-w-[28px] text-center">{qty}</span>
                         <button
-                            // ADDED: Prevent user from clicking "+" if they reach max stock
                             disabled={product.stockQuantity === 0 || qty >= product.stockQuantity}
                             onClick={() => setQty(q => q + 1)}
                             className="px-2 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -104,12 +103,11 @@ function ProductCard({product, onAddToCart}: {
                         </button>
                     </div>
                     <button
-                        // ADDED: Disable Add To Cart button
                         disabled={product.stockQuantity === 0}
                         onClick={() => onAddToCart(product.id, qty)}
                         className="flex-1 flex items-center justify-center gap-1.5 bg-primary text-primary-foreground py-1.5 rounded-lg text-sm font-semibold hover:bg-accent hover:text-accent-foreground disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors"
                     >
-                        <ShoppingCart size={14}/>
+                        <ShoppingCart size={14} />
                         Add
                     </button>
                 </div>
@@ -119,81 +117,126 @@ function ProductCard({product, onAddToCart}: {
 }
 
 export default function HomePage() {
+    const { addToCart } = useCart();
+
+    // Core Data State
     const [products, setProducts] = useState<ProductSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    // Split-Mode State
+    const [isSearching, setIsSearching] = useState(false);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+
+    // Filter State
     const [search, setSearch] = useState('');
+    const [categorySearch, setCategorySearch] = useState('');
     const [filterType, setFilterType] = useState<ProductTypeName | 'all'>('all');
-    const [sortBy, setSortBy] = useState<'default' | 'price_asc' | 'price_desc' | 'name'>('default');
     const [priceMin, setPriceMin] = useState('');
     const [priceMax, setPriceMax] = useState('');
     const [showFilter, setShowFilter] = useState(false);
     const [addedId, setAddedId] = useState<string | null>(null);
 
-    const { addToCart } = useCart();
+    // ADDED: Frontend Derived State for Type Filtering
+    const displayedProducts = useMemo(() => {
+        if (filterType === 'all') return products;
+        return products.filter(product => product.productType === filterType);
+    }, [products, filterType]);
 
+    // 1. DISCOVERY MODE (Initial Load)
+    const loadDiscoveryMode = async () => {
+        setLoading(true);
+        try {
+            const data = await HomepageService.get20RandomProducts();
+            setProducts(data);
+            setHasMore(false); // No pagination in random mode
+        } catch (err) {
+            console.error("Error fetching random products:", err);
+            setError("Could not load products. Please try again later.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Trigger Discovery Mode when not searching
     useEffect(() => {
-        HomepageService.getProductList()
-            .then(data => {
-                setProducts(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error("Error fetching products:", err);
-                setError("Could not load products. Please try again later.");
-                setLoading(false);
+        if (!isSearching) {
+            loadDiscoveryMode();
+        }
+    }, [isSearching]);
+
+    // 2. SEARCH MODE (Hits the paginated backend)
+    const executeSearch = async (pageNum: number) => {
+        const isFirstPage = pageNum === 0;
+        if (isFirstPage) setLoading(true);
+        else setLoadingMore(true);
+
+        try {
+            const data = await HomepageService.filterProductsBy({
+                page: pageNum,
+                title: search.trim() || undefined,
+                category: categorySearch.trim() || undefined,
+                minPrice: priceMin ? Number(priceMin) : undefined,
+                maxPrice: priceMax ? Number(priceMax) : undefined,
             });
-    }, []);
 
-    const randomProducts = useMemo(() => {
-        const shuffled = [...products].sort(() => Math.random() - 0.5);
-        return shuffled.slice(0, 20);
-    }, [products]);
+            if (isFirstPage) {
+                setProducts(data);
+            } else {
+                setProducts(prev => [...prev, ...data]); // Append new page!
+            }
 
-    const [displayProducts, setDisplayProducts] = useState<ProductSummary[]>([]);
+            // If backend returned 20 items, there MIGHT be more. If less, we hit the end.
+            setHasMore(data.length === 20);
+        } catch (err) {
+            console.error("Error executing search:", err);
+            setError("Search failed. Please try again.");
+        } finally {
+            setLoading(false);
+            setLoadingMore(false);
+        }
+    };
 
-    useEffect(() => {
-        if (search.trim() || filterType !== 'all' || priceMin || priceMax) {
-            setDisplayProducts(products);
+    // UI Event Handlers
+    const handleSearchSubmit = () => {
+        setIsSearching(true);
+        setPage(0);
+        executeSearch(0);
+    };
+
+    const handleClearSearch = () => {
+        setSearch('');
+        setCategorySearch('');
+        setFilterType('all');
+        setPriceMin('');
+        setPriceMax('');
+        setIsSearching(false); // Triggers loadDiscoveryMode via useEffect
+        setPage(0);
+    };
+
+    // ADDED: Rock-solid Reset Store function
+    const handleResetStore = async () => {
+        setError(null);
+        setSearch('');
+        setCategorySearch('');
+        setFilterType('all');
+        setPriceMin('');
+        setPriceMax('');
+        setProducts([]);
+
+        if (isSearching) {
+            setIsSearching(false); // useEffect will pick this up and fetch
         } else {
-            setDisplayProducts(randomProducts);
+            await loadDiscoveryMode(); // Force a re-fetch if already in discovery mode
         }
-    }, [search, filterType, priceMin, priceMax, products, randomProducts]);
+    };
 
-    const filtered = useMemo(() => {
-        let list = [...displayProducts];
-
-        if (search.trim()) {
-            const q = search.toLowerCase();
-            list = list.filter(p =>
-                p.title.toLowerCase().includes(q) ||
-                (p.creators && p.creators.some(c => c.toLowerCase().includes(q)))
-            );
-        }
-
-        if (filterType !== 'all') list = list.filter(p => p.productType === filterType);
-        if (priceMin) list = list.filter(p => p.currentPrice >= Number(priceMin));
-        if (priceMax) list = list.filter(p => p.currentPrice <= Number(priceMax));
-
-        switch (sortBy) {
-            case 'price_asc':
-                return list.sort((a, b) => a.currentPrice - b.currentPrice);
-            case 'price_desc':
-                return list.sort((a, b) => b.currentPrice - a.currentPrice);
-            case 'name':
-                return list.sort((a, b) => a.title.localeCompare(b.title));
-            default:
-                return list;
-        }
-    }, [displayProducts, search, filterType, sortBy, priceMin, priceMax]);
-
-    const handleSearch = () => {
-        if (!search.trim() && filterType === 'all' && !priceMin && !priceMax) {
-            setDisplayProducts(randomProducts);
-        } else {
-            setDisplayProducts(products);
-        }
+    const handleLoadMore = () => {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        executeSearch(nextPage);
     };
 
     const handleAddToCart = async (productId: string, quantity: number) => {
@@ -202,56 +245,68 @@ export default function HomePage() {
             setAddedId(productId);
             setTimeout(() => setAddedId(null), 1500);
         } catch (err: any) {
-            console.error("Failed to add to cart:", err);
-            alert(err.message ?? "Failed to add item to cart. Please make sure the backend is running.");
+            alert(err.message ?? "Failed to add item to cart.");
         }
     };
 
-    if (loading) {
+    if (loading && page === 0) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh]">
-                <Loader2 className="w-10 h-10 animate-spin text-primary mb-4"/>
+                <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
                 <p className="text-muted-foreground font-medium">Loading store inventory...</p>
             </div>
         );
     }
 
+    // ADDED: Graceful Error UI
     if (error) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] text-destructive">
-                <X className="w-12 h-12 mb-4"/>
-                <p className="font-medium text-lg">{error}</p>
+            <div className="flex-1 flex flex-col items-center justify-center py-24 px-4 text-center animate-in fade-in zoom-in duration-300">
+                <div className="bg-destructive/10 p-5 rounded-full mb-6">
+                    <AlertCircle className="w-12 h-12 text-destructive" />
+                </div>
+
+                <h2 className="text-3xl font-extrabold text-foreground tracking-tight mb-3">
+                    Oops! Something went wrong
+                </h2>
+
+                <p className="text-muted-foreground text-lg max-w-md mx-auto mb-8">
+                    {error}
+                </p>
+
+                <button
+                    onClick={handleResetStore}
+                    className="flex items-center gap-2 px-8 py-3 bg-primary text-primary-foreground rounded-xl font-semibold shadow-lg hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all duration-200"
+                >
+                    <RefreshCw size={20} />
+                    Reset Store
+                </button>
             </div>
         );
     }
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-6">
-            {/* Hero Banner */}
-            <div
-                className="bg-gradient-to-br from-primary to-accent/80 rounded-2xl p-8 mb-8 text-primary-foreground shadow-lg relative overflow-hidden">
-                <div
-                    className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
-
+            {/* Hero Banner (Same as before) */}
+            <div className="bg-gradient-to-br from-primary to-accent/80 rounded-2xl p-8 mb-8 text-primary-foreground shadow-lg relative overflow-hidden">
+                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
                 <div className="relative z-10">
                     <h1 className="text-3xl sm:text-4xl mb-3 font-bold drop-shadow-sm">Welcome to AIMS! 🎉</h1>
-                    <p className="text-primary-foreground/80 mb-6 text-lg">Discover thousands of books, CDs, DVDs, and
-                        newspapers</p>
+                    <p className="text-primary-foreground/80 mb-6 text-lg">Discover thousands of books, CDs, DVDs, and newspapers</p>
                     <div className="flex flex-col sm:flex-row gap-3 max-w-xl">
                         <div className="flex-1 relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-                                    size={18}/>
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                             <input
                                 type="text"
                                 placeholder="Search products..."
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
-                                onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                                onKeyDown={e => e.key === 'Enter' && handleSearchSubmit()}
                                 className="w-full bg-background text-foreground placeholder:text-muted-foreground pl-12 pr-4 py-3.5 rounded-xl outline-none focus:ring-2 focus:ring-primary/50 shadow-inner text-sm transition-all"
                             />
                         </div>
                         <button
-                            onClick={handleSearch}
+                            onClick={handleSearchSubmit}
                             className="bg-foreground text-background px-8 py-3.5 rounded-xl font-bold text-sm hover:opacity-90 transition-opacity shadow-md"
                         >
                             Search
@@ -266,12 +321,14 @@ export default function HomePage() {
                     {(['all', 'Book', 'CD', 'DVD', 'Newspaper'] as const).map(type => (
                         <button
                             key={type}
-                            onClick={() => setFilterType(type as ProductTypeName | 'all')}
-                            className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
-                                filterType === type
-                                    ? 'bg-primary text-primary-foreground shadow-md'
-                                    : 'bg-card text-foreground border border-border hover:border-primary/50 hover:text-primary'
-                            }`}
+                            onClick={() => {
+                                // ADDED: Just update the state! The useMemo hook will instantly re-filter the UI.
+                                setFilterType(type as ProductTypeName | 'all');
+                            }}
+                            className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${filterType === type
+                                ? 'bg-primary text-primary-foreground shadow-md'
+                                : 'bg-card text-foreground border border-border hover:border-primary/50 hover:text-primary'
+                                }`}
                         >
                             {type === 'all' ? 'All' : TYPE_LABELS[type as ProductTypeName]}
                         </button>
@@ -279,100 +336,120 @@ export default function HomePage() {
                 </div>
 
                 <div className="flex items-center gap-2 ml-auto">
-                    {/* Sort */}
-                    <div className="relative">
-                        <select
-                            value={sortBy}
-                            onChange={e => setSortBy(e.target.value as typeof sortBy)}
-                            className="appearance-none bg-card border border-border text-foreground text-sm pl-4 pr-10 py-2.5 rounded-xl cursor-pointer outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all hover:border-primary/50"
-                        >
-                            <option value="default">Default</option>
-                            <option value="price_asc">Price: Low to High</option>
-                            <option value="price_desc">Price: High to Low</option>
-                            <option value="name">Name: A to Z</option>
-                        </select>
-                        <ChevronDown size={14}
-                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"/>
-                    </div>
+                    {isSearching && (
+                        <button onClick={handleClearSearch} className="text-sm text-destructive hover:underline mr-4">
+                            Clear Filters
+                        </button>
+                    )}
 
-                    {/* Price filter toggle */}
                     <button
                         onClick={() => setShowFilter(o => !o)}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
-                            showFilter || priceMin || priceMax
-                                ? 'border-primary text-primary bg-primary/10'
-                                : 'border-border text-muted-foreground bg-card hover:border-primary/50 hover:text-foreground'
-                        }`}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${showFilter || priceMin || priceMax || categorySearch
+                            ? 'border-primary text-primary bg-primary/10'
+                            : 'border-border text-muted-foreground bg-card hover:border-primary/50 hover:text-foreground'
+                            }`}
                     >
-                        <SlidersHorizontal size={16}/>
-                        Filter Prices
+                        <SlidersHorizontal size={16} />
+                        Advanced Filters
                     </button>
                 </div>
             </div>
 
-            {/* Price filter panel */}
+            {/* Advanced Filters Panel */}
             {showFilter && (
-                <div
-                    className="bg-card border border-border rounded-xl p-5 mb-6 flex flex-wrap items-center gap-4 shadow-sm animate-in slide-in-from-top-2">
-                    <span className="text-sm text-foreground font-medium">Price Range:</span>
-                    <input
-                        type="number"
-                        placeholder="Minimum Price"
-                        value={priceMin}
-                        onChange={e => setPriceMin(e.target.value)}
-                        className="bg-input-background border border-border text-foreground rounded-lg px-3 py-2 text-sm w-36 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-                    />
-                    <span className="text-muted-foreground">–</span>
-                    <input
-                        type="number"
-                        placeholder="Maximum Price"
-                        value={priceMax}
-                        onChange={e => setPriceMax(e.target.value)}
-                        className="bg-input-background border border-border text-foreground rounded-lg px-3 py-2 text-sm w-36 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-                    />
+                <div className="bg-card border border-border rounded-xl p-5 mb-6 flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-5 shadow-sm animate-in slide-in-from-top-2">
+
+                    {/* Category String Search */}
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <span className="text-sm text-foreground font-medium whitespace-nowrap">Category:</span>
+                        <input
+                            type="text"
+                            placeholder="e.g., Action, Sci-Fi..."
+                            value={categorySearch}
+                            onChange={e => setCategorySearch(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && handleSearchSubmit()}
+                            className="bg-input-background border border-border text-foreground rounded-lg px-3 py-2 text-sm w-full sm:w-48 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                        />
+                    </div>
+
+                    <div className="hidden sm:block w-px h-8 bg-border"></div> {/* Visual Divider */}
+
+                    {/* Price Range */}
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <span className="text-sm text-foreground font-medium whitespace-nowrap">Price Range:</span>
+                        <div className="flex items-center gap-2 w-full">
+                            <input
+                                type="number"
+                                placeholder="Min ₫"
+                                value={priceMin}
+                                onChange={e => setPriceMin(e.target.value)}
+                                className="bg-input-background border border-border text-foreground rounded-lg px-3 py-2 text-sm w-full sm:w-28 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                            />
+                            <span className="text-muted-foreground">–</span>
+                            <input
+                                type="number"
+                                placeholder="Max ₫"
+                                value={priceMax}
+                                onChange={e => setPriceMax(e.target.value)}
+                                className="bg-input-background border border-border text-foreground rounded-lg px-3 py-2 text-sm w-full sm:w-28 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                            />
+                        </div>
+                    </div>
                     <button
-                        onClick={() => {
-                            setPriceMin('');
-                            setPriceMax('');
-                        }}
-                        className="text-sm text-destructive hover:text-destructive-foreground hover:bg-destructive/10 px-3 py-1.5 rounded-md flex items-center gap-1 transition-colors"
+                        onClick={handleSearchSubmit}
+                        className="text-sm bg-primary text-primary-foreground px-6 py-2.5 rounded-lg font-bold sm:ml-auto w-full sm:w-auto hover:bg-primary/90 transition-colors shadow-sm"
                     >
-                        <X size={14}/> Clear Filters
+                        Apply Filters
                     </button>
                 </div>
             )}
 
-            {/* Products Grid */}
+            {/* Title / Status */}
             <div className="flex items-center justify-between mb-4">
                 <p className="text-sm text-muted-foreground">
-                    Showing <strong className="text-foreground">{filtered.length}</strong> products
+                    {isSearching ? `Showing search results...` : `Showing 20 random products. Use search to find more.`}
                 </p>
             </div>
 
-            {filtered.length === 0 ? (
-                <div
-                    className="text-center py-20 text-muted-foreground bg-card rounded-2xl border border-border border-dashed">
-                    <Search size={48} className="mx-auto mb-4 opacity-30"/>
+            {/* Products Grid */}
+            {/* ADDED: Using displayedProducts instead of products */}
+            {displayedProducts.length === 0 ? (
+                <div className="text-center py-20 text-muted-foreground bg-card rounded-2xl border border-border border-dashed">
+                    <Search size={48} className="mx-auto mb-4 opacity-30" />
                     <p className="text-lg font-medium text-foreground">No matching products found</p>
                     <p className="text-sm mt-1">Try adjusting your search or filter criteria</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
-                    {filtered.map(product => (
-                        <div key={product.id} className="relative">
-                            <ProductCard product={product} onAddToCart={handleAddToCart}/>
-                            {addedId === product.id && (
-                                <div
-                                    className="absolute inset-0 bg-primary/20 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10 animate-in fade-in zoom-in duration-200">
-                          <span
-                              className="bg-primary text-primary-foreground font-semibold text-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
-                            ✓ Added to Cart
-                          </span>
-                                </div>
-                            )}
+                <>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 mb-8">
+                        {displayedProducts.map(product => (
+                            <div key={product.id} className="relative">
+                                <ProductCard product={product} onAddToCart={handleAddToCart} />
+                                {addedId === product.id && (
+                                    <div className="absolute inset-0 bg-primary/20 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10 animate-in fade-in zoom-in duration-200">
+                                        <span className="bg-primary text-primary-foreground font-semibold text-sm px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
+                                            ✓ Added to Cart
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Pagination: Load More Button */}
+                    {hasMore && isSearching && filterType === 'all' && (
+                        <div className="flex justify-center mt-8 mb-12">
+                            <button
+                                onClick={handleLoadMore}
+                                disabled={loadingMore}
+                                className="px-8 py-3 rounded-xl border-2 border-primary text-primary font-bold hover:bg-primary/10 transition-colors flex items-center gap-2 disabled:opacity-50"
+                            >
+                                {loadingMore && <Loader2 size={18} className="animate-spin" />}
+                                {loadingMore ? 'Loading...' : 'Load More Products'}
+                            </button>
                         </div>
-                    ))}
-                </div>
+                    )}
+                </>
             )}
         </div>
     );

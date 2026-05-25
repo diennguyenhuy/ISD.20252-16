@@ -1,12 +1,12 @@
-import {ArrowLeft, Truck, ChevronDown, AlertCircle, Loader2} from 'lucide-react';
-import {useState} from 'react';
-import {useNavigate} from 'react-router';
+import { ArrowLeft, Truck, ChevronDown, AlertCircle, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
 
-import {useCart} from '../../context/CartContext';
+import { useCart } from '../../context/CartContext';
 import OrderService from '../../api/orderService';
-import {formatVND} from '../../data/mockData';
-import {provinces, provinceToWards} from '../../data/provinceData';
-import type {DeliveryInformation} from '../../models/order.interface';
+import { formatVND } from '../../data/mockData';
+import { provinces, provinceToWards } from '../../data/provinceData';
+import type { DeliveryInformation } from '../../models/order.interface';
 
 type FieldError = {
     [K in keyof DeliveryInformation]?: DeliveryInformation[K] | undefined;
@@ -16,7 +16,7 @@ export default function DeliveryForm() {
     const navigate = useNavigate();
 
     // Bring in the global cart to satisfy the requirement: "Customers will still see products"
-    const {cart} = useCart();
+    const { cart } = useCart();
 
     const [form, setForm] = useState<DeliveryInformation>({
         customerName: '',
@@ -87,21 +87,21 @@ export default function DeliveryForm() {
 
     // Safe updater for standard text fields
     const updateText = (field: keyof DeliveryInformation, value: string) => {
-        setForm(prev => ({...prev, [field]: value}));
+        setForm(prev => ({ ...prev, [field]: value }));
         if (errors[field as keyof FieldError]) {
-            setErrors(prev => ({...prev, [field]: undefined}));
+            setErrors(prev => ({ ...prev, [field]: undefined }));
         }
     };
 
     // Dependent Dropdown Logic
     const handleProvinceChange = (newProvince: string) => {
         setForm(prev => ({
-                ...prev,
-                province: newProvince,
-                commune: ''
-            })
+            ...prev,
+            province: newProvince,
+            commune: ''
+        })
         );
-        if (errors.province) setErrors(prev => ({...prev, province: undefined}));
+        if (errors.province) setErrors(prev => ({ ...prev, province: undefined }));
     };
 
     const inputBaseClass = "w-full border rounded-xl px-4 py-3.5 text-sm outline-none transition-all duration-200 text-foreground";
@@ -112,7 +112,7 @@ export default function DeliveryForm() {
     if (!cart) {
         return (
             <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-                <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto mb-4"/>
+                <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto mb-4" />
                 <p>Loading order data...</p>
             </div>
         );
@@ -136,7 +136,7 @@ export default function DeliveryForm() {
                 <div className="lg:col-span-2 bg-card rounded-3xl border border-border shadow-lg p-6 sm:p-8">
                     <div className="flex items-center gap-4 mb-8">
                         <div className="bg-primary/10 p-3 rounded-2xl shadow-inner">
-                            <Truck size={24} className="text-primary"/>
+                            <Truck size={24} className="text-primary" />
                         </div>
                         <div>
                             <h1 className="text-2xl text-foreground font-bold">Delivery Information</h1>
@@ -161,7 +161,7 @@ export default function DeliveryForm() {
                                 />
                                 {errors.customerName && (
                                     <p className="mt-1.5 text-xs text-destructive font-medium flex items-center gap-1.5">
-                                        <AlertCircle size={14}/> {errors.customerName}
+                                        <AlertCircle size={14} /> {errors.customerName}
                                     </p>
                                 )}
                             </div>
@@ -180,7 +180,7 @@ export default function DeliveryForm() {
                                 />
                                 {errors.phoneNumber && (
                                     <p className="mt-1.5 text-xs text-destructive font-medium flex items-center gap-1.5">
-                                        <AlertCircle size={14}/> {errors.phoneNumber}
+                                        <AlertCircle size={14} /> {errors.phoneNumber}
                                     </p>
                                 )}
                             </div>
@@ -200,7 +200,7 @@ export default function DeliveryForm() {
                             />
                             {errors.customerEmail && (
                                 <p className="mt-1.5 text-xs text-destructive font-medium flex items-center gap-1.5">
-                                    <AlertCircle size={14}/> {errors.customerEmail}
+                                    <AlertCircle size={14} /> {errors.customerEmail}
                                 </p>
                             )}
                         </div>
@@ -221,14 +221,14 @@ export default function DeliveryForm() {
                                             --
                                         </option>
                                         {provinces.map(p => <option key={p} value={p}
-                                                                    className="bg-card text-foreground">{p}</option>)}
+                                            className="bg-card text-foreground">{p}</option>)}
                                     </select>
                                     <ChevronDown size={16}
-                                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"/>
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                                 </div>
                                 {errors.province && (
                                     <p className="mt-1.5 text-xs text-destructive font-medium flex items-center gap-1.5">
-                                        <AlertCircle size={14}/> {errors.province}
+                                        <AlertCircle size={14} /> {errors.province}
                                     </p>
                                 )}
                             </div>
@@ -248,15 +248,15 @@ export default function DeliveryForm() {
                                         <option value="" disabled>-- Select Ward --</option>
                                         {form.province && provinceToWards[form.province]?.map((ward: string) => (
                                             <option key={ward} value={ward}
-                                                    className="bg-card text-foreground">{ward}</option>
+                                                className="bg-card text-foreground">{ward}</option>
                                         ))}
                                     </select>
                                     <ChevronDown size={16}
-                                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"/>
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                                 </div>
                                 {errors.commune && (
                                     <p className="mt-1.5 text-xs text-destructive font-medium flex items-center gap-1.5">
-                                        <AlertCircle size={14}/> {errors.commune}
+                                        <AlertCircle size={14} /> {errors.commune}
                                     </p>
                                 )}
                             </div>
@@ -276,7 +276,7 @@ export default function DeliveryForm() {
                             />
                             {errors.address && (
                                 <p className="mt-1.5 text-xs text-destructive font-medium flex items-center gap-1.5">
-                                    <AlertCircle size={14}/> {errors.address}
+                                    <AlertCircle size={14} /> {errors.address}
                                 </p>
                             )}
                         </div>
@@ -290,15 +290,14 @@ export default function DeliveryForm() {
                                 <button
                                     type="button"
                                     onClick={() => updateText('deliveryMethod', 'standard')}
-                                    className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
-                                        form.deliveryMethod === 'standard'
+                                    className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${form.deliveryMethod === 'standard'
                                             ? 'border-primary bg-primary/5 shadow-sm shadow-primary/10'
                                             : 'border-border bg-card hover:border-primary/40 hover:bg-muted/30'
-                                    }`}
+                                        }`}
                                 >
                                     <div
                                         className={`p-2 rounded-full ${form.deliveryMethod === 'standard' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
-                                        <Truck size={20}/>
+                                        <Truck size={20} />
                                     </div>
                                     <div>
                                         <p className={`text-sm font-bold ${form.deliveryMethod === 'standard' ? 'text-primary' : 'text-foreground'}`}>Standard
@@ -310,15 +309,14 @@ export default function DeliveryForm() {
                                 <button
                                     type="button"
                                     onClick={() => updateText('deliveryMethod', 'rush')}
-                                    className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
-                                        form.deliveryMethod === 'rush'
+                                    className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${form.deliveryMethod === 'rush'
                                             ? 'border-primary bg-primary/5 shadow-sm shadow-primary/10'
                                             : 'border-border bg-card hover:border-primary/40 hover:bg-muted/30'
-                                    }`}
+                                        }`}
                                 >
                                     <div
                                         className={`p-2 rounded-full ${form.deliveryMethod === 'rush' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
-                                        <Truck size={20}/>
+                                        <Truck size={20} />
                                     </div>
                                     <div>
                                         <p className={`text-sm font-bold ${form.deliveryMethod === 'rush' ? 'text-primary' : 'text-foreground'}`}>Rush
@@ -337,7 +335,7 @@ export default function DeliveryForm() {
                             disabled={isCanceling || isSubmitting}
                             className="flex-1 py-3.5 rounded-xl border border-border bg-card text-foreground font-semibold hover:bg-muted transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                         >
-                            {isCanceling ? <Loader2 size={18} className="animate-spin"/> : <ArrowLeft size={18}/>}
+                            {isCanceling ? <Loader2 size={18} className="animate-spin" /> : <ArrowLeft size={18} />}
                             Cancel Order
                         </button>
                         <button
@@ -345,7 +343,7 @@ export default function DeliveryForm() {
                             disabled={isSubmitting || isCanceling}
                             className="flex-[2] py-3.5 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-accent hover:text-accent-foreground transition-all shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
-                            {isSubmitting && <Loader2 size={18} className="animate-spin"/>}
+                            {isSubmitting && <Loader2 size={18} className="animate-spin" />}
                             {isSubmitting ? 'Processing...' : 'Continue to Invoice →'}
                         </button>
                     </div>
