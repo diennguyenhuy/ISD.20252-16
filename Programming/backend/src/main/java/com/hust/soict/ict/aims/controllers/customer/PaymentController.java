@@ -13,8 +13,19 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PaymentController {
 
+    // Control Coupling: controller controls which payment method is used
     private final PaymentService paymentService;
 
+    /**
+     * Endpoint: Pay by Credit Card
+     *
+     * Coupling:
+     * - Control Coupling: defines payment method
+     * - Stamp Coupling: passes full request DTO
+     *
+     * Cohesion:
+     * - Functional: only handles HTTP request
+     */
     @PostMapping("/credit-card")
     public PaymentInitiationResponse payByCreditCard(
             @Valid @RequestBody PayByCreditCardRequest request

@@ -1,5 +1,16 @@
 package com.hust.soict.ict.aims.models.dto.request;
 
+/**
+ * DTO for Credit Card Payment
+ *
+ * Coupling:
+ * - Stamp Coupling: full object passed across layers
+ *
+ * Improvement:
+ * - Can split into smaller objects:
+ *   + CardInfo
+ *   + PaymentInfo
+ */
 public class PayByCreditCardRequest {
 
     private String orderId;
