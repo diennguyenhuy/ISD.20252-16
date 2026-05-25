@@ -19,7 +19,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 /**
- * Provide API endpoints for customer delivery screen and invoice screen
+ * Provide API endpoints for customer delivery screen and invoice screen<br>
+ * Cohesion: Procedural Cohesion<br>
+ * - Reason:
+ * Coordinates sequential order placement workflow through REST endpoints.
+ * Methods participate in the same order processing procedure:
+ * placing order, submitting delivery info, retrieving invoice,
+ * retrieving order details, and canceling order. (not concerning payment)<br>
+ * Coupling: Data coupling with PlaceOrderService and DeliveryService
+ * through method parameters and return values.<br>
+ * - Reason: Method sends data structures that the 2 service classes use wholly or
+ * sends only necessary data to the service classes.
  */
 @RestController
 @RequestMapping("/order")

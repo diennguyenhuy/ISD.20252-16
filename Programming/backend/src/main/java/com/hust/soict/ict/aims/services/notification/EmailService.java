@@ -17,6 +17,17 @@ import org.springframework.stereotype.Service;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Cohesion: Communicational Cohesion
+ * Reason:
+ * Methods collaborate to construct and send
+ * order confirmation emails using related email data.
+ * Coupling:
+ * - Data coupling with JavaMailSender and
+ *   NotificationService abstraction.
+ * - Stamp coupling with Order and PaymentTransaction
+ *   because full domain objects are used to build emails.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j

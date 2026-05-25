@@ -57,9 +57,9 @@ public class PaymentServiceImpl implements PaymentService {
         Order order = orderRepository.findById(UUID.fromString(request.getOrderId()))
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        // Step 3: Check order state
-        if (order.getStatus() != OrderStatus.DRAFT &&
-                order.getStatus() != OrderStatus.PENDING) {
+        // check state machine
+        if (order.getStatus() != Order.Status.DRAFT &&
+                order.getStatus() != Order.Status.PENDING) {
             throw new RuntimeException("Order not payable");
         }
 
@@ -79,9 +79,9 @@ public class PaymentServiceImpl implements PaymentService {
 
         // Step 6: Update order status
         if (success) {
-            order.changeStatus(OrderStatus.APPROVED);
+            order.changeStatus(Order.Status.APPROVED);
         } else {
-            order.changeStatus(OrderStatus.REJECTED);
+            order.changeStatus(Order.Status.REJECTED);
         }
 
         orderRepository.save(order);

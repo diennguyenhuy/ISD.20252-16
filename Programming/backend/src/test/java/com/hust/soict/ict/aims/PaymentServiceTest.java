@@ -34,7 +34,7 @@ class PaymentServiceTest {
 
         Order order = Mockito.mock(Order.class);
 
-        Mockito.when(order.getStatus()).thenReturn(OrderStatus.DRAFT);
+        Mockito.when(order.getStatus()).thenReturn(Order.Status.DRAFT);
 
         UUID id = UUID.randomUUID();
 
@@ -53,7 +53,7 @@ class PaymentServiceTest {
 
         assertTrue(res.success());
 
-        Mockito.verify(order).changeStatus(OrderStatus.APPROVED);
+        Mockito.verify(order).changeStatus(Order.Status.APPROVED);
 
         Mockito.verify(orderRepo).save(order);
     }
@@ -68,7 +68,7 @@ class PaymentServiceTest {
 
         Order order = Mockito.mock(Order.class);
 
-        Mockito.when(order.getStatus()).thenReturn(OrderStatus.DRAFT);
+        Mockito.when(order.getStatus()).thenReturn(Order.Status.DRAFT);
 
         UUID id = UUID.randomUUID();
 
@@ -87,7 +87,7 @@ class PaymentServiceTest {
 
         assertFalse(res.success());
 
-        Mockito.verify(order).changeStatus(OrderStatus.REJECTED);
+        Mockito.verify(order).changeStatus(Order.Status.REJECTED);
 
         Mockito.verify(orderRepo).save(order);
     }

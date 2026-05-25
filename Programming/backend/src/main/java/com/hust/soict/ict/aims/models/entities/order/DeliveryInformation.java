@@ -5,6 +5,15 @@ import lombok.*;
 
 import java.util.UUID;
 
+/**
+ * Cohesion: Communicational Cohesion
+ * Reason:
+ * Fields and methods operate on the same delivery-related
+ * data associated with an Order.
+ * Coupling:
+ * - Stamp coupling with Order through bidirectional
+ *   entity association.
+ */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -61,5 +70,12 @@ public class DeliveryInformation {
         di.deliveryMethod = deliveryMethod;
 
         return di;
+    }
+
+    public static DeliveryInformation of(DeliveryInformation deliveryInformation, @NonNull Order order) {
+        order.setDeliveryInformation(deliveryInformation);
+        deliveryInformation.order = order;
+
+        return deliveryInformation;
     }
 }

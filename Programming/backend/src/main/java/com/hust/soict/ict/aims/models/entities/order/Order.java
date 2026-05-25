@@ -8,10 +8,20 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
+/**
+ * Cohesion: Communicational Cohesion
+ * Reason:
+ * Fields and methods operate on the same Order aggregate
+ * and related business state.
+ * Coupling:
+ * - Stamp coupling with OrderItem, DeliveryInformation,
+ *   Invoice, PaymentTransaction, and Cart through
+ *   aggregate relationships.
+ * - Data coupling with OrderStatus through enum-based
+ *   state transition logic.
+ */
 @Entity
 @Table(name = "order")
 @NamedEntityGraphs({
@@ -42,6 +52,24 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order {
+    public enum Status {
+        DRAFT,
+        PENDING,
+        APPROVED,
+        REJECTED,
+        CANCELLED,
+        REFUNDED;
+
+        static final Map<Status, Set<Status>> transitions = Map.of(
+                DRAFT, Set.of(PENDING),
+                PENDING, Set.of(APPROVED, REJECTED, CANCELLED),
+                APPROVED, Set.of(),
+                REJECTED, Set.of(REFUNDED),
+                CANCELLED, Set.of(REFUNDED),
+                REFUNDED, Set.of()
+        );
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false)
@@ -51,7 +79,7 @@ public class Order {
     private List<OrderItem> items = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;
+    private Status status;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     @Setter(AccessLevel.PACKAGE)
@@ -95,14 +123,14 @@ public class Order {
         return deliveryFee + getTotalPriceWithVAT();
     }
 
-    public void addItem(OrderItem orderItem) {
+    void addItem(OrderItem orderItem) {
         items.add(orderItem);
     }
 
-    public void changeStatus(@NonNull OrderStatus newStatus) throws IllegalStateException {
+    public void changeStatus(@NonNull Status newStatus) throws IllegalStateException {
         if (newStatus == status) return;
 
-        if (!OrderStatus.transitions.get(status).contains(newStatus)) {
+        if (!Status.transitions.get(status).contains(newStatus)) {
             throw new IllegalStateException("Cannot transition order status from " + status.name() + " to " + newStatus.name());
         }
 
@@ -113,7 +141,7 @@ public class Order {
         Order order = new Order();
         cart.getItems().forEach(item -> order.addItem(OrderItem.from(item, order)));
 
-        order.status = OrderStatus.DRAFT;
+        order.status = Status.DRAFT;
 
         return order;
     }

@@ -8,6 +8,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+/**
+ * Uses event-driven architecture and dependency inversion
+ * to reduce direct coupling with order placement workflow.
+ * Cohesion: Communicational Cohesion
+ * Reason:
+ * All operations react to the same OrderSuccessEvent
+ * and process related post-order data and side effects.
+ * Coupling:
+ * - Data coupling with NotificationService through
+ *   interface-based method calls.
+ * - Stamp coupling with OrderSuccessEvent and CartContext
+ *   because composite objects are passed/shared.
+ */
 @Component
 @RequiredArgsConstructor
 public class PlaceOrderSuccessListener {

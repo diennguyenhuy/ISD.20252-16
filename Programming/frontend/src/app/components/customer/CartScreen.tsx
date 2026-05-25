@@ -50,13 +50,18 @@ export default function CartScreen() {
         setIsPlacingOrder(true);
         try {
             // Hit the POST /order endpoint to start the place-order process in the backend session
-            await OrderService.placeOrder();
+            const draftOrderResponse = await OrderService.placeOrder();
             // Only navigate if the API succeeds
-            navigate('/checkout/delivery');
+            navigate('/checkout/delivery', {
+                state: {
+                    prefilledDeliveryInfo: draftOrderResponse.deliveryInformation
+                }
+            });
         } catch (error: any) {
             const errorMessage = error.response?.data?.message || error.response?.data || "Failed to initiate place order process. Please check your cart.";
             alert(`Checkout paused: ${errorMessage}`);
             if (error.response?.status === 409) await fetchCart();
+        } finally {
             setIsPlacingOrder(false);
         }
     };

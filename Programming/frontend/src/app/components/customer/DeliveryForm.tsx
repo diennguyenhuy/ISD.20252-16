@@ -1,6 +1,6 @@
 import { ArrowLeft, Truck, ChevronDown, AlertCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 
 import { useCart } from '../../context/CartContext';
 import OrderService from '../../api/orderService';
@@ -14,18 +14,19 @@ type FieldError = {
 
 export default function DeliveryForm() {
     const navigate = useNavigate();
-
+    const location = useLocation();
+    const existingInfo = location.state?.prefilledDeliveryInfo as DeliveryInformation;
     // Bring in the global cart to satisfy the requirement: "Customers will still see products"
     const { cart } = useCart();
 
     const [form, setForm] = useState<DeliveryInformation>({
-        customerName: '',
-        customerEmail: '',
-        phoneNumber: '',
-        province: '',
-        commune: '',
-        address: '',
-        deliveryMethod: 'standard',
+        customerName: existingInfo?.customerName || '',
+        customerEmail: existingInfo?.customerEmail || '',
+        phoneNumber: existingInfo?.phoneNumber || '',
+        province: existingInfo?.province || '',
+        commune: existingInfo?.commune || '',
+        address: existingInfo?.address || '',
+        deliveryMethod: existingInfo?.deliveryMethod || 'standard',
     });
 
     const [errors, setErrors] = useState<FieldError>({});
@@ -77,10 +78,11 @@ export default function DeliveryForm() {
         try {
             // Cancel the current active order session in the backend
             await OrderService.cancelOrderPlacement();
-            navigate('/cart');
         } catch (error) {
             console.error("Failed to cancel order placement", error);
             // Even if API fails, we should probably still let the user go back to cart
+        } finally {
+            setIsCanceling(false);
             navigate('/cart');
         }
     };

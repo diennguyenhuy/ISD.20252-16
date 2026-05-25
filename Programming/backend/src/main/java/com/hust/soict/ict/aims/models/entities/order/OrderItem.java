@@ -9,6 +9,15 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+/**
+ * Cohesion: Functional Cohesion
+ * Reason:
+ * Represents a purchased item within an Order and
+ * related pricing/weight calculations.
+ * Coupling:
+ * - Stamp coupling with Order, Product, and CartItem
+ *   through aggregate relationships and factory methods.
+ */
 @Entity
 @Table(name = "order_item")
 @Getter

@@ -10,6 +10,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+/**
+ * Cohesion: Communicational Cohesion<br>
+ * Reason:
+ * Methods operate on the same delivery-related data,
+ * including DeliveryInformation and draft Order state.<br>
+ * Coupling:<br>
+ * - Stamp coupling with OrderDraftContext, DeliveryRequest,
+ *   and OrderMapper because composite objects are shared.
+ * - Data coupling with DeliveryFeeCalculator through
+ *   primitive/simple parameters.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
