@@ -1,12 +1,9 @@
 package com.hust.soict.ict.aims.services.order;
 
-import com.hust.soict.ict.aims.exceptions.OrderNotFoundException;
-import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
+import com.hust.soict.ict.aims.exceptions.*;
 import com.hust.soict.ict.aims.models.dto.response.order.*;
 import com.hust.soict.ict.aims.models.entities.order.*;
 import com.hust.soict.ict.aims.context.OrderDraftContext;
-import com.hust.soict.ict.aims.exceptions.EmptyCartException;
-import com.hust.soict.ict.aims.exceptions.NotEnoughStockException;
 import com.hust.soict.ict.aims.repositories.OrderRepository;
 import com.hust.soict.ict.aims.mapper.OrderMapper;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +14,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ * Cohesion: Procedural Cohesion<br>
+ * Reason: Coordinates the order placement workflow including stock validation,
+ * order drafting, invoice generation, finalization, retrieval, and cancellation.<br>
+ * Coupling:
+ * - Data coupling with StockValidator, OrderRepository,
+ *   and ApplicationEventPublisher through method calls.
+ *   Uses event-driven architecture through ApplicationEventPublisher
+ *   to reduce direct dependencies between services.
+ * - Stamp coupling with Order, PaymentTransaction,
+ *   OrderDraftContext, and OrderMapper because
+ *   composite domain objects are passed between modules.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -34,8 +44,14 @@ public class PlaceOrderService {
         log.debug("Placing order...");
         log.debug("Checking stock availability...");
         Order draftOrder = Order.from(stockValidator.checkStockAvailability());
-
         log.debug("Stock availability check done and satisfied.");
+
+        try {
+            var existingDelivery = orderDraftContext.getDraftOrder().getDeliveryInformation();
+            if (existingDelivery != null) {
+                DeliveryInformation.of(existingDelivery, draftOrder);
+            }
+        } catch (OrderNotPlacedException ignored) {}
 
         orderDraftContext.saveDraftOrder(draftOrder);
         log.debug("Order placed successfully! New draft order has been created!");
@@ -56,7 +72,7 @@ public class PlaceOrderService {
     public OrderResponse finalizeOrder(PaymentTransaction paymentTransaction) { //TODO: Add new PaymentTransaction to order
         log.debug("Finalizing order...");
         Order draftOrder = orderDraftContext.getDraftOrder();
-        draftOrder.changeStatus(OrderStatus.PENDING);
+        draftOrder.changeStatus(Order.Status.PENDING);
 
         Order order = orderRepository.save(draftOrder);
 
@@ -82,7 +98,7 @@ public class PlaceOrderService {
     public void cancelOrder(UUID orderId) throws IllegalStateException, OrderNotFoundException {
         log.debug("Canceling order #{}...", orderId);
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        order.changeStatus(OrderStatus.CANCELLED);
+        order.changeStatus(Order.Status.CANCELLED);
 
         log.debug("Order #{} successfully canceled!", orderId);
         orderRepository.save(order);

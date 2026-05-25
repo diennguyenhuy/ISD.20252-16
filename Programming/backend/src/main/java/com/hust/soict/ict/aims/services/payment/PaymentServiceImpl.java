@@ -35,8 +35,8 @@ public class PaymentServiceImpl implements PaymentService {
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         // check state machine
-        if (order.getStatus() != OrderStatus.DRAFT &&
-                order.getStatus() != OrderStatus.PENDING) {
+        if (order.getStatus() != Order.Status.DRAFT &&
+                order.getStatus() != Order.Status.PENDING) {
             throw new RuntimeException("Order not payable");
         }
 
@@ -54,9 +54,9 @@ public class PaymentServiceImpl implements PaymentService {
 
         // update trạng thái
         if (success) {
-            order.changeStatus(OrderStatus.APPROVED);
+            order.changeStatus(Order.Status.APPROVED);
         } else {
-            order.changeStatus(OrderStatus.REJECTED);
+            order.changeStatus(Order.Status.REJECTED);
         }
 
         orderRepository.save(order);

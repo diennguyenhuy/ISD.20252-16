@@ -6,6 +6,16 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.util.*;
 
+/**
+ * Cohesion: Functional Cohesion
+ * Reason:
+ * All methods contribute directly to managing cart state,
+ * cart items, and aggregate cart calculations.
+ * Coupling:
+ * - Stamp coupling with Product and CartItem through
+ *   aggregate relationships.
+ * - Data coupling with UUID-based operations.
+ */
 @NoArgsConstructor
 public class Cart {
     private final Map<UUID, CartItem> items = new LinkedHashMap<>();

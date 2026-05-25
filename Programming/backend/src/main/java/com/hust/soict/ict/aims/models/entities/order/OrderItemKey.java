@@ -10,6 +10,13 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * Cohesion: Functional Cohesion
+ * Reason:
+ * Represents composite identity for OrderItem.
+ * Coupling:
+ * - Data coupling with OrderItem through identifier usage.
+ */
 @Embeddable
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

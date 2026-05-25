@@ -7,6 +7,18 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+/**
+ * Cohesion: Functional Cohesion
+ * Reason:
+ * Represents a product entry within a shopping cart
+ * and related quantity/price calculations.
+ * Coupling:
+ * - Stamp coupling with Product because full product
+ *   objects are referenced and queried.
+ * Note:
+ * CartItem intentionally depends on live Product state,
+ * unlike OrderItem which snapshots product data.
+ */
 @Getter
 public class CartItem {
     private final Product product;

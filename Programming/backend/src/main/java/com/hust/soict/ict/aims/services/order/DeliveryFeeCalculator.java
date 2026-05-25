@@ -5,6 +5,16 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+/**
+ * Cohesion: Functional Cohesion<br>
+ * Reason:
+ * All attributes, constants, and methods contribute solely
+ * to delivery fee calculation logic.
+ * Coupling: Data coupling with DeliveryService because only
+ * required primitive/simple parameters are passed.
+ * Stamp coupling avoided by receiving only necessary data
+ * instead of entire Order objects.
+ */
 @Component
 public class DeliveryFeeCalculator {
     private static final long UNIT_FEE_PER_WEIGHT_DEDUCTION = 2_500;

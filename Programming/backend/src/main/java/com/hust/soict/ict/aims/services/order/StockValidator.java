@@ -21,6 +21,16 @@ import java.util.stream.Collectors;
 
 /**
  * Service for checking product stock
+ * Cohesion: Functional Cohesion
+ * Reason:
+ * All methods and logic contribute to validating
+ * stock availability and cart consistency.
+ * Coupling:
+ * - Data coupling with ProductRepository through
+ * repository method calls.
+ * - Stamp coupling with CartContext, Cart, CartItem,
+ * and Product because composite domain objects
+ * are shared and traversed.
  */
 @Component
 @RequiredArgsConstructor
