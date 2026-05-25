@@ -1,7 +1,18 @@
-package com.hust.soict.ict.aims.models.entities.payments;
-
-/**
- * Entity representing payment status check result
+package com.hust.soict.ict.aims.subsystems.vietqr;
+/*
+ * + Cohesion level: FUNCTIONAL
+ * + Coupling level with VietQRController: DATA
+ * + Reason: QRCodePaymentStatus has one clear responsibility: representing and
+ *           interpreting the payment status returned from VietQR. Its fields
+ *           status and message, together with methods such as isCompleted(),
+ *           isPending(), isFailed(), isCancelled(), and parseResponseString(),
+ *           all support the same purpose of checking payment result status.
+ *
+ *           The coupling with VietQRController is DATA coupling because
+ *           VietQRController only needs to receive or use simple status data,
+ *           such as status and message, through this object or its getter methods.
+ *           No control flags are passed, and QRCodePaymentStatus does not control
+ *           the internal logic of VietQRController.
  */
 public class QRCodePaymentStatus {
     private String status;    // "PENDING", "COMPLETED", "FAILED", "CANCELLED"

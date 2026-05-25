@@ -1,7 +1,15 @@
 package com.hust.soict.ict.aims.subsystems.vietqr;
 
 import java.util.Base64;
-
+/**
+ * + Cohesion level: FUNCTIONAL
+ * + Coupling level with VietQRController: DATA
+ * + Reason: VietQRController instantiates QRAccessTokenRequest by passing two primitive
+ *           String values (username, password) and only calls buildAuthorizationHeader()
+ *           which returns a plain String. Only the minimal required data is exchanged;
+ *           no composite objects or control flags pass between the two classes. The class has exactly
+ *           one clear responsibility.
+ */
 class QRAccessTokenRequest {
     private String username;
     private String password;
