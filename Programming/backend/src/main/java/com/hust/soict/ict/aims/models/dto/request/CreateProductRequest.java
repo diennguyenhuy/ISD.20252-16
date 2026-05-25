@@ -54,6 +54,9 @@ public class CreateProductRequest {
 
     private String imageURL;
 
+    @NotBlank(message = "Product type is required (BOOK, CD, DVD, NEWSPAPER)")
+    private String productType;
+
     // PRINTABLE PRODUCT (BOOK, NEWSPAPER)
     private String publisher;
     private LocalDate publicationDate;

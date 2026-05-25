@@ -5,7 +5,14 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-
+/**
+ * + Cohesion level: FUNCTIONAL
+ * + Coupling level level with VietQRController: DATA
+ * + Reason: VietQRBoundary is only called by VietQRController. The controller passes
+ *           individual String parameters (authorizationHeader, accessToken, requestString)
+ *           and receives back a raw JSON String. Only the exact necessary data is exchanged;
+ *           no composite objects or control flags are involved.
+ */
 class VietQRBoundary {
 
     private static final String GET_TOKEN_URL = "/token_generate";

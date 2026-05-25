@@ -13,6 +13,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+/**
+ * Cohesion: Communicational Cohesion<br>
+ * Reason: Groups all REST API endpoint routing and HTTP mapping logic related to the same business domain (Product Management).<br>
+ * Coupling:
+ * - Data coupling with ProductManagementService when passing primitive path variables like UUID.
+ * - Stamp coupling with the service layer by passing composite request DTOs (CreateProductRequest, UpdateProductRequest) and returning ProductDetail responses.
+ * Design Strength:
+ * Maintains an extremely thin architecture focused exclusively on HTTP protocol translation and validation routing, delegating all business operations to the service layer.
+ */
+
 @RestController
 @RequestMapping("/api/v1/manager/products")
 @RequiredArgsConstructor

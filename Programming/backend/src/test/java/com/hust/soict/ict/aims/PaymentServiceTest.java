@@ -26,7 +26,11 @@ class PaymentServiceTest {
         OrderRepository orderRepo = Mockito.mock(OrderRepository.class);
         PaymentTransactionRepository transRepo = Mockito.mock(PaymentTransactionRepository.class);
 
-        PaymentService service = new PaymentServiceImpl(orderRepo, transRepo);
+        PayByCreditCardService creditService =
+                new PayByCreditCardService(orderRepo, transRepo, null);
+
+        PaymentService service =
+                new PaymentServiceImpl(creditService);
 
         Order order = Mockito.mock(Order.class);
 
