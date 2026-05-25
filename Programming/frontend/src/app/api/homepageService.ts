@@ -1,17 +1,23 @@
 import { apiClient } from "./client";
 import type { ProductSummary, ProductType } from "../models/product.interface";
 
-const PRODUCTS_URL = "/products";
+export interface ProductFilterParams {
+    title: string | undefined;
+    category: string | undefined;
+    minPrice: number | undefined;
+    maxPrice: number | undefined;
+    page: number;
+}
 
 const HomepageService = {
-    getProductList: async (): Promise<ProductSummary[]> => {
-        const response= await apiClient.get<ProductSummary[]>(PRODUCTS_URL);
+    get20RandomProducts: async (): Promise<ProductSummary[]> => {
+        const response= await apiClient.get<ProductSummary[]>('products/initiate');
         return response.data;
     },
 
-    filterProductsBy: async (page: number, title?: string, category?: string, minPrice?: number, maxPrice?: number): Promise<ProductSummary[]> => {
-        let requestURL = `${PRODUCTS_URL}?page=${page}`;
-        if (title) requestURL += `&title=${title}`;
+    filterProductsBy: async ({page, title, category, minPrice, maxPrice}: ProductFilterParams): Promise<ProductSummary[]> => {
+        let requestURL = `products?page=${page}`;
+        if (title) requestURL += `&title=${encodeURIComponent(title)}`;
         if (category) requestURL += `&category=${category}`;
         if (minPrice) requestURL += `&minPrice=${minPrice}`;
         if (maxPrice) requestURL += `&maxPrice=${maxPrice}`;
@@ -20,7 +26,7 @@ const HomepageService = {
     },
 
     getProductDetail: async (productId: string): Promise<ProductType> => {
-        const response = await apiClient.get<ProductType>(`${PRODUCTS_URL}/${productId}`);
+        const response = await apiClient.get<ProductType>(`products/${productId}`);
         return response.data;
     }
 }

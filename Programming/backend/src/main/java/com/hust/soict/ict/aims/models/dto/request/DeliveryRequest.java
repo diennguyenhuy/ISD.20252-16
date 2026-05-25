@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.models.dto.request;
 
+import com.hust.soict.ict.aims.constraints.ValidProvinceCommune;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -7,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
+@ValidProvinceCommune
 public class DeliveryRequest {
     @NotBlank
     @Pattern(regexp = "^[\\p{L}\\s'.-]+$", message = "Must only contain characters")

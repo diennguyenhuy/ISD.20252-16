@@ -10,12 +10,12 @@ const OrderService = {
     },
 
     submitDeliveryForm: async (deliveryForm: DeliveryInformation): Promise<DeliveryInformation> => {
-        const response = await apiClient.post<DeliveryInformation>(`${ORDER_URL}/delivery`, deliveryForm);
+        const response = await apiClient.post<DeliveryInformation>(`order/delivery`, deliveryForm);
         return response.data;
     },
 
     getInvoice: async (): Promise<Invoice> => {
-        const response = await apiClient.get<Invoice>(`${ORDER_URL}/invoice`);
+        const response = await apiClient.get<Invoice>(`order/invoice`);
         return response.data;
     },
 
@@ -24,11 +24,11 @@ const OrderService = {
     },
 
     cancelOrder: async (orderId: string): Promise<void> => {
-        await apiClient.delete<void>(`${ORDER_URL}/${orderId}`);
+        await apiClient.delete<void>(`order/${orderId}`);
     },
 
     getOrder: async (orderId: string): Promise<Order> => {
-        const response = await apiClient.get<Order>(`${ORDER_URL}/${orderId}`);
+        const response = await apiClient.get<Order>(`order/${orderId}`);
         return response.data;
     }
 };

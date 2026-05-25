@@ -19,8 +19,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     List<Product> findAllByIdInAndStatus(Collection<UUID> ids, ProductStatus status);
 
-    @Query(nativeQuery = true, value = "SELECT * FROM product WHERE status = 'ACTIVE' ORDER BY RANDOM() LIMIT 20")
-    List<Product> find20RandomActiveProducts();
+    @Query("SELECT p FROM Product p WHERE p.status = ACTIVE ORDER BY random()")
+    List<Product> find20RandomActiveProducts(Pageable pageable);
 
     Optional<Product> findByIdAndStatus(UUID id, ProductStatus status);
 
@@ -28,16 +28,16 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     long countByStatusIn(Collection<ProductStatus> statuses);
   
     @Query("SELECT p FROM Product p WHERE " +
-    "(:title IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :title, '%') ) ) AND " +
-    "(:category IS NULL OR LOWER(p.category) LIKE LOWER(CONCAT('%', :category, '%') ) ) AND " +
+    "(:title IS NULL OR LOWER(p.title) LIKE :title) AND " +
+    "(:category IS NULL OR LOWER(p.category) LIKE :category) AND " +
     "(:minPrice IS NULL OR p.currentPrice >= :minPrice) AND " +
     "(:maxPrice IS NULL OR p.currentPrice <= :maxPrice) AND " +
     "p.status = ACTIVE")
     List<Product> searchActiveProductsBy(
             @Param("title") String title,
             @Param("category") String category,
-            @Param("minPrice") long minPrice,
-            @Param("maxPrice") long maxPrice,
+            @Param("minPrice") Long minPrice,
+            @Param("maxPrice") Long maxPrice,
             Pageable pageable
     );
 }

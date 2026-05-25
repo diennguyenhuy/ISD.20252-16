@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.order;
+package com.hust.soict.ict.aims.services.customer;
 
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.dto.response.product.ProductDetail;
@@ -7,6 +7,7 @@ import com.hust.soict.ict.aims.models.entities.product.ProductStatus;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import com.hust.soict.ict.aims.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,8 @@ public class ProductCatalogueService {
     private final ProductMapper productMapper;
 
     public List<ProductSummary> get20RandomProducts() {
-        return productRepository.find20RandomActiveProducts().stream().map(productMapper::toProductSummary).toList();
+        return productRepository.find20RandomActiveProducts(PageRequest.of(0, 20)).stream()
+                .map(productMapper::toProductSummary).toList();
     }
 
     public ProductDetail getProductById(UUID productId) throws ProductNotFoundException {
@@ -30,8 +32,11 @@ public class ProductCatalogueService {
                 .orElseThrow(() -> new ProductNotFoundException(productId));
     }
 
-    public List<ProductSummary> getProductsBy(String title, String category, long minPrice, long maxPrice, Pageable pageable) {
-        return productRepository.searchActiveProductsBy(title, category, minPrice, maxPrice, pageable)
+    public List<ProductSummary> getProductsBy(String title, String category, Long minPrice, Long maxPrice, Pageable pageable) {
+        String reqTitle = title == null ? null : "%" + title.toLowerCase() + "%";
+        String reqCategory = category == null ? null : "%" + category.toLowerCase() + "%";
+
+        return productRepository.searchActiveProductsBy(reqTitle, reqCategory, minPrice, maxPrice, pageable)
                 .stream().map(productMapper::toProductSummary).toList();
     }
 }

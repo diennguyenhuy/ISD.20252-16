@@ -13,12 +13,4 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PaymentController {
 
-    private final PaymentService paymentService;
-
-    @PostMapping("/credit-card")
-    public PaymentInitiationResponse payByCreditCard(
-            @Valid @RequestBody PayByCreditCardRequest request
-    ) {
-        return paymentService.initiatePayment(TransactionMethod.PAYPAL, request);
-    }
 }

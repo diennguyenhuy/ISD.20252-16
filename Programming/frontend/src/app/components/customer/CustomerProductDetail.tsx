@@ -1,5 +1,5 @@
-import {useState, useEffect} from 'react';
-import {useParams, useNavigate} from 'react-router';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router';
 import {
     ArrowLeft, ShoppingCart, Package,
     BookOpen, Disc, Tv, FileText, ChevronRight, CheckCircle2, Loader2
@@ -7,8 +7,8 @@ import {
 
 // Use standard services instead of AppContext
 import HomepageService from '../../api/homepageService';
-import {useCart} from "../../context/CartContext";
-import {formatVND, formatDate, formatDurationMinutes} from '../../data/mockData';
+import { useCart } from "../../context/CartContext";
+import { formatVND, formatDate, formatDurationMinutes } from '../../data/mockData';
 
 // Import our strict interfaces
 import type {
@@ -41,7 +41,7 @@ const TYPE_COLORS: Record<ProductTypeName, string> = {
     Newspaper: 'bg-muted text-muted-foreground border-border',
 };
 
-function InfoRow({label, value}: { label: string; value: string | number | undefined }) {
+function InfoRow({ label, value }: { label: string; value: string | number | undefined }) {
     if (value === undefined || value === '') return null; // Don't render empty rows
     return (
         <div
@@ -53,7 +53,7 @@ function InfoRow({label, value}: { label: string; value: string | number | undef
 }
 
 export default function CustomerProductDetail() {
-    const {id} = useParams<{ id: string }>();
+    const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
     // Local State for standard fetching
@@ -94,7 +94,7 @@ export default function CustomerProductDetail() {
     if (loading) {
         return (
             <div className="max-w-7xl mx-auto px-4 py-32 flex flex-col items-center justify-center animate-in fade-in">
-                <Loader2 className="w-10 h-10 animate-spin text-primary mb-4"/>
+                <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
                 <p className="text-muted-foreground">Loading product details...</p>
             </div>
         );
@@ -137,16 +137,16 @@ export default function CustomerProductDetail() {
             {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
                 <button onClick={() => navigate('/')}
-                        className="hover:text-foreground transition-colors flex items-center gap-1">
-                    <ArrowLeft size={16} className="mr-1"/>
+                    className="hover:text-foreground transition-colors flex items-center gap-1">
+                    <ArrowLeft size={16} className="mr-1" />
                     Back to Home
                 </button>
-                <ChevronRight size={14} className="opacity-50"/>
+                <ChevronRight size={14} className="opacity-50" />
                 <span
                     className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${TYPE_COLORS[product.productType]}`}>
-          {TYPE_LABELS[product.productType]}
-        </span>
-                <ChevronRight size={14} className="opacity-50"/>
+                    {TYPE_LABELS[product.productType]}
+                </span>
+                <ChevronRight size={14} className="opacity-50" />
                 <span className="text-foreground font-medium truncate max-w-[200px]">{product.title}</span>
             </nav>
 
@@ -161,16 +161,16 @@ export default function CustomerProductDetail() {
                             src={product.imageURL}
                             alt={product.title}
                             className="w-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                            style={{maxHeight: '500px'}}
+                            style={{ maxHeight: '500px' }}
                         />
 
                         {/* ADDED: Out of Stock Overlay matching the Homepage */}
                         {stockQty === 0 && (
                             <div
                                 className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-10">
-                  <span className="bg-background text-foreground px-6 py-2 rounded-full text-lg font-bold shadow-lg">
-                    Out of stock
-                  </span>
+                                <span className="bg-background text-foreground px-6 py-2 rounded-full text-lg font-bold shadow-lg">
+                                    Out of stock
+                                </span>
                             </div>
                         )}
                     </div>
@@ -180,11 +180,11 @@ export default function CustomerProductDetail() {
                 <div className="space-y-6 flex flex-col">
                     <div>
                         <div className="flex items-center gap-2 mb-3">
-              <span
-                  className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full border shadow-sm ${TYPE_COLORS[product.productType]}`}>
-                <TypeIcon size={14}/>
-                  {TYPE_LABELS[product.productType]}
-              </span>
+                            <span
+                                className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full border shadow-sm ${TYPE_COLORS[product.productType]}`}>
+                                <TypeIcon size={14} />
+                                {TYPE_LABELS[product.productType]}
+                            </span>
                         </div>
 
                         <h1 className="text-3xl sm:text-4xl text-foreground font-bold leading-tight tracking-tight mb-4">
@@ -232,7 +232,7 @@ export default function CustomerProductDetail() {
 
                     {/* Stock */}
                     <div className="flex items-center gap-2 font-medium">
-                        <Package size={18} className={stockQty > 0 ? 'text-primary' : 'text-destructive'}/>
+                        <Package size={18} className={stockQty > 0 ? 'text-primary' : 'text-destructive'} />
                         {stockQty > 10 ? (
                             <span className="text-foreground">Status: <span className="text-primary font-bold">In Stock ({stockQty})</span></span>
                         ) : stockQty > 0 ? (
@@ -279,18 +279,17 @@ export default function CustomerProductDetail() {
                         <button
                             disabled={stockQty === 0}
                             onClick={handleAdd}
-                            className={`flex-1 flex items-center justify-center gap-2 h-14 px-6 rounded-xl font-bold text-base transition-all shadow-md ${
-                                added
-                                    ? 'bg-primary/20 text-primary border-2 border-primary shadow-primary/20'
-                                    : stockQty === 0
-                                        ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-70'
-                                        : 'bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground hover:shadow-primary/30 hover:-translate-y-0.5'
-                            }`}
+                            className={`flex-1 flex items-center justify-center gap-2 h-14 px-6 rounded-xl font-bold text-base transition-all shadow-md ${added
+                                ? 'bg-primary/20 text-primary border-2 border-primary shadow-primary/20'
+                                : stockQty === 0
+                                    ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-70'
+                                    : 'bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground hover:shadow-primary/30 hover:-translate-y-0.5'
+                                }`}
                         >
                             {added ? (
-                                <><CheckCircle2 size={20} className="animate-in zoom-in"/> Added to cart!</>
+                                <><CheckCircle2 size={20} className="animate-in zoom-in" /> Added to cart!</>
                             ) : (
-                                <><ShoppingCart size={20}/> Add to Cart</>
+                                <><ShoppingCart size={20} /> Add to Cart</>
                             )}
                         </button>
                     </div>
@@ -310,11 +309,11 @@ export default function CustomerProductDetail() {
                 </div>
                 <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
                     <div className="space-y-1">
-                        <InfoRow label="Category" value={product.category}/>
-                        <InfoRow label="Barcode" value={product.barcode}/>
-                        <InfoRow label="Weight" value={`${product.weight} kg`}/>
+                        <InfoRow label="Category" value={product.category} />
+                        <InfoRow label="Barcode" value={product.barcode} />
+                        <InfoRow label="Weight" value={`${product.weight} kg`} />
                         <InfoRow label="Dimensions"
-                                 value={`${product.length} x ${product.width} x ${product.height} cm`}/>
+                            value={`${product.length} x ${product.width} x ${product.height} cm`} />
                         {/*<InfoRow label="Added At" value={product.addedAt ? formatDate(product.addedAt) : "-"} />*/}
                     </div>
                     <div className="space-y-1">
@@ -322,46 +321,46 @@ export default function CustomerProductDetail() {
                         {product.productType === 'Book' && (() => {
                             const b = product as Book;
                             return <>
-                                <InfoRow label="Publisher" value={b.publisher}/>
-                                <InfoRow label="Publish Date" value={formatDate(b.publicationDate)}/>
-                                <InfoRow label="Pages" value={b.numberOfPages}/>
-                                <InfoRow label="Language" value={b.language}/>
-                                <InfoRow label="Cover" value={b.coverType}/>
-                                <InfoRow label="Genre" value={b.genre}/>
+                                <InfoRow label="Publisher" value={b.publisher} />
+                                <InfoRow label="Publish Date" value={formatDate(b.publicationDate)} />
+                                <InfoRow label="Pages" value={b.numberOfPages} />
+                                <InfoRow label="Language" value={b.language} />
+                                <InfoRow label="Cover" value={b.coverType} />
+                                <InfoRow label="Genre" value={b.genre} />
                             </>;
                         })()}
 
                         {product.productType === 'CD' && (() => {
                             const c = product as CD;
                             return <>
-                                <InfoRow label="Record Label" value={c.recordLabel}/>
-                                {c.releaseDate && <InfoRow label="Release Date" value={formatDate(c.releaseDate)}/>}
-                                <InfoRow label="Genre" value={c.genre}/>
-                                <InfoRow label="Tracks" value={c.tracks.map(t => t.title).join(', ')}/>
+                                <InfoRow label="Record Label" value={c.recordLabel} />
+                                {c.releaseDate && <InfoRow label="Release Date" value={formatDate(c.releaseDate)} />}
+                                <InfoRow label="Genre" value={c.genre} />
+                                <InfoRow label="Tracks" value={c.tracks.map(t => t.title).join(', ')} />
                             </>;
                         })()}
 
                         {product.productType === 'DVD' && (() => {
                             const d = product as DVD;
                             return <>
-                                <InfoRow label="Studio" value={d.studio}/>
-                                <InfoRow label="Runtime" value={formatDurationMinutes(d.runtime)}/>
-                                <InfoRow label="Language" value={d.language}/>
-                                <InfoRow label="Subtitles" value={d.subtitles.join(', ')}/>
-                                <InfoRow label="Disc Type" value={d.discType}/>
-                                {d.releaseDate && <InfoRow label="Release Date" value={formatDate(d.releaseDate)}/>}
+                                <InfoRow label="Studio" value={d.studio} />
+                                <InfoRow label="Runtime" value={formatDurationMinutes(d.runtime)} />
+                                <InfoRow label="Language" value={d.language} />
+                                <InfoRow label="Subtitles" value={d.subtitles.join(', ')} />
+                                <InfoRow label="Disc Type" value={d.discType} />
+                                {d.releaseDate && <InfoRow label="Release Date" value={formatDate(d.releaseDate)} />}
                             </>;
                         })()}
 
                         {product.productType === 'Newspaper' && (() => {
                             const n = product as Newspaper;
                             return <>
-                                <InfoRow label="Publisher" value={n.publisher}/>
-                                <InfoRow label="Publish Date" value={formatDate(n.publicationDate)}/>
-                                <InfoRow label="Language" value={n.language}/>
-                                <InfoRow label="Issue Number" value={n.issueNumber}/>
-                                <InfoRow label="Frequency" value={n.publicationFrequency}/>
-                                <InfoRow label="ISSN" value={n.ISSN}/>
+                                <InfoRow label="Publisher" value={n.publisher} />
+                                <InfoRow label="Publish Date" value={formatDate(n.publicationDate)} />
+                                <InfoRow label="Language" value={n.language} />
+                                <InfoRow label="Issue Number" value={n.issueNumber} />
+                                <InfoRow label="Frequency" value={n.publicationFrequency} />
+                                <InfoRow label="ISSN" value={n.ISSN} />
                             </>;
                         })()}
                     </div>
