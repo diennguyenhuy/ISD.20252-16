@@ -23,7 +23,7 @@ public class PaymentServiceImpl implements PaymentService {
      * Not implemented (for other payment methods like VietQR)
      */
     @Override
-    public PaymentInitiationResponse initiatePayment(TransactionMethod method) {
+    public PaymentInitiationResponse initiatePayment(PaymentTransaction.Method method) {
         throw new UnsupportedOperationException("Not implemented");
     }
 
@@ -46,7 +46,7 @@ public class PaymentServiceImpl implements PaymentService {
      */
     @Override
     public PaymentInitiationResponse initiatePayment(
-            TransactionMethod method,
+            PaymentTransaction.Method method,
             PayByCreditCardRequest request
     ) {
 

@@ -1,7 +1,6 @@
 package com.hust.soict.ict.aims.repositories;
 
 import com.hust.soict.ict.aims.models.entities.product.Product;
-import com.hust.soict.ict.aims.models.entities.product.ProductStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,17 +14,17 @@ import java.util.UUID;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, UUID> {
-    List<Product> findAllByStatus(ProductStatus status);
+    List<Product> findAllByStatus(Product.Status status);
 
-    List<Product> findAllByIdInAndStatus(Collection<UUID> ids, ProductStatus status);
+    List<Product> findAllByIdInAndStatus(Collection<UUID> ids, Product.Status status);
 
     @Query("SELECT p FROM Product p WHERE p.status = ACTIVE ORDER BY random()")
     List<Product> find20RandomActiveProducts(Pageable pageable);
 
-    Optional<Product> findByIdAndStatus(UUID id, ProductStatus status);
+    Optional<Product> findByIdAndStatus(UUID id, Product.Status status);
 
     boolean existsByBarcode(String barcode);
-    long countByStatusIn(Collection<ProductStatus> statuses);
+    long countByStatusIn(Collection<Product.Status> statuses);
   
     @Query("SELECT p FROM Product p WHERE " +
     "(:title IS NULL OR LOWER(p.title) LIKE :title) AND " +

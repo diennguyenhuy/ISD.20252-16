@@ -5,7 +5,6 @@ import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.cart.Cart;
 import com.hust.soict.ict.aims.models.dto.response.CartResponse;
 import com.hust.soict.ict.aims.models.entities.product.Product;
-import com.hust.soict.ict.aims.models.entities.product.ProductStatus;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import com.hust.soict.ict.aims.mapper.CartMapper;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,7 @@ public class CartService {
 
     public CartResponse addItem(UUID productId, int quantity) throws ProductNotFoundException, IllegalArgumentException {
         log.debug("Adding item to cart with quantity {} for product #{}...", quantity, productId);
-        Product product = productRepository.findByIdAndStatus(productId, ProductStatus.ACTIVE)
+        Product product = productRepository.findByIdAndStatus(productId, Product.Status.ACTIVE)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
 
         Cart cart = cartContext.getOrCreateCart();

@@ -16,6 +16,11 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DVD extends Product {
+    public enum DiscType {
+        BLU_RAY,
+        HD_DVD,
+    }
+
     private LocalDate releaseDate;
 
     @Column(length = 50)

@@ -1,15 +1,14 @@
 package com.hust.soict.ict.aims.models.dto.response.product;
 
+import com.hust.soict.ict.aims.models.entities.product.Newspaper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
 @Data
 public class NewspaperDetail extends ProductDetail {
     private String publisher;
@@ -21,4 +20,7 @@ public class NewspaperDetail extends ProductDetail {
     private String ISSN;
     private List<String> sections = new ArrayList<>();
 
+    public NewspaperDetail() {
+        super(Newspaper.class.getSimpleName());
+    }
 }

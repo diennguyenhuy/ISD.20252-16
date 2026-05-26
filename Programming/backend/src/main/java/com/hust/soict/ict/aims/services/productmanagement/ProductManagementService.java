@@ -43,7 +43,7 @@ public class ProductManagementService {
         Product product = productFactory.buildNewProduct(dto);
         Product savedProduct = productRepo.save(product);
 
-        return mapToProductDetail(savedProduct);
+        return productMapper.toProductDetail(savedProduct);
     }
 
     @Transactional
@@ -55,7 +55,7 @@ public class ProductManagementService {
         setProductIdWithReflection(updatedProduct, id);
 
         Product savedProduct = productRepo.save(updatedProduct);
-        return mapToProductDetail(savedProduct);
+        return productMapper.toProductDetail(savedProduct);
     }
 
     @Transactional
@@ -64,14 +64,14 @@ public class ProductManagementService {
             throw new ProductValidationException("Cannot delete more than 10 products at a time.", "productIds");
         }
 
-        long deletedToday = productRepo.countByStatusIn(List.of(ProductStatus.DEACTIVATED, ProductStatus.DELETED));
+        long deletedToday = productRepo.countByStatusIn(List.of(Product.Status.DEACTIVATED, Product.Status.DELETED));
         if (deletedToday + productIds.size() > 20) {
             throw new ProductValidationException("Daily deletion quota exceeded (Max 20 per day).", "status");
         }
 
         for (UUID id : productIds) {
             productRepo.findById(id).ifPresent(product -> {
-                product.updateStatus(ProductStatus.DELETED);
+                product.updateStatus(Product.Status.DELETED);
 
                 Product deletedProduct = productFactory.buildDeletedProduct(product);
                 setProductIdWithReflection(deletedProduct, id);
@@ -79,15 +79,6 @@ public class ProductManagementService {
                 productRepo.save(deletedProduct);
             });
         }
-    }
-
-    private ProductDetail mapToProductDetail(Product product) {
-        ProductDetail detail = productMapper.toProductDetail(product);
-
-        String actualType = product.getClass().getSimpleName().toUpperCase();
-        detail.setProductType(actualType);
-
-        return detail;
     }
 
     private void setProductIdWithReflection(Product targetProduct, UUID oldId) {

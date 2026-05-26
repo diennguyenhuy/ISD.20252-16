@@ -29,9 +29,9 @@ public class ProductFactory {
                     .title(dto.getTitle()).category(dto.getCategory()).description(dto.getDescription())
                     .height(dto.getHeight()).width(dto.getWidth()).length(dto.getLength()).weight(dto.getWeight())
                     .barcode(dto.getBarcode()).originalValue(dto.getOriginalValue()).currentPrice(dto.getCurrentPrice())
-                    .stockQuantity(dto.getStockQuantity()).status(ProductStatus.ACTIVE).imageURL(dto.getImageURL())
+                    .stockQuantity(dto.getStockQuantity()).status(Product.Status.ACTIVE).imageURL(dto.getImageURL())
                     .publisher(dto.getPublisher()).publicationDate(dto.getPublicationDate()).language(dto.getLanguage())
-                    .authors(dto.getAuthors()).coverType(CoverType.valueOf(dto.getCoverType().toUpperCase()))
+                    .authors(dto.getAuthors()).coverType(Book.CoverType.valueOf(dto.getCoverType().toUpperCase()))
                     .numberOfPages(dto.getNumberOfPages()).genre(dto.getGenre()).build();
 
             case "CD" -> {
@@ -41,7 +41,7 @@ public class ProductFactory {
                         .title(dto.getTitle()).category(dto.getCategory()).description(dto.getDescription())
                         .height(dto.getHeight()).width(dto.getWidth()).length(dto.getLength()).weight(dto.getWeight())
                         .barcode(dto.getBarcode()).originalValue(dto.getOriginalValue()).currentPrice(dto.getCurrentPrice())
-                        .stockQuantity(dto.getStockQuantity()).status(ProductStatus.ACTIVE).imageURL(dto.getImageURL())
+                        .stockQuantity(dto.getStockQuantity()).status(Product.Status.ACTIVE).imageURL(dto.getImageURL())
                         .releaseDate(dto.getReleaseDate()).genre(dto.getGenre()).artists(dto.getArtists())
                         .recordLabel(dto.getRecordLabel()).tracks(cdTracks).build();
             }
@@ -50,8 +50,8 @@ public class ProductFactory {
                     .title(dto.getTitle()).category(dto.getCategory()).description(dto.getDescription())
                     .height(dto.getHeight()).width(dto.getWidth()).length(dto.getLength()).weight(dto.getWeight())
                     .barcode(dto.getBarcode()).originalValue(dto.getOriginalValue()).currentPrice(dto.getCurrentPrice())
-                    .stockQuantity(dto.getStockQuantity()).status(ProductStatus.ACTIVE).imageURL(dto.getImageURL())
-                    .releaseDate(dto.getReleaseDate()).genre(dto.getGenre()).discType(DiscType.valueOf(dto.getDiscType().toUpperCase()))
+                    .stockQuantity(dto.getStockQuantity()).status(Product.Status.ACTIVE).imageURL(dto.getImageURL())
+                    .releaseDate(dto.getReleaseDate()).genre(dto.getGenre()).discType(DVD.DiscType.valueOf(dto.getDiscType().toUpperCase()))
                     .director(dto.getDirector()).runtime(dto.getRuntime()).studio(dto.getStudio()).language(dto.getLanguage())
                     .subtitles(dto.getSubtitles()).build();
 
@@ -59,7 +59,7 @@ public class ProductFactory {
                     .title(dto.getTitle()).category(dto.getCategory()).description(dto.getDescription())
                     .height(dto.getHeight()).width(dto.getWidth()).length(dto.getLength()).weight(dto.getWeight())
                     .barcode(dto.getBarcode()).originalValue(dto.getOriginalValue()).currentPrice(dto.getCurrentPrice())
-                    .stockQuantity(dto.getStockQuantity()).status(ProductStatus.ACTIVE).imageURL(dto.getImageURL())
+                    .stockQuantity(dto.getStockQuantity()).status(Product.Status.ACTIVE).imageURL(dto.getImageURL())
                     .publisher(dto.getPublisher()).publicationDate(dto.getPublicationDate()).language(dto.getLanguage())
                     .editorInChief(dto.getEditorInChief()).issueNumber(dto.getIssueNumber()).publicationFrequency(dto.getPublicationFrequency())
                     .ISSN(dto.getISSN()).sections(dto.getSections()).build();

@@ -10,8 +10,6 @@ import com.hust.soict.ict.aims.models.dto.response.product.BookDetail;
 import com.hust.soict.ict.aims.models.dto.response.product.ProductDetail;
 import com.hust.soict.ict.aims.models.entities.product.Book;
 import com.hust.soict.ict.aims.models.entities.product.Product;
-import com.hust.soict.ict.aims.models.entities.product.ProductStatus;
-import com.hust.soict.ict.aims.models.entities.product.CoverType;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -90,7 +88,7 @@ class ProductManagementServiceTest {
         lenient().when(mockProduct.getOriginalValue()).thenReturn(200000L);
         lenient().when(mockProduct.getCurrentPrice()).thenReturn(220000L);
         lenient().when(mockProduct.getStockQuantity()).thenReturn(5);
-        lenient().when(mockProduct.getStatus()).thenReturn(ProductStatus.ACTIVE);
+        lenient().when(mockProduct.getStatus()).thenReturn(Product.Status.ACTIVE);
 
         lenient().when(mockProduct.getHeight()).thenReturn(new BigDecimal("24.0"));
         lenient().when(mockProduct.getWidth()).thenReturn(new BigDecimal("18.0"));
@@ -102,7 +100,7 @@ class ProductManagementServiceTest {
         lenient().when(mockBook.getPublicationDate()).thenReturn(java.time.LocalDate.now());
         lenient().when(mockBook.getLanguage()).thenReturn("English");
         lenient().when(mockBook.getAuthors()).thenReturn(List.of("Robert C. Martin"));
-        lenient().when(mockBook.getCoverType()).thenReturn(CoverType.HARDCOVER);
+        lenient().when(mockBook.getCoverType()).thenReturn(Book.CoverType.HARDCOVER);
         lenient().when(mockBook.getNumberOfPages()).thenReturn(464);
         lenient().when(mockBook.getGenre()).thenReturn("Technology");
 
@@ -219,7 +217,7 @@ class ProductManagementServiceTest {
             when(mockProduct.getStockQuantity()).thenReturn(0);
             when(productRepo.countByStatusIn(anyCollection())).thenReturn(0L);
             when(productRepo.findById(sampleId)).thenReturn(Optional.of(mockProduct));
-            when(mockProduct.getStatus()).thenReturn(ProductStatus.DELETED);
+            when(mockProduct.getStatus()).thenReturn(Product.Status.DELETED);
 
             productManagementService.deleteProducts(List.of(sampleId));
 
@@ -233,7 +231,7 @@ class ProductManagementServiceTest {
             when(mockProduct.getStockQuantity()).thenReturn(5);
             when(productRepo.countByStatusIn(anyCollection())).thenReturn(0L);
             when(productRepo.findById(sampleId)).thenReturn(Optional.of(mockProduct));
-            when(mockProduct.getStatus()).thenReturn(ProductStatus.DEACTIVATED);
+            when(mockProduct.getStatus()).thenReturn(Product.Status.DEACTIVATED);
 
             productManagementService.deleteProducts(List.of(sampleId));
 

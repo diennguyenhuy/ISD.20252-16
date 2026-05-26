@@ -6,7 +6,6 @@ import com.hust.soict.ict.aims.exceptions.NotEnoughStockException;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.cart.Cart;
 import com.hust.soict.ict.aims.models.entities.product.Product;
-import com.hust.soict.ict.aims.models.entities.product.ProductStatus;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -61,7 +60,7 @@ class StockValidatorTest {
 
         cart.addItem(product, 2);
 
-        when(productRepository.findAllByIdInAndStatus(any(), eq(ProductStatus.ACTIVE))).thenReturn(List.of(product));
+        when(productRepository.findAllByIdInAndStatus(any(), eq(Product.Status.ACTIVE))).thenReturn(List.of(product));
 
         Cart result = stockValidator.checkStockAvailability();
 
@@ -83,7 +82,7 @@ class StockValidatorTest {
         when(cartContext.getOrCreateCart()).thenReturn(cart);
         cart.addItem(product, 5);
 
-        when(productRepository.findAllByIdInAndStatus(any(), eq(ProductStatus.ACTIVE))).thenReturn(List.of(product));
+        when(productRepository.findAllByIdInAndStatus(any(), eq(Product.Status.ACTIVE))).thenReturn(List.of(product));
 
         NotEnoughStockException x = assertThrows(NotEnoughStockException.class, () -> stockValidator.checkStockAvailability());
 
@@ -102,7 +101,7 @@ class StockValidatorTest {
         when(cartContext.getOrCreateCart()).thenReturn(cart);
         cart.addItem(product, 2);
 
-        when(productRepository.findAllByIdInAndStatus(any(), eq(ProductStatus.ACTIVE))).thenReturn(List.of());
+        when(productRepository.findAllByIdInAndStatus(any(), eq(Product.Status.ACTIVE))).thenReturn(List.of());
 
         ProductNotFoundException x = assertThrows(ProductNotFoundException.class, () -> stockValidator.checkStockAvailability());
 

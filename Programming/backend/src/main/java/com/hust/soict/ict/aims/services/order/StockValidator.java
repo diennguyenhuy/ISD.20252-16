@@ -7,7 +7,6 @@ import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.cart.Cart;
 import com.hust.soict.ict.aims.models.cart.CartItem;
 import com.hust.soict.ict.aims.models.entities.product.Product;
-import com.hust.soict.ict.aims.models.entities.product.ProductStatus;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -57,7 +56,7 @@ public class StockValidator {
                 .map(i -> i.getProduct().getId())
                 .toList();
 
-        List<Product> products = productRepository.findAllByIdInAndStatus(productIds, ProductStatus.ACTIVE);
+        List<Product> products = productRepository.findAllByIdInAndStatus(productIds, Product.Status.ACTIVE);
 
         Map<UUID, Product> productMap = products.stream()
                 .collect(Collectors.toMap(Product::getId, p -> p));

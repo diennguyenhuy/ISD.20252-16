@@ -4,7 +4,6 @@ import com.hust.soict.ict.aims.IPaymentQRCode;
 import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
-import com.hust.soict.ict.aims.models.entities.order.TransactionMethod;
 import com.hust.soict.ict.aims.subsystems.vietqr.QRCode;
 import com.hust.soict.ict.aims.subsystems.vietqr.QRCodePaymentStatus;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +53,7 @@ public class PayOrderService {
         return PaymentTransaction.of(
                 content,
                 Instant.now(),
-                TransactionMethod.VIETQR,
+                PaymentTransaction.Method.VIETQR,
                 order.getTotalAmount(),
                 order
         );

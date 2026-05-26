@@ -15,6 +15,11 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Book extends PrintableProduct {
+    public enum CoverType {
+        PAPERBACK,
+        HARDCOVER,
+    }
+
     @ElementCollection
     @CollectionTable(
             name = "book_authors",

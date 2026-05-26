@@ -3,7 +3,7 @@ package com.hust.soict.ict.aims.services.customer;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.dto.response.product.ProductDetail;
 import com.hust.soict.ict.aims.models.dto.response.product.ProductSummary;
-import com.hust.soict.ict.aims.models.entities.product.ProductStatus;
+import com.hust.soict.ict.aims.models.entities.product.Product;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import com.hust.soict.ict.aims.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class ProductCatalogueService {
     }
 
     public ProductDetail getProductById(UUID productId) throws ProductNotFoundException {
-        return productRepository.findByIdAndStatus(productId, ProductStatus.ACTIVE)
+        return productRepository.findByIdAndStatus(productId, Product.Status.ACTIVE)
                 .map(productMapper::toProductDetail)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
     }

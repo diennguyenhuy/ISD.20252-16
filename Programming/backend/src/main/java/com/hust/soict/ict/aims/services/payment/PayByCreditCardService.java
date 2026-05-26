@@ -19,15 +19,15 @@ public class PayByCreditCardService {
     private final PaymentTransactionRepository transactionRepository;
     private final NotificationService notificationService;
 
-    public boolean process(PayByCreditCardRequest request, TransactionMethod method) {
+    public boolean process(PayByCreditCardRequest request, PaymentTransaction.Method method) {
 
         validateCard(request);
 
         Order order = orderRepository.findById(UUID.fromString(request.getOrderId()))
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        if (order.getStatus() != OrderStatus.DRAFT &&
-                order.getStatus() != OrderStatus.PENDING) {
+        if (order.getStatus() != Order.Status.DRAFT &&
+                order.getStatus() != Order.Status.PENDING) {
             throw new RuntimeException("Order not payable");
         }
 
@@ -44,9 +44,9 @@ public class PayByCreditCardService {
         transactionRepository.save(transaction);
 
         if (success) {
-            order.changeStatus(OrderStatus.APPROVED);
+            order.changeStatus(Order.Status.APPROVED);
         } else {
-            order.changeStatus(OrderStatus.REJECTED);
+            order.changeStatus(Order.Status.REJECTED);
         }
 
         orderRepository.save(order);

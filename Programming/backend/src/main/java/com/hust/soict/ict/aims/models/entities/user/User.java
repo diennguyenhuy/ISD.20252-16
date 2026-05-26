@@ -1,6 +1,5 @@
 package com.hust.soict.ict.aims.models.entities.user;
 
-import com.hust.soict.ict.aims.exceptions.ValidationException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -9,15 +8,18 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.UUID;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "user")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
+    public enum Role {
+        PRODUCT_MANAGER,
+        ADMINISTRATOR,
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false)
@@ -45,14 +47,9 @@ public class User {
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "role", length = 20)
-    private Set<UserRole> roles = new HashSet<>();
+    private Set<Role> roles = new HashSet<>();
 
-    public User(Builder builder) throws ValidationException {
-        UserValidator.validateUsername(builder.username);
-        UserValidator.validateEmail(builder.username);
-        UserValidator.validateHashedPassword(builder.hashedPassword);
-        UserValidator.validateRoles(builder.roles);
-
+    public User(Builder builder) {
         this.username = builder.username;
         this.email = builder.email;
         this.hashedPassword = builder.hashedPassword;
@@ -63,7 +60,7 @@ public class User {
         private String username;
         private String email;
         private String hashedPassword;
-        private Set<UserRole> roles = new HashSet<>();
+        private Set<Role> roles = new HashSet<>();
 
         public Builder username(String username) {
             this.username = username;
@@ -80,41 +77,13 @@ public class User {
             return this;
         }
 
-        public Builder roles(Set<UserRole> roles) {
+        public Builder roles(Set<Role> roles) {
             this.roles = roles;
             return this;
         }
 
-        public User build() throws ValidationException {
+        public User build() {
             return new User(this);
-        }
-    }
-}
-
-final class UserValidator {
-    private UserValidator() {}
-
-    static void validateUsername(String username) throws ValidationException {
-        if (username == null || username.isBlank()) {
-            throw new ValidationException("Username is required", "username");
-        }
-    }
-
-    static void validateEmail(String email) throws ValidationException {
-        if (email == null || email.isBlank()) {
-            throw new ValidationException("Email is required", "email");
-        }
-    }
-
-    static void validateHashedPassword(String hashedPassword) throws ValidationException {
-        if (hashedPassword == null || hashedPassword.isBlank()) {
-            throw new ValidationException("Hashed password is required", "hashedPassword");
-        }
-    }
-
-    static void validateRoles(Set<UserRole> roles) throws ValidationException {
-        if (roles == null || roles.isEmpty()) {
-            throw new ValidationException("Roles are required", "roles");
         }
     }
 }

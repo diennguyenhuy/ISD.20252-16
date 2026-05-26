@@ -1,12 +1,10 @@
 package com.hust.soict.ict.aims.models.dto.response.product;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 
-@NoArgsConstructor
 @Data
 public abstract class ProductDetail {
     private String id;
@@ -25,5 +23,9 @@ public abstract class ProductDetail {
     private String imageURL;
     private Instant addedAt;
     private Instant updatedAt;
-    private String productType;
+    protected final String productType;
+
+    protected ProductDetail(String productType) {
+        this.productType = productType;
+    }
 }

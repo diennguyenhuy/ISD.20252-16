@@ -1,15 +1,14 @@
 package com.hust.soict.ict.aims.models.dto.response.product;
 
 
+import com.hust.soict.ict.aims.models.entities.product.DVD;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
 @Data
 public class DVDDetail extends ProductDetail {
     private LocalDate releaseDate;
@@ -20,4 +19,8 @@ public class DVDDetail extends ProductDetail {
     private String studio;
     private String language;
     private List<String> subtitles;
+
+    public DVDDetail() {
+        super(DVD.class.getSimpleName());
+    }
 }

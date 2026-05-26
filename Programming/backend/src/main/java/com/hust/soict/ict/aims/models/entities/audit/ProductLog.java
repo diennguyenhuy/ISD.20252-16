@@ -19,6 +19,13 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductLog {
+    public enum Action {
+        ADD,
+        EDIT,
+        DELETE,
+        DEACTIVATE,
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false)
@@ -26,7 +33,7 @@ public class ProductLog {
 
     @Column(nullable = false, updatable = false, length = 20)
     @Enumerated(EnumType.STRING)
-    private ManagerAction action;
+    private Action action;
 
     @ManyToOne
     @JoinColumn(name = "manager_id", updatable = false)
@@ -61,7 +68,7 @@ public class ProductLog {
     }
 
     public static ProductLog of(
-            ManagerAction action,
+            Action action,
             User manager,
             Product product,
             Instant timestamp

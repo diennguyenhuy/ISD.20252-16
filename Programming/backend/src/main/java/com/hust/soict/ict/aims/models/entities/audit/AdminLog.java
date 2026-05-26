@@ -17,6 +17,17 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AdminLog {
+    public enum Action {
+        CREATE,
+        ACTIVATE,
+        DEACTIVATE,
+        BLOCK,
+        UNBLOCK,
+        ASSIGN_ROLE,
+        RESET_PASSWORD,
+        UPDATE_EMAIL
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false)
@@ -24,7 +35,7 @@ public class AdminLog {
 
     @Column(nullable = false, updatable = false, length = 20)
     @Enumerated(EnumType.STRING)
-    private AdminAction action;
+    private Action action;
 
     @ManyToOne
     @JoinColumn(name = "admin_id", updatable = false)
@@ -69,7 +80,7 @@ public class AdminLog {
     }
 
     public static AdminLog of(
-            AdminAction action,
+            Action action,
             User admin,
             User affectedUser,
             Instant timestamp

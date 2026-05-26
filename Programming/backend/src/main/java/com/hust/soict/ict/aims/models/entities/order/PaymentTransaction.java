@@ -20,6 +20,11 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PaymentTransaction {
+    public enum Method {
+        VIETQR,
+        PAYPAL
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false)
@@ -31,7 +36,7 @@ public class PaymentTransaction {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TransactionMethod transactionMethod;
+    private Method transactionMethod;
 
     @Column(nullable = false)
     private Long amountPaid;
@@ -51,7 +56,7 @@ public class PaymentTransaction {
     public static PaymentTransaction of(
             String transactionContent,
             Instant transactionTimestamp,
-            TransactionMethod transactionMethod,
+            Method transactionMethod,
             Long amountPaid,
             @NotNull Order order
     ) {

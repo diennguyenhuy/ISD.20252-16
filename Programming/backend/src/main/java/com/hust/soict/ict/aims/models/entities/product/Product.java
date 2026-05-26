@@ -17,6 +17,18 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class Product {
+    public enum Status {
+        ACTIVE,
+        DEACTIVATED,
+        DELETED;
+
+        static final Map<Status, Set<Status>> transitions = Map.of(
+                ACTIVE, Set.of(DEACTIVATED, DELETED),
+                DEACTIVATED, Set.of(ACTIVE, DELETED),
+                DELETED, Set.of(ACTIVE)
+        );
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false)
@@ -61,7 +73,7 @@ public abstract class Product {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private ProductStatus status = ProductStatus.ACTIVE;
+    private Status status = Status.ACTIVE;
 
     @Column(name = "image_url", length = 2048)
     private String imageURL;
@@ -95,9 +107,15 @@ public abstract class Product {
         this.currentPrice = newPrice;
     }
 
-    public void updateStatus(@NonNull ProductStatus status) {
-        if (status == ProductStatus.DELETED && stockQuantity > 0) {
-            status = ProductStatus.DEACTIVATED;
+    public void updateStatus(@NonNull Status status) throws IllegalStateException {
+        if (status == this.status) return;
+
+        if (!Status.transitions.get(this.status).contains(status)) {
+            throw new IllegalStateException("Cannot transition product status from " + this.status + " to " + status);
+        }
+
+        if (status == Status.DELETED && stockQuantity > 0) {
+            status = Status.DEACTIVATED;
         }
 
         this.status = status;
@@ -131,7 +149,7 @@ public abstract class Product {
         private Long originalValue;
         private Long currentPrice;
         private Integer stockQuantity;
-        private ProductStatus status = ProductStatus.ACTIVE;
+        private Status status = Status.ACTIVE;
         private String imageURL;
 
         protected abstract B self();
@@ -193,7 +211,7 @@ public abstract class Product {
             return self();
         }
 
-        public B status(ProductStatus status) {
+        public B status(Status status) {
             this.status = status;
             return self();
         }

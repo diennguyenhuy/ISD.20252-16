@@ -2,7 +2,7 @@ package com.hust.soict.ict.aims.services.payment;
 
 import com.hust.soict.ict.aims.models.dto.request.PayByCreditCardRequest;
 import com.hust.soict.ict.aims.models.dto.response.order.PaymentInitiationResponse;
-import com.hust.soict.ict.aims.models.entities.order.TransactionMethod;
+import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 
 /**
  * Payment Service Interface
@@ -19,10 +19,10 @@ import com.hust.soict.ict.aims.models.entities.order.TransactionMethod;
  */
 public interface PaymentService {
 
-    PaymentInitiationResponse initiatePayment(TransactionMethod transactionMethod);
+    PaymentInitiationResponse initiatePayment(PaymentTransaction.Method transactionMethod);
 
     PaymentInitiationResponse initiatePayment(
-            TransactionMethod transactionMethod,
+            PaymentTransaction.Method transactionMethod,
             PayByCreditCardRequest request
     );
 }

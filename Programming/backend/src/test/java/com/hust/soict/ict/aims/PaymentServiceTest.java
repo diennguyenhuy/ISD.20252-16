@@ -5,6 +5,7 @@ import com.hust.soict.ict.aims.models.dto.response.order.PaymentInitiationRespon
 import com.hust.soict.ict.aims.models.entities.order.*;
 import com.hust.soict.ict.aims.repositories.OrderRepository;
 import com.hust.soict.ict.aims.repositories.PaymentTransactionRepository;
+import com.hust.soict.ict.aims.services.payment.PayByCreditCardService;
 import com.hust.soict.ict.aims.services.payment.PaymentService;
 import com.hust.soict.ict.aims.services.payment.PaymentServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -49,7 +50,7 @@ class PaymentServiceTest {
         request.setCvv("123");
 
         PaymentInitiationResponse res =
-                service.initiatePayment(TransactionMethod.PAYPAL, request);
+                service.initiatePayment(PaymentTransaction.Method.PAYPAL, request);
 
         assertTrue(res.success());
 
@@ -83,7 +84,7 @@ class PaymentServiceTest {
         request.setCvv("123");
 
         PaymentInitiationResponse res =
-                service.initiatePayment(TransactionMethod.PAYPAL, request);
+                service.initiatePayment(PaymentTransaction.Method.PAYPAL, request);
 
         assertFalse(res.success());
 
@@ -101,7 +102,7 @@ class PaymentServiceTest {
         req.setCardNumber("123");
 
         assertThrows(RuntimeException.class, () ->
-                service.initiatePayment(TransactionMethod.PAYPAL, req)
+                service.initiatePayment(PaymentTransaction.Method.PAYPAL, req)
         );
     }
 }
