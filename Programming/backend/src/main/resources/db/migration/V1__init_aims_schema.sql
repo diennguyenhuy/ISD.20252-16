@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS product(
-	id 				UUID PRIMARY KEY,
+	id 				UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	title			VARCHAR(255) NOT NULL,
 	category		VARCHAR(50) NOT NULL,
 	description		TEXT NOT NULL,
@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS product(
 	status			VARCHAR(20) NOT NULL,
 	image_url		VARCHAR(2048),
     version         BIGINT NOT NULL DEFAULT 0,
-	added_at		TIMESTAMPTZ NOT NULL,
-	updated_at		TIMESTAMPTZ NOT NULL
+	created_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS book(
@@ -94,21 +94,21 @@ CREATE TABLE IF NOT EXISTS dvd_subtitles(
 );
 
 CREATE TABLE IF NOT EXISTS "order"(
-    id				UUID PRIMARY KEY,
+    id				UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     status			VARCHAR(10) NOT NULL,
-    delivery_fee	BIGINT,
-    created_at		TIMESTAMPTZ NOT NULL,
-    updated_at		TIMESTAMPTZ NOT NULL
+    created_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS order_item(
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     order_id		UUID REFERENCES "order"(id) ON DELETE CASCADE,
-    product_id		UUID REFERENCES product(id) ON DELETE CASCADE,
-    product_name	VARCHAR(255),
-    quantity		INT,
-    unit_price		BIGINT,
-    unit_weight		NUMERIC(10, 3),
-    PRIMARY KEY (order_id, product_id)
+    product_id		UUID REFERENCES product(id) ON DELETE SET NULL,
+    product_name	VARCHAR(255) NOT NULL,
+    quantity		INT NOT NULL,
+    unit_price		BIGINT NOT NULL,
+    unit_weight		NUMERIC(10, 3) NOT NULL,
+    UNIQUE (order_id, product_id)
 );
 
 CREATE TABLE IF NOT EXISTS delivery_information(
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS invoice(
 );
 
 CREATE TABLE IF NOT EXISTS payment_transaction(
-    id						UUID PRIMARY KEY,
+    id						UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     transaction_content		TEXT,
     transaction_timestamp	TIMESTAMPTZ NOT NULL,
     transaction_method		VARCHAR(10) NOT NULL,
@@ -141,12 +141,12 @@ CREATE TABLE IF NOT EXISTS payment_transaction(
 );
 
 CREATE TABLE IF NOT EXISTS "user"(
-    id				UUID PRIMARY KEY,
+    id				UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     username		VARCHAR(255) NOT NULL,
     email			VARCHAR(255) NOT NULL UNIQUE,
     hashed_password	TEXT NOT NULL,
-    created_at		TIMESTAMPTZ NOT NULL,
-    updated_at		TIMESTAMPTZ NOT NULL
+    created_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS user_roles(
@@ -156,27 +156,33 @@ CREATE TABLE IF NOT EXISTS user_roles(
 );
 
 CREATE TABLE IF NOT EXISTS product_log(
-    id			UUID PRIMARY KEY,
-    action		VARCHAR(10) NOT NULL,
-    manager_id	UUID REFERENCES "user"(id) ON DELETE SET NULL,
-    product_id	UUID NOT NULL REFERENCES product(id) ON DELETE CASCADE,
-    timestamp	TIMESTAMPTZ NOT NULL
+    id			        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    action		        VARCHAR(20) NOT NULL,
+    manager_id	        UUID REFERENCES "user"(id) ON DELETE SET NULL,
+    manager_username    VARCHAR(255) NOT NULL,
+    product_id	        UUID REFERENCES product(id) ON DELETE SET NULL,
+    product_title       VARCHAR(255) NOT NULL,
+    timestamp	        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS stock_adjust_log(
-    id			UUID PRIMARY KEY,
-    old_stock	INT NOT NULL,
-    new_stock	INT NOT NULL,
-    reason		TEXT NOT NULL,
-    manager_id	UUID REFERENCES "user"(id) ON DELETE SET NULL,
-    product_id	UUID NOT NULL REFERENCES product(id) ON DELETE CASCADE,
-    timestamp	TIMESTAMPTZ NOT NULL
+    id			        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    old_stock	        INT NOT NULL,
+    new_stock	        INT NOT NULL,
+    reason		        TEXT NOT NULL,
+    manager_id	        UUID REFERENCES "user"(id) ON DELETE SET NULL,
+    manager_username    VARCHAR(255) NOT NULL,
+    product_id	        UUID REFERENCES product(id) ON DELETE SET NULL,
+    product_title       VARCHAR(255) NOT NULL,
+    timestamp	        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS admin_log(
-    id					UUID PRIMARY KEY,
+    id					UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     action				VARCHAR(20) NOT NULL,
     admin_id			UUID REFERENCES "user"(id) ON DELETE SET NULL,
-    affected_user_id	UUID NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
-    timestamp			TIMESTAMPTZ NOT NULL
+    admin_username      VARCHAR(255) NOT NULL,
+    affected_user_id	UUID REFERENCES "user"(id) ON DELETE SET NULL,
+    affected_username   VARCHAR(255) NOT NULL,
+    timestamp			TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

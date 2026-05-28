@@ -1,22 +1,20 @@
 package com.hust.soict.ict.aims.models.entities.product;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.*;
 
 import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
 import com.hust.soict.ict.aims.exceptions.ProductValidationException;
+import com.hust.soict.ict.aims.models.entities.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "product")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class Product {
+public abstract class Product extends AuditableEntity {
     public enum Status {
         ACTIVE,
         DEACTIVATED,
@@ -81,16 +79,8 @@ public abstract class Product {
     @Version
     private Long version;
 
-    @CreationTimestamp
-    @Column(updatable = false, nullable = false)
-    private Instant addedAt;
-
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private Instant updatedAt;
-
-    public static final double MIN_PRICE_RELATIVE = 0.3;
-    public static final double MAX_PRICE_RELATIVE = 1.5;
+    private static final double MIN_PRICE_RELATIVE = 0.3;
+    private static final double MAX_PRICE_RELATIVE = 1.5;
 
     public void changePrice(long newPrice) throws ProductValidationException {
         if (newPrice < 0) {

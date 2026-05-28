@@ -21,7 +21,7 @@ public abstract class ProductDetail {
     private int stockQuantity;
     private String status;
     private String imageURL;
-    private Instant addedAt;
+    private Instant createdAt;
     private Instant updatedAt;
     protected final String productType;
 

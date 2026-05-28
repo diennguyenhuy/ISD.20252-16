@@ -1,20 +1,18 @@
 package com.hust.soict.ict.aims.models.entities.user;
 
+import com.hust.soict.ict.aims.models.entities.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.Instant;
 import java.util.*;
 
 @Entity
 @Table(name = "user")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User {
+public class User extends AuditableEntity {
     public enum Role {
         PRODUCT_MANAGER,
         ADMINISTRATOR,
@@ -34,14 +32,6 @@ public class User {
     @Column(nullable = false)
     @Getter(AccessLevel.NONE)
     private String hashedPassword;
-
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private Instant createdAt;
-
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private Instant updatedAt;
 
     @ElementCollection
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))

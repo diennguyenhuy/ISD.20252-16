@@ -1,13 +1,11 @@
 package com.hust.soict.ict.aims.models.entities.order;
 
 import com.hust.soict.ict.aims.models.cart.Cart;
+import com.hust.soict.ict.aims.models.entities.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.*;
 
 /**
@@ -51,7 +49,7 @@ import java.util.*;
 })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Order {
+public class Order extends AuditableEntity {
     public enum Status {
         DRAFT,
         PENDING,
@@ -86,6 +84,7 @@ public class Order {
     private DeliveryInformation deliveryInformation;
 
     @Setter
+    @Transient
     private Long deliveryFee;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
@@ -96,13 +95,6 @@ public class Order {
     @Setter(AccessLevel.PACKAGE)
     private PaymentTransaction paymentTransaction;
 
-    @CreationTimestamp
-    @Column(updatable = false)
-    private Instant createdAt;
-
-    @UpdateTimestamp
-    private Instant updatedAt;
-
     @Transient
     public Long getTotalPriceWithoutVAT() {
         return items.stream().mapToLong(OrderItem::getItemTotalPrice).sum();
@@ -110,7 +102,7 @@ public class Order {
 
     @Transient
     public Long getTotalPriceWithVAT() {
-        return Math.round(getTotalPriceWithoutVAT() * 1.1);
+        return getTotalPriceWithoutVAT() * 110 / 100;
     }
 
     @Transient
@@ -125,6 +117,7 @@ public class Order {
 
     void addItem(OrderItem orderItem) {
         items.add(orderItem);
+        orderItem.setOrder(this);
     }
 
     public void changeStatus(@NonNull Status newStatus) throws IllegalStateException {
