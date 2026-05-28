@@ -6,8 +6,10 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 /**
  * Cohesion: Functional Cohesion
@@ -19,29 +21,38 @@ import java.math.BigDecimal;
  *   through aggregate relationships and factory methods.
  */
 @Entity
-@Table(name = "order_item")
+@Table(
+        name = "order_item",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"order_id", "product_id"}
+        )
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderItem {
-    @EmbeddedId
-    private OrderItemKey id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(updatable = false)
+    private UUID id;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @MapsId("orderId")
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
+    @Setter(AccessLevel.PACKAGE)
     private Order order;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @MapsId("productId")
-    @JoinColumn(name = "product_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
     private Product product;
 
+    @Column(nullable = false)
     private String productName;
 
+    @Column(nullable = false)
     private Integer quantity;
+    @Column(nullable = false)
     private Long unitPrice;
 
-    @Column(precision = 10, scale = 3)
+    @Column(precision = 10, scale = 3, nullable = false)
     private BigDecimal unitWeight;
 
     @Transient

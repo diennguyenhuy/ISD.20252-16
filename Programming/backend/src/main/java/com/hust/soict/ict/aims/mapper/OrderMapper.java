@@ -17,7 +17,7 @@ public interface OrderMapper {
 
     OrderDraftResponse toOrderDraftResponse(Order order);
 
-    @Mapping(target = "productId", expression = "java(orderItem.getProduct().getId().toString())")
+    @Mapping(target = "productId", expression = "java(orderItem.getProduct().getId())")
     OrderItemResponse toOrderItemResponse(OrderItem orderItem);
 
     DeliveryResponse toDeliveryResponse(DeliveryInformation deliveryInformation);
