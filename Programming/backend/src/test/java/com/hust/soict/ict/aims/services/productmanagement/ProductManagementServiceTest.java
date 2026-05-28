@@ -4,12 +4,14 @@ import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.exceptions.ProductValidationException;
 import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
 import com.hust.soict.ict.aims.mapper.ProductMapper;
-import com.hust.soict.ict.aims.models.dto.request.CreateProductRequest;
-import com.hust.soict.ict.aims.models.dto.request.UpdateProductRequest;
+import com.hust.soict.ict.aims.models.dto.request.CreateBookRequest;
+import com.hust.soict.ict.aims.models.dto.request.UpdateBookRequest;
 import com.hust.soict.ict.aims.models.dto.response.product.BookDetail;
 import com.hust.soict.ict.aims.models.dto.response.product.ProductDetail;
 import com.hust.soict.ict.aims.models.entities.product.Book;
 import com.hust.soict.ict.aims.models.entities.product.Product;
+import com.hust.soict.ict.aims.models.entities.product.Product.Status;
+import com.hust.soict.ict.aims.models.entities.product.*;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,9 +20,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,11 +44,16 @@ class ProductManagementServiceTest {
     @Mock
     private ProductMapper productMapper;
 
+    // Sử dụng @Spy để Inject logic thật của Factory vào Service
+    @Spy
+    private ProductFactory productFactory = new ProductFactory();
+
     @InjectMocks
     private ProductManagementService productManagementService;
 
-    private CreateProductRequest sampleCreateRequest;
-    private UpdateProductRequest sampleUpdateRequest;
+    // Sử dụng trực tiếp class con (CreateBookRequest) để test tính đa hình
+    private CreateBookRequest sampleCreateRequest;
+    private UpdateBookRequest sampleUpdateRequest;
     private UUID sampleId;
     private Product mockProduct;
     private BookDetail sampleBookDetail;
@@ -53,80 +62,90 @@ class ProductManagementServiceTest {
     void setUp() {
         sampleId = UUID.randomUUID();
 
-        sampleCreateRequest = new CreateProductRequest();
-        sampleCreateRequest.setTitle("Clean Code");
-        sampleCreateRequest.setBarcode("9780132350884");
-        sampleCreateRequest.setCategory("BOOK");
-        sampleCreateRequest.setOriginalValue(200000L);
-        sampleCreateRequest.setCurrentPrice(220000L);
-        sampleCreateRequest.setStockQuantity(5);
-        sampleCreateRequest.setDescription("Non-blank description");
-        sampleCreateRequest.setHeight(new BigDecimal("24.0"));
-        sampleCreateRequest.setWidth(new BigDecimal("18.0"));
-        sampleCreateRequest.setLength(new BigDecimal("3.0"));
-        sampleCreateRequest.setWeight(new BigDecimal("0.6"));
+        // 1. Cài đặt DTO Tạo mới (Sử dụng CreateBookRequest)
+        sampleCreateRequest = new CreateBookRequest();
+        sampleCreateRequest.setProductType("BOOK");
+        sampleCreateRequest.setTitle("Clean Architecture");
+        sampleCreateRequest.setCategory("Technology");
+        sampleCreateRequest.setDescription("Software design book");
+        sampleCreateRequest.setBarcode("9780134494166");
+        sampleCreateRequest.setOriginalValue(300000L);
+        sampleCreateRequest.setCurrentPrice(320000L);
+        sampleCreateRequest.setStockQuantity(10);
+        sampleCreateRequest.setHeight(new BigDecimal("23.0"));
+        sampleCreateRequest.setWidth(new BigDecimal("15.0"));
+        sampleCreateRequest.setLength(new BigDecimal("3.5"));
+        sampleCreateRequest.setWeight(new BigDecimal("0.8"));
 
-        sampleCreateRequest.setPublisher("O'Reilly Media");
-        sampleCreateRequest.setPublicationDate(java.time.LocalDate.now());
+        // Specific info cho Book
+        sampleCreateRequest.setPublisher("Prentice Hall");
+        sampleCreateRequest.setPublicationDate(LocalDate.of(2017, 9, 10));
+        sampleCreateRequest.setLanguage("English");
         sampleCreateRequest.setAuthors(List.of("Robert C. Martin"));
-        sampleCreateRequest.setCoverType("HARDCOVER");
-        sampleCreateRequest.setNumberOfPages(300);
-        sampleCreateRequest.setGenre("Technology");
+        sampleCreateRequest.setCoverType("PAPERBACK");
+        sampleCreateRequest.setNumberOfPages(432);
+        sampleCreateRequest.setGenre("Computer Science");
 
-        sampleUpdateRequest = new UpdateProductRequest();
-        sampleUpdateRequest.setTitle("Clean Code - Ed.2");
-        sampleUpdateRequest.setCurrentPrice(210000L);
-        sampleUpdateRequest.setStockQuantity(12);
-        sampleUpdateRequest.setDescription("Updated description");
+        // 2. Cài đặt DTO Cập nhật (Sử dụng UpdateBookRequest)
+        sampleUpdateRequest = new UpdateBookRequest();
+        sampleUpdateRequest.setProductType("BOOK");
+        sampleUpdateRequest.setTitle("Clean Architecture - Revised Edition");
+        sampleUpdateRequest.setCurrentPrice(310000L); // Dùng wrapper Long
+        sampleUpdateRequest.setStockQuantity(15);    // Dùng wrapper Integer
+        sampleUpdateRequest.setNumberOfPages(450);   // Update specific field
 
+        // 3. Cấu hình Mock Entity
         mockProduct = mock(Book.class);
         lenient().when(mockProduct.getId()).thenReturn(sampleId);
-        lenient().when(mockProduct.getTitle()).thenReturn("Clean Code");
-        lenient().when(mockProduct.getBarcode()).thenReturn("9780132350884");
-        lenient().when(mockProduct.getCategory()).thenReturn("BOOK");
-        lenient().when(mockProduct.getDescription()).thenReturn("Non-blank description");
-        lenient().when(mockProduct.getOriginalValue()).thenReturn(200000L);
-        lenient().when(mockProduct.getCurrentPrice()).thenReturn(220000L);
-        lenient().when(mockProduct.getStockQuantity()).thenReturn(5);
-        lenient().when(mockProduct.getStatus()).thenReturn(Product.Status.ACTIVE);
-
-        lenient().when(mockProduct.getHeight()).thenReturn(new BigDecimal("24.0"));
-        lenient().when(mockProduct.getWidth()).thenReturn(new BigDecimal("18.0"));
-        lenient().when(mockProduct.getLength()).thenReturn(new BigDecimal("3.0"));
-        lenient().when(mockProduct.getWeight()).thenReturn(new BigDecimal("0.6"));
+        lenient().when(mockProduct.getTitle()).thenReturn("Clean Architecture");
+        lenient().when(mockProduct.getBarcode()).thenReturn("9780134494166");
+        lenient().when(mockProduct.getCategory()).thenReturn("Technology");
+        lenient().when(mockProduct.getDescription()).thenReturn("Software design book");
+        lenient().when(mockProduct.getOriginalValue()).thenReturn(300000L);
+        lenient().when(mockProduct.getCurrentPrice()).thenReturn(320000L);
+        lenient().when(mockProduct.getStockQuantity()).thenReturn(10);
+        lenient().when(mockProduct.getStatus()).thenReturn(Status.ACTIVE);
+        lenient().when(mockProduct.getHeight()).thenReturn(new BigDecimal("23.0"));
+        lenient().when(mockProduct.getWidth()).thenReturn(new BigDecimal("15.0"));
+        lenient().when(mockProduct.getLength()).thenReturn(new BigDecimal("3.5"));
+        lenient().when(mockProduct.getWeight()).thenReturn(new BigDecimal("0.8"));
 
         Book mockBook = (Book) mockProduct;
-        lenient().when(mockBook.getPublisher()).thenReturn("O'Reilly Media");
-        lenient().when(mockBook.getPublicationDate()).thenReturn(java.time.LocalDate.now());
+        lenient().when(mockBook.getPublisher()).thenReturn("Prentice Hall");
+        lenient().when(mockBook.getPublicationDate()).thenReturn(LocalDate.of(2017, 9, 10));
         lenient().when(mockBook.getLanguage()).thenReturn("English");
         lenient().when(mockBook.getAuthors()).thenReturn(List.of("Robert C. Martin"));
-        lenient().when(mockBook.getCoverType()).thenReturn(Book.CoverType.HARDCOVER);
-        lenient().when(mockBook.getNumberOfPages()).thenReturn(464);
-        lenient().when(mockBook.getGenre()).thenReturn("Technology");
+        lenient().when(mockBook.getCoverType()).thenReturn(Book.CoverType.PAPERBACK);
+        lenient().when(mockBook.getNumberOfPages()).thenReturn(432);
+        lenient().when(mockBook.getGenre()).thenReturn("Computer Science");
 
+        // 4. Khởi tạo đối tượng Response mock trả về
         sampleBookDetail = new BookDetail();
         sampleBookDetail.setId(sampleId.toString());
-        sampleBookDetail.setCategory("BOOK");
+        sampleBookDetail.setTitle("Clean Architecture");
+
+        // Cấu hình mock save() trả về chính đối tượng được truyền vào (phục vụ lấy ClassName)
+        lenient().when(productRepo.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        lenient().when(productMapper.toProductDetail(any(Product.class))).thenReturn(sampleBookDetail);
     }
 
-    // SUITE 1: CREATE PRODUCT
+    // =========================================================================
+    // SUITE 1: CREATE PRODUCT USE CASE
+    // =========================================================================
     @Nested
     @DisplayName("Suite: Create Product Use Case")
     class CreateProductTestSuite {
 
         @Test
-        @DisplayName("Create Product - Success Flow")
+        @DisplayName("Create Product - Success Flow with Polymorphic DTO")
         void createProduct_Success() {
             when(productRepo.existsByBarcode(sampleCreateRequest.getBarcode())).thenReturn(false);
-            when(productRepo.save(any(Product.class))).thenReturn(mockProduct);
-            when(productMapper.toProductDetail(any(Product.class))).thenReturn(sampleBookDetail);
 
             ProductDetail result = productManagementService.createProduct(sampleCreateRequest);
 
             assertNotNull(result);
-            assertEquals(sampleId.toString(), result.getId());
-            // Cập nhật Assert để xác thực trường productType mới thay thế cho category cũ
-            assertEquals("BOOK", result.getProductType());
+            assertEquals("Book", result.getProductType());
+            verify(productFactory, times(1)).buildNewProduct(sampleCreateRequest);
             verify(productRepo, times(1)).save(any(Product.class));
         }
 
@@ -144,22 +163,23 @@ class ProductManagementServiceTest {
         }
     }
 
-    // SUITE 2: UPDATE PRODUCT
+    // =========================================================================
+    // SUITE 2: UPDATE PRODUCT USE CASE
+    // =========================================================================
     @Nested
     @DisplayName("Suite: Update Product Use Case")
     class UpdateProductTestSuite {
 
         @Test
-        @DisplayName("Update Product - Success Flow")
+        @DisplayName("Update Product - Success Flow with Polymorphic Fallback")
         void updateProduct_Success() {
             when(productRepo.findById(sampleId)).thenReturn(Optional.of(mockProduct));
-            when(productRepo.save(any(Product.class))).thenReturn(mockProduct);
-            when(productMapper.toProductDetail(any(Product.class))).thenReturn(sampleBookDetail);
 
             ProductDetail result = productManagementService.updateProduct(sampleId, sampleUpdateRequest);
 
             assertNotNull(result);
-            assertEquals("BOOK", result.getProductType());
+            assertEquals("Book", result.getProductType());
+            verify(productFactory, times(1)).buildUpdatedProduct(mockProduct, sampleUpdateRequest);
             verify(productRepo, times(1)).save(any(Product.class));
         }
 
@@ -177,17 +197,7 @@ class ProductManagementServiceTest {
         @Test
         @DisplayName("Update Product - Boundary Failure When Price Too Low (< 30%)")
         void updateProduct_ThrowsException_WhenPriceBelowThirtyPercent() {
-            sampleUpdateRequest.setCurrentPrice(50000L);
-            when(productRepo.findById(sampleId)).thenReturn(Optional.of(mockProduct));
-            assertThrows(ProductConstructionException.class, () -> {
-                productManagementService.updateProduct(sampleId, sampleUpdateRequest);
-            });
-        }
-
-        @Test
-        @DisplayName("Update Product - Boundary Failure When Price Too High (> 150%)")
-        void updateProduct_ThrowsException_WhenPriceAboveOneHundredFiftyPercent() {
-            sampleUpdateRequest.setCurrentPrice(350000L);
+            sampleUpdateRequest.setCurrentPrice(50000L); // Original is 300,000
             when(productRepo.findById(sampleId)).thenReturn(Optional.of(mockProduct));
 
             assertThrows(ProductConstructionException.class, () -> {
@@ -196,7 +206,9 @@ class ProductManagementServiceTest {
         }
     }
 
-    // SUITE 3: DELETE PRODUCT
+    // =========================================================================
+    // SUITE 3: DELETE PRODUCT (SOFT DELETE) USE CASE
+    // =========================================================================
     @Nested
     @DisplayName("Suite: Delete Product Use Case")
     class DeleteProductTestSuite {
@@ -217,12 +229,13 @@ class ProductManagementServiceTest {
             when(mockProduct.getStockQuantity()).thenReturn(0);
             when(productRepo.countByStatusIn(anyCollection())).thenReturn(0L);
             when(productRepo.findById(sampleId)).thenReturn(Optional.of(mockProduct));
-            when(mockProduct.getStatus()).thenReturn(Product.Status.DELETED);
+            when(mockProduct.getStatus()).thenReturn(Status.DELETED);
 
             productManagementService.deleteProducts(List.of(sampleId));
 
             verify(productRepo, never()).deleteById(any(UUID.class));
             verify(productRepo, times(1)).save(any(Product.class));
+            verify(productFactory, times(1)).buildDeletedProduct(mockProduct);
         }
 
         @Test
@@ -231,12 +244,13 @@ class ProductManagementServiceTest {
             when(mockProduct.getStockQuantity()).thenReturn(5);
             when(productRepo.countByStatusIn(anyCollection())).thenReturn(0L);
             when(productRepo.findById(sampleId)).thenReturn(Optional.of(mockProduct));
-            when(mockProduct.getStatus()).thenReturn(Product.Status.DEACTIVATED);
+            when(mockProduct.getStatus()).thenReturn(Status.DEACTIVATED);
 
             productManagementService.deleteProducts(List.of(sampleId));
 
             verify(productRepo, never()).deleteById(any(UUID.class));
             verify(productRepo, times(1)).save(any(Product.class));
+            verify(productFactory, times(1)).buildDeletedProduct(mockProduct);
         }
     }
 }

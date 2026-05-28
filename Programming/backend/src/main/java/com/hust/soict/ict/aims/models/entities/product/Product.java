@@ -89,8 +89,8 @@ public abstract class Product {
     @Column(nullable = false)
     private Instant updatedAt;
 
-    private static final double MIN_PRICE_RELATIVE = 0.3;
-    private static final double MAX_PRICE_RELATIVE = 1.5;
+    public static final double MIN_PRICE_RELATIVE = 0.3;
+    public static final double MAX_PRICE_RELATIVE = 1.5;
 
     public void changePrice(long newPrice) throws ProductValidationException {
         if (newPrice < 0) {

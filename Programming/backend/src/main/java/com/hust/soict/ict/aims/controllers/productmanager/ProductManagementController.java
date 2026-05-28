@@ -24,7 +24,7 @@ import java.util.UUID;
  */
 
 @RestController
-@RequestMapping("/api/v1/manager/products")
+@RequestMapping("manager/products")
 @RequiredArgsConstructor
 public class ProductManagementController {
 

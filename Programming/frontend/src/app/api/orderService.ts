@@ -24,11 +24,11 @@ const OrderService = {
     },
 
     cancelOrder: async (orderId: string): Promise<void> => {
-        await apiClient.delete<void>(`order/${orderId}`);
+        await apiClient.delete<void>(`order/{orderId}`);
     },
 
     getOrder: async (orderId: string): Promise<Order> => {
-        const response = await apiClient.get<Order>(`order/${orderId}`);
+        const response = await apiClient.get<Order>(`order/{orderId}`);
         return response.data;
     }
 };
