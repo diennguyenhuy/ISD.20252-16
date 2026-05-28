@@ -71,12 +71,12 @@ export const ProductManagementService = {
     },
 
     updateProduct: async (id: string, data: Partial<ProductRequestPayload>): Promise<ProductType> => {
-        const response = await apiClient.patch<ProductType>(`products/{id}`, data);
+        const response = await apiClient.patch<ProductType>(`manager/products/{id}`, data);
         return response.data;
     },
 
     deleteProduct: async (id: string): Promise<void> => {
-        await apiClient.delete(`manager/products/{id}`);
+        await apiClient.delete('manager/products', { data: { productIds: [id] } });
     },
 
     adjustStock: async (id: string, delta: number, reason: string): Promise<void> => {

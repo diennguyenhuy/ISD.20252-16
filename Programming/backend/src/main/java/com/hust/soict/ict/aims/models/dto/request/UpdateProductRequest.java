@@ -16,7 +16,7 @@ import java.math.BigDecimal;
         @JsonSubTypes.Type(value = UpdateDVDRequest.class, name = "DVD"),
         @JsonSubTypes.Type(value = UpdateNewspaperRequest.class, name = "NEWSPAPER")
 })
-public abstract class UpdateProductRequest {
+public class UpdateProductRequest {
     private String productType;
 
     private String title;

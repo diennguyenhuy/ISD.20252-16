@@ -4,6 +4,7 @@ import com.hust.soict.ict.aims.models.dto.request.CreateProductRequest;
 import com.hust.soict.ict.aims.models.dto.request.UpdateProductRequest;
 import com.hust.soict.ict.aims.models.dto.request.DeleteProductRequest;
 import com.hust.soict.ict.aims.models.dto.response.product.ProductDetail;
+import com.hust.soict.ict.aims.models.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.services.productmanagement.ProductManagementService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -48,5 +50,25 @@ public class ProductManagementController {
     public ResponseEntity<Void> deleteProducts(@RequestBody @Valid DeleteProductRequest request) {
         productManagementService.deleteProducts(request.getProductIds());
         return ResponseEntity.noContent().build();
+    }
+    public static class AdjustStockRequest {
+        public int delta;
+        public String reason;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ProductSummary>> getAllProducts() {
+        return ResponseEntity.ok(productManagementService.getAllProductsForManager());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductDetail> getProductById(@PathVariable UUID id) {
+        return ResponseEntity.ok(productManagementService.getProductByIdForManager(id));
+    }
+
+    @PostMapping("/{id}/stock")
+    public ResponseEntity<Void> adjustStock(@PathVariable UUID id, @RequestBody AdjustStockRequest request) {
+        productManagementService.adjustStock(id, request.delta, request.reason);
+        return ResponseEntity.ok().build();
     }
 }

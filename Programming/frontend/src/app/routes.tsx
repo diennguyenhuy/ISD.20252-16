@@ -13,8 +13,16 @@ import QRPayment from './components/customer/QRPayment';
 import SuccessOrder from './components/customer/SuccessOrder';
 import CustomerOrderDetail from './components/customer/CustomerOrderDetail';
 import { CartProvider } from "./context/CartContext";
+import LoginSignup from "./components/shared/LoginSignup";
+import ManagerLayout from "./components/layout/ManagerLayout";
+import ManagerHomePage from "./components/manager/ManagerHomePage";
+import ProductAddition from "./components/manager/ProductAddition";
+import ManagerProductDetail from "./components/manager/ManagerProductDetail";
+import ManagerOrderDetail from "./components/manager/ManagerOrderDetail";
+import ManagerOrderList from "./components/manager/ManagerOrderList";
 
 export const router = createBrowserRouter([
+    { path: '/login', Component: LoginSignup },
     {
         path: '/',
         element: (
@@ -35,7 +43,19 @@ export const router = createBrowserRouter([
         ],
     },
     {
-        //TODO: PRODUCT MANAGER ROUTES
+        path: '/manager',
+        Component: ManagerLayout,
+        children: [
+            { index: true, Component: ManagerHomePage },
+            { path: 'products/add', Component: ProductAddition },
+            { path: 'products/edit/:id', Component: ProductAddition },
+            { path: 'products/:id', Component: ManagerProductDetail },
+            { path: 'orders', Component: ManagerOrderList },
+            { path: 'orders/:id', Component: ManagerOrderDetail },
+            // { path: 'profile', Component: UserProfile },
+            // { path: 'change-password', Component: ChangePassword },
+        ],
+
     },
     {
         //TODO: ADMIN ROUTES
