@@ -1,96 +1,46 @@
 package com.hust.soict.ict.aims.models.dto.request;
-
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
 
-@Data
-public class CreateProductRequest {
-    // Shared fields
+@Getter
+@Setter
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "productType", visible = true)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = CreateBookRequest.class, name = "BOOK"),
+        @JsonSubTypes.Type(value = CreateCDRequest.class, name = "CD"),
+        @JsonSubTypes.Type(value = CreateDVDRequest.class, name = "DVD"),
+        @JsonSubTypes.Type(value = CreateNewspaperRequest.class, name = "NEWSPAPER")
+})
+public abstract class CreateProductRequest {
+    @NotBlank(message = "Product type is required (BOOK, CD, DVD, NEWSPAPER)")
+    private String productType;
+
     @NotBlank(message = "Title is required")
     private String title;
 
-    @NotBlank(message = "Category is required")
     private String category;
-
-    @NotBlank(message = "Description is required")
     private String description;
-
-    @NotNull(message = "Height is required")
-    @Positive
-    private BigDecimal height;
-
-    @NotNull(message = "Width is required")
-    @Positive
-    private BigDecimal width;
-
-    @NotNull(message = "Length is required")
-    @Positive
-    private BigDecimal length;
-
-    @NotNull(message = "Weight is required")
-    @Positive
-    private BigDecimal weight;
 
     @NotBlank(message = "Barcode is required")
     private String barcode;
 
-    @NotNull(message = "Original value is required")
-    @PositiveOrZero
-    private Long originalValue;
+    @Min(value = 0, message = "Original value must be positive")
+    private long originalValue;
 
-    @NotNull(message = "Current price is required")
-    @PositiveOrZero
-    private Long currentPrice;
+    @Min(value = 0, message = "Current price must be positive")
+    private long currentPrice;
 
-    @NotNull(message = "Stock quantity is required")
-    @PositiveOrZero
-    private Integer stockQuantity;
+    @Min(value = 0, message = "Stock quantity cannot be negative")
+    private int stockQuantity;
 
     private String imageURL;
-
-    @NotBlank(message = "Product type is required (BOOK, CD, DVD, NEWSPAPER)")
-    private String productType;
-
-    // PRINTABLE PRODUCT (BOOK, NEWSPAPER)
-    private String publisher;
-    private LocalDate publicationDate;
-    private String language;
-
-    // BOOK
-    private List<String> authors;
-    private String coverType;
-    private Integer numberOfPages;
-    private String genre;
-
-    // CD
-    private LocalDate releaseDate;
-    private List<String> artists;
-    private String recordLabel;
-    private List<TrackDTO> tracks;
-
-    // DVD
-    private String discType;
-    private String director;
-    private Integer runtime;
-    private String studio;
-    private List<String> subtitles;
-
-    // NEWSPAPER
-    private String editorInChief;
-    private String issueNumber;
-    private String publicationFrequency;
-    private String ISSN;
-    private List<String> sections;
-
-    @Data
-    public static class TrackDTO {
-        private String title;
-        private Integer length;
-    }
+    private BigDecimal height;
+    private BigDecimal width;
+    private BigDecimal length;
+    private BigDecimal weight;
 }

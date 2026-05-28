@@ -5,7 +5,7 @@ import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.mapper.ProductMapper;
 import com.hust.soict.ict.aims.models.dto.request.CreateProductRequest;
 import com.hust.soict.ict.aims.models.dto.request.UpdateProductRequest;
-import com.hust.soict.ict.aims.models.dto.response.product.ProductDetail;
+import com.hust.soict.ict.aims.models.dto.response.product.*;
 import com.hust.soict.ict.aims.models.entities.product.*;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -89,5 +89,46 @@ public class ProductManagementService {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException("Reflection failure", e);
         }
+    }
+
+    // 1. Lấy danh sách cho Manager (Không filter status, lấy tất cả)
+    @Transactional(readOnly = true)
+    public List<ProductSummary> getAllProductsForManager() {
+        return productRepo.findAll().stream()
+                .map(productMapper::toProductSummary)
+                .toList();
+    }
+
+    // 2. Lấy chi tiết cho Manager (Lấy cả sản phẩm đã xóa hoặc vô hiệu hóa)
+    @Transactional(readOnly = true)
+    public ProductDetail getProductByIdForManager(UUID id) {
+        Product product = productRepo.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException(id));
+        return productMapper.toProductDetail(product);
+    }
+
+    // 3. Hàm riêng cho Adjust Stock (Khớp với Frontend AdjustStockModal)
+    @Transactional
+    public void adjustStock(UUID id, int delta, String reason) {
+        Product product = productRepo.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException(id));
+
+        int newStock = product.getStockQuantity() + delta;
+        if (newStock < 0) {
+            throw new ProductValidationException("Stock cannot be negative", "stockQuantity");
+        }
+
+        // Tạo request giả để update qua Factory (Hoặc bạn có thể thêm hàm setter cho stock trong entity)
+        // Vì Entity Product hiện tại của bạn không có setter (rất chặt chẽ),
+        // Cách tốt nhất là dùng hàm update hiện có của bạn:
+        UpdateProductRequest updateReq = new UpdateProductRequest();
+        updateReq.setStockQuantity(newStock);
+
+        Product updatedProduct = productFactory.buildUpdatedProduct(product, updateReq);
+        setProductIdWithReflection(updatedProduct, id);
+
+        productRepo.save(updatedProduct);
+
+        // TODO: (Tương lai) Ghi log lý do (reason) vào bảng StockAdjustLog tại đây
     }
 }
