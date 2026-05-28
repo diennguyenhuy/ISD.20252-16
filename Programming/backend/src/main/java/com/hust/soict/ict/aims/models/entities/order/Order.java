@@ -69,9 +69,8 @@ public class Order extends AuditableEntity {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false)
-    private UUID id;
+    private UUID id = UUID.randomUUID();
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<OrderItem> items = new ArrayList<>();

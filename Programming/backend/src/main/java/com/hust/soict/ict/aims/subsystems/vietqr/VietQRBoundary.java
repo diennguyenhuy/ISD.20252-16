@@ -51,6 +51,11 @@ class VietQRBoundary {
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        System.out.println("=== VIETQR GENERATE QR ===");
+        System.out.println("URL: " + apiBaseUrl + GENERATE_QR_URL);
+        System.out.println("REQUEST: " + requestString);
+        System.out.println("STATUS: " + response.statusCode());
+        System.out.println("BODY: " + response.body());
         return response.body();
     }
 

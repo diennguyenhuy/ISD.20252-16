@@ -29,3 +29,11 @@ spring:
 logging:
   level:
     com.hust.soict.ict.aims: debug
+
+vietqr:
+  username: customer-maybeez321-user26591
+  password: Y3VzdG9tZXItbWF5YmVlejMyMS11c2VyMjY1OTE=
+  apiBaseUrl: https://dev.vietqr.org/vqr/api
+  accountNo: 03349966868
+  accountName: NGUYEN TIEN DAT
+  bankCode: MB
