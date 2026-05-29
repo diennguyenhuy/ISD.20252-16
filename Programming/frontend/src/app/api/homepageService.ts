@@ -26,7 +26,7 @@ const HomepageService = {
     },
 
     getProductDetail: async (productId: string): Promise<ProductType> => {
-        const response = await apiClient.get<ProductType>(`products/{id}`);
+        const response = await apiClient.get<ProductType>(`products/${productId}`);
         return response.data;
     }
 }

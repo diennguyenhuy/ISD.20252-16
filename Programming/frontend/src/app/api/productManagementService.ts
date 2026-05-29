@@ -61,7 +61,7 @@ export const ProductManagementService = {
 
     // Trả về ProductType (Sẽ tự động map về đúng Book | CD | DVD | Newspaper dựa vào data)
     getProductById: async (id: string): Promise<ProductType> => {
-        const response = await apiClient.get<ProductType>(`manager/products/{id}`);
+        const response = await apiClient.get<ProductType>(`manager/products/${id}`);
         return response.data;
     },
 
@@ -71,7 +71,7 @@ export const ProductManagementService = {
     },
 
     updateProduct: async (id: string, data: Partial<ProductRequestPayload>): Promise<ProductType> => {
-        const response = await apiClient.patch<ProductType>(`manager/products/{id}`, data);
+        const response = await apiClient.patch<ProductType>(`manager/products/${id}`, data);
         return response.data;
     },
 

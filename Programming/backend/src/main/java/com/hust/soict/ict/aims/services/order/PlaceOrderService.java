@@ -50,6 +50,7 @@ public class PlaceOrderService {
             var existingDelivery = orderDraftContext.getDraftOrder().getDeliveryInformation();
             if (existingDelivery != null) {
                 DeliveryInformation.of(existingDelivery, draftOrder);
+                draftOrder.setDeliveryFee(orderDraftContext.getDraftOrder().getDeliveryFee());
             }
         } catch (OrderNotPlacedException ignored) {}
 
