@@ -53,13 +53,13 @@ export function useProductManagement() {
         }
     };
 
-    const deleteProduct = async (id: string) => {
+    const deleteProducts = async (ids: string[]) => {
         try {
-            await ProductManagementService.deleteProduct(id);
-            await fetchProducts(); // Refetch API to get the latest status
+            await ProductManagementService.deleteProducts(ids);
+            await fetchProducts();
             return { success: true };
         } catch (err: any) {
-            return { success: false, error: err.message };
+            return { success: false, error: err.response?.data?.message || err.message };
         }
     };
 
@@ -107,7 +107,7 @@ export function useProductManagement() {
         getProduct,
         createProduct,
         updateProduct,
-        deleteProduct,
+        deleteProducts,
         adjustStock,
         activateProduct
     };

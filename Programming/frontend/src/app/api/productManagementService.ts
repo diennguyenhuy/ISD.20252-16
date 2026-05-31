@@ -66,9 +66,9 @@ export const ProductManagementService = {
         return response.data;
     },
 
-    deleteProduct: async (id: string): Promise<void> => {
+    deleteProducts: async (ids: string[]): Promise<void> => {
         await apiClient.delete('manager/products', {
-            data: { productIds: [id] },
+            data: { productIds: ids },
             headers: { 'Content-Type': 'application/json' }
         });
     },
