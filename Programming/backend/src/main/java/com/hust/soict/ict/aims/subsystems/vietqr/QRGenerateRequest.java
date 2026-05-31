@@ -24,9 +24,9 @@ class QRGenerateRequest {
         this.bankCode = bankCode;
         this.bankAccount = bankAccount;
         this.userBankName = userBankName;
-        this.content = sanitizeContent(content);
+        this.content = content;
         this.amount = amount;
-        this.orderId = sanitizeOrderId(orderId);
+        this.orderId = orderId;
         this.qrType = 0;  // Dynamic QR
         this.transType = "C";  // Credit (receiving money)
     }
@@ -42,45 +42,7 @@ class QRGenerateRequest {
         );
     }
     
-    /**
-     * Sanitize content to meet VietQR requirements:
-     * - Max 23 characters
-     * - No special characters
-     * - Vietnamese without diacritics.
-     */
-    String sanitizeContent(String content) {
-        if (content == null) return "";
-        
-        // Remove diacritics and special characters
-        String sanitized = content.replaceAll("[^a-zA-Z0-9 ]", "");
-        
-        // Truncate to 23 chars
-        if (sanitized.length() > 23) {
-            sanitized = sanitized.substring(0, 23);
-        }
-        
-        return sanitized;
-    }
-    
-    /**
-     * Sanitize order ID to meet VietQR requirements:
-     * - Max 13 characters
-     * - No special characters
-     */
-    String sanitizeOrderId(String orderId) {
-        if (orderId == null) return "";
-        
-        // Remove special characters
-        String sanitized = orderId.replaceAll("[^a-zA-Z0-9]", "");
-        
-        // Truncate to 13 chars
-        if (sanitized.length() > 13) {
-            sanitized = sanitized.substring(0, 13);
-        }
-        
-        return sanitized;
-    }
-    
+
     String getBankCode() { return bankCode; }
     String getBankAccount() { return bankAccount; }
     String getUserBankName() { return userBankName; }
