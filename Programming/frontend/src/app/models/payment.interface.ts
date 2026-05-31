@@ -14,3 +14,9 @@ export interface PaymentStatusResponse {
     status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'CANCELLED' | string;
     message: string;
 }
+
+/** Response of POST /order/payment/paypal/create */
+export interface PayPalCreateResponse {
+    approvalUrl: string;
+    providerOrderId: string;
+}
