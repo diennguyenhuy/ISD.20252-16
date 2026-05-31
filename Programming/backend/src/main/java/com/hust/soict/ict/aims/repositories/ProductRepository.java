@@ -25,6 +25,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     boolean existsByBarcode(String barcode);
     long countByStatusIn(Collection<Product.Status> statuses);
+    long countByStatusInAndUpdatedAtAfter(List<Product.Status> statuses, java.time.Instant startOfDay);
   
     @Query("SELECT p FROM Product p WHERE " +
     "(:title IS NULL OR LOWER(p.title) LIKE :title) AND " +

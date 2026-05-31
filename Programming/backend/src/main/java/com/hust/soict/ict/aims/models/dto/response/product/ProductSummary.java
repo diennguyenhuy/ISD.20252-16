@@ -16,4 +16,5 @@ public class ProductSummary {
     private String productType;
     private List<String> creators;
     private String imageURL;
+    private String status;
 }

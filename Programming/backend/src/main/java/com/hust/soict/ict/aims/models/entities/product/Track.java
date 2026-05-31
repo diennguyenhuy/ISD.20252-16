@@ -26,7 +26,7 @@ public class Track {
     @JoinColumn(name = "cd_id", nullable = false)
     private CD cd;
 
-    void setCd(@NonNull CD cd) {
+    public void setCd(@NonNull CD cd) {
         this.cd = cd;
     }
 
