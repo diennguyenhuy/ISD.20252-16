@@ -6,6 +6,7 @@ import com.hust.soict.ict.aims.mapper.ProductMapper;
 import com.hust.soict.ict.aims.models.dto.request.CreateProductRequest;
 import com.hust.soict.ict.aims.models.dto.request.UpdateProductRequest;
 import com.hust.soict.ict.aims.models.dto.response.product.*;
+import com.hust.soict.ict.aims.models.entities.AuditableEntity; // <-- IMPORT THÊM CÁI NÀY
 import com.hust.soict.ict.aims.models.entities.product.*;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -49,10 +50,14 @@ public class ProductManagementService {
     @Transactional
     public ProductDetail updateProduct(UUID id, UpdateProductRequest dto) {
         Product product = productRepo.findById(id).orElseThrow(() -> new ProductNotFoundException(id));
-        product.changePrice(dto.getCurrentPrice()); // Validate price 30% - 150%
+
+        if (dto.getCurrentPrice() != null) {
+            product.changePrice(dto.getCurrentPrice()); // Validate price 30% - 150%
+        }
 
         Product updatedProduct = productFactory.buildUpdatedProduct(product, dto);
-        setProductIdWithReflection(updatedProduct, id);
+
+        restoreEntityIdentityWithReflection(updatedProduct, product);
 
         Product savedProduct = productRepo.save(updatedProduct);
         return productMapper.toProductDetail(savedProduct);
@@ -64,34 +69,25 @@ public class ProductManagementService {
             throw new ProductValidationException("Cannot delete more than 10 products at a time.", "productIds");
         }
 
-        long deletedToday = productRepo.countByStatusIn(List.of(Product.Status.DEACTIVATED, Product.Status.DELETED));
-        if (deletedToday + productIds.size() > 20) {
-            throw new ProductValidationException("Daily deletion quota exceeded (Max 20 per day).", "status");
-        }
+//        long deletedToday = productRepo.countByStatusIn(List.of(Product.Status.DEACTIVATED, Product.Status.DELETED));
+//        if (deletedToday + productIds.size() > 20) {
+//            throw new ProductValidationException("Daily deletion quota exceeded (Max 20 per day).", "status");
+//        }
 
         for (UUID id : productIds) {
             productRepo.findById(id).ifPresent(product -> {
                 product.updateStatus(Product.Status.DELETED);
 
                 Product deletedProduct = productFactory.buildDeletedProduct(product);
-                setProductIdWithReflection(deletedProduct, id);
+
+                restoreEntityIdentityWithReflection(deletedProduct, product);
 
                 productRepo.save(deletedProduct);
             });
         }
     }
 
-    private void setProductIdWithReflection(Product targetProduct, UUID oldId) {
-        try {
-            Field idField = Product.class.getDeclaredField("id");
-            idField.setAccessible(true);
-            idField.set(targetProduct, oldId);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException("Reflection failure", e);
-        }
-    }
-
-    // 1. Lấy danh sách cho Manager (Không filter status, lấy tất cả)
+    // 1. Product list for Manager
     @Transactional(readOnly = true)
     public List<ProductSummary> getAllProductsForManager() {
         return productRepo.findAll().stream()
@@ -99,7 +95,7 @@ public class ProductManagementService {
                 .toList();
     }
 
-    // 2. Lấy chi tiết cho Manager (Lấy cả sản phẩm đã xóa hoặc vô hiệu hóa)
+    // 2. Product detail for Manager
     @Transactional(readOnly = true)
     public ProductDetail getProductByIdForManager(UUID id) {
         Product product = productRepo.findById(id)
@@ -107,7 +103,7 @@ public class ProductManagementService {
         return productMapper.toProductDetail(product);
     }
 
-    // 3. Hàm riêng cho Adjust Stock (Khớp với Frontend AdjustStockModal)
+    // 3. Adjust Stock
     @Transactional
     public void adjustStock(UUID id, int delta, String reason) {
         Product product = productRepo.findById(id)
@@ -118,17 +114,44 @@ public class ProductManagementService {
             throw new ProductValidationException("Stock cannot be negative", "stockQuantity");
         }
 
-        // Tạo request giả để update qua Factory (Hoặc bạn có thể thêm hàm setter cho stock trong entity)
-        // Vì Entity Product hiện tại của bạn không có setter (rất chặt chẽ),
-        // Cách tốt nhất là dùng hàm update hiện có của bạn:
         UpdateProductRequest updateReq = new UpdateProductRequest();
         updateReq.setStockQuantity(newStock);
 
         Product updatedProduct = productFactory.buildUpdatedProduct(product, updateReq);
-        setProductIdWithReflection(updatedProduct, id);
+
+        restoreEntityIdentityWithReflection(updatedProduct, product);
 
         productRepo.save(updatedProduct);
 
         // TODO: (Tương lai) Ghi log lý do (reason) vào bảng StockAdjustLog tại đây
+    }
+    private void restoreEntityIdentityWithReflection(Product targetProduct, Product existingProduct) {
+        try {
+            // 1. Phục hồi ID
+            Field idField = Product.class.getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(targetProduct, existingProduct.getId());
+
+            // 2. Phục hồi Version (CHỐNG LỖI 500 INTERNAL SERVER ERROR)
+            Field versionField = Product.class.getDeclaredField("version");
+            versionField.setAccessible(true);
+            versionField.set(targetProduct, existingProduct.getVersion());
+
+            // 3. Phục hồi CreatedAt (Lấy từ class cha AuditableEntity)
+            Field createdAtField = AuditableEntity.class.getDeclaredField("createdAt");
+            createdAtField.setAccessible(true);
+            createdAtField.set(targetProduct, existingProduct.getCreatedAt());
+
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException("Reflection failure", e);
+        }
+    }
+
+    @Transactional
+    public void activateProduct(UUID id) {
+        Product product = productRepo.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException(id));
+        product.updateStatus(Product.Status.ACTIVE);
+        productRepo.save(product);
     }
 }

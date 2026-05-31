@@ -71,4 +71,10 @@ public class ProductManagementController {
         productManagementService.adjustStock(id, request.delta, request.reason);
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("/{id}/activate")
+    public ResponseEntity<Void> activateProduct(@PathVariable UUID id) {
+        productManagementService.activateProduct(id);
+        return ResponseEntity.ok().build();
+    }
 }

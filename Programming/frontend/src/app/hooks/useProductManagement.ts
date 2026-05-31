@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { ProductManagementService } from '../api/productManagementService';
+import type { ProductRequestPayload } from '../api/productManagementService';
 import type { ProductSummary, ProductType } from '../models/product.interface';
 
 export function useProductManagement() {
@@ -32,16 +33,82 @@ export function useProductManagement() {
         }
     };
 
+    const createProduct = async (data: ProductRequestPayload) => {
+        try {
+            await ProductManagementService.createProduct(data);
+            await fetchProducts();
+            return { success: true };
+        } catch (err: any) {
+            return { success: false, error: err.response?.data?.message || err.message };
+        }
+    };
+
+    const updateProduct = async (id: string, data: Partial<ProductRequestPayload>) => {
+        try {
+            await ProductManagementService.updateProduct(id, data);
+            await fetchProducts();
+            return { success: true };
+        } catch (err: any) {
+            return { success: false, error: err.response?.data?.message || err.message };
+        }
+    };
+
+    const deleteProduct = async (id: string) => {
+        try {
+            await ProductManagementService.deleteProduct(id);
+            await fetchProducts(); // Refetch API to get the latest status
+            return { success: true };
+        } catch (err: any) {
+            return { success: false, error: err.message };
+        }
+    };
+
+    const adjustStock = async (id: string, newStock: number, reason: string) => {
+        try {
+            const currentProduct = await ProductManagementService.getProductById(id);
+            if (!currentProduct) {
+                return { success: false, error: "Product not found" };
+            }
+
+            console.log(`[Adjust Stock] Product ID: ${id} | Reason: ${reason}`);
+
+            // FIX TS2322: Use "unknown" cast to bypass strict exactOptionalPropertyTypes mapping
+            const payload = {
+                ...currentProduct,
+                productType: currentProduct.productType.toUpperCase() as 'BOOK' | 'CD' | 'DVD' | 'NEWSPAPER',
+                stockQuantity: newStock,
+                currentPrice: currentProduct.currentPrice
+            } as unknown as Partial<ProductRequestPayload>;
+
+            await ProductManagementService.updateProduct(id, payload);
+            await fetchProducts();
+            return { success: true };
+        } catch (err: any) {
+            return { success: false, error: err.response?.data?.message || err.message };
+        }
+    };
+
+    const activateProduct = async (id: string) => {
+        try {
+            await ProductManagementService.activateProduct(id);
+            await fetchProducts(); // Refetch API to update product status
+            return { success: true };
+        } catch (err: any) {
+            return { success: false, error: err.message };
+        }
+    };
+
     return {
         products,
-        setProducts, // Để Optimistic UI update
+        setProducts,
         loading,
         error,
         fetchProducts,
         getProduct,
-        createProduct: ProductManagementService.createProduct,
-        updateProduct: ProductManagementService.updateProduct,
-        deleteProduct: ProductManagementService.deleteProduct,
-        adjustStock: ProductManagementService.adjustStock
+        createProduct,
+        updateProduct,
+        deleteProduct,
+        adjustStock,
+        activateProduct
     };
 }

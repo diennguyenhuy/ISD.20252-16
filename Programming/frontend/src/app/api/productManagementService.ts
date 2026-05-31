@@ -1,11 +1,8 @@
 import { apiClient } from './client';
 import type { ProductSummary, ProductType } from '../models/product.interface';
 
-// Payload gửi lên Backend CUD (Luôn sử dụng UPPERCASE cho productType để khớp với Java Enum/Jackson)
 export interface ProductRequestPayload {
     productType: 'BOOK' | 'CD' | 'DVD' | 'NEWSPAPER';
-
-    // Thuộc tính chung (Product)
     title: string;
     category?: string;
     description?: string;
@@ -19,38 +16,33 @@ export interface ProductRequestPayload {
     width: number;
     length: number;
 
-    // Thuộc tính của Sách (Book) & Báo (Newspaper)
     publisher?: string;
-    publicationDate?: string; // Format: YYYY-MM-DD
+    publicationDate?: string;
     language?: string;
 
-    // Thuộc tính riêng của Sách (Book)
     authors?: string[];
     coverType?: 'HARDCOVER' | 'PAPERBACK';
     numberOfPages?: number;
 
-    // Thuộc tính riêng của Báo (Newspaper)
     editorInChief?: string;
     issueNumber?: string;
     publicationFrequency?: string;
     ISSN?: string;
     sections?: string[];
 
-    // Thuộc tính chung cho Nhạc/Phim (CD/DVD)
-    releaseDate?: string; // Format: YYYY-MM-DD
+    releaseDate?: string;
     genre?: string;
 
-    // Thuộc tính riêng của Đĩa nhạc (CD)
     artists?: string[];
     recordLabel?: string;
     tracks?: { title: string; length: number }[];
 
-    // Thuộc tính riêng của Phim (DVD)
     discType?: 'HD_DVD' | 'BLU_RAY';
     director?: string;
     runtime?: number;
     studio?: string;
-    subtitles?: string; // DTO backend nhận String phân tách bằng dấu phẩy
+    subtitles?: string[]; // Đã sửa thành mảng string
+    [key: string]: any;
 }
 
 export const ProductManagementService = {
@@ -59,9 +51,8 @@ export const ProductManagementService = {
         return response.data;
     },
 
-    // Trả về ProductType (Sẽ tự động map về đúng Book | CD | DVD | Newspaper dựa vào data)
     getProductById: async (id: string): Promise<ProductType> => {
-        const response = await apiClient.get<ProductType>(`manager/products/{id}`);
+        const response = await apiClient.get<ProductType>(`manager/products/${id}`);
         return response.data;
     },
 
@@ -71,15 +62,18 @@ export const ProductManagementService = {
     },
 
     updateProduct: async (id: string, data: Partial<ProductRequestPayload>): Promise<ProductType> => {
-        const response = await apiClient.patch<ProductType>(`manager/products/{id}`, data);
+        const response = await apiClient.put<ProductType>(`manager/products/${id}`, data);
         return response.data;
     },
 
     deleteProduct: async (id: string): Promise<void> => {
-        await apiClient.delete('manager/products', { data: { productIds: [id] } });
+        await apiClient.delete('manager/products', {
+            data: { productIds: [id] },
+            headers: { 'Content-Type': 'application/json' }
+        });
     },
 
-    adjustStock: async (id: string, delta: number, reason: string): Promise<void> => {
-        await apiClient.post(`manager/products`, { delta, reason });
+    activateProduct: async (id: string): Promise<void> => {
+        await apiClient.patch(`manager/products/${id}/activate`);
     }
 };
