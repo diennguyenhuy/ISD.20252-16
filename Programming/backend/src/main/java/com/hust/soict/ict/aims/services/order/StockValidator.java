@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StockValidator {
     private final ProductRepository productRepository;
-    private final CartContext cartContext;
 
     /**
      * Check for stock availability
@@ -45,9 +44,7 @@ public class StockValidator {
      * @throws ProductNotFoundException if product "vanishes" (gets deactivated) during checkout
      */
     @Transactional
-    public Cart checkStockAvailability() throws NotEnoughStockException, EmptyCartException, ProductNotFoundException {
-        Cart cart = cartContext.getOrCreateCart();
-
+    public Cart checkStockAvailability(Cart cart) throws NotEnoughStockException, EmptyCartException, ProductNotFoundException {
         if (cart.isEmpty()) {
             throw new EmptyCartException();
         }
@@ -67,8 +64,7 @@ public class StockValidator {
             Product managedProduct = productMap.get(item.getProduct().getId());
 
             if (managedProduct != null) {
-                item = new CartItem(managedProduct, item.getQuantity());
-                cart.replaceItem(item.getProduct().getId(), item);
+                cart.replaceProductItemWith(managedProduct);
 
                 if (item.getProduct().getStockQuantity() < item.getQuantity()) {
                     insufficientQuantity.put(item.getProduct().getId(), item.getProduct().getStockQuantity());

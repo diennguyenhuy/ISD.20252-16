@@ -1,6 +1,6 @@
 import { apiClient } from './client';
 import type { QRCodeResponse, PaymentStatusResponse } from '../models/payment.interface';
-import type { Order } from '../models/order.interface';
+import type {Order, PaymentTransaction} from '../models/order.interface';
 
 const PAY_ORDER_URL = '/order/payment/vietqr';
 
@@ -16,8 +16,8 @@ const PayOrderService = {
         return response.data;
     },
 
-    confirmPayment: async (): Promise<Order> => {
-        const response = await apiClient.post<Order>(`${PAY_ORDER_URL}/confirm`);
+    confirmPayment: async (): Promise<PaymentTransaction> => {
+        const response = await apiClient.post<PaymentTransaction>(`${PAY_ORDER_URL}/confirm`);
         return response.data;
     },
 

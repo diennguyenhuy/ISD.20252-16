@@ -36,6 +36,10 @@ public class GlobalExceptionHandler {
         return Map.of("message", e.getMessage());
     }
 
+    @ExceptionHandler(OrderNotCompleteException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handle(OrderNotCompleteException e) { return Map.of("message", e.getMessage()); }
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, Object> handle(MethodArgumentTypeMismatchException e) {

@@ -13,5 +13,5 @@ import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
  *   parameters.
  */
 public interface NotificationService {
-    void sendOrderConfirmation(Order order, PaymentTransaction paymentTransaction);
+    void sendOrderConfirmation(Order order);
 }

@@ -41,7 +41,7 @@ class StockValidatorTest {
         when(cartContext.getOrCreateCart()).thenReturn(cart);
 
 
-        assertThrows(EmptyCartException.class, () -> stockValidator.checkStockAvailability());
+        assertThrows(EmptyCartException.class, () -> stockValidator.checkStockAvailability(cart));
 
         verifyNoInteractions(productRepository);
     }
@@ -62,7 +62,7 @@ class StockValidatorTest {
 
         when(productRepository.findAllByIdInAndStatus(any(), eq(Product.Status.ACTIVE))).thenReturn(List.of(product));
 
-        Cart result = stockValidator.checkStockAvailability();
+        Cart result = stockValidator.checkStockAvailability(cart);
 
         assertNotNull(result);
 
@@ -84,7 +84,7 @@ class StockValidatorTest {
 
         when(productRepository.findAllByIdInAndStatus(any(), eq(Product.Status.ACTIVE))).thenReturn(List.of(product));
 
-        NotEnoughStockException x = assertThrows(NotEnoughStockException.class, () -> stockValidator.checkStockAvailability());
+        NotEnoughStockException x = assertThrows(NotEnoughStockException.class, () -> stockValidator.checkStockAvailability(cart));
 
         assertTrue(x.getInsufficientQuantity().containsKey(productId));
     }
@@ -103,7 +103,7 @@ class StockValidatorTest {
 
         when(productRepository.findAllByIdInAndStatus(any(), eq(Product.Status.ACTIVE))).thenReturn(List.of());
 
-        ProductNotFoundException x = assertThrows(ProductNotFoundException.class, () -> stockValidator.checkStockAvailability());
+        ProductNotFoundException x = assertThrows(ProductNotFoundException.class, () -> stockValidator.checkStockAvailability(cart));
 
         assertEquals(productId, x.getProductId());
 
