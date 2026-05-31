@@ -19,12 +19,17 @@ const OrderService = {
         return response.data;
     },
 
+    finalizeOrder: async (): Promise<Order> => {
+        const response = await apiClient.post<Order>(`order/finalize`);
+        return response.data;
+    },
+
     cancelOrderPlacement: async (): Promise<void> => {
         await apiClient.delete<void>(ORDER_URL);
     },
 
     cancelOrder: async (orderId: string): Promise<void> => {
-        await apiClient.delete<void>(`order/{orderId}`);
+        await apiClient.delete<void>(`order/${orderId}`);
     },
 
     getOrder: async (orderId: string): Promise<Order> => {

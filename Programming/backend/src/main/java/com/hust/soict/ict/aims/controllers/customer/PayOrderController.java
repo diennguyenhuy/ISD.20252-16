@@ -1,12 +1,9 @@
 package com.hust.soict.ict.aims.controllers.customer;
 
-import com.hust.soict.ict.aims.context.OrderDraftContext;
 import com.hust.soict.ict.aims.exceptions.PaymentException;
-import com.hust.soict.ict.aims.models.dto.response.order.OrderResponse;
+import com.hust.soict.ict.aims.models.dto.response.order.PaymentTransactionResponse;
 import com.hust.soict.ict.aims.models.dto.response.payments.PaymentStatusResponse;
 import com.hust.soict.ict.aims.models.dto.response.payments.QRCodeResponse;
-import com.hust.soict.ict.aims.models.entities.order.Order;
-import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 import com.hust.soict.ict.aims.services.order.PlaceOrderService;
 import com.hust.soict.ict.aims.services.payment.PayOrderService;
 import lombok.RequiredArgsConstructor;
@@ -45,30 +42,24 @@ public class PayOrderController {
 
     private final PayOrderService payOrderService;
     private final PlaceOrderService placeOrderService;
-    private final OrderDraftContext orderDraftContext;
 
     @PostMapping("/qr")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody QRCodeResponse generateQRCode() throws PaymentException {
-        Order order = orderDraftContext.getDraftOrder();
-        return payOrderService.generatePaymentQR(order);
+        return payOrderService.generatePaymentQR();
     }
 
     @GetMapping("/status")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody PaymentStatusResponse checkPaymentStatus() throws PaymentException {
-        Order order = orderDraftContext.getDraftOrder();
-        return payOrderService.checkPaymentStatus(order);
+        return payOrderService.checkPaymentStatus();
     }
 
     @PostMapping("/confirm")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody OrderResponse confirmPayment()
+    public @ResponseBody PaymentTransactionResponse confirmPayment()
             throws PaymentException, IllegalStateException {
-        Order order = orderDraftContext.getDraftOrder();
-
-        PaymentTransaction transaction = payOrderService.confirmPayment(order);
-        return placeOrderService.finalizeOrder(transaction);
+        return payOrderService.confirmPayment();
     }
 }
 

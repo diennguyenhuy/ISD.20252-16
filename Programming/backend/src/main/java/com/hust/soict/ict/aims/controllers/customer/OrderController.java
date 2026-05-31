@@ -1,9 +1,6 @@
 package com.hust.soict.ict.aims.controllers.customer;
 
-import com.hust.soict.ict.aims.exceptions.EmptyCartException;
-import com.hust.soict.ict.aims.exceptions.NotEnoughStockException;
-import com.hust.soict.ict.aims.exceptions.OrderNotFoundException;
-import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
+import com.hust.soict.ict.aims.exceptions.*;
 import com.hust.soict.ict.aims.models.dto.request.DeliveryRequest;
 import com.hust.soict.ict.aims.models.dto.response.order.DeliveryResponse;
 import com.hust.soict.ict.aims.models.dto.response.order.InvoiceResponse;
@@ -61,6 +58,12 @@ public class OrderController {
             @Valid @RequestBody DeliveryRequest deliveryRequest
     ) {
         return deliveryService.submitDeliveryInformation(deliveryRequest);
+    }
+
+    @PostMapping("/finalize")
+    @ResponseStatus(HttpStatus.CREATED)
+    public OrderResponse finalizeOrder() throws OrderNotCompleteException {
+        return placeOrderService.finalizeOrder();
     }
 
     /**

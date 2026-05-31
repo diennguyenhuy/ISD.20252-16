@@ -54,7 +54,7 @@ public class PayByCreditCardService {
         // gửi mail nếu thành công
         if (success && notificationService != null) {
             try {
-                notificationService.sendOrderConfirmation(order, transaction);
+                notificationService.sendOrderConfirmation(order);
             } catch (Exception ignored) {}
         }
 

@@ -222,7 +222,11 @@ export default function Invoice() {
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-4">
                 <button
-                    onClick={() => navigate('/checkout/delivery')}
+                    onClick={() => navigate('/checkout/delivery', {
+                        state: {
+                            prefilledDeliveryInfo: deliveryInfo
+                        }
+                    })}
                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl border border-border bg-card text-foreground font-semibold hover:bg-muted transition-colors shadow-sm"
                 >
                     <ArrowLeft size={18} />

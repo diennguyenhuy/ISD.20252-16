@@ -1,15 +1,20 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams, useLocation } from 'react-router';
 import { CheckCircle, Home, Package, User, MapPin, Phone, CreditCard, Hash, Calendar, FileText, Loader2 } from 'lucide-react';
 import { formatVND, formatDateTime } from '../../data/mockData';
 import OrderService from '../../api/orderService';
 import type { Order } from '../../models/order.interface';
+import { useCart } from "../../context/CartContext";
 
 export default function SuccessOrder() {
     const navigate = useNavigate();
+    const location = useLocation();
     const { id } = useParams<{ id: string }>();
+    const { clearCart } = useCart();
 
-    const [order, setOrder] = useState<Order | null>(null);
+    const newlyPlacedOrder = location.state?.placedOrder as Order;
+
+    const [order, setOrder] = useState<Order | null>(newlyPlacedOrder);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -18,15 +23,21 @@ export default function SuccessOrder() {
             return;
         }
 
-        OrderService.getOrder(id)
-            .then(data => {
-                setOrder(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error("Failed to fetch completed order:", err);
-                setLoading(false);
-            });
+        clearCart();
+
+        if (!newlyPlacedOrder) {
+            OrderService.getOrder(id)
+                .then(data => {
+                    setOrder(data);
+                    setLoading(false);
+                })
+                .catch(err => {
+                    console.error("Failed to fetch completed order:", err);
+                    setLoading(false);
+                });
+        } else {
+            setLoading(false);
+        }
     }, [id]);
 
     if (loading) {

@@ -10,6 +10,7 @@ interface CartContextType {
     addToCart: (productId: string, quantity: number) => Promise<void>;
     updateQuantity: (productId: string, quantity: number) => Promise<void>;
     removeFromCart: (productId: string) => Promise<void>;
+    clearCart: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -71,12 +72,17 @@ export function CartProvider({children}: { children: ReactNode }) {
         setCart(updatedCart);
     };
 
+    const clearCart = async () => {
+        await CartService.clearCart();
+        setCart(null);
+    };
+
     // Pre-calculate the total quantity so components don't have to
     const totalQuantity = cart?.totalQuantity || 0;
 
     return (
         <CartContext.Provider
-            value={{cart, loading, totalQuantity, fetchCart, addToCart, updateQuantity, removeFromCart}}>
+            value={{cart, loading, totalQuantity, fetchCart, addToCart, updateQuantity, removeFromCart, clearCart}}>
             {children}
         </CartContext.Provider>
     );
