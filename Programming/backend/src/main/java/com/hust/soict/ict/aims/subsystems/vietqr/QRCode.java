@@ -16,32 +16,36 @@ package com.hust.soict.ict.aims.subsystems.vietqr;
  *           between the two components.
  */
 public class QRCode {
-    private String qrCode; // Base64 or URL of QR code image
-    private String qrLink;  // Link to view QR code
-    private String bankCode; // Bank code (e.g., "VCB", "TCB")
-    private String bankName; // Bank name (e.g., "Vietcombank")
-    private String bankAccount; // Bank account number
-    
+    private String qrCode;
+    private String qrLink;
+    private String bankCode;
+    private String bankName;
+    private String bankAccount;
+    private String userBankName;
+    private String content;
+    private Long amount; // amount in VND (parsed from VietQR's string field)
+
     public QRCode() {}
-    
-    public QRCode(String qrCode, String qrLink, String bankCode, String bankName, String bankAccount) {
+
+    public QRCode(String qrCode, String qrLink, String bankCode, String bankName, String bankAccount, String userBankName, String content) {
         this.qrCode = qrCode;
         this.qrLink = qrLink;
         this.bankCode = bankCode;
         this.bankName = bankName;
         this.bankAccount = bankAccount;
+        this.userBankName = userBankName;
+        this.content = content;
     }
     
     public String getQrCode() { return qrCode; }
-    
     public String getQrLink() { return qrLink; }
-    
     public String getBankCode() { return bankCode; }
-    
     public String getBankName() { return bankName; }
-    
     public String getBankAccount() { return bankAccount; }
-    
+    public String getUserBankName() { return userBankName; }
+    public String getContent() { return content; }
+    public Long getAmount() { return amount; }
+
     @Override
     public String toString() {
         return String.format("QRCode{bankName='%s', bankCode='%s', account='%s'}", 
@@ -58,6 +62,13 @@ public class QRCode {
         this.bankCode = extractField(response, "bankCode");
         this.bankName = extractField(response, "bankName");
         this.bankAccount = extractField(response, "bankAccount");
+        this.userBankName = extractField(response, "userBankName");
+        this.content = extractField(response, "content");
+        // VietQR returns amount as a string e.g. "1455700"
+        String amountStr = extractField(response, "amount");
+        if (amountStr != null && !amountStr.isBlank()) {
+            try { this.amount = Long.parseLong(amountStr); } catch (NumberFormatException ignored) {}
+        }
     }
 
     /**

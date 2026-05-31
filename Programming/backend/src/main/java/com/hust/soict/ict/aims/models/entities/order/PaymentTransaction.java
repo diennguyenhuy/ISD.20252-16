@@ -24,7 +24,6 @@ public class PaymentTransaction {
         VIETQR,
         PAYPAL
     }
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false)
@@ -41,18 +40,11 @@ public class PaymentTransaction {
     @Column(nullable = false)
     private Long amountPaid;
 
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
-    /**
-     * Factory method to create PaymentTransaction
-     *
-     * Cohesion:
-     * - Functional: encapsulates creation logic
-     *
-     * Design:
-     * - Ensures consistency between Order and PaymentTransaction
-     */
+
     public static PaymentTransaction of(
             String transactionContent,
             Instant transactionTimestamp,
@@ -72,3 +64,4 @@ public class PaymentTransaction {
         return pt;
     }
 }
+

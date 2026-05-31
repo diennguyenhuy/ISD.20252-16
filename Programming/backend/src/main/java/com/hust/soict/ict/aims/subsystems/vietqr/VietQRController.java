@@ -110,14 +110,12 @@ public class VietQRController implements IPaymentQRCode {
         try {
             // Get valid access token
             String token = getValidAccessToken();
-
+            
             long amount = (long) order.getTotalAmount();
 
-            // Derive a short, alphanumeric orderId (≤13 chars, no dashes) so that
-            // sanitizeOrderId() and sanitizeContent() in QRGenerateRequest both
-            // reference the same value and don't truncate inconsistently.
-            String orderId = toShortOrderId(order.getId());
-            String content = "ORDER " + orderId;
+            // Use the formatter to explicitly sanitize strings
+            String orderId = VietQRFormatter.sanitizeOrderId(order.getId().toString());
+            String content = VietQRFormatter.sanitizeContent("ORD" + orderId);
 
             // Create request with bank info from config
             QRGenerateRequest request = new QRGenerateRequest(
@@ -132,8 +130,6 @@ public class VietQRController implements IPaymentQRCode {
 
             return qrCode;
         } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println(e.getMessage());
             throw new UnknownException("Failed to generate QR code: ", e);
         }
     }
@@ -148,56 +144,25 @@ public class VietQRController implements IPaymentQRCode {
     @Override
     public QRCodePaymentStatus checkPaymentStatus(Order order) throws PaymentException {
         try {
-            // Get valid access token
             String token = getValidAccessToken();
-
+            
             long amount = (long) order.getTotalAmount();
 
-            // Use the same short orderId derivation as generateQRCode() so the
-            // content field in the test-callback request matches what was sent
-            // during QR generation.
-            String orderId = toShortOrderId(order.getId());
-            String content = "ORDER " + orderId;
+            String orderId = VietQRFormatter.sanitizeOrderId(order.getId().toString());
+            String content = VietQRFormatter.sanitizeContent("ORD" + orderId);
 
             // Create status check request
             QRTestCallbackRequest request = new QRTestCallbackRequest(
-                    accountNo,
-                    content,
-                    amount,
-                    bankCode
+                    accountNo, content, amount, bankCode
             );
-
             String requestString = request.buildRequestString();
-
-            // Call API with Bearer token
             String response = boundary.checkPaymentStatus(token, requestString);
-
-            // Parse response string to PaymentStatus
             QRCodePaymentStatus status = new QRCodePaymentStatus();
             status.parseResponseString(response);
-
             return status;
         } catch (Exception e) {
             throw new UnknownException("Failed to check payment status: " + e.getMessage(), e);
         }
     }
 
-    /**
-     * Converts a UUID to a compact, alphanumeric string suitable for VietQR's
-     * {@code orderId} field (max 13 chars, no special characters).
-     *
-     * <p>Strategy: strip the hyphens from the UUID hex string, then take the
-     * first 13 characters. This gives a stable, collision-resistant prefix that
-     * both {@code generateQRCode()} and {@code checkPaymentStatus()} can derive
-     * independently from the same {@link java.util.UUID}, ensuring the
-     * {@code content} and {@code orderId} fields sent to the VietQR API always
-     * reference the same value.
-     *
-     * @param id the order UUID
-     * @return a 13-character lowercase hex string
-     */
-    private static String toShortOrderId(java.util.UUID id) {
-        String hex = id.toString().replace("-", ""); // 32 lowercase hex chars
-        return hex.substring(0, 13);                 // VietQR max orderId = 13 chars
-    }
 }

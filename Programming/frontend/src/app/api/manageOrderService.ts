@@ -8,7 +8,7 @@ export const ManagerOrderService = {
     },
 
     updateOrderStatus: async (id: string, status: OrderStatus): Promise<Order> => {
-        const response = await apiClient.patch<Order>(`manager/orders/{id}/status`, { status });
+        const response = await apiClient.patch<Order>(`manager/orders/${id}/status`, { status });
         return response.data;
     }
 };

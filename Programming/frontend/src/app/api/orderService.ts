@@ -28,7 +28,7 @@ const OrderService = {
     },
 
     getOrder: async (orderId: string): Promise<Order> => {
-        const response = await apiClient.get<Order>(`order/{orderId}`);
+        const response = await apiClient.get<Order>(`order/${orderId}`);
         return response.data;
     }
 };

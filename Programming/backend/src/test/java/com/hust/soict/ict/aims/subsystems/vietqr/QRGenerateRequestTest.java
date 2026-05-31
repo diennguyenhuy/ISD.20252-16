@@ -26,7 +26,7 @@ class QRGenerateRequestTest {
 
     @Test
     void sanitizeContent_shouldRemoveSpecialCharactersAndTruncate() {
-        String result = request.sanitizeContent(
+        String result = VietQRFormatter.sanitizeContent(
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$!!!"
         );
 
@@ -36,7 +36,7 @@ class QRGenerateRequestTest {
 
     @Test
     void sanitizeOrderId_shouldRemoveSpecialCharactersAndTruncate() {
-        String result = request.sanitizeOrderId(
+        String result = VietQRFormatter.sanitizeOrderId(
                 "ORDER@#123456789012345"
         );
 
