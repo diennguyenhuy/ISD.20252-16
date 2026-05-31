@@ -20,6 +20,8 @@ public class SecurityConfig {
                         auth.requestMatchers(HttpMethod.OPTIONS).permitAll()
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                                 .requestMatchers("/product/**", "/cart/**", "/order/**").permitAll()
+                                // VietQR callback endpoints: auth is handled internally via Basic/Bearer
+                                .requestMatchers("/vqr/**").permitAll()
                                 .anyRequest().permitAll()
                 );
         return http.build();

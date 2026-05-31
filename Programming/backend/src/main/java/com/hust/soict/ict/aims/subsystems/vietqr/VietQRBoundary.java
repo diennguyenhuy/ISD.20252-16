@@ -37,6 +37,11 @@ class VietQRBoundary {
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        System.out.println("=== VIETQR GET TOKEN ===");
+        System.out.println("URL: " + apiBaseUrl + GET_TOKEN_URL);
+        System.out.println("REQUEST: (Empty Body)");
+        System.out.println("STATUS: " + response.statusCode());
+        System.out.println("BODY: " + response.body());
         return response.body();
     }
 
@@ -50,8 +55,7 @@ class VietQRBoundary {
                 .POST(HttpRequest.BodyPublishers.ofString(requestString))
                 .build();
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println("=== VIETQR GENERATE QR ===");
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());System.out.println("=== VIETQR GENERATE QR ===");
         System.out.println("URL: " + apiBaseUrl + GENERATE_QR_URL);
         System.out.println("REQUEST: " + requestString);
         System.out.println("STATUS: " + response.statusCode());
@@ -72,6 +76,11 @@ class VietQRBoundary {
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        System.out.println("=== VIETQR TEST CALLBACK ===");
+        System.out.println("URL: " + callbackUrl);
+        System.out.println("REQUEST: " + requestString);
+        System.out.println("STATUS: " + response.statusCode());
+        System.out.println("BODY: " + response.body());
         return response.body();
     }
 }

@@ -132,12 +132,12 @@ CREATE TABLE IF NOT EXISTS invoice(
 );
 
 CREATE TABLE IF NOT EXISTS payment_transaction(
-    id						UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    transaction_content		TEXT,
-    transaction_timestamp	TIMESTAMPTZ NOT NULL,
-    transaction_method		VARCHAR(10) NOT NULL,
-    amount_paid				BIGINT NOT NULL,
-    order_id				UUID NOT NULL REFERENCES "order"(id) ON DELETE CASCADE
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    transaction_content TEXT,
+    transaction_timestamp TIMESTAMPTZ NOT NULL,
+    transaction_method  VARCHAR(10) NOT NULL,
+    amount_paid         BIGINT NOT NULL,
+    order_id            UUID NOT NULL REFERENCES "order"(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "user"(

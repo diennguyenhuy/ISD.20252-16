@@ -4,54 +4,55 @@ import com.hust.soict.ict.aims.IPaymentQRCode;
 import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
+import com.hust.soict.ict.aims.mapper.PaymentMapper;
+import com.hust.soict.ict.aims.models.dto.response.payments.PaymentStatusResponse;
+import com.hust.soict.ict.aims.models.dto.response.payments.QRCodeResponse;
 import com.hust.soict.ict.aims.subsystems.vietqr.QRCode;
 import com.hust.soict.ict.aims.subsystems.vietqr.QRCodePaymentStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import java.time.Instant;
+
 /*
  * + Cohesion level: FUNCTIONAL
  * + Coupling level with IPaymentQRCode/VietQRController: DATA
- * + Reason: PayOrderService has one main responsibility: coordinating the
- *           VietQR payment flow for an order. Its methods generatePaymentQR(),
- *           checkPaymentStatus(), and confirmPayment() all work toward the
- *           same goal of generating a QR code, checking the payment result,
- *           and creating a PaymentTransaction after successful payment.
+ * + Reason: PayOrderService is the single owner of PaymentTransaction creation
+ *           for all payment paths. Its methods:
  *
- *           The coupling with IPaymentQRCode/VietQRController is DATA coupling
- *           because PayOrderService communicates through the IPaymentQRCode
- *           interface by passing an Order object and receiving QRCode or
- *           QRCodePaymentStatus objects. It does not control the internal
- *           logic of the VietQR implementation. Also, because it depends on
- *           the IPaymentQRCode interface instead of a concrete VietQRController,
- *           the coupling is reduced and the design is more flexible.
+ *           all work toward the same goal: managing the VietQR payment lifecycle
+ *           for an order. No other service creates PaymentTransaction objects.
+ *
+ *           confirmPayment() reads PaymentCallbackContext to obtain real payment
+ *           data supplied by the gateway callback when it is available, and
+ *           falls back to local order data otherwise. This keeps PayOrderService
+ *           fully decoupled from any specific gateway callback mechanism.
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PayOrderService {
 
     private final IPaymentQRCode qrPaymentController;
+    private final PaymentMapper paymentMapper;
 
-    public QRCode generatePaymentQR(Order order) throws PaymentException {
-        return qrPaymentController.generateQRCode(order);
+    public QRCodeResponse generatePaymentQR(Order order) throws PaymentException {
+        return paymentMapper.toQRCodeResponse(qrPaymentController.generateQRCode(order));
     }
 
-    public QRCodePaymentStatus checkPaymentStatus(Order order) throws PaymentException {
-        return qrPaymentController.checkPaymentStatus(order);
+    public PaymentStatusResponse checkPaymentStatus(Order order) throws PaymentException {
+        return paymentMapper.toPaymentStatusResponse(qrPaymentController.checkPaymentStatus(order));
     }
 
     public PaymentTransaction confirmPayment(Order order) throws PaymentException {
-        QRCodePaymentStatus paymentStatus = checkPaymentStatus(order);
-
+        QRCodePaymentStatus paymentStatus = qrPaymentController.checkPaymentStatus(order);
         if (!paymentStatus.isCompleted()) {
             throw new PaymentException(
-                    "Payment is not completed. Current status: " + paymentStatus.getStatus());
+                    "Payment verification failed. VietQR status: " + paymentStatus.getStatus());
         }
-
-        String content = "VietQR payment for ORDER " + order.getId();
+        log.info("[PayOrderService] VietQR confirmed COMPLETED — creating PaymentTransaction");
         return PaymentTransaction.of(
-                content,
+                "ORD" + order.getId(),
                 Instant.now(),
                 PaymentTransaction.Method.VIETQR,
                 order.getTotalAmount(),

@@ -21,7 +21,7 @@ import java.util.*;
  *   state transition logic.
  */
 @Entity
-@Table(name = "order")
+@Table(name = "\"order\"")
 @NamedEntityGraphs({
         @NamedEntityGraph(
                 name = "Order-aggregate",

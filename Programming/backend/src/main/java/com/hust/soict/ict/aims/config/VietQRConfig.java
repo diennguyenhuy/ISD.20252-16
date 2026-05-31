@@ -6,17 +6,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Spring configuration that exposes a {@link VietQRController} instance as the
- * {@link IPaymentQRCode} bean consumed by {@code PayOrderService}.
+ * Spring configuration that exposes a  VietQRController instance as the
+ * IPaymentQRCode bean consumed by {@code PayOrderService}.
  *
- * <p>Because {@link VietQRController} is a plain Java class (not annotated with
+ * <p>Because  VietQRControlleris a plain Java class (not annotated with
  * {@code @Component} / {@code @Service}), it cannot be discovered by component
  * scanning. This {@code @Configuration} class bridges that gap: it reads the
- * VietQR credentials and bank account details from {@link VietQRProperties}
+ * VietQR credentials and bank account details from VietQRProperties
  * (which is populated from {@code application.yaml}) and passes them to the
- * {@link VietQRController} constructor.
+ * VietQRController constructor.
  *
- * <p>Coupling level with {@link VietQRProperties}: DATA coupling — only the
+ * <p>Coupling level with VietQRProperties: DATA coupling — only the
  * primitive String values (username, password, bankCode, accountNo, accountName,
  * apiBaseUrl) are extracted and forwarded; no composite objects or control
  * flags are passed.

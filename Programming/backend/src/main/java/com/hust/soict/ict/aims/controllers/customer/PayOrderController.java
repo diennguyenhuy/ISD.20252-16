@@ -9,19 +9,20 @@ import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 import com.hust.soict.ict.aims.services.order.PlaceOrderService;
 import com.hust.soict.ict.aims.services.payment.PayOrderService;
-import com.hust.soict.ict.aims.subsystems.vietqr.QRCode;
-import com.hust.soict.ict.aims.subsystems.vietqr.QRCodePaymentStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.Instant;
+import java.util.UUID;
 /*
  * + Cohesion level: FUNCTIONAL
  * + Coupling level with PayOrderService and PlaceOrderService: DATA
  * + Reason: PayOrderController has one clear responsibility: handling VietQR
  *           payment-related HTTP requests from the client. Its methods
- *           generateQRCode(), checkPaymentStatus(), and confirmPayment()
- *           all contribute to the same payment workflow by receiving requests,
- *           invoking services, and returning response DTOs.
+ *           generateQRCode(), checkPaymentStatus(), confirmPayment(), and
+ *           simulateCallback() all contribute to the same payment workflow
+ *           by receiving requests, invoking services, and returning response DTOs.
  *
  *           The coupling with PayOrderService and PlaceOrderService is
  *           DATA coupling because the controller exchanges only the required
@@ -33,6 +34,9 @@ import org.springframework.web.bind.annotation.*;
  *           Additionally, the controller improves modularity by separating
  *           HTTP/API handling logic from the business logic implemented inside
  *           the service layer.
+ *
+ *           DTO mapping is delegated to PaymentMapper (MapStruct) to keep
+ *           both the controller and service layer free of manual field copying.
  */
 @RestController
 @RequestMapping("/order/payment/vietqr")
@@ -47,16 +51,14 @@ public class PayOrderController {
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody QRCodeResponse generateQRCode() throws PaymentException {
         Order order = orderDraftContext.getDraftOrder();
-        QRCode qrCode = payOrderService.generatePaymentQR(order);
-        return toQRCodeResponse(qrCode);
+        return payOrderService.generatePaymentQR(order);
     }
 
     @GetMapping("/status")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody PaymentStatusResponse checkPaymentStatus() throws PaymentException {
         Order order = orderDraftContext.getDraftOrder();
-        QRCodePaymentStatus status = payOrderService.checkPaymentStatus(order);
-        return toPaymentStatusResponse(status);
+        return payOrderService.checkPaymentStatus(order);
     }
 
     @PostMapping("/confirm")
@@ -68,22 +70,5 @@ public class PayOrderController {
         PaymentTransaction transaction = payOrderService.confirmPayment(order);
         return placeOrderService.finalizeOrder(transaction);
     }
-
-
-
-    private static QRCodeResponse toQRCodeResponse(QRCode qrCode) {
-        return new QRCodeResponse(
-                qrCode.getQrCode(),
-                qrCode.getQrLink(),
-                qrCode.getBankName(),
-                qrCode.getBankAccount()
-        );
-    }
-
-    private static PaymentStatusResponse toPaymentStatusResponse(QRCodePaymentStatus status) {
-        return new PaymentStatusResponse(
-                status.getStatus(),
-                status.getMessage()
-        );
-    }
 }
+
