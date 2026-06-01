@@ -1,6 +1,5 @@
 package com.hust.soict.ict.aims.subsystems.vietqr;
 
-import com.hust.soict.ict.aims.IPaymentQRCode;
 import com.hust.soict.ict.aims.exceptions.*;
 import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.models.entities.order.Order;

@@ -1,6 +1,6 @@
 package com.hust.soict.ict.aims.config;
 
-import com.hust.soict.ict.aims.IPaymentQRCode;
+import com.hust.soict.ict.aims.subsystems.vietqr.IPaymentQRCode;
 import com.hust.soict.ict.aims.subsystems.vietqr.VietQRController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class VietQRConfig {
-
     @Bean
     public IPaymentQRCode paymentQRCode(VietQRProperties props) {
         return new VietQRController(

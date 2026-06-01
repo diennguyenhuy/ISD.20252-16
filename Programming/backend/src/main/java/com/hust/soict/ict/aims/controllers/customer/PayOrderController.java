@@ -37,10 +37,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/order/payment/vietqr")
 @RequiredArgsConstructor
 public class PayOrderController {
-
     private final PayOrderService payOrderService;
-    private final PlaceOrderService placeOrderService;
-
     @PostMapping("/qr")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody QRCodeResponse generateQRCode() throws PaymentException {
