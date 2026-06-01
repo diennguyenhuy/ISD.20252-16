@@ -29,6 +29,8 @@ export default function ManagerHomePage() {
   const [confirmDelete, setConfirmDelete] = useState<ProductSummary[] | null>(null);
   const [confirmActivate, setConfirmActivate] = useState<ProductSummary | null>(null);
 
+  const [actionError, setActionError] = useState<string | null>(null);
+
   useEffect(() => {
     fetchProducts().catch(console.error);
   }, [fetchProducts]);
@@ -59,9 +61,16 @@ export default function ManagerHomePage() {
 
   const handleDeleteBatch = async () => {
     if (confirmDelete) {
-      await deleteProducts(confirmDelete.map(p => p.id));
-      setConfirmDelete(null);
-      setSelectedIds([]);
+      setActionError(null);
+      const res = await deleteProducts(confirmDelete.map(p => p.id)) as any;
+
+      if (res && res.success) {
+        setConfirmDelete(null);
+        setSelectedIds([]);
+      } else {
+        setActionError(res.error || "Cannot delete products due to server error.");
+        setConfirmDelete(null);
+      }
     }
   };
 
@@ -101,9 +110,19 @@ export default function ManagerHomePage() {
           </div>
         </div>
 
+        {}
+        {actionError && (
+            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-xl flex items-center gap-3 font-bold animate-in slide-in-from-top-2">
+              <AlertTriangle size={20} className="shrink-0" />
+              {actionError}
+              <button onClick={() => setActionError(null)} className="ml-auto underline text-sm hover:text-destructive/80">Dismiss</button>
+            </div>
+        )}
+
+        {}
         {selectedIds.length > 10 && (
             <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 text-amber-600 rounded-xl flex items-center gap-3 font-semibold animate-in slide-in-from-top-2">
-              <AlertTriangle size={20} />
+              <AlertTriangle size={20} className="shrink-0" />
               You can only delete a maximum of 10 products per request. Please deselect some items.
             </div>
         )}
@@ -261,7 +280,6 @@ export default function ManagerHomePage() {
                 </div>
 
                 <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
-                  {/* FIX TS2532: using optional chaining ?. */}
                   Are you sure you want to delete {confirmDelete.length > 1 ? <span className="font-bold text-foreground">{confirmDelete.length} selected products</span> : <span><span className="font-bold text-foreground">{confirmDelete[0]?.title}</span></span>}?
                 </p>
 
