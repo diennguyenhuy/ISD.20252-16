@@ -20,6 +20,22 @@ import org.springframework.stereotype.Service;
  *   and OrderMapper because composite objects are shared.
  * - Data coupling with DeliveryFeeCalculator through
  *   primitive/simple parameters.
+ * SOLID Review
+ * Potential Violation:
+ * - Open/Closed Principle (OCP)
+ * - Dependency Inversion Principle (DIP)
+ * Reason:
+ * DeliveryService relies on a specific delivery fee
+ * calculation implementation, specifically the concrete
+ * DeliveryFeeCalculator class.
+ * Future requirements introducing alternative delivery
+ * fee policies may require modification of existing
+ * calculation logic.
+ * High-level delivery processing logic is therefore
+ * oupled to a specific fee calculation implementation.
+ * Improvement Direction:
+ * Introduce a DeliveryFeeStrategy abstraction and move
+ * fee calculation algorithms into separate implementations.
  */
 @Service
 @RequiredArgsConstructor

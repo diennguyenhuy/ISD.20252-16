@@ -27,6 +27,27 @@ import java.util.UUID;
  * - Stamp coupling with Order, PaymentTransaction,
  *   OrderDraftContext, and OrderMapper because
  *   composite domain objects are passed between modules.
+ * SOLID Review
+ * Potential Violation:
+ * - Single Responsibility Principle (SRP)
+ * - Open/Closed Principle (OCP)
+ * Reason:
+ * - [SRP] PlaceOrderService is responsible for multiple aspects of
+ * the order lifecycle, including draft order creation,
+ * invoice generation, order finalization, order retrieval,
+ * and order cancellation. Changes to any of these workflows may
+ * require modification of the same class.
+ * - [OCP] Order completion requirements are hardcoded inside
+ * finalizeOrder(). New requirements such as additional mandatory order
+ * information, validation rules, or completion criteria
+ * would require modification of existing logic.
+ * Improvement Direction:
+ * - [SRP] If the application grows, consider separating responsibilities
+ * into dedicated services such as OrderDraftService,
+ * OrderFinalizationService, and OrderQueryService.
+ * - [OCP] Introduce extensible validation mechanisms such as
+ * OrderCompletionRule or OrderValidator abstractions
+ * that can be extended without modifying the service.
  */
 @Service
 @RequiredArgsConstructor
