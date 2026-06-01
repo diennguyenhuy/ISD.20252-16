@@ -17,41 +17,15 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
-/**
- * Owns the credit-card / PayPal payment lifecycle for AIMS.
- *
- * <p>This is the credit-card counterpart of {@code PayOrderService} (VietQR):
- * the single place where a PayPal {@link PaymentTransaction} is created and the
- * order is finalized.
- *
- * <h3>Why this is a refactor of the old {@code PayByCreditCardService}</h3>
- * The previous version (a) re-implemented card validation + a hard-coded
- * "starts-with-4" gateway simulation, (b) duplicated the exact same logic that
- * already lived in {@code PaymentServiceImpl}, (c) fetched the order by id from a
- * request DTO instead of the session draft, and (d) never finalized the order.
- * Those are low cohesion (validation + gateway + persistence + email in one
- * method) and high coupling (two concrete repositories + a notification service).
- *
- * <h3>New design</h3>
- * <ul>
- *   <li><b>SRP / cohesion:</b> orchestrate "create payment" and "capture &amp;
- *       finalize". Nothing else.</li>
- *   <li><b>DIP / low coupling:</b> depends on the {@link IPaymentProvider} facade
- *       (not on PayPal), on {@link OrderDraftContext} (not on a request DTO), and
- *       on {@link PlaceOrderService} (the existing persistence + email owner).</li>
- *   <li><b>Integration rule:</b> on a successful capture it triggers
- *       {@link PlaceOrderService#finalizeOrder(PaymentTransaction)} — exactly the
- *       contract the VietQR flow uses.</li>
- * </ul>
- *
- * <h3>Transaction persistence note</h3>
- * Following the proven VietQR path, the {@link PaymentTransaction} is created and
- * handed to {@code finalizeOrder()}, which is the system's single persistence
- * owner (it saves the {@code Order} aggregate, cascading the transaction, and
- * sends the confirmation email). A direct {@code PaymentTransactionRepository.save}
- * here would double-insert. If — and only if — {@code finalizeOrder()} does NOT
- * cascade-persist the transaction in your build, inject
- * {@code PaymentTransactionRepository} and save before finalizing.
+/*
+ * [SOLID DIP: low-severity note][cite: 1]
+ * Principle: Dependency Inversion (D)[cite: 1]
+ * Why: This service correctly depends on the IPaymentProvider abstraction, but[cite: 1]
+ *      PlaceOrderService and OrderDraftContext are injected as CONCRETE classes,[cite: 1]
+ *      so orchestration is still bound to two concrete in-process types. Severity[cite: 1]
+ *      is low because both are stable Spring beans (same reasoning as OrderContro][cite: 1]
+ * Proposed Solution: If finer testability is wanted, depend on narrow ports[cite: 1]
+ *      (e.g. OrderFinalizer, OrderDraftSource) and inject those instead.[cite: 1]
  */
 @Service
 @RequiredArgsConstructor

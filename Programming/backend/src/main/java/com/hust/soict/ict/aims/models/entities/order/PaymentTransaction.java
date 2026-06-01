@@ -6,14 +6,15 @@ import lombok.*;
 
 import java.time.Instant;
 import java.util.UUID;
-/**
- * Entity representing a payment transaction
- *
- * Cohesion:
- * - Functional: stores transaction data
- *
- * Relationship:
- * - One-to-one with Order
+/*
+ * [SOLID OCP: minor, localized note][cite: 1]
+ * Principle: Open/Closed (O)[cite: 1]
+ * Why: Method is a fixed enum {VIETQR, PAYPAL}. Adding a provider (Stripe/Momo)[cite: 1]
+ *      means editing this enum and any switch reading it. The provider call path[cite: 1]
+ *      itself is OCP-clean (IPaymentProvider), so this is a small touch point, not[cite: 1]
+ *      a structural violation. For a known, small, closed set an enum is acceptab][cite: 1]
+ * Proposed Solution: If methods become open-ended, store a provider code resolved[cite: 1]
+ *      from the IPaymentProvider implementation rather than a hardcoded enum.[cite: 1]
  */
 @Entity
 @Table(name = "payment_transaction")
