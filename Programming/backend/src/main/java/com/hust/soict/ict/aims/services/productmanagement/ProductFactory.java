@@ -18,6 +18,11 @@ import java.util.stream.Collectors;
  * Design Strength:
  * Eliminates control coupling (switch-cases) from the service layer by centralizing object instantiation. Utilizes Java Pattern Matching to strictly adhere to the Open/Closed Principle.
  */
+
+/**
+ * [SOLID VIOLATION - OCP]: Current Factory is using a switch-case structure based on productType.
+ * [IMPROVEMENT]: Replace the switch-case structure with the Registry or Strategy pattern.
+ */
 @Component
 public class ProductFactory {
 
