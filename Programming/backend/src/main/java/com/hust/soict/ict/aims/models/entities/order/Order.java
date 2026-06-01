@@ -58,7 +58,7 @@ public class Order extends AuditableEntity {
         CANCELLED,
         REFUNDED;
 
-        static final Map<Status, Set<Status>> transitions = Map.of(
+        private static final Map<Status, Set<Status>> transitions = Map.of(
                 DRAFT, Set.of(PENDING),
                 PENDING, Set.of(APPROVED, REJECTED, CANCELLED),
                 APPROVED, Set.of(),
@@ -66,6 +66,10 @@ public class Order extends AuditableEntity {
                 CANCELLED, Set.of(REFUNDED),
                 REFUNDED, Set.of()
         );
+
+        public boolean isValidTransition(Status status) {
+            return transitions.get(this).contains(status);
+        }
     }
 
     @Id
@@ -122,7 +126,7 @@ public class Order extends AuditableEntity {
     public void changeStatus(@NonNull Status newStatus) throws IllegalStateException {
         if (newStatus == status) return;
 
-        if (!Status.transitions.get(status).contains(newStatus)) {
+        if (!this.status.isValidTransition(newStatus)) {
             throw new IllegalStateException("Cannot transition order status from " + status.name() + " to " + newStatus.name());
         }
 

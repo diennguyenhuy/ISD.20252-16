@@ -99,11 +99,15 @@ export default function QRPayment() {
         try {
             // confirmPayment() calls VietQR's test-callback API internally for
             // verification, then creates the PaymentTransaction and finalizes the order.
-            const order = await PayOrderService.confirmPayment();
-
+            await PayOrderService.confirmPayment();
             // Step 3: success
             setConfirmState('success');
-            setTimeout(() => navigate(`/checkout/success/${order.id}`), 1500);
+            const order = await OrderService.finalizeOrder();
+            setTimeout(() => navigate(`/checkout/success/${order.id}`, {
+                state: {
+                    placedOrder: order,
+                }
+            }), 1500);
         } catch (err: any) {
             const msg =
                 err?.response?.data?.message ||

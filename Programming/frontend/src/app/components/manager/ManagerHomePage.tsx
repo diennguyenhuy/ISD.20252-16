@@ -17,35 +17,52 @@ const TYPE_COLORS: Record<string, string> = {
 
 export default function ManagerHomePage() {
   const navigate = useNavigate();
-  const { products, loading, fetchProducts, deleteProduct, activateProduct } = useProductManagement();
+  const { products, loading, fetchProducts, deleteProducts, activateProduct } = useProductManagement();
 
   const [search, setSearch] = useState('');
-  const [filterType, setFilterType] = useState<string>('ALL'); // Điều khiển bằng 4 thẻ Cards
-  const [filterStatus, setFilterStatus] = useState<string>('ALL'); // Điều khiển bằng Dropdown
+  const [filterType, setFilterType] = useState<string>('ALL');
+  const [filterStatus, setFilterStatus] = useState<string>('ALL');
+
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const [adjustProduct, setAdjustProduct] = useState<ProductSummary | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<ProductSummary | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<ProductSummary[] | null>(null);
   const [confirmActivate, setConfirmActivate] = useState<ProductSummary | null>(null);
 
   useEffect(() => {
     fetchProducts().catch(console.error);
   }, [fetchProducts]);
 
+  useEffect(() => { setSelectedIds([]); }, [filterType, filterStatus, search]);
+
   const filtered = products.filter(p => {
     const q = search.toLowerCase();
     const matchSearch = !q || p.title.toLowerCase().includes(q) || (p.creators && p.creators.join(' ').toLowerCase().includes(q));
-
     const matchType = filterType === 'ALL' || p.productType.toUpperCase() === filterType;
-
     const pStatus = (p as any).status || 'ACTIVE';
     const matchStatus = filterStatus === 'ALL' || pStatus === filterStatus;
 
     return matchSearch && matchType && matchStatus;
   });
 
-  const handleDelete = async (id: string) => {
-    await deleteProduct(id);
-    setConfirmDelete(null);
+  const selectableProducts = filtered.filter(p => ((p as any).status || 'ACTIVE') !== 'DELETED');
+  const isAllSelected = selectableProducts.length > 0 && selectedIds.length === selectableProducts.length;
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) setSelectedIds([]);
+    else setSelectedIds(selectableProducts.map(p => p.id));
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const handleDeleteBatch = async () => {
+    if (confirmDelete) {
+      await deleteProducts(confirmDelete.map(p => p.id));
+      setConfirmDelete(null);
+      setSelectedIds([]);
+    }
   };
 
   const handleActivate = async (id: string) => {
@@ -66,20 +83,36 @@ export default function ManagerHomePage() {
             <h2 className="text-foreground text-2xl font-bold tracking-tight">Product catalog</h2>
             <p className="text-muted-foreground text-sm mt-1 font-medium">{products.length} products total</p>
           </div>
-          <button onClick={() => navigate('/manager/products/add')} className="flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-xl hover:bg-accent font-bold shadow-sm">
-            <Plus size={18} /> Add new product
-          </button>
+
+          <div className="flex gap-3">
+            {selectedIds.length > 0 && (
+                <button
+                    onClick={() => setConfirmDelete(filtered.filter(p => selectedIds.includes(p.id)))}
+                    disabled={selectedIds.length > 10}
+                    className="flex items-center justify-center gap-2 bg-destructive text-destructive-foreground px-5 py-2.5 rounded-xl hover:opacity-90 font-bold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  <Trash2 size={18} /> Delete Selected ({selectedIds.length})
+                </button>
+            )}
+
+            <button onClick={() => navigate('/manager/products/add')} className="flex items-center justify-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-xl hover:bg-accent font-bold shadow-sm">
+              <Plus size={18} /> Add new product
+            </button>
+          </div>
         </div>
 
-        {/* --- KHU VỰC TÌM KIẾM VÀ BỘ LỌC STATUS --- */}
+        {selectedIds.length > 10 && (
+            <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 text-amber-600 rounded-xl flex items-center gap-3 font-semibold animate-in slide-in-from-top-2">
+              <AlertTriangle size={20} />
+              You can only delete a maximum of 10 products per request. Please deselect some items.
+            </div>
+        )}
+
         <div className="flex flex-wrap gap-3 mb-6">
           <div className="flex-1 min-w-[240px] relative">
             <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input type="text" placeholder="Search by name, creator..." value={search} onChange={e => setSearch(e.target.value)} className={`w-full pl-10 pr-4 ${inputClass}`} />
           </div>
-
-          {/* Đã xóa Dropdown "All Categories" bị sai định nghĩa ở đây */}
-
           <div className="relative min-w-[180px]">
             <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className={`w-full appearance-none pr-10 cursor-pointer ${inputClass}`}>
               <option value="ALL">All Statuses</option>
@@ -91,22 +124,14 @@ export default function ManagerHomePage() {
           </div>
         </div>
 
-        {/* --- 4 THẺ CARDS LỌC THEO PRODUCT TYPE ĐƯỢC KHÔI PHỤC --- */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {(['BOOK', 'CD', 'DVD', 'NEWSPAPER']).map(type => {
             const count = products.filter(p => p.productType.toUpperCase() === type).length;
             const Icon = TYPE_ICONS[type] || Package;
-
-            // Nếu filterType đang trỏ vào type này, thì nổi bật card lên
             const isActive = filterType === type;
 
             return (
-                <button
-                    key={type}
-                    onClick={() => setFilterType(isActive ? 'ALL' : type)}
-                    className={`flex items-center gap-3.5 p-4 rounded-2xl border transition-all duration-200 text-left 
-                    ${isActive ? 'border-primary bg-primary/10 shadow-sm shadow-primary/5' : 'border-border bg-card hover:border-primary/40 hover:bg-muted/30 shadow-sm'}`}
-                >
+                <button key={type} onClick={() => setFilterType(isActive ? 'ALL' : type)} className={`flex items-center gap-3.5 p-4 rounded-2xl border transition-all duration-200 text-left ${isActive ? 'border-primary bg-primary/10 shadow-sm shadow-primary/5' : 'border-border bg-card hover:border-primary/40 hover:bg-muted/30 shadow-sm'}`}>
                   <div className={`p-2.5 rounded-xl shadow-inner ${isActive ? 'bg-primary text-primary-foreground' : TYPE_COLORS[type]}`}>
                     <Icon size={18} />
                   </div>
@@ -124,6 +149,15 @@ export default function ManagerHomePage() {
             <table className="w-full text-sm">
               <thead>
               <tr className="bg-muted/30 border-b border-border">
+                <th className="px-5 py-4 w-12 text-center">
+                  <input
+                      type="checkbox"
+                      checked={isAllSelected && selectableProducts.length > 0}
+                      onChange={toggleSelectAll}
+                      disabled={selectableProducts.length === 0}
+                      className="w-4 h-4 rounded border-border text-primary focus:ring-primary cursor-pointer disabled:cursor-not-allowed"
+                  />
+                </th>
                 <th className="text-left px-5 py-4 font-semibold text-muted-foreground uppercase text-xs whitespace-nowrap">Product</th>
                 <th className="text-left px-5 py-4 font-semibold text-muted-foreground uppercase text-xs">Type</th>
                 <th className="text-right px-5 py-4 font-semibold text-muted-foreground uppercase text-xs">Price</th>
@@ -137,9 +171,19 @@ export default function ManagerHomePage() {
                 const uType = product.productType.toUpperCase();
                 const Icon = TYPE_ICONS[uType] || Package;
                 const status = (product as any).status || 'ACTIVE';
+                const isSelected = selectedIds.includes(product.id);
 
                 return (
-                    <tr key={product.id} className={`border-b border-border/50 hover:bg-muted/30 cursor-pointer transition-colors ${status === 'DELETED' ? 'opacity-60 bg-muted/10' : ''}`} onClick={() => navigate(`/manager/products/${product.id}`)}>
+                    <tr key={product.id} className={`border-b border-border/50 hover:bg-muted/30 cursor-pointer transition-colors ${status === 'DELETED' ? 'opacity-60 bg-muted/10' : ''} ${isSelected ? 'bg-primary/5' : ''}`} onClick={() => navigate(`/manager/products/${product.id}`)}>
+                      <td className="px-5 py-3.5 w-12 text-center" onClick={e => e.stopPropagation()}>
+                        <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleSelect(product.id)}
+                            disabled={status === 'DELETED'}
+                            className="w-4 h-4 rounded border-border text-primary focus:ring-primary cursor-pointer disabled:cursor-not-allowed"
+                        />
+                      </td>
                       <td className="px-5 py-3.5 min-w-[250px]">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-xl border border-border bg-muted overflow-hidden shrink-0">
@@ -174,44 +218,14 @@ export default function ManagerHomePage() {
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
 
-                          {/* ADJUST STOCK */}
-                          <button
-                              onClick={() => setAdjustProduct(product)}
-                              disabled={status === 'DELETED'}
-                              title={status === 'DELETED' ? "Cannot adjust stock of deleted product" : "Adjust Stock"}
-                              className="p-2 text-muted-foreground hover:text-primary rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                          >
-                            <Package size={16} />
-                          </button>
+                          <button onClick={() => setAdjustProduct(product)} disabled={status === 'DELETED'} title="Adjust Stock" className="p-2 text-muted-foreground hover:text-primary rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"><Package size={16} /></button>
 
-                          {/* EDIT */}
-                          <button
-                              onClick={() => navigate(`/manager/products/edit/${product.id}`)}
-                              disabled={status === 'DELETED' || status === 'DEACTIVATED'}
-                              title={status === 'DEACTIVATED' ? "Activate product to edit" : status === 'DELETED' ? "Cannot edit deleted product" : "Edit Product"}
-                              className="p-2 text-muted-foreground hover:text-amber-500 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                          >
-                            <Pencil size={16} />
-                          </button>
+                          <button onClick={() => navigate(`/manager/products/edit/${product.id}`)} disabled={status === 'DELETED' || status === 'DEACTIVATED'} title="Edit Product" className="p-2 text-muted-foreground hover:text-amber-500 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"><Pencil size={16} /></button>
 
-                          {/* DELETE OR ACTIVATE */}
                           {status === 'DEACTIVATED' ? (
-                              <button
-                                  onClick={() => setConfirmActivate(product)}
-                                  title="Activate Product"
-                                  className="p-2 text-amber-600 hover:text-emerald-600 hover:bg-emerald-500/10 rounded-lg transition-colors"
-                              >
-                                <CheckCircle size={16} />
-                              </button>
+                              <button onClick={() => setConfirmActivate(product)} title="Activate Product" className="p-2 text-amber-600 hover:text-emerald-600 hover:bg-emerald-500/10 rounded-lg transition-colors"><CheckCircle size={16} /></button>
                           ) : (
-                              <button
-                                  onClick={() => setConfirmDelete(product)}
-                                  disabled={status === 'DELETED'}
-                                  title="Delete Product"
-                                  className="p-2 text-muted-foreground hover:text-destructive rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                              >
-                                <Trash2 size={16} />
-                              </button>
+                              <button onClick={() => setConfirmDelete([product])} disabled={status === 'DELETED'} title="Delete Product" className="p-2 text-muted-foreground hover:text-destructive rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"><Trash2 size={16} /></button>
                           )}
                         </div>
                       </td>
@@ -223,59 +237,42 @@ export default function ManagerHomePage() {
           </div>
         </div>
 
-        {adjustProduct && (
-            <AdjustStockModal
-                product={adjustProduct}
-                onClose={() => {
-                  setAdjustProduct(null);
-                  fetchProducts().catch(console.error);
-                }}
-            />
-        )}
+        {adjustProduct && <AdjustStockModal product={adjustProduct} onClose={() => { setAdjustProduct(null); fetchProducts().catch(console.error); }} />}
 
         {confirmActivate && (
-            <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-              <div className="bg-card rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-border animate-in zoom-in-95 duration-200">
-                <div className="flex items-center gap-4 mb-5">
-                  <div className="p-3 bg-emerald-500/10 rounded-2xl"><CheckCircle size={24} className="text-emerald-600" /></div>
-                  <h3 className="text-lg font-bold text-foreground">Activate product</h3>
-                </div>
-                <p className="text-muted-foreground text-sm mb-8 leading-relaxed">
-                  Are you sure you want to reactivate <span className="font-bold text-foreground">{confirmActivate.title}</span>? This will allow you to edit the product again.
-                </p>
+            <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in">
+              <div className="bg-card rounded-3xl p-8 max-w-sm w-full shadow-2xl border">
+                <div className="flex items-center gap-4 mb-5"><div className="p-3 bg-emerald-500/10 rounded-2xl"><CheckCircle size={24} className="text-emerald-600" /></div><h3 className="text-lg font-bold">Activate product</h3></div>
+                <p className="text-muted-foreground text-sm mb-8">Are you sure you want to reactivate <span className="font-bold text-foreground">{confirmActivate.title}</span>?</p>
                 <div className="flex gap-3">
-                  <button onClick={() => setConfirmActivate(null)} className="flex-1 py-3 rounded-xl border border-border bg-card text-foreground font-semibold hover:bg-muted transition-colors">Cancel</button>
-                  <button onClick={() => void handleActivate(confirmActivate.id)} className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-bold hover:opacity-90 transition-opacity shadow-sm">
-                    Activate
-                  </button>
+                  <button onClick={() => setConfirmActivate(null)} className="flex-1 py-3 rounded-xl border bg-card font-semibold hover:bg-muted">Cancel</button>
+                  <button onClick={() => void handleActivate(confirmActivate.id)} className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-bold hover:opacity-90">Activate</button>
                 </div>
               </div>
             </div>
         )}
 
-        {confirmDelete && (
-            <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-              <div className="bg-card rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-border animate-in zoom-in-95 duration-200">
+        {confirmDelete && confirmDelete.length > 0 && (
+            <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in">
+              <div className="bg-card rounded-3xl p-8 max-w-sm w-full shadow-2xl border">
                 <div className="flex items-center gap-4 mb-5">
                   <div className="p-3 bg-destructive/10 rounded-2xl"><Trash2 size={24} className="text-destructive" /></div>
-                  <h3 className="text-lg font-bold text-foreground">Delete product</h3>
+                  <h3 className="text-lg font-bold">Delete {confirmDelete.length > 1 ? 'Products' : 'Product'}</h3>
                 </div>
-                <p className="text-muted-foreground text-sm mb-6">
-                  Are you sure you want to delete <span className="font-bold text-foreground">{confirmDelete.title}</span>?
+
+                <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+                  {/* FIX TS2532: using optional chaining ?. */}
+                  Are you sure you want to delete {confirmDelete.length > 1 ? <span className="font-bold text-foreground">{confirmDelete.length} selected products</span> : <span><span className="font-bold text-foreground">{confirmDelete[0]?.title}</span></span>}?
                 </p>
-                <div className="mb-8 p-3 rounded-xl border flex gap-3 text-sm font-medium bg-muted/50 border-border">
+
+                <div className="mb-8 p-3 rounded-xl border flex gap-3 text-sm font-medium bg-muted/50">
                   <AlertTriangle size={18} className="shrink-0 text-amber-500 mt-0.5" />
-                  <p>
-                    {confirmDelete.stockQuantity > 0
-                        ? "Because this product still has stock, it will be marked as DEACTIVATED instead."
-                        : "It will be marked as DELETED permanently."}
-                  </p>
+                  <p>Products with active stock (&gt;0) will be marked as DEACTIVATED instead. Out of stock products will be DELETED permanently.</p>
                 </div>
+
                 <div className="flex gap-3">
-                  <button onClick={() => setConfirmDelete(null)} className="flex-1 py-3 rounded-xl border border-border bg-card text-foreground font-semibold hover:bg-muted transition-colors">Cancel</button>
-                  <button onClick={() => void handleDelete(confirmDelete.id)} className="flex-1 py-3 rounded-xl bg-destructive text-destructive-foreground font-bold hover:opacity-90 transition-opacity shadow-sm">
-                    Confirm
-                  </button>
+                  <button onClick={() => setConfirmDelete(null)} className="flex-1 py-3 rounded-xl border bg-card font-semibold hover:bg-muted">Cancel</button>
+                  <button onClick={handleDeleteBatch} className="flex-1 py-3 rounded-xl bg-destructive text-white font-bold hover:opacity-90">Confirm</button>
                 </div>
               </div>
             </div>

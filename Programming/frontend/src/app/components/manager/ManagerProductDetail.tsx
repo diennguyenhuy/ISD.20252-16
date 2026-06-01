@@ -30,7 +30,7 @@ export default function ManagerProductDetail() {
   const navigate = useNavigate();
 
   // ĐÃ THÊM: activateProduct
-  const { getProduct, deleteProduct, activateProduct } = useProductManagement();
+  const { getProduct, deleteProducts, activateProduct } = useProductManagement();
 
   const [product, setProduct] = useState<ProductType | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,7 +73,7 @@ export default function ManagerProductDetail() {
 
   const handleDelete = async () => {
     setIsDeleting(true);
-    await deleteProduct(product.id);
+    await deleteProducts([product.id]);
 
     // Tải lại product thay vì navigate đi chỗ khác
     const updated = await getProduct(product.id);
