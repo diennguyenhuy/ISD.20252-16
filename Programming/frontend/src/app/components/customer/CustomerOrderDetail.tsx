@@ -9,7 +9,6 @@ import OrderService from '../../api/orderService';
 import { formatVND, formatDateTime } from '../../data/mockData';
 import type { Order, OrderStatus } from '../../models/order.interface';
 
-// UPDATED: Theme-safe status badges matching the strict OrderStatus type
 const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; icon: any }> = {
     DRAFT: { label: 'Draft', color: 'bg-muted text-muted-foreground border-border', icon: FileText },
     PENDING: { label: 'Pending Processing', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20', icon: Clock },
@@ -62,6 +61,14 @@ export default function CustomerOrderDetail() {
         }
     };
 
+    const handleGoBack = () => {
+        if (passedOrder) {
+            navigate(-1)
+        } else {
+            navigate('/')
+        }
+    }
+
     if (loading) {
         return (
             <div className="max-w-3xl mx-auto px-4 py-32 flex flex-col items-center justify-center animate-in fade-in">
@@ -100,7 +107,7 @@ export default function CustomerOrderDetail() {
             {/* Header */}
             <div className="flex flex-wrap items-center gap-4 mb-8">
                 <button
-                    onClick={() => navigate(-1)}
+                    onClick={handleGoBack}
                     className="p-2.5 bg-card border border-border rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shadow-sm shrink-0"
                 >
                     <ArrowLeft size={20} />
@@ -288,7 +295,7 @@ export default function CustomerOrderDetail() {
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-border">
                 <button
-                    onClick={() => navigate(-1)}
+                    onClick={handleGoBack}
                     className="flex-1 py-3.5 px-6 rounded-xl border border-border bg-card text-foreground font-semibold hover:bg-muted transition-colors flex items-center justify-center gap-2 shadow-sm"
                 >
                     <ArrowLeft size={18} />

@@ -37,6 +37,9 @@ public class EmailService implements NotificationService {
     @Value("${spring.mail.username}")
     private String from;
 
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
+
     @Override
     public void sendOrderConfirmation(Order order) {
         log.debug("Sending order confirmation email...");
@@ -161,6 +164,21 @@ public class EmailService implements NotificationService {
             sb.append("</table>");
             sb.append("</div>");
         }
+
+        String orderLink = frontendUrl + "/order/" + order.getId();
+
+        sb.append("<div style='text-align: center; margin: 35px 0 20px 0;'>");
+        sb.append("<p style='color: #52525b; font-size: 14px; margin-bottom: 15px;'>You can track your order status or cancel your order using the link below:</p>");
+
+        // Theming the button to match the React frontend's Primary color (#6d28d9)
+        sb.append("<a href='").append(orderLink).append("' ")
+                .append("style='background-color: #6d28d9; color: #ffffff; padding: 14px 28px; border-radius: 12px; ")
+                .append("text-decoration: none; font-size: 16px; font-weight: bold; display: inline-block; ")
+                .append("box-shadow: 0 4px 6px rgba(109, 40, 217, 0.25);'>")
+                .append("View / Manage Order")
+                .append("</a>");
+
+        sb.append("</div>");
 
         // 8. Close Container & Footer
         sb.append("</div>"); // Close main padding div

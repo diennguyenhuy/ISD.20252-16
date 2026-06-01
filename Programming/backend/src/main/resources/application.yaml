@@ -62,3 +62,7 @@ paypal:
   # should be your SPA origin (e.g. http://localhost:5173 in dev).
   return-url: ${APP_FRONTEND_URL:http://localhost:5173}/checkout/payment/paypal/callback
   cancel-url: ${APP_FRONTEND_URL:http://localhost:5173}/checkout/payment/paypal/cancel
+
+app:
+  frontend:
+    url: ${APP_FRONTEND_URL:http://localhost:5173}

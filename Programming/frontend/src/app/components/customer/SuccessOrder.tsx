@@ -15,29 +15,24 @@ export default function SuccessOrder() {
     const newlyPlacedOrder = location.state?.placedOrder as Order;
 
     const [order, setOrder] = useState<Order | null>(newlyPlacedOrder);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!newlyPlacedOrder);
 
     useEffect(() => {
-        if (!id) {
-            setLoading(false);
+        clearCart();
+
+        if (!id || (newlyPlacedOrder && newlyPlacedOrder.id === id)) {
             return;
         }
 
-        clearCart();
-
-        if (!newlyPlacedOrder) {
-            OrderService.getOrder(id)
-                .then(data => {
-                    setOrder(data);
-                    setLoading(false);
-                })
-                .catch(err => {
-                    console.error("Failed to fetch completed order:", err);
-                    setLoading(false);
-                });
-        } else {
-            setLoading(false);
-        }
+        OrderService.getOrder(id)
+            .then(data => {
+                setOrder(data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error("Failed to fetch completed order:", err);
+                setLoading(false);
+            });
     }, [id]);
 
     if (loading) {
