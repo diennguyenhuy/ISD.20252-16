@@ -2,6 +2,7 @@ package com.hust.soict.ict.aims.models.cart;
 
 import com.hust.soict.ict.aims.models.entities.product.Product;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -26,13 +27,9 @@ public class Cart {
      * @param quantity The quantity of the product to add to cart
      * @throws IllegalArgumentException If quantity <= 0
      */
-    public void addItem(Product product, int quantity) throws IllegalArgumentException {
+    public void addItem(@NonNull Product product, int quantity) throws IllegalArgumentException {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be positive.");
-        }
-
-        if (product == null) {
-            throw new IllegalArgumentException("Product cannot be null.");
         }
 
         items.merge(
@@ -57,10 +54,8 @@ public class Cart {
             throw new IllegalArgumentException("Quantity must be non-negative");
         }
 
-        CartItem item = items.get(productId);
-        if (item == null) {
-            throw new NoSuchElementException("No product with id " + productId + " in cart");
-        }
+        CartItem item = Optional.ofNullable(items.get(productId))
+                .orElseThrow(() -> new NoSuchElementException("No product with id " + productId + " in cart"));
 
         if (quantity == 0) {
             items.remove(productId);
@@ -78,8 +73,9 @@ public class Cart {
         items.remove(productId);
     }
 
-    public void replaceItem(UUID productId, CartItem item) {
-        items.replace(productId, item);
+    public void replaceProductItemWith(@NonNull Product product) {
+        CartItem item = Optional.ofNullable(items.get(product.getId())).orElseThrow(() -> new NoSuchElementException("No product with id " + product.getId() + " in cart"));
+        items.replace(item.getProduct().getId(), new CartItem(product, item.getQuantity()));
     }
 
     public void clear() {
@@ -91,11 +87,9 @@ public class Cart {
     }
 
     public int getQuantity(UUID productId) throws NoSuchElementException {
-        CartItem item = items.get(productId);
-        if (item == null) {
-            throw new NoSuchElementException("No product with id " + productId + " in cart");
-        }
-        return item.getQuantity();
+        return Optional.ofNullable(items.get(productId))
+                .orElseThrow(() -> new NoSuchElementException("No product with id " + productId + " in cart"))
+                .getQuantity();
     }
 
     public int getTotalQuantity() {

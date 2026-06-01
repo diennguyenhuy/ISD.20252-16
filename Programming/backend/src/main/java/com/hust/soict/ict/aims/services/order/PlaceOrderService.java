@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.services.order;
 
+import com.hust.soict.ict.aims.context.CartContext;
 import com.hust.soict.ict.aims.exceptions.*;
 import com.hust.soict.ict.aims.models.dto.response.order.*;
 import com.hust.soict.ict.aims.models.entities.order.*;
@@ -34,6 +35,7 @@ public class PlaceOrderService {
     private final StockValidator stockValidator;
     private final OrderRepository orderRepository;
 
+    private final CartContext cartContext;
     private final OrderDraftContext orderDraftContext;
 
     private final OrderMapper orderMapper;
@@ -43,7 +45,7 @@ public class PlaceOrderService {
     public OrderDraftResponse placeOrder() throws EmptyCartException, NotEnoughStockException, ProductNotFoundException {
         log.debug("Placing order...");
         log.debug("Checking stock availability...");
-        Order draftOrder = Order.from(stockValidator.checkStockAvailability());
+        Order draftOrder = Order.from(stockValidator.checkStockAvailability(cartContext.getOrCreateCart()));
         log.debug("Stock availability check done and satisfied.");
 
         try {
@@ -70,14 +72,25 @@ public class PlaceOrderService {
     }
 
     @Transactional
-    public OrderResponse finalizeOrder(PaymentTransaction paymentTransaction) { //TODO: Add new PaymentTransaction to order
+    public OrderResponse finalizeOrder() throws OrderNotCompleteException {
         log.debug("Finalizing order...");
         Order draftOrder = orderDraftContext.getDraftOrder();
+
+        if (draftOrder.getDeliveryInformation() == null
+                || draftOrder.getInvoice() == null
+                || draftOrder.getPaymentTransaction() == null
+        ) {
+            throw new OrderNotCompleteException("Order is not complete.");
+        }
+
         draftOrder.changeStatus(Order.Status.PENDING);
 
         Order order = orderRepository.save(draftOrder);
 
-        applicationEventPublisher.publishEvent(new OrderSuccessEvent(order, paymentTransaction));
+        applicationEventPublisher.publishEvent(new OrderSuccessEvent(order));
+
+        cartContext.getOrCreateCart().clear();
+        orderDraftContext.clearDraftOrder();
 
         log.debug("Order has been successfully saved!");
         return orderMapper.toOrderResponse(order);

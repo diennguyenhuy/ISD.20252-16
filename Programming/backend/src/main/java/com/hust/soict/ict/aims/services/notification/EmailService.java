@@ -38,7 +38,7 @@ public class EmailService implements NotificationService {
     private String from;
 
     @Override
-    public void sendOrderConfirmation(Order order, PaymentTransaction paymentTransaction) {
+    public void sendOrderConfirmation(Order order) {
         log.debug("Sending order confirmation email...");
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -46,8 +46,9 @@ public class EmailService implements NotificationService {
             helper.setFrom(from);
             helper.setTo(order.getDeliveryInformation().getCustomerEmail());
             helper.setSubject("AIMS - Thank you for your order! Order #" + order.getId());
-            helper.setText(buildOrderEmail(order, paymentTransaction), true);
+            helper.setText(buildOrderEmail(order), true);
             mailSender.send(mimeMessage);
+            log.debug("Order confirmation email sent successfully!");
         } catch (MessagingException e) {
             log.warn("Multipart creation failed: {}", e.getMessage());
         } catch (MailAuthenticationException e) {
@@ -55,10 +56,9 @@ public class EmailService implements NotificationService {
         } catch (MailSendException e) {
             log.warn("Could not send email: {}", e.getMessage());
         }
-        log.debug("Order confirmation email sent successfully!");
     }
 
-    private String buildOrderEmail(Order order, PaymentTransaction paymentTransaction) {
+    private String buildOrderEmail(Order order) {
         StringBuilder sb = new StringBuilder();
 
         // 1. Setup HTML, Body, and a Main Container Card
@@ -83,12 +83,12 @@ public class EmailService implements NotificationService {
         sb.append("<th style='padding: 10px 0; text-align: right; color: #71717a;'>Quantity</th>");
         sb.append("</tr></thead><tbody>");
 
-        for (OrderItem item : order.getItems()) {
+        order.getItems().forEach(item ->
             sb.append("<tr style='border-bottom: 1px solid #f4f4f5;'>")
                     .append("<td style='padding: 12px 0; font-weight: bold;'>").append(item.getProduct().getTitle()).append("</td>")
                     .append("<td style='padding: 12px 0; text-align: right;'>").append(item.getQuantity()).append("</td>")
-                    .append("</tr>");
-        }
+                    .append("</tr>")
+        );
         sb.append("</tbody></table>");
 
         // 5. Total Footer
@@ -102,7 +102,7 @@ public class EmailService implements NotificationService {
         // 6. Payment Transaction Details (NEW)
         // Format the Instant into a readable string (Adjust timezone as needed)
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss").withZone(ZoneId.of("Asia/Ho_Chi_Minh"));
-        String formattedTime = formatter.format(paymentTransaction.getTransactionTimestamp());
+        String formattedTime = formatter.format(order.getPaymentTransaction().getTransactionTimestamp());
 
         sb.append("<div style='background-color: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e4e4e7;'>");
         sb.append("<h3 style='color: #6d28d9; margin-top: 0; margin-bottom: 15px; font-size: 16px;'>Payment Information</h3>");
@@ -112,7 +112,7 @@ public class EmailService implements NotificationService {
         // Method
         sb.append("<tr>")
                 .append("<td style='padding: 8px 0; color: #71717a;'>Payment Method:</td>")
-                .append("<td style='padding: 8px 0; text-align: right; font-weight: bold; color: #09090b;'>").append(paymentTransaction.getTransactionMethod()).append("</td>")
+                .append("<td style='padding: 8px 0; text-align: right; font-weight: bold; color: #09090b;'>").append(order.getPaymentTransaction().getTransactionMethod()).append("</td>")
                 .append("</tr>");
 
         // Timestamp
@@ -124,14 +124,14 @@ public class EmailService implements NotificationService {
         // Content
         sb.append("<tr>")
                 .append("<td style='padding: 8px 0; color: #71717a;'>Transfer Content:</td>")
-                .append("<td style='padding: 8px 0; text-align: right; font-weight: bold; font-family: monospace; color: #09090b;'>").append(paymentTransaction.getTransactionContent()).append("</td>")
+                .append("<td style='padding: 8px 0; text-align: right; font-weight: bold; font-family: monospace; color: #09090b;'>").append(order.getPaymentTransaction().getTransactionContent()).append("</td>")
                 .append("</tr>");
 
         // Amount Paid (Highlighted in Green)
         sb.append("<tr style='border-top: 1px dashed #d4d4d8;'>")
                 .append("<td style='padding: 12px 0 0 0; color: #71717a;'>Amount Paid:</td>")
                 .append("<td style='padding: 12px 0 0 0; text-align: right; font-weight: bold; color: #10b981; font-size: 16px;'>")
-                .append(String.format("%,d", paymentTransaction.getAmountPaid())).append(" VND</td>")
+                .append(String.format("%,d", order.getPaymentTransaction().getAmountPaid())).append(" VND</td>")
                 .append("</tr>");
 
         sb.append("</table>");

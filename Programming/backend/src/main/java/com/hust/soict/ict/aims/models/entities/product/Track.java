@@ -24,11 +24,8 @@ public class Track {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "cd_id", nullable = false)
+    @NonNull @Setter(AccessLevel.PACKAGE)
     private CD cd;
-
-    public void setCd(@NonNull CD cd) {
-        this.cd = cd;
-    }
 
     public Track(String title, int length) {
         this.title = title;

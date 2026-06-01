@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -43,11 +44,7 @@ public class CD extends Product {
         return Collections.unmodifiableList(tracks);
     }
 
-    public void addTrack(Track track) throws IllegalArgumentException {
-        if (track == null) {
-            throw new IllegalArgumentException("track is null");
-        }
-
+    public void addTrack(@NonNull Track track) throws IllegalArgumentException {
         track.setCd(this);
         tracks.add(track);
     }
@@ -59,7 +56,7 @@ public class CD extends Product {
         this.genre = builder.genre;
         this.artists = new ArrayList<>(builder.artists);
         this.recordLabel = builder.recordLabel;
-        this.tracks = new ArrayList<>(builder.tracks);
+        builder.tracks.forEach(this::addTrack);
     }
 
     public static class Builder extends Product.Builder<Builder> {

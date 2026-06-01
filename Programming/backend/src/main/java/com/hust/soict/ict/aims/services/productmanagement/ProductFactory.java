@@ -38,7 +38,8 @@ public class ProductFactory {
             case CreateCDRequest cdReq -> {
                 List<Track> cdTracks = cdReq.getTracks() == null ? List.of() : cdReq.getTracks().stream()
                         .map(t -> new Track(t.getTitle(), t.getLength())).collect(Collectors.toList());
-                CD newCd = new CD.Builder()
+
+                yield new CD.Builder()
                         .title(cdReq.getTitle()).category(cdReq.getCategory()).description(cdReq.getDescription())
                         .height(cdReq.getHeight()).width(cdReq.getWidth()).length(cdReq.getLength()).weight(cdReq.getWeight())
                         .barcode(cdReq.getBarcode()).originalValue(cdReq.getOriginalValue()).currentPrice(cdReq.getCurrentPrice())
@@ -47,11 +48,6 @@ public class ProductFactory {
                         .imageURL(cdReq.getImageURL())
                         .releaseDate(cdReq.getReleaseDate()).genre(cdReq.getGenre()).artists(cdReq.getArtists())
                         .recordLabel(cdReq.getRecordLabel()).tracks(cdTracks).build();
-                if (newCd.getTracks() != null) {
-                    newCd.getTracks().forEach(t -> t.setCd(newCd));
-                }
-
-                yield newCd;
             }
 
             case CreateDVDRequest dvdReq -> new DVD.Builder()
@@ -131,19 +127,12 @@ public class ProductFactory {
                             .collect(Collectors.toList());
                 }
 
-                CD updatedCd = new CD.Builder()
+                yield new CD.Builder()
                         .barcode(cd.getBarcode()).originalValue(cd.getOriginalValue()).status(cd.getStatus())
                         .title(title).category(category).description(desc).imageURL(img).currentPrice(price).stockQuantity(stock)
                         .height(h).width(w).length(l).weight(weight)
                         .releaseDate(relDate).genre(genre).artists(artists).recordLabel(recLabel).tracks(tracks)
                         .build();
-
-                // Link CD with each Track
-                if (updatedCd.getTracks() != null) {
-                    updatedCd.getTracks().forEach(t -> t.setCd(updatedCd));
-                }
-
-                yield updatedCd;
             }
             case DVD d -> {
                 UpdateDVDRequest dDto = (UpdateDVDRequest) dto;
