@@ -13,6 +13,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
+/*
+ * + Cohesion level: FUNCTIONAL
+ * + Coupling level with VietQRCallbackAuthService and VietQRTransactionSyncService: DATA
+ * + Reason: Only primitive Strings (authorizationHeader, token) and DTOs
+ *   (VietQRTransactionSyncRequest/Response) are exchanged; no control flags involved.
+ */
 @RestController
 @RequiredArgsConstructor
 @Slf4j

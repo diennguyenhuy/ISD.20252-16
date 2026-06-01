@@ -10,6 +10,12 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
+/*
+ * + Cohesion level: FUNCTIONAL
+ * + Coupling level with VietQRCallbackController: DATA
+ * + Reason: Only VietQRTransactionSyncRequest (a DTO) is passed in and
+ *   VietQRTransactionSyncResponse is returned; no control flags involved.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j

@@ -2,18 +2,8 @@ package com.hust.soict.ict.aims.subsystems.vietqr;
 /*
  * + Cohesion level: FUNCTIONAL
  * + Coupling level with VietQRController: DATA
- * + Reason: QRCode is responsible for representing and parsing QR code
- *           information returned from the VietQR subsystem. All attributes
- *           (qrCode, qrLink, bankCode, bankName, bankAccount) and methods
- *           such as parseQRCodeResponse() and extractField() contribute to
- *           the single purpose of storing and processing QR code response data.
- *
- *           The coupling with VietQRController is DATA coupling because
- *           VietQRController only exchanges the QRCode object and related
- *           data values with this class. The controller does not pass
- *           control parameters or manipulate the internal parsing logic
- *           of QRCode. Only the necessary QR response data is shared
- *           between the two components.
+ * + Reason: VietQRController only reads QR data fields via getters after
+ *   calling parseQRCodeResponse(). No control flags or internal logic shared.
  */
 public class QRCode {
     private String qrCode;
