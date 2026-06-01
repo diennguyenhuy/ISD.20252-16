@@ -1,13 +1,11 @@
 package com.hust.soict.ict.aims.subsystems.vietqr;
-/**
+/*
+ * SOLID Principles: No violations.
+ *
  * + Cohesion level: FUNCTIONAL
  * + Coupling level with VietQRController: DATA
- * + Reason: VietQRController constructs QRGenerateRequest by passing individual primitive
- *           and String arguments (bankCode, accountNo, accountName, content, amount,
- *           orderId). It then calls buildRequestString() which returns a plain String.
- *           Only the exact data needed for the QR generation request is exchanged;
- *           no composite objects or control flags are involved. Moreover, All fields and methods
- *           work together toward a single well-defined goal.
+ * + Reason: Only primitives and Strings are passed in; buildRequestString()
+ *   returns a plain String. No composite objects or control flags involved.
  */
 class QRGenerateRequest {
     private String bankCode;

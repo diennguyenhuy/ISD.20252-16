@@ -16,20 +16,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
-
 /*
+ * SOLID Principles
+ *
+ * SRP: confirmPayment() mixes payment verification with order finalization,
+ *   which belongs to a different domain.
+ *   Improvement: delegate orderFinalization to a CheckoutOrchestrator.
+ *
  * + Cohesion level: FUNCTIONAL
  * + Coupling level with IPaymentQRCode/VietQRController: DATA
- * + Reason: PayOrderService is the single owner of PaymentTransaction creation
- *           for all payment paths. Its methods:
- *
- *           all work toward the same goal: managing the VietQR payment lifecycle
- *           for an order. No other service creates PaymentTransaction objects.
- *
- *           confirmPayment() reads PaymentCallbackContext to obtain real payment
- *           data supplied by the gateway callback when it is available, and
- *           falls back to local order data otherwise. This keeps PayOrderService
- *           fully decoupled from any specific gateway callback mechanism.
+ * + Reason: PayOrderService is the single owner of the VietQR payment lifecycle.
+ *           It delegates to IPaymentQRCode for gateway calls and to
+ *           OrderFinalization for order persistence, keeping both concerns loosely coupled.
  */
 @Service
 @RequiredArgsConstructor
