@@ -18,7 +18,6 @@ import QRPayment from './components/customer/QRPayment';
 import SuccessOrder from './components/customer/SuccessOrder';
 import CustomerOrderDetail from './components/customer/CustomerOrderDetail';
 
-// PayPal Components (Đã sửa lại đường dẫn import chính xác)
 import PayPalPayment from './components/customer/PayPalPayment';
 import PayPalCallback from './components/customer/PayPalCallback';
 import PayPalCancel from './components/customer/PayPalCancel';
@@ -47,7 +46,6 @@ export const router = createBrowserRouter([
             { path: 'checkout/invoice', Component: Invoice },
             { path: 'checkout/payment/qr', Component: QRPayment },
 
-            // Đã thêm 3 routes cho luồng thanh toán PayPal
             { path: 'checkout/payment/paypal', Component: PayPalPayment },
             { path: 'checkout/payment/paypal/callback', Component: PayPalCallback },
             { path: 'checkout/payment/paypal/cancel', Component: PayPalCancel },

@@ -2,18 +2,8 @@ package com.hust.soict.ict.aims.subsystems.vietqr;
 /*
  * + Cohesion level: FUNCTIONAL
  * + Coupling level with VietQRController: DATA
- * + Reason: QRAccessTokenResponse is responsible for handling and interpreting
- *           the access token response returned from the VietQR API. All fields
- *           (accessToken, tokenType, expiresIn) and methods such as
- *           parseResponseString(), isValid(), and getter methods work together
- *           toward the single purpose of storing and validating authentication
- *           token information.
- *
- *           The coupling with VietQRController is DATA coupling because
- *           VietQRController only exchanges authentication-related data through
- *           this object, such as accessToken and expiresIn. The controller
- *           simply retrieves the parsed values and does not depend on or control
- *           the internal parsing implementation of QRAccessTokenResponse.
+ * + Reason: VietQRController only reads accessToken and expiresIn via getters;
+ *   no control flags or internal parsing logic is shared.
  */
 class QRAccessTokenResponse {
     private String accessToken;

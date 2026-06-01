@@ -29,7 +29,6 @@ export default function ManagerProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // ĐÃ THÊM: activateProduct
   const { getProduct, deleteProducts, activateProduct } = useProductManagement();
 
   const [product, setProduct] = useState<ProductType | null>(null);
@@ -75,7 +74,6 @@ export default function ManagerProductDetail() {
     setIsDeleting(true);
     await deleteProducts([product.id]);
 
-    // Tải lại product thay vì navigate đi chỗ khác
     const updated = await getProduct(product.id);
     setProduct(updated);
 
@@ -101,11 +99,9 @@ export default function ManagerProductDetail() {
   const isOutOfStock = product.stockQuantity === 0;
   const isLowStock = product.stockQuantity <= 5 && product.stockQuantity > 0;
 
-  // CSS cho Stock
   const stockContainerClass = isOutOfStock ? 'bg-destructive/5 border-destructive/20' : isLowStock ? 'bg-amber-500/5 border-amber-500/20' : 'bg-primary/5 border-primary/20';
   const stockTextClass = isOutOfStock ? 'text-destructive' : isLowStock ? 'text-amber-500 dark:text-amber-400' : 'text-primary';
 
-  // CSS cho Status MỚI
   const statusContainerClass = status === 'ACTIVE' ? 'bg-emerald-500/5 border-emerald-500/20' : status === 'DEACTIVATED' ? 'bg-amber-500/5 border-amber-500/20' : 'bg-destructive/5 border-destructive/20 bg-muted/50';
   const statusTextClass = status === 'ACTIVE' ? 'text-emerald-600' : status === 'DEACTIVATED' ? 'text-amber-600' : 'text-destructive';
 
@@ -185,7 +181,6 @@ export default function ManagerProductDetail() {
               </p>
             </div>
 
-            {/* KHUNG STATUS MỚI THÊM NỔI BẬT */}
             <div className={`p-6 rounded-3xl border shadow-sm ${statusContainerClass}`}>
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Product Status</span>
@@ -234,7 +229,7 @@ export default function ManagerProductDetail() {
                 </h3>
                 <div className="space-y-1">
                   <InfoRow label="Category" value={product.category} />
-                  <InfoRow label="Weight" value={`${product.weight}g`} />
+                  <InfoRow label="Weight" value={`${product.weight}kg`} />
                   <InfoRow label="Dimensions" value={`${product.length}x${product.width}x${product.height} cm`} />
                   <InfoRow label="Updated At" value={product.updatedAt ? formatDate(product.updatedAt) : undefined} />
                 </div>

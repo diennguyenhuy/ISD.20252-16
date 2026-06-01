@@ -20,7 +20,6 @@ export default function QRPayment() {
     const [qrImageDataUrl, setQrImageDataUrl] = useState<string | null>(null);
     const [qrLoading, setQrLoading] = useState(true);
     const [qrError, setQrError] = useState<string | null>(null);
-    const [timeLeft, setTimeLeft] = useState(180);
 
     // ── Confirm button state ─────────────────────────────────────────────────
     const [confirmState, setConfirmState] = useState<ConfirmState>('idle');
@@ -31,7 +30,6 @@ export default function QRPayment() {
 
     const qrFetchedRef = useRef(false);
 
-    // ── Generate QR on mount ─────────────────────────────────────────────────
     useEffect(() => {
         if (qrFetchedRef.current) return;  // StrictMode double-invoke guard
         qrFetchedRef.current = true;
@@ -39,7 +37,6 @@ export default function QRPayment() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // ── Render QR image from EMV string ──────────────────────────────────────
     useEffect(() => {
         if (!qrData?.qrCode) { setQrImageDataUrl(null); return; }
         QRCode.toDataURL(qrData.qrCode, {
@@ -50,21 +47,11 @@ export default function QRPayment() {
             .catch(() => setQrImageDataUrl(null));
     }, [qrData]);
 
-    // ── Countdown Timer ──────────────────────────────────────────────────────
-    useEffect(() => {
-        if (qrLoading || qrError || confirmState === 'success' || timeLeft <= 0) return;
-        const timerId = setInterval(() => {
-            setTimeLeft((prev) => prev - 1);
-        }, 1000);
-        return () => clearInterval(timerId);
-    }, [qrLoading, qrError, confirmState, timeLeft]);
 
-    // ────────────────────────────────────────────────────────────────────────
 
     async function generateQR() {
         setQrLoading(true);
         setQrError(null);
-        setTimeLeft(180);
         try {
             const data = await PayOrderService.generateQRCode();
             setQrData(data);
@@ -79,17 +66,6 @@ export default function QRPayment() {
         }
     }
 
-    /**
-     * Called when the user clicks "I have successfully paid".
-     *
-     * Flow:
-     *   1. simulateTestCallback() — seeds PaymentCallbackData into backend session
-     *      (simulates VietQR pushing the payment notification to our callback endpoint)
-     *   2. confirmPayment()       — reads the callback data, creates PaymentTransaction,
-     *      finalizes the order via PlaceOrderService
-     *   3. On success → show green banner → navigate to success screen after 1.5 s
-     *   4. On error   → show error message, re-enable the button for retry
-     */
     async function handleConfirmPayment() {
         if (confirmState === 'loading' || confirmState === 'success') return;
 
@@ -99,10 +75,9 @@ export default function QRPayment() {
         try {
             // confirmPayment() calls VietQR's test-callback API internally for
             // verification, then creates the PaymentTransaction and finalizes the order.
-            await PayOrderService.confirmPayment();
+            const order = await PayOrderService.confirmPayment();
             // Step 3: success
             setConfirmState('success');
-            const order = await OrderService.finalizeOrder();
             setTimeout(() => navigate(`/checkout/success/${order.id}`, {
                 state: {
                     placedOrder: order,
@@ -117,17 +92,14 @@ export default function QRPayment() {
             setConfirmState('error');
         }
     }
-
     async function handleCancelOrder() {
         try { await OrderService.cancelOrderPlacement(); } catch { /* best-effort */ }
         navigate('/cart');
     }
-
     const isSuccess = confirmState === 'success';
     const isLoading = confirmState === 'loading';
     const qrSrc = qrImageDataUrl ?? null;
 
-    // ────────────────────────────────────────────────────────────────────────
     return (
         <div className="max-w-lg mx-auto px-4 py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Progress */}
@@ -185,26 +157,11 @@ export default function QRPayment() {
                                     src={qrSrc}
                                     alt="VietQR Payment QR Code"
                                     width={220} height={220}
-                                    className={`transition-all duration-500 ${timeLeft === 0 ? 'blur-md opacity-30 grayscale' : ''}`}
+                                    className="transition-all duration-500"
                                 />
-                                {timeLeft === 0 && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/20 animate-in fade-in duration-300">
-                                        <button
-                                            onClick={generateQR}
-                                            className="p-3.5 bg-white border border-border rounded-full shadow-sm hover:scale-105 active:scale-95 transition-transform text-primary hover:text-primary/80"
-                                        >
-                                            <RefreshCw size={28} />
-                                        </button>
-                                    </div>
-                                )}
                             </div>
                         )}
                     </div>
-                    {!qrLoading && !qrError && timeLeft > 0 && (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/5 text-primary font-bold text-sm border border-primary/10 shadow-sm animate-in fade-in slide-in-from-top-2">
-                            {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-                        </span>
-                    )}
                 </div>
 
                 {/* ── Bank info ── */}
@@ -277,13 +234,13 @@ export default function QRPayment() {
                     <button
                         id="btn-confirm-payment"
                         onClick={handleConfirmPayment}
-                        disabled={isSuccess || isLoading || qrLoading || !!qrError || timeLeft === 0}
+                        disabled={isSuccess || isLoading || qrLoading || !!qrError}
                         className={`w-full py-4 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2 shadow-md ${
                             isSuccess
                                 ? 'bg-green-500/20 text-green-700 border-2 border-green-500/40 cursor-default'
                                 : isLoading
                                 ? 'bg-primary/50 text-primary-foreground cursor-wait'
-                                : qrLoading || !!qrError || timeLeft === 0
+                                : qrLoading || !!qrError
                                 ? 'bg-muted text-muted-foreground cursor-not-allowed'
                                 : 'bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground hover:shadow-primary/30 hover:-translate-y-0.5'
                         }`}

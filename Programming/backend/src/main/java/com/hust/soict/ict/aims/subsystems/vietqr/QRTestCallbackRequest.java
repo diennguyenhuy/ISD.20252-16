@@ -1,12 +1,11 @@
 package com.hust.soict.ict.aims.subsystems.vietqr;
-/**
+/*
+ * SOLID Principles: No violations.
+ *
  * + Cohesion level: FUNCTIONAL
  * + Coupling level with VietQRController: DATA
- * + Reason: VietQRController constructs QRTestCallbackRequest by passing individual
- *           primitive/String arguments (bankAccount, content, amount, bankCode). It then
- *           calls buildRequestString() which returns a plain String. No composite object
- *           or control flag is passed. The class has one purpose, and every element contributes
- *           directly to that purpose.
+ * + Reason: Only primitives and Strings are passed in; buildRequestString()
+ *   returns a plain String. No composite objects or control flags involved.
  */
 class QRTestCallbackRequest {
     private final String bankAccount;

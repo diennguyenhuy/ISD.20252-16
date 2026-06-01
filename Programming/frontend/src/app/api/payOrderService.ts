@@ -16,8 +16,8 @@ const PayOrderService = {
         return response.data;
     },
 
-    confirmPayment: async (): Promise<PaymentTransaction> => {
-        const response = await apiClient.post<PaymentTransaction>(`${PAY_ORDER_URL}/confirm`);
+    confirmPayment: async (): Promise<Order> => {
+        const response = await apiClient.post<Order>(`${PAY_ORDER_URL}/confirm`);
         return response.data;
     },
 

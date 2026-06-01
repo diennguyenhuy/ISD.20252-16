@@ -20,11 +20,15 @@ public abstract class Product extends AuditableEntity {
         DEACTIVATED,
         DELETED;
 
-        static final Map<Status, Set<Status>> transitions = Map.of(
+        private static final Map<Status, Set<Status>> transitions = Map.of(
                 ACTIVE, Set.of(DEACTIVATED, DELETED),
                 DEACTIVATED, Set.of(ACTIVE, DELETED),
                 DELETED, Set.of(ACTIVE)
         );
+
+        public boolean isValidTransition(Status newStatus) {
+            return transitions.get(this).contains(newStatus);
+        }
     }
 
     @Id
@@ -97,21 +101,21 @@ public abstract class Product extends AuditableEntity {
         this.currentPrice = newPrice;
     }
 
-    public void updateStatus(@NonNull Status status) throws IllegalStateException {
-        if (status == this.status) return;
+    public void updateStatus(@NonNull Status newStatus) throws IllegalStateException {
+        if (newStatus == this.status) return;
 
-        if (!Status.transitions.get(this.status).contains(status)) {
-            throw new IllegalStateException("Cannot transition product status from " + this.status + " to " + status);
+        if (this.status == Status.DELETED && newStatus == Status.DEACTIVATED) {
+            throw new IllegalStateException("Cannot transition product status from " + this.status + " to " + newStatus);
         }
 
-        if (status == Status.DELETED && stockQuantity > 0) {
-            status = Status.DEACTIVATED;
+        if (newStatus == Status.DELETED && stockQuantity > 0) {
+            newStatus = Status.DEACTIVATED;
         }
 
-        this.status = status;
+        this.status = newStatus;
     }
 
-    protected Product(Builder<?> builder) {
+    protected Product(Builder<? extends Builder<?>> builder) {
         this.title = builder.title;
         this.category = builder.category;
         this.description = builder.description;

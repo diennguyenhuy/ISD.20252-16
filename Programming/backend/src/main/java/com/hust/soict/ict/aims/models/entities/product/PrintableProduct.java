@@ -21,7 +21,7 @@ public abstract class PrintableProduct extends Product {
     @Column(length = 50)
     private String language;
 
-    protected PrintableProduct(Builder<?> builder) {
+    protected PrintableProduct(Builder<? extends Builder<?>> builder) {
         super(builder);
 
         this.publisher = builder.publisher;

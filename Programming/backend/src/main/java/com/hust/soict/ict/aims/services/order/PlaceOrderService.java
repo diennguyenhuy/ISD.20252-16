@@ -27,11 +27,32 @@ import java.util.UUID;
  * - Stamp coupling with Order, PaymentTransaction,
  *   OrderDraftContext, and OrderMapper because
  *   composite domain objects are passed between modules.
+ * SOLID Review
+ * Potential Violation:
+ * - Single Responsibility Principle (SRP)
+ * - Open/Closed Principle (OCP)
+ * Reason:
+ * - [SRP] PlaceOrderService is responsible for multiple aspects of
+ * the order lifecycle, including draft order creation,
+ * invoice generation, order finalization, order retrieval,
+ * and order cancellation. Changes to any of these workflows may
+ * require modification of the same class.
+ * - [OCP] Order completion requirements are hardcoded inside
+ * finalizeOrder(). New requirements such as additional mandatory order
+ * information, validation rules, or completion criteria
+ * would require modification of existing logic.
+ * Improvement Direction:
+ * - [SRP] If the application grows, consider separating responsibilities
+ * into dedicated services such as OrderDraftService,
+ * OrderFinalizationService, and OrderQueryService.
+ * - [OCP] Introduce extensible validation mechanisms such as
+ * OrderCompletionRule or OrderValidator abstractions
+ * that can be extended without modifying the service.
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PlaceOrderService {
+public class PlaceOrderService implements OrderFinalization {
     private final StockValidator stockValidator;
     private final OrderRepository orderRepository;
 
@@ -71,10 +92,10 @@ public class PlaceOrderService {
         return orderMapper.toInvoiceResponse(invoice);
     }
 
+    @Override
     @Transactional
-    public OrderResponse finalizeOrder() throws OrderNotCompleteException {
+    public OrderResponse finalizeOrder(Order draftOrder) throws OrderNotCompleteException {
         log.debug("Finalizing order...");
-        Order draftOrder = orderDraftContext.getDraftOrder();
 
         if (draftOrder.getDeliveryInformation() == null
                 || draftOrder.getInvoice() == null
@@ -88,9 +109,6 @@ public class PlaceOrderService {
         Order order = orderRepository.save(draftOrder);
 
         applicationEventPublisher.publishEvent(new OrderSuccessEvent(order));
-
-        cartContext.getOrCreateCart().clear();
-        orderDraftContext.clearDraftOrder();
 
         log.debug("Order has been successfully saved!");
         return orderMapper.toOrderResponse(order);

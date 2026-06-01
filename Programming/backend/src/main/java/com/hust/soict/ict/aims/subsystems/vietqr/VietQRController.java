@@ -1,37 +1,17 @@
 package com.hust.soict.ict.aims.subsystems.vietqr;
 
-import com.hust.soict.ict.aims.IPaymentQRCode;
 import com.hust.soict.ict.aims.exceptions.*;
 import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 
 import java.io.IOException;
-/**
- * Cohesion level: FUNCTIONAL
- * Coupling level:
- *   - VietQRBoundary : DATA COUPLING
- *       Reason: VietQRController passes only primitive/simple values (String accessToken,
- *               String requestString, String authorizationHeader) to VietQRBoundary methods.
- *               Only the exact data needed for each HTTP call is passed; no composite object
- *               is transferred unnecessarily.
+/*
+ * SOLID Principles: No violations.
  *
- *   - QRAccessTokenRequest : DATA COUPLING
- *       Reason: VietQRController constructs a QRAccessTokenRequest with two primitive Strings
- *               (username, password) and then calls buildAuthorizationHeader() which returns a
- *               String. The interaction is limited to necessary data only.
- *
- *   - QRAccessTokenResponse: DATA COUPLING
- *
- *   - QRGenerateRequest: DATA COUPLING
- *
- *   - QRTestCallbackRequest: DATA COUPLING
- *
- *   - Order: STAMP COUPLING
- *       Reason: The full Order object is accepted as a parameter to generateQRCode() and
- *               checkPaymentStatus(), but only order.getTotalAmount() and order.getId() are
- *               actually used. The whole composite object is passed even though only a subset
- *               of its data is needed.
- *
+ * + Cohesion level: FUNCTIONAL
+ * + Coupling level with VietQRBoundary: DATA
+ * + Coupling level with Order: STAMP — only order.getId() and order.getTotalAmount()
+ *   are used, but the full Order object is passed.
  */
 public class VietQRController implements IPaymentQRCode {
     private final VietQRBoundary boundary;

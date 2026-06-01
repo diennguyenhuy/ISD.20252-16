@@ -43,6 +43,9 @@ vietqr:
   accountNo: 03349966868
   accountName: NGUYEN TIEN DAT
   bankCode: MB
+  expectedpassword: 12345qwertW
+  expectedusername: maybeez
+
 paypal:
   base-url: https://api-m.sandbox.paypal.com      # live: https://api-m.paypal.com
   client-id: AdMTfa7iXh-wBCivX8N05MMJFfxkk3FRML_-g7dRW4QB6PGH_Rgoipj-BRktMyuxiZPGiCEkVdpZJ0tw
@@ -59,3 +62,7 @@ paypal:
   # should be your SPA origin (e.g. http://localhost:5173 in dev).
   return-url: ${APP_FRONTEND_URL:http://localhost:5173}/checkout/payment/paypal/callback
   cancel-url: ${APP_FRONTEND_URL:http://localhost:5173}/checkout/payment/paypal/cancel
+
+app:
+  frontend:
+    url: ${APP_FRONTEND_URL:http://localhost:5173}

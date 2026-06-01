@@ -7,6 +7,7 @@ import com.hust.soict.ict.aims.models.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.models.dto.response.payments.PayPalCreateResponse;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
+import com.hust.soict.ict.aims.services.order.OrderFinalization;
 import com.hust.soict.ict.aims.services.order.PlaceOrderService;
 import com.hust.soict.ict.aims.subsystems.paypal.IPaymentProvider;
 import com.hust.soict.ict.aims.subsystems.paypal.PaymentCapture;
@@ -34,7 +35,7 @@ public class PayByCreditCardService {
 
     private final IPaymentProvider paymentProvider;     // PayPal facade (abstraction)
     private final OrderDraftContext orderDraftContext;  // session draft source
-    private final PlaceOrderService placeOrderService;  // finalize + confirmation email
+    private final OrderFinalization orderFinalization;  // finalize + confirmation email
 
     /**
      * Step 1 — create a PayPal payment for the current draft order and return the
@@ -85,7 +86,7 @@ public class PayByCreditCardService {
                 capture.captureId(), order.getId());
 
         // Crucial integration rule: persist the order + send confirmation email.
-        return placeOrderService.finalizeOrder(transaction);
+        return orderFinalization.finalizeOrder(transaction.getOrder());
     }
 
     /**

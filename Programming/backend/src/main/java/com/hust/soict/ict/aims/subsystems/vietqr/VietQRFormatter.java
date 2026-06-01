@@ -1,9 +1,9 @@
 package com.hust.soict.ict.aims.subsystems.vietqr;
-/**
- * Utility class for formatting data specific to the VietQR API requirements.
- * 
- * Cohesion: High (Functional) - strictly handles formatting rules for VietQR.
- * Coupling: Low - Only depends on standard Java UUID, no business logic dependencies.
+/*
+ * SOLID Principles: No violations.
+ *
+ * + Cohesion level: FUNCTIONAL
+ * + Coupling level: NONE — depends only on standard Java types.
  */
 public class VietQRFormatter {
     

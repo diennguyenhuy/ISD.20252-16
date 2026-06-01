@@ -27,6 +27,18 @@ import java.util.UUID;
  * through method parameters and return values.<br>
  * - Reason: Method sends data structures that the 2 service classes use wholly or
  * sends only necessary data to the service classes.
+ * SOLID Review
+ * Potential Violation:
+ * - Dependency Inversion Principle (DIP)
+ * Reason:
+ * OrderController depends directly on concrete service
+ * implementations (PlaceOrderService and DeliveryService).
+ * This makes the controller coupled to specific application
+ * service classes rather than abstractions.
+ * Improvement Direction:
+ * Introduce use-case interfaces such as PlaceOrderUseCase
+ * and DeliveryUseCase, and inject those abstractions instead
+ * of concrete service implementations.
  */
 @RestController
 @RequestMapping("/order")
@@ -58,12 +70,6 @@ public class OrderController {
             @Valid @RequestBody DeliveryRequest deliveryRequest
     ) {
         return deliveryService.submitDeliveryInformation(deliveryRequest);
-    }
-
-    @PostMapping("/finalize")
-    @ResponseStatus(HttpStatus.CREATED)
-    public OrderResponse finalizeOrder() throws OrderNotCompleteException {
-        return placeOrderService.finalizeOrder();
     }
 
     /**
