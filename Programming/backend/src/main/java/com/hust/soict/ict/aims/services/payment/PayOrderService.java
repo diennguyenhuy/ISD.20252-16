@@ -4,12 +4,14 @@ import com.hust.soict.ict.aims.IPaymentQRCode;
 import com.hust.soict.ict.aims.context.OrderDraftContext;
 import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.mapper.OrderMapper;
+import com.hust.soict.ict.aims.models.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.models.dto.response.order.PaymentTransactionResponse;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 import com.hust.soict.ict.aims.mapper.PaymentMapper;
 import com.hust.soict.ict.aims.models.dto.response.payments.PaymentStatusResponse;
 import com.hust.soict.ict.aims.models.dto.response.payments.QRCodeResponse;
+import com.hust.soict.ict.aims.services.order.OrderFinalization;
 import com.hust.soict.ict.aims.subsystems.vietqr.QRCode;
 import com.hust.soict.ict.aims.subsystems.vietqr.QRCodePaymentStatus;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,8 @@ public class PayOrderService {
     private final IPaymentQRCode qrPaymentController;
     private final OrderDraftContext orderDraftContext;
 
+    private final OrderFinalization orderFinalization;
+
     private final OrderMapper orderMapper;
 
     private final PaymentMapper paymentMapper;
@@ -51,7 +55,7 @@ public class PayOrderService {
         return paymentMapper.toPaymentStatusResponse(qrPaymentController.checkPaymentStatus(orderDraftContext.getDraftOrder()));
     }
 
-    public PaymentTransactionResponse confirmPayment() throws PaymentException {
+    public OrderResponse confirmPayment() throws PaymentException {
         Order order = orderDraftContext.getDraftOrder();
 
         QRCodePaymentStatus paymentStatus = qrPaymentController.checkPaymentStatus(order);
@@ -60,12 +64,12 @@ public class PayOrderService {
                     "Payment verification failed. VietQR status: " + paymentStatus.getStatus());
         }
         log.info("[PayOrderService] VietQR confirmed COMPLETED — creating PaymentTransaction");
-        return orderMapper.toPaymentTransactionResponse(PaymentTransaction.of(
+        return orderFinalization.finalizeOrder(PaymentTransaction.of(
                 "ORD" + order.getId(),
                 Instant.now(),
                 PaymentTransaction.Method.VIETQR,
                 order.getTotalAmount(),
                 order
-        ));
+        ).getOrder());
     }
 }

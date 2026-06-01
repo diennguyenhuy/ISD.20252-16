@@ -60,12 +60,6 @@ public class OrderController {
         return deliveryService.submitDeliveryInformation(deliveryRequest);
     }
 
-    @PostMapping("/finalize")
-    @ResponseStatus(HttpStatus.CREATED)
-    public OrderResponse finalizeOrder() throws OrderNotCompleteException {
-        return placeOrderService.finalizeOrder();
-    }
-
     /**
      * GET /order/invoice endpoint for getting invoice info. Return status 202
      * @return response of invoice

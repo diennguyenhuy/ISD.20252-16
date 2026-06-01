@@ -25,11 +25,13 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class PlaceOrderSuccessListener {
     private final CartContext cartContext;
+    private final OrderDraftContext orderDraftContext;
     private final NotificationService notificationService;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     void handle(OrderSuccessEvent event) {
         notificationService.sendOrderConfirmation(event.order());
         cartContext.getOrCreateCart().clear();
+        orderDraftContext.clearDraftOrder();
     }
 }

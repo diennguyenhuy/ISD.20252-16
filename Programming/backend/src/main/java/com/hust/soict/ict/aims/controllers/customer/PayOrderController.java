@@ -1,7 +1,7 @@
 package com.hust.soict.ict.aims.controllers.customer;
 
 import com.hust.soict.ict.aims.exceptions.PaymentException;
-import com.hust.soict.ict.aims.models.dto.response.order.PaymentTransactionResponse;
+import com.hust.soict.ict.aims.models.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.models.dto.response.payments.PaymentStatusResponse;
 import com.hust.soict.ict.aims.models.dto.response.payments.QRCodeResponse;
 import com.hust.soict.ict.aims.services.order.PlaceOrderService;
@@ -10,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
-import java.util.UUID;
 /*
  * + Cohesion level: FUNCTIONAL
  * + Coupling level with PayOrderService and PlaceOrderService: DATA
@@ -57,7 +55,7 @@ public class PayOrderController {
 
     @PostMapping("/confirm")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody PaymentTransactionResponse confirmPayment()
+    public @ResponseBody OrderResponse confirmPayment()
             throws PaymentException, IllegalStateException {
         return payOrderService.confirmPayment();
     }

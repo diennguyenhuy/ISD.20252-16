@@ -7,6 +7,7 @@ import com.hust.soict.ict.aims.models.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.models.dto.response.payments.PayPalCreateResponse;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
+import com.hust.soict.ict.aims.services.order.OrderFinalization;
 import com.hust.soict.ict.aims.services.order.PlaceOrderService;
 import com.hust.soict.ict.aims.subsystems.paypal.IPaymentProvider;
 import com.hust.soict.ict.aims.subsystems.paypal.PaymentCapture;
@@ -40,7 +41,7 @@ import java.time.Instant;
  *       (not on PayPal), on {@link OrderDraftContext} (not on a request DTO), and
  *       on {@link PlaceOrderService} (the existing persistence + email owner).</li>
  *   <li><b>Integration rule:</b> on a successful capture it triggers
- *       {@link PlaceOrderService#finalizeOrder(PaymentTransaction)} — exactly the
+ *       {@link OrderFinalization#finalizeOrder(Order)} — exactly the
  *       contract the VietQR flow uses.</li>
  * </ul>
  *
@@ -60,7 +61,7 @@ public class PayByCreditCardService {
 
     private final IPaymentProvider paymentProvider;     // PayPal facade (abstraction)
     private final OrderDraftContext orderDraftContext;  // session draft source
-    private final PlaceOrderService placeOrderService;  // finalize + confirmation email
+    private final OrderFinalization orderFinalization;  // finalize + confirmation email
 
     /**
      * Step 1 — create a PayPal payment for the current draft order and return the
@@ -111,7 +112,7 @@ public class PayByCreditCardService {
                 capture.captureId(), order.getId());
 
         // Crucial integration rule: persist the order + send confirmation email.
-        return placeOrderService.finalizeOrder(transaction);
+        return orderFinalization.finalizeOrder(transaction.getOrder());
     }
 
     /**

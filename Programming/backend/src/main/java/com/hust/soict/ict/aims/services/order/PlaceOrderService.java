@@ -31,7 +31,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PlaceOrderService {
+public class PlaceOrderService implements OrderFinalization {
     private final StockValidator stockValidator;
     private final OrderRepository orderRepository;
 
@@ -71,10 +71,10 @@ public class PlaceOrderService {
         return orderMapper.toInvoiceResponse(invoice);
     }
 
+    @Override
     @Transactional
-    public OrderResponse finalizeOrder() throws OrderNotCompleteException {
+    public OrderResponse finalizeOrder(Order draftOrder) throws OrderNotCompleteException {
         log.debug("Finalizing order...");
-        Order draftOrder = orderDraftContext.getDraftOrder();
 
         if (draftOrder.getDeliveryInformation() == null
                 || draftOrder.getInvoice() == null
@@ -88,9 +88,6 @@ public class PlaceOrderService {
         Order order = orderRepository.save(draftOrder);
 
         applicationEventPublisher.publishEvent(new OrderSuccessEvent(order));
-
-        cartContext.getOrCreateCart().clear();
-        orderDraftContext.clearDraftOrder();
 
         log.debug("Order has been successfully saved!");
         return orderMapper.toOrderResponse(order);

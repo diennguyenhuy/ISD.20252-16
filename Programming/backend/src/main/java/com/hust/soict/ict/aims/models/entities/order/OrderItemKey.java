@@ -17,6 +17,7 @@ import java.util.UUID;
  * Coupling:
  * - Data coupling with OrderItem through identifier usage.
  */
+@Deprecated
 @Embeddable
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
