@@ -43,3 +43,19 @@ vietqr:
   accountNo: 03349966868
   accountName: NGUYEN TIEN DAT
   bankCode: MB
+paypal:
+  base-url: https://api-m.sandbox.paypal.com      # live: https://api-m.paypal.com
+  client-id: AdMTfa7iXh-wBCivX8N05MMJFfxkk3FRML_-g7dRW4QB6PGH_Rgoipj-BRktMyuxiZPGiCEkVdpZJ0tw
+  client-secret: EIyRBDJ0E3BqqfPumeC1uokmAotH9HUyNMJd3UpLxCYpXVh5lM1mqhGc-99KJ3mo_1uAZlkgwseCS4DZ
+
+  # PayPal sandbox does not settle VND, so AIMS VND prices are converted for the
+  # gateway only. Adjust rate as needed; the converted value never leaves the subsystem.
+  currency: USD
+  vnd-to-currency-rate: 25000
+
+  brand-name: AIMS
+
+  # Frontend routes PayPal redirects the customer back to. ${APP_FRONTEND_URL}
+  # should be your SPA origin (e.g. http://localhost:5173 in dev).
+  return-url: ${APP_FRONTEND_URL:http://localhost:5173}/checkout/payment/paypal/callback
+  cancel-url: ${APP_FRONTEND_URL:http://localhost:5173}/checkout/payment/paypal/cancel
