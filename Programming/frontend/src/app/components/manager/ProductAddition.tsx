@@ -231,10 +231,10 @@ export default function ProductAddition() {
               <div className="sm:col-span-2"><Field label="Title" required><input value={title} onChange={e=>setTitle(e.target.value)}  className={inputClass()} /></Field></div>
               <Field label="Barcode" required><input value={barcode} onChange={e=>setBarcode(e.target.value)} className={inputClass()} /></Field>
               <Field label="Category"><input value={category} onChange={e=>setCategory(e.target.value)} className={inputClass()} /></Field>
-              {!isEdit && <Field label="Original Value (Giá nhập)" required><input type="number" onWheel={e=>e.currentTarget.blur()} value={originalValue} onChange={e=>setOriginalValue(e.target.value)} className={inputClass()} /></Field>}
-              <Field label="Current Price (Giá bán)" required><input type="number" onWheel={e=>e.currentTarget.blur()} value={currentPrice} onChange={e=>setCurrentPrice(e.target.value)} className={inputClass()} /></Field>
+              {!isEdit && <Field label="Original Value" required><input type="number" onWheel={e=>e.currentTarget.blur()} value={originalValue} onChange={e=>setOriginalValue(e.target.value)} className={inputClass()} /></Field>}
+              <Field label="Current Price" required><input type="number" onWheel={e=>e.currentTarget.blur()} value={currentPrice} onChange={e=>setCurrentPrice(e.target.value)} className={inputClass()} /></Field>
               <Field label="Stock Quantity" required><input type="number" onWheel={e=>e.currentTarget.blur()} value={stockQuantity} onChange={e=>setStockQuantity(e.target.value)} className={inputClass()} /></Field>
-              <Field label="Weight (g)"><input type="number" onWheel={e=>e.currentTarget.blur()} value={weight} onChange={e=>setWeight(e.target.value)} className={inputClass()} /></Field>
+              <Field label="Weight (kg)"><input type="number" onWheel={e=>e.currentTarget.blur()} value={weight} onChange={e=>setWeight(e.target.value)} className={inputClass()} /></Field>
               <Field label="Height (cm)"><input type="number" onWheel={e=>e.currentTarget.blur()} value={height} onChange={e=>setHeight(e.target.value)} className={inputClass()} /></Field>
               <Field label="Width (cm)"><input type="number" onWheel={e=>e.currentTarget.blur()} value={width} onChange={e=>setWidth(e.target.value)} className={inputClass()} /></Field>
               <Field label="Length (cm)"><input type="number" onWheel={e=>e.currentTarget.blur()} value={length} onChange={e=>setLength(e.target.value)} className={inputClass()} /></Field>
