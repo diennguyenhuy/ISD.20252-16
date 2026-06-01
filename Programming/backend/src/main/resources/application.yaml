@@ -43,6 +43,9 @@ vietqr:
   accountNo: 03349966868
   accountName: NGUYEN TIEN DAT
   bankCode: MB
+  expectedpassword: 12345qwertW
+  expectedusername: maybeez
+
 paypal:
   base-url: https://api-m.sandbox.paypal.com      # live: https://api-m.paypal.com
   client-id: AdMTfa7iXh-wBCivX8N05MMJFfxkk3FRML_-g7dRW4QB6PGH_Rgoipj-BRktMyuxiZPGiCEkVdpZJ0tw

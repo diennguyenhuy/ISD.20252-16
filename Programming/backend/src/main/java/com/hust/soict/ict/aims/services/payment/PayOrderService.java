@@ -1,18 +1,16 @@
 package com.hust.soict.ict.aims.services.payment;
 
-import com.hust.soict.ict.aims.IPaymentQRCode;
+import com.hust.soict.ict.aims.subsystems.vietqr.IPaymentQRCode;
 import com.hust.soict.ict.aims.context.OrderDraftContext;
 import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.mapper.OrderMapper;
 import com.hust.soict.ict.aims.models.dto.response.order.OrderResponse;
-import com.hust.soict.ict.aims.models.dto.response.order.PaymentTransactionResponse;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 import com.hust.soict.ict.aims.mapper.PaymentMapper;
 import com.hust.soict.ict.aims.models.dto.response.payments.PaymentStatusResponse;
 import com.hust.soict.ict.aims.models.dto.response.payments.QRCodeResponse;
 import com.hust.soict.ict.aims.services.order.OrderFinalization;
-import com.hust.soict.ict.aims.subsystems.vietqr.QRCode;
 import com.hust.soict.ict.aims.subsystems.vietqr.QRCodePaymentStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

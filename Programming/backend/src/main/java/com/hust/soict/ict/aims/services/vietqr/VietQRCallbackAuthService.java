@@ -1,6 +1,7 @@
 package com.hust.soict.ict.aims.services.vietqr;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -14,9 +15,10 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class VietQRCallbackAuthService {
 
-
-    private static final String EXPECTED_USERNAME = "maybeez";
-    private static final String EXPECTED_PASSWORD = "12345qwertW";
+    @Value("${vietqr.expectedusername}")
+    private String EXPECTED_USERNAME;
+    @Value("${vietqr.expectedpassword}")
+    private String EXPECTED_PASSWORD;
 
     private static final String BASIC_PREFIX  = "Basic ";
     private static final String BEARER_PREFIX = "Bearer ";
