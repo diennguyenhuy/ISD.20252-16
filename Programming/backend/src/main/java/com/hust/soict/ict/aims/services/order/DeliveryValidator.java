@@ -2,7 +2,7 @@ package com.hust.soict.ict.aims.services.order;
 
 import com.hust.soict.ict.aims.constraints.LocationProvider;
 import org.springframework.stereotype.Component;
-import com.hust.soict.ict.aims.models.dto.request.DeliveryRequest;
+import com.hust.soict.ict.aims.dto.request.DeliveryRequest;
 import lombok.RequiredArgsConstructor;
 
 import java.util.regex.Pattern;

@@ -1,6 +1,6 @@
 package com.hust.soict.ict.aims.services.productmanagement;
 
-import com.hust.soict.ict.aims.models.dto.request.UpdateProductRequest;
+import com.hust.soict.ict.aims.dto.request.UpdateProductRequest;
 import com.hust.soict.ict.aims.models.entities.product.Product;
 import org.springframework.stereotype.Component;
 

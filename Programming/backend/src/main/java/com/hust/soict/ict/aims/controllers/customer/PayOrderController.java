@@ -1,10 +1,9 @@
 package com.hust.soict.ict.aims.controllers.customer;
 
 import com.hust.soict.ict.aims.exceptions.PaymentException;
-import com.hust.soict.ict.aims.models.dto.response.order.OrderResponse;
-import com.hust.soict.ict.aims.models.dto.response.payments.PaymentStatusResponse;
-import com.hust.soict.ict.aims.models.dto.response.payments.QRCodeResponse;
-import com.hust.soict.ict.aims.services.order.PlaceOrderService;
+import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
+import com.hust.soict.ict.aims.dto.response.payments.PaymentStatusResponse;
+import com.hust.soict.ict.aims.dto.response.payments.QRCodeResponse;
 import com.hust.soict.ict.aims.services.payment.PayOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

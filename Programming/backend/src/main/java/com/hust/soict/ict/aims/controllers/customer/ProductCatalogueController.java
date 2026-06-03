@@ -1,8 +1,8 @@
 package com.hust.soict.ict.aims.controllers.customer;
 
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
-import com.hust.soict.ict.aims.models.dto.response.product.ProductDetail;
-import com.hust.soict.ict.aims.models.dto.response.product.ProductSummary;
+import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
+import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.services.customer.ProductCatalogueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;

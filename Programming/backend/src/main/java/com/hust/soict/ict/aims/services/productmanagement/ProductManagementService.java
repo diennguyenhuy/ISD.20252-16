@@ -1,12 +1,12 @@
 package com.hust.soict.ict.aims.services.productmanagement;
 
+import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
+import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.exceptions.ProductValidationException;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
-import com.hust.soict.ict.aims.mapper.ProductMapper;
-import com.hust.soict.ict.aims.models.dto.request.CreateProductRequest;
-import com.hust.soict.ict.aims.models.dto.request.UpdateProductRequest;
-import com.hust.soict.ict.aims.models.dto.response.product.*;
-import com.hust.soict.ict.aims.models.entities.AuditableEntity;
+import com.hust.soict.ict.aims.dto.mapper.ProductMapper;
+import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
+import com.hust.soict.ict.aims.dto.request.UpdateProductRequest;
 import com.hust.soict.ict.aims.models.entities.product.*;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.UUID;
 

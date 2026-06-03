@@ -1,6 +1,6 @@
 package com.hust.soict.ict.aims.services.productmanagement;
 
-import com.hust.soict.ict.aims.models.dto.request.UpdateNewspaperRequest;
+import com.hust.soict.ict.aims.dto.request.UpdateNewspaperRequest;
 import com.hust.soict.ict.aims.models.entities.product.Newspaper;
 import org.springframework.stereotype.Component;
 

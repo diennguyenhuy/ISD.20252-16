@@ -1,6 +1,6 @@
 package com.hust.soict.ict.aims.services.productmanagement;
 
-import com.hust.soict.ict.aims.models.dto.request.CreateProductRequest;
+import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
 import com.hust.soict.ict.aims.models.entities.product.Product;
 
 public interface ProductCreator<P extends Product, C extends CreateProductRequest> {

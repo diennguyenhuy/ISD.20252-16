@@ -1,6 +1,6 @@
 package com.hust.soict.ict.aims.constraints;
 
-import com.hust.soict.ict.aims.models.dto.request.CreateProductRequest;
+import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
 import com.hust.soict.ict.aims.models.entities.product.Product;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

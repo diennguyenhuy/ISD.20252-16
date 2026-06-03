@@ -1,6 +1,6 @@
 package com.hust.soict.ict.aims.services.productmanagement;
 
-import com.hust.soict.ict.aims.models.dto.request.CreateCDRequest;
+import com.hust.soict.ict.aims.dto.request.CreateCDRequest;
 import com.hust.soict.ict.aims.models.entities.product.CD;
 import com.hust.soict.ict.aims.models.entities.product.Track;
 import org.springframework.stereotype.Component;

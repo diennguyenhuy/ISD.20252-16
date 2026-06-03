@@ -1,6 +1,7 @@
 package com.hust.soict.ict.aims.models.cart;
 
 import com.hust.soict.ict.aims.models.entities.product.Product;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,7 +23,7 @@ import java.util.Objects;
 @Getter
 public class CartItem {
     private final Product product;
-    @Setter
+    @Setter(AccessLevel.PACKAGE)
     private int quantity;
 
     CartItem(Product product, int quantity) {

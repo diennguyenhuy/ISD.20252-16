@@ -1,10 +1,10 @@
 package com.hust.soict.ict.aims.controllers.productmanager;
 
-import com.hust.soict.ict.aims.models.dto.request.CreateProductRequest;
-import com.hust.soict.ict.aims.models.dto.request.UpdateProductRequest;
-import com.hust.soict.ict.aims.models.dto.request.DeleteProductRequest;
-import com.hust.soict.ict.aims.models.dto.response.product.ProductDetail;
-import com.hust.soict.ict.aims.models.dto.response.product.ProductSummary;
+import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
+import com.hust.soict.ict.aims.dto.request.UpdateProductRequest;
+import com.hust.soict.ict.aims.dto.request.DeleteProductRequest;
+import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
+import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.services.productmanagement.ProductManagementService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

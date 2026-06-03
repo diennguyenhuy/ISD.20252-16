@@ -1,9 +1,9 @@
 package com.hust.soict.ict.aims.services.payment.vietqr;
 
 
-import com.hust.soict.ict.aims.models.dto.vietqr.request.VietQRTransactionSyncRequest;
-import com.hust.soict.ict.aims.models.dto.vietqr.response.VietQRTransactionSyncObject;
-import com.hust.soict.ict.aims.models.dto.vietqr.response.VietQRTransactionSyncResponse;
+import com.hust.soict.ict.aims.dto.vietqr.request.VietQRTransactionSyncRequest;
+import com.hust.soict.ict.aims.dto.vietqr.response.VietQRTransactionSyncObject;
+import com.hust.soict.ict.aims.dto.vietqr.response.VietQRTransactionSyncResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

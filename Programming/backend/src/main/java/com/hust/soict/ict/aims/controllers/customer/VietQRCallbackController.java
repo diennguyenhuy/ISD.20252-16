@@ -1,8 +1,8 @@
 package com.hust.soict.ict.aims.controllers.customer;
 
-import com.hust.soict.ict.aims.models.dto.vietqr.request.VietQRTransactionSyncRequest;
-import com.hust.soict.ict.aims.models.dto.vietqr.response.VietQRTokenResponse;
-import com.hust.soict.ict.aims.models.dto.vietqr.response.VietQRTransactionSyncResponse;
+import com.hust.soict.ict.aims.dto.vietqr.request.VietQRTransactionSyncRequest;
+import com.hust.soict.ict.aims.dto.vietqr.response.VietQRTokenResponse;
+import com.hust.soict.ict.aims.dto.vietqr.response.VietQRTransactionSyncResponse;
 import com.hust.soict.ict.aims.services.payment.vietqr.VietQRCallbackAuthService;
 import com.hust.soict.ict.aims.services.payment.vietqr.VietQRTransactionSyncService;
 import lombok.RequiredArgsConstructor;
