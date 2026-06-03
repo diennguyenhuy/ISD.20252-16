@@ -1,16 +1,16 @@
 package com.hust.soict.ict.aims.models.dto.request;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import java.time.LocalDate;
 import java.util.List;
 
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class UpdateCDRequest extends UpdateProductRequest {
     private LocalDate releaseDate;
     private String genre;
     private List<String> artists;
     private String recordLabel;
-    private List<TrackDTO> tracks;
+    private List<TrackRequest> tracks;
 }

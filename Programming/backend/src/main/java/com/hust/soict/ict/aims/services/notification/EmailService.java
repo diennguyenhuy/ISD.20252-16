@@ -74,7 +74,7 @@ public class EmailService implements NotificationService {
                 formatter.format(order.getInvoice().getIssuedAt()) : "N/A";
 
         // 1. Setup HTML, Body, and a Main Container Card
-        sb.append("<html><body style='font-family: \"Segoe UI\", Helvetica, Arial, sans-serif; background-color: #f4f4f5; padding: 40px 20px; color: #09090b; line-height: 1.6;'>");
+        sb.append("<html><body style='font-family: \"DM Sans\", Helvetica, Arial, sans-serif; background-color: #f4f4f5; padding: 40px 20px; color: #09090b; line-height: 1.6;'>");
         sb.append("<div style='max-width: 650px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #e4e4e7;'>");
 
         // 2. Cinematic Header
@@ -114,14 +114,14 @@ public class EmailService implements NotificationService {
         sb.append("<h3 style='border-bottom: 2px solid #e4e4e7; padding-bottom: 10px; color: #27272a;'>Purchased Items</h3>");
         sb.append("<table style='width: 100%; border-collapse: collapse; margin-bottom: 20px;'>");
 
-        order.getItems().forEach(item -> {
-            sb.append("<tr style='border-bottom: 1px solid #f4f4f5;'>")
-                    .append("<td style='padding: 15px 0; font-weight: 600; color: #3f3f46;'>").append(item.getProductName()).append("</td>")
-                    .append("<td style='padding: 15px 0; text-align: center; color: #71717a;'>x").append(item.getQuantity()).append("</td>")
-                    .append("<td style='padding: 15px 0; text-align: right; color: #3f3f46; font-weight: 500;'>")
-                    .append(String.format("%,d", item.getItemTotalPrice())).append(" ₫</td>")
-                    .append("</tr>");
-        });
+        order.getItems().forEach(item ->
+                sb.append("<tr style='border-bottom: 1px solid #f4f4f5;'>")
+                .append("<td style='padding: 15px 0; font-weight: 600; color: #3f3f46;'>").append(item.getProductName()).append("</td>")
+                .append("<td style='padding: 15px 0; text-align: center; color: #71717a;'>x").append(item.getQuantity()).append("</td>")
+                .append("<td style='padding: 15px 0; text-align: right; color: #3f3f46; font-weight: 500;'>")
+                .append(String.format("%,d", item.getItemTotalPrice())).append(" ₫</td>")
+                .append("</tr>")
+        );
         sb.append("</table>");
 
         // 6. Detailed Invoice Breakdown

@@ -51,7 +51,8 @@ public class ProductManagementService {
 
     private final ProductRepository productRepo;
     private final ProductMapper productMapper;
-    private final ProductFactory productFactory;
+    private final ProductCreatorFactory productCreatorFactory;
+    private final ProductUpdaterFactory productUpdaterFactory;
 
     @Transactional
     public ProductDetail createProduct(CreateProductRequest dto) {
@@ -62,7 +63,7 @@ public class ProductManagementService {
             throw new ProductValidationException("Barcode already exists: " + dto.getBarcode(), "barcode");
         }
 
-        Product product = productFactory.buildNewProduct(dto);
+        Product product = productCreatorFactory.getCreator(dto).createFrom(dto);
         Product savedProduct = productRepo.save(product);
 
         log.info("[CREATE SUCCESS] Successfully saved new product. ID: {}", savedProduct.getId());
@@ -79,12 +80,10 @@ public class ProductManagementService {
         });
 
         if (dto.getCurrentPrice() != null) {
-            product.changePrice(dto.getCurrentPrice()); // Validate price 30% - 150%
+            product.updatePrice(dto.getCurrentPrice()); // Validate price 30% - 150%
         }
 
-        Product updatedProduct = productFactory.buildUpdatedProduct(product, dto);
-        restoreEntityIdentityWithReflection(updatedProduct, product);
-
+        Product updatedProduct = productUpdaterFactory.getUpdater(dto).updateFrom(product, dto);
         Product savedProduct = productRepo.save(updatedProduct);
         log.info("[UPDATE SUCCESS] Successfully updated product. ID: {}, Current Price: {}", savedProduct.getId(), savedProduct.getCurrentPrice());
 
@@ -117,7 +116,7 @@ public class ProductManagementService {
         int processedCount = 0;
         for (UUID id : productIds) {
             productRepo.findById(id).ifPresent(product -> {
-                product.updateStatus(Product.Status.DELETED);
+                product.delete();
 
                 productRepo.save(product);
 
@@ -161,42 +160,14 @@ public class ProductManagementService {
                     return new ProductNotFoundException(id);
                 });
 
+
         int newStock = product.getStockQuantity() + delta;
-        if (newStock < 0) {
-            log.warn("[ADJUST STOCK FAILED] Resulting stock cannot be negative. ID: {}, Current Stock: {}, Delta: {}", id, product.getStockQuantity(), delta);
-            throw new ProductValidationException("Stock cannot be negative", "stockQuantity");
-        }
+        product.updateStock(newStock);
 
-        UpdateProductRequest updateReq = new UpdateProductRequest();
-        updateReq.setStockQuantity(newStock);
-
-        Product updatedProduct = productFactory.buildUpdatedProduct(product, updateReq);
-        restoreEntityIdentityWithReflection(updatedProduct, product);
-
-        productRepo.save(updatedProduct);
-        log.info("[ADJUST STOCK SUCCESS] Successfully updated stock. ID: {}, New Stock: {}", updatedProduct.getId(), updatedProduct.getStockQuantity());
+        productRepo.save(product);
+        log.info("[ADJUST STOCK SUCCESS] Successfully updated stock. ID: {}, New Stock: {}", product.getId(), product.getStockQuantity());
 
         // TODO: (Tương lai) Ghi log lý do (reason) vào bảng StockAdjustLog tại đây
-    }
-
-    private void restoreEntityIdentityWithReflection(Product targetProduct, Product existingProduct) {
-        try {
-            Field idField = Product.class.getDeclaredField("id");
-            idField.setAccessible(true);
-            idField.set(targetProduct, existingProduct.getId());
-
-            Field versionField = Product.class.getDeclaredField("version");
-            versionField.setAccessible(true);
-            versionField.set(targetProduct, existingProduct.getVersion());
-
-            Field createdAtField = AuditableEntity.class.getDeclaredField("createdAt");
-            createdAtField.setAccessible(true);
-            createdAtField.set(targetProduct, existingProduct.getCreatedAt());
-
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            log.error("[SYSTEM ERROR] Reflection failure while restoring entity identity.", e);
-            throw new RuntimeException("Reflection failure", e);
-        }
     }
 
     @Transactional
@@ -209,7 +180,7 @@ public class ProductManagementService {
                     return new ProductNotFoundException(id);
                 });
 
-        product.updateStatus(Product.Status.ACTIVE);
+        product.activate();
         productRepo.save(product);
 
         log.info("[ACTIVATE SUCCESS] Successfully reactivated product. ID: {}", id);

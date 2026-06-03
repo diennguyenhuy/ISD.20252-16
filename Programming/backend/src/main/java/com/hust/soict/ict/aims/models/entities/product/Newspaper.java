@@ -1,15 +1,12 @@
 package com.hust.soict.ict.aims.models.entities.product;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
-import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
-import com.hust.soict.ict.aims.exceptions.ProductValidationException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Entity
 @Table(name = "newspaper")
@@ -19,13 +16,13 @@ public class Newspaper extends PrintableProduct {
     @Column(nullable = false)
     private String editorInChief;
 
-    @Column(length = 25)
+    @Column(length = 25, updatable = false)
     private String issueNumber;
 
     @Column(length = 25)
     private String publicationFrequency;
 
-    @Column(length = 9)
+    @Column(length = 9, updatable = false)
     private String ISSN;
 
     @ElementCollection
@@ -42,20 +39,39 @@ public class Newspaper extends PrintableProduct {
 
     private Newspaper(Builder builder) {
         super(builder);
-
-        this.editorInChief = builder.editorInChief;
+        this.editorInChief = Objects.requireNonNull(builder.editorInChief, "Newspaper editor in chief cannot be null");
         this.issueNumber = builder.issueNumber;
         this.publicationFrequency = builder.publicationFrequency;
         this.ISSN = builder.ISSN;
-        this.sections = builder.sections == null ? new ArrayList<>() : new ArrayList<>(builder.sections);
+        this.sections = List.copyOf(builder.sections);
     }
 
-    public static class Builder extends PrintableProduct.Builder<Builder> {
+    private void apply(Builder builder) {
+        super.apply(builder);
+        this.editorInChief = builder.editorInChief;
+        this.publicationFrequency = builder.publicationFrequency;
+        this.sections = List.copyOf(builder.sections);
+    }
+
+    public static class Builder extends PrintableProduct.Builder<Newspaper, Builder> {
         private String editorInChief;
         private String issueNumber;
         private String publicationFrequency;
         private String ISSN;
         private List<String> sections = new ArrayList<>();
+
+        public Builder() {
+            super();
+        }
+
+        public Builder(Newspaper existingNewspaper) {
+            super(existingNewspaper);
+            this.editorInChief = existingNewspaper.editorInChief;
+            this.issueNumber = existingNewspaper.issueNumber;
+            this.publicationFrequency = existingNewspaper.publicationFrequency;
+            this.ISSN = existingNewspaper.ISSN;
+            this.sections = existingNewspaper.sections;
+        }
 
         @Override
         protected Builder self() {
@@ -63,12 +79,14 @@ public class Newspaper extends PrintableProduct {
         }
 
         @Override
-        public Newspaper build() throws ProductConstructionException {
-            this.validate().throwProductConstructionExceptionIfAny();
-            return new Newspaper(this);
+        public Newspaper build() {
+            if (updatingProduct != null) {
+                updatingProduct.apply(this);
+                return updatingProduct;
+            } else return new Newspaper(this);
         }
 
-        public Builder editorInChief(String editorInChief) {
+        public Builder editorInChief(@NonNull String editorInChief) {
             this.editorInChief = editorInChief;
             return this;
         }
@@ -88,16 +106,18 @@ public class Newspaper extends PrintableProduct {
             return this;
         }
 
-        public Builder sections(List<String> sections) {
-            this.sections = sections;
+        public Builder section(String section) {
+            this.sections.add(section);
             return this;
         }
 
-        @Override
-        protected Builder validate() {
-            super.validate();
-            this.validate(() -> requireNonBlank(this.editorInChief, "editorInChief"));
+        public Builder sections(Collection<String> sections) {
+            this.sections = List.copyOf(sections);
+            return this;
+        }
 
+        public Builder sections(String... sections) {
+            this.sections = List.of(sections);
             return this;
         }
     }

@@ -1,4 +1,7 @@
 package com.hust.soict.ict.aims.subsystems.vietqr;
+
+import lombok.Getter;
+
 /*
  * SOLID Principles: No violations.
  *
@@ -7,6 +10,7 @@ package com.hust.soict.ict.aims.subsystems.vietqr;
  * + Reason: Only primitives and Strings are passed in; buildRequestString()
  *   returns a plain String. No composite objects or control flags involved.
  */
+@Getter
 class QRGenerateRequest {
     private String bankCode;
     private String bankAccount;
@@ -39,14 +43,4 @@ class QRGenerateRequest {
             content, qrType, amount, orderId, transType
         );
     }
-    
-
-    String getBankCode() { return bankCode; }
-    String getBankAccount() { return bankAccount; }
-    String getUserBankName() { return userBankName; }
-    String getContent() { return content; }
-    int getQrType() { return qrType; }
-    long getAmount() { return amount; }
-    String getOrderId() { return orderId; }
-    String getTransType() { return transType; }
 }

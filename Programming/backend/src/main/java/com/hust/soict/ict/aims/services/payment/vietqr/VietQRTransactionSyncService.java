@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.vietqr;
+package com.hust.soict.ict.aims.services.payment.vietqr;
 
 
 import com.hust.soict.ict.aims.models.dto.vietqr.request.VietQRTransactionSyncRequest;

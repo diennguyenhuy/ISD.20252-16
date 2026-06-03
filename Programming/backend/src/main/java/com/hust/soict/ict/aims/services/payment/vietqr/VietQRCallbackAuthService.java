@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.vietqr;
+package com.hust.soict.ict.aims.services.payment.vietqr;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

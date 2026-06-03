@@ -1,12 +1,12 @@
 package com.hust.soict.ict.aims.models.dto.request;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import java.time.LocalDate;
 import java.util.List;
 
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class UpdateBookRequest extends UpdateProductRequest {
     private String publisher;
     private LocalDate publicationDate;

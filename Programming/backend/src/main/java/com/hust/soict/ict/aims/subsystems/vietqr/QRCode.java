@@ -1,10 +1,14 @@
 package com.hust.soict.ict.aims.subsystems.vietqr;
+
+import lombok.Getter;
+
 /*
  * + Cohesion level: FUNCTIONAL
  * + Coupling level with VietQRController: DATA
  * + Reason: VietQRController only reads QR data fields via getters after
  *   calling parseQRCodeResponse(). No control flags or internal logic shared.
  */
+@Getter
 public class QRCode {
     private String qrCode;
     private String qrLink;
@@ -26,15 +30,6 @@ public class QRCode {
         this.userBankName = userBankName;
         this.content = content;
     }
-    
-    public String getQrCode() { return qrCode; }
-    public String getQrLink() { return qrLink; }
-    public String getBankCode() { return bankCode; }
-    public String getBankName() { return bankName; }
-    public String getBankAccount() { return bankAccount; }
-    public String getUserBankName() { return userBankName; }
-    public String getContent() { return content; }
-    public Long getAmount() { return amount; }
 
     @Override
     public String toString() {

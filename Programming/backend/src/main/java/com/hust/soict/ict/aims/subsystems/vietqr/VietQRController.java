@@ -91,7 +91,7 @@ public class VietQRController implements IPaymentQRCode {
             // Get valid access token
             String token = getValidAccessToken();
             
-            long amount = (long) order.getTotalAmount();
+            long amount = order.getTotalAmount();
 
             // Use the formatter to explicitly sanitize strings
             String orderId = VietQRFormatter.sanitizeOrderId(order.getId().toString());
