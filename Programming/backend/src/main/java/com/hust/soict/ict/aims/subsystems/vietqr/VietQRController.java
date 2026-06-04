@@ -81,26 +81,25 @@ public class VietQRController implements IPaymentQRCode {
     /**
      * Generate QR code for payment using VietQR service
      * 
-     * @param order Order to generate QR code for
+     * @param orderId Order ID to generate QR code for
+     * @param totalAmount total amount to be paid
      * @return QRCode object containing QR information
      * @throws PaymentException if generation fails
      */
     @Override
-    public QRCode generateQRCode(Order order) throws PaymentException {
+    public QRCode generateQRCode(String orderId, long totalAmount) throws PaymentException {
         try {
             // Get valid access token
             String token = getValidAccessToken();
-            
-            long amount = order.getTotalAmount();
 
             // Use the formatter to explicitly sanitize strings
-            String orderId = VietQRFormatter.sanitizeOrderId(order.getId().toString());
+            orderId = VietQRFormatter.sanitizeOrderId(orderId);
             String content = VietQRFormatter.sanitizeContent("ORD" + orderId);
 
             // Create request with bank info from config
             QRGenerateRequest request = new QRGenerateRequest(
                     bankCode, accountNo, accountName,
-                    content, amount, orderId);
+                    content, totalAmount, orderId);
             String requestString = request.buildRequestString();
 
             String response = boundary.generateQRCode(token, requestString);
@@ -117,23 +116,22 @@ public class VietQRController implements IPaymentQRCode {
     /**
      * Check payment status for an order
      * 
-     * @param order Order to check
+     * @param orderId Order ID to check
+     * @param totalAmount total amount to be paid
      * @return PaymentStatus indicating current state
      * @throws PaymentException if check fails
      */
     @Override
-    public QRCodePaymentStatus checkPaymentStatus(Order order) throws PaymentException {
+    public QRCodePaymentStatus checkPaymentStatus(String orderId, long totalAmount) throws PaymentException {
         try {
             String token = getValidAccessToken();
-            
-            long amount = (long) order.getTotalAmount();
 
-            String orderId = VietQRFormatter.sanitizeOrderId(order.getId().toString());
+            orderId = VietQRFormatter.sanitizeOrderId(orderId);
             String content = VietQRFormatter.sanitizeContent("ORD" + orderId);
 
             // Create status check request
             QRTestCallbackRequest request = new QRTestCallbackRequest(
-                    accountNo, content, amount, bankCode
+                    accountNo, content, totalAmount, bankCode
             );
             String requestString = request.buildRequestString();
             String response = boundary.checkPaymentStatus(token, requestString);

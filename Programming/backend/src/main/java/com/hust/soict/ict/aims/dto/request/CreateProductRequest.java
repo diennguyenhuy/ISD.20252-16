@@ -3,7 +3,8 @@ package com.hust.soict.ict.aims.dto.request;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.hust.soict.ict.aims.constraints.ValidPriceRange;
-import com.hust.soict.ict.aims.models.entities.product.Product;
+import static com.hust.soict.ict.aims.models.entities.product.Product.MIN_PRICE_RELATIVE_PERCENTAGE;
+import static com.hust.soict.ict.aims.models.entities.product.Product.MAX_PRICE_RELATIVE_PERCENTAGE;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -37,8 +38,8 @@ public abstract class CreateProductRequest {
     @NotNull
     @PositiveOrZero(message = "Current price cannot be negative")
     @ValidPriceRange(message = "Current price must be within "
-            + Product.MIN_PRICE_RELATIVE_PERCENTAGE + "% and "
-            + Product.MAX_PRICE_RELATIVE_PERCENTAGE + "% of original price"
+            + MIN_PRICE_RELATIVE_PERCENTAGE + "% and "
+            + MAX_PRICE_RELATIVE_PERCENTAGE + "% of original price"
     )
     private Long currentPrice;
 

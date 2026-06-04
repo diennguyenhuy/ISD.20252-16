@@ -1,7 +1,6 @@
 package com.hust.soict.ict.aims.models.entities.order;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.Instant;
@@ -21,10 +20,6 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PaymentTransaction {
-    public enum Method {
-        VIETQR,
-        PAYPAL
-    }
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false)
@@ -34,9 +29,8 @@ public class PaymentTransaction {
     private String transactionContent;
     private Instant transactionTimestamp;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Method transactionMethod;
+    private String transactionMethod;
 
     @Column(nullable = false)
     private Long amountPaid;
@@ -49,9 +43,9 @@ public class PaymentTransaction {
     public static PaymentTransaction of(
             String transactionContent,
             Instant transactionTimestamp,
-            Method transactionMethod,
+            String transactionMethod,
             Long amountPaid,
-            @NotNull Order order
+            @NonNull Order order
     ) {
         PaymentTransaction pt = new PaymentTransaction();
 
@@ -65,4 +59,3 @@ public class PaymentTransaction {
         return pt;
     }
 }
-

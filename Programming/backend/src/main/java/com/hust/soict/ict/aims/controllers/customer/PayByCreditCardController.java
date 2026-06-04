@@ -4,7 +4,7 @@ import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.dto.request.PayPalCaptureRequest;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.dto.response.payments.PayPalCreateResponse;
-import com.hust.soict.ict.aims.services.payment.PayByCreditCardService;
+import com.hust.soict.ict.aims.services.payment.paypal.PayByCreditCardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

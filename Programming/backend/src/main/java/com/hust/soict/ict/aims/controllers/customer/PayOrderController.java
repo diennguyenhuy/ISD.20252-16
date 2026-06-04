@@ -4,7 +4,7 @@ import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.dto.response.payments.PaymentStatusResponse;
 import com.hust.soict.ict.aims.dto.response.payments.QRCodeResponse;
-import com.hust.soict.ict.aims.services.payment.PayOrderService;
+import com.hust.soict.ict.aims.services.payment.vietqr.PayOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

@@ -9,10 +9,12 @@ import jakarta.persistence.MappedSuperclass;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Immutable;
 
 @MappedSuperclass
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Immutable
 public abstract class ProductAuditLog extends AuditLog {
     @ManyToOne
     @JoinColumn(name = "manager_id", updatable = false)
