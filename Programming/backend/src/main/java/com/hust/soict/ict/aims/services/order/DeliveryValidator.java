@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.regex.Pattern;
 
+@Deprecated
 @Component
 @RequiredArgsConstructor
 public class DeliveryValidator {

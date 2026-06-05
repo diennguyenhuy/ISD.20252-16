@@ -1,69 +1,32 @@
-package com.hust.soict.ict.aims.services.notification;
+package com.hust.soict.ict.aims.services.notification.email;
 
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailAuthenticationException;
-import org.springframework.mail.MailException;
-import org.springframework.mail.MailSendException;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.stereotype.Service;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-/**
- * Cohesion: Communicational Cohesion
- * Reason:
- * Methods collaborate to construct and send
- * order confirmation emails using related email data.
- * Coupling:
- * - Data coupling with JavaMailSender and
- *   NotificationService abstraction.
- * - Stamp coupling with Order and PaymentTransaction
- *   because full domain objects are used to build emails.
- */
-@Service
 @RequiredArgsConstructor
-@Slf4j
-public class EmailService implements NotificationService {
-    private final JavaMailSender mailSender;
-
-    @Value("${spring.mail.username}")
-    private String from;
+public class OrderConfirmationEmail implements EmailNotificationMessage {
+    private final Order order;
 
     @Value("${app.frontend.url}")
     private String frontendUrl;
 
     @Override
-    public void sendOrderConfirmation(Order order) {
-        log.debug("Sending order confirmation email...");
-        try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            helper.setFrom(from);
-            helper.setTo(order.getDeliveryInformation().getCustomerEmail());
-            helper.setSubject("AIMS - Thank you for your order! Order #" + order.getId());
-            helper.setText(buildOrderEmail(order), true);
-            mailSender.send(mimeMessage);
-            log.debug("Order confirmation email sent successfully!");
-        } catch (MessagingException e) {
-            log.warn("Multipart creation failed: {}", e.getMessage());
-        } catch (MailAuthenticationException e) {
-            log.warn("Mail authentication failed: {}", e.getMessage());
-        } catch (MailSendException e) {
-            log.warn("Could not send email: {}", e.getMessage());
-        } catch (MailException e) {
-            log.warn("Mail exception: {}", e.getMessage());
-        }
+    public String subject() {
+        return "AIMS - Thank you for your order! Order #" + order.getId();
     }
 
-    private String buildOrderEmail(Order order) {
+    @Override
+    public String recipient() {
+        return order.getDeliveryInformation().getCustomerEmail();
+    }
+
+    @Override
+    public String body() {
         StringBuilder sb = new StringBuilder();
 
         // Helper formatters
@@ -74,7 +37,7 @@ public class EmailService implements NotificationService {
                 formatter.format(order.getInvoice().getIssuedAt()) : "N/A";
 
         // 1. Setup HTML, Body, and a Main Container Card
-        sb.append("<html><body style='font-family: \"DM Sans\", Helvetica, Arial, sans-serif; background-color: #f4f4f5; padding: 40px 20px; color: #09090b; line-height: 1.6;'>");
+        sb.append("<html><body style='font-family: \"Segoe UI\", Helvetica, Arial, sans-serif; background-color: #f4f4f5; padding: 40px 20px; color: #09090b; line-height: 1.6;'>");
         sb.append("<div style='max-width: 650px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #e4e4e7;'>");
 
         // 2. Cinematic Header
@@ -116,11 +79,11 @@ public class EmailService implements NotificationService {
 
         order.getItems().forEach(item ->
                 sb.append("<tr style='border-bottom: 1px solid #f4f4f5;'>")
-                .append("<td style='padding: 15px 0; font-weight: 600; color: #3f3f46;'>").append(item.getProductName()).append("</td>")
-                .append("<td style='padding: 15px 0; text-align: center; color: #71717a;'>x").append(item.getQuantity()).append("</td>")
-                .append("<td style='padding: 15px 0; text-align: right; color: #3f3f46; font-weight: 500;'>")
-                .append(String.format("%,d", item.getItemTotalPrice())).append(" ₫</td>")
-                .append("</tr>")
+                        .append("<td style='padding: 15px 0; font-weight: 600; color: #3f3f46;'>").append(item.getProductName()).append("</td>")
+                        .append("<td style='padding: 15px 0; text-align: center; color: #71717a;'>x").append(item.getQuantity()).append("</td>")
+                        .append("<td style='padding: 15px 0; text-align: right; color: #3f3f46; font-weight: 500;'>")
+                        .append(String.format("%,d", item.getItemTotalPrice())).append(" ₫</td>")
+                        .append("</tr>")
         );
         sb.append("</table>");
 

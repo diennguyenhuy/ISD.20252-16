@@ -25,25 +25,19 @@ public class DeliveryInformation {
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "order_id")
+    @Setter(AccessLevel.PACKAGE)
     private Order order;
 
-    @Setter @NonNull
     private String customerName;
-    @Setter @NonNull
     private String customerEmail;
-    @Setter @NonNull
     @Column(length = 10)
     private String phoneNumber;
-    @Setter @NonNull
     @Column(length = 50)
     private String province;
-    @Setter @NonNull
     @Column(length = 50)
     private String commune;
-    @Setter @NonNull
     @Column(columnDefinition = "TEXT")
     private String address;
-    @Setter @NonNull
     @Column(length = 50)
     private String deliveryMethod;
 
@@ -51,35 +45,23 @@ public class DeliveryInformation {
         return province.equalsIgnoreCase("Thành phố Hà Nội") || province.equalsIgnoreCase("Thành phố Hồ Chí Minh");
     }
 
-    public static DeliveryInformation of(
-            String customerName,
-            String customerEmail,
-            String phoneNumber,
-            String province,
-            String commune,
-            String address,
-            String deliveryMethod,
-            @NonNull Order order
+    DeliveryInformation(
+            @NonNull String customerName,
+            @NonNull String customerEmail,
+            @NonNull String phoneNumber,
+            @NonNull String province,
+            @NonNull String commune,
+            @NonNull String address,
+            @NonNull String deliveryMethod,
+            Order order
     ) {
-        DeliveryInformation di = new DeliveryInformation();
-
-        order.setDeliveryInformation(di);
-        di.order = order;
-        di.customerName = customerName;
-        di.customerEmail = customerEmail;
-        di.phoneNumber = phoneNumber;
-        di.province = province;
-        di.commune = commune;
-        di.address = address;
-        di.deliveryMethod = deliveryMethod;
-
-        return di;
-    }
-
-    public static DeliveryInformation of(DeliveryInformation deliveryInformation, @NonNull Order order) {
-        order.setDeliveryInformation(deliveryInformation);
-        deliveryInformation.order = order;
-
-        return deliveryInformation;
+        this.customerName = customerName;
+        this.customerEmail = customerEmail;
+        this.phoneNumber = phoneNumber;
+        this.province = province;
+        this.commune = commune;
+        this.address = address;
+        this.deliveryMethod = deliveryMethod;
+        this.order = order;
     }
 }

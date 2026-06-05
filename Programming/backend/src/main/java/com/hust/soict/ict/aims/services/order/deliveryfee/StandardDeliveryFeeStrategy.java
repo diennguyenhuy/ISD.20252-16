@@ -1,5 +1,6 @@
-package com.hust.soict.ict.aims.services.order;
+package com.hust.soict.ict.aims.services.order.deliveryfee;
 
+import com.hust.soict.ict.aims.models.entities.order.Order;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -16,7 +17,7 @@ import java.math.RoundingMode;
  * instead of entire Order objects.
  */
 @Component
-public class DeliveryFeeCalculator {
+public class StandardDeliveryFeeStrategy implements DeliveryFeeCalculationStrategy {
     private static final long UNIT_FEE_PER_WEIGHT_DEDUCTION = 2_500;
     private static final BigDecimal UNIT_WEIGHT_DEDUCTION = BigDecimal.valueOf(0.5);
     private static final long INITIAL_FEE = 30_000;
@@ -26,11 +27,17 @@ public class DeliveryFeeCalculator {
     private static final long FREE_SHIPPING_THRESHOLD = 100_000;
     private static final long MAX_FREE_SHIPPING_SUBSIDY = 25_000;
 
-    public long calculateDeliveryFee(
-            BigDecimal totalWeight,
-            String province,
-            long totalPrice
-    ) {
+    @Override
+    public DeliveryFeeCalculationMethod method() {
+        return DeliveryFeeCalculationMethod.STANDARD;
+    }
+
+    @Override
+    public long calculateDeliveryFee(Order order) {
+        BigDecimal totalWeight = order.getTotalWeight();
+        String province = order.getDeliveryInformation().getProvince();
+        long totalPrice = order.getTotalPriceWithoutVAT();
+
         long fee = 0;
         BigDecimal weight;
         if (isHanoiOrHoChiMinh(province)) {

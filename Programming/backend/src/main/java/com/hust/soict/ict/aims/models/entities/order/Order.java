@@ -67,7 +67,7 @@ public class Order extends AuditableEntity {
                 REFUNDED, Set.of()
         );
 
-        public boolean isValidTransition(Status status) {
+        boolean isValidTransitionTo(Status status) {
             return transitions.get(this).contains(status);
         }
     }
@@ -83,20 +83,51 @@ public class Order extends AuditableEntity {
     private Status status;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
-    @Setter(AccessLevel.PACKAGE)
     private DeliveryInformation deliveryInformation;
 
-    @Setter
     @Transient
     private Long deliveryFee;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
-    @Setter(AccessLevel.PACKAGE)
     private Invoice invoice;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
-    @Setter(AccessLevel.PACKAGE)
     private PaymentTransaction paymentTransaction;
+
+    private void changeStatus(Status newStatus) throws IllegalStateException {
+        if (newStatus == status) return;
+        if (!this.status.isValidTransitionTo(newStatus)) {
+            throw new IllegalStateException("Cannot transition order status from " + status.name() + " to " + newStatus.name());
+        }
+        this.status = newStatus;
+    }
+
+    public DeliveryInformation provideDeliveryInformation(
+            @NonNull String customerName,
+            @NonNull String customerEmail,
+            @NonNull String phoneNumber,
+            @NonNull String province,
+            @NonNull String commune,
+            @NonNull String address,
+            @NonNull String deliveryMethod
+    ) {
+        this.deliveryInformation = new DeliveryInformation(customerName, customerEmail, phoneNumber, province, commune, address, deliveryMethod, this);
+        return this.deliveryInformation;
+    }
+
+    public void provideDeliveryInformation(@NonNull DeliveryInformation existingInfo, long precalculatedDeliveryFee) {
+        this.deliveryInformation = new DeliveryInformation(
+                existingInfo.getCustomerName(),
+                existingInfo.getCustomerEmail(),
+                existingInfo.getPhoneNumber(),
+                existingInfo.getProvince(),
+                existingInfo.getCommune(),
+                existingInfo.getAddress(),
+                existingInfo.getDeliveryMethod(),
+                this
+        );
+        this.deliveryFee = precalculatedDeliveryFee;
+    }
 
     @Transient
     public Long getTotalPriceWithoutVAT() {
@@ -118,21 +149,35 @@ public class Order extends AuditableEntity {
         return deliveryFee + getTotalPriceWithVAT();
     }
 
+    public void updateDeliveryFee(long deliveryFee) {
+        this.deliveryFee = deliveryFee;
+        this.invoice = new Invoice(this);
+    }
+
+    public boolean isComplete() {
+        return deliveryInformation != null && deliveryFee != null && invoice != null && paymentTransaction != null;
+    }
+
+    public void complete() {
+        changeStatus(Status.PENDING);
+    }
+    public void approve() {
+        changeStatus(Status.APPROVED);
+    }
+    public void reject() {
+        changeStatus(Status.REJECTED);
+    }
+    public void cancel() {
+        changeStatus(Status.CANCELLED);
+    }
+    public void refund() {
+        changeStatus(Status.REFUNDED);
+    }
+
     void addItem(OrderItem orderItem) {
         items.add(orderItem);
         orderItem.setOrder(this);
     }
-
-    public void changeStatus(@NonNull Status newStatus) throws IllegalStateException {
-        if (newStatus == status) return;
-
-        if (!this.status.isValidTransition(newStatus)) {
-            throw new IllegalStateException("Cannot transition order status from " + status.name() + " to " + newStatus.name());
-        }
-
-        this.status = newStatus;
-    }
-
     public static Order from(Cart cart) {
         Order order = new Order();
         cart.getItems().forEach(item -> order.addItem(OrderItem.from(item, order)));

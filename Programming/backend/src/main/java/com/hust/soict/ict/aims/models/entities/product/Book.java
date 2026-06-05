@@ -39,6 +39,11 @@ public class Book extends PrintableProduct {
         return Collections.unmodifiableList(authors);
     }
 
+    @Override
+    public Builder toBuilder() {
+        return new Builder(this);
+    }
+
     private Book(Builder builder) {
         super(builder);
         this.authors = List.copyOf(builder.authors);
@@ -64,7 +69,7 @@ public class Book extends PrintableProduct {
             super();
         }
 
-        public Builder(Book existingBook) {
+        private Builder(Book existingBook) {
             super(existingBook);
             this.authors = existingBook.authors;
             this.coverType = existingBook.coverType;

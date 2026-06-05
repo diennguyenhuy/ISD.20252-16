@@ -1,0 +1,41 @@
+package com.hust.soict.ict.aims.services.order;
+
+import com.hust.soict.ict.aims.context.CartContext;
+import com.hust.soict.ict.aims.context.OrderDraftContext;
+import com.hust.soict.ict.aims.dto.mapper.OrderMapper;
+import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
+import com.hust.soict.ict.aims.exceptions.OrderNotCompleteException;
+import com.hust.soict.ict.aims.models.entities.order.Order;
+import com.hust.soict.ict.aims.repositories.OrderRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@RequiredArgsConstructor
+@Service
+@Slf4j
+public class OrderFinalizer implements OrderFinalization {
+    private final OrderRepository orderRepository;
+    private final OrderMapper orderMapper;
+    private final ApplicationEventPublisher applicationEventPublisher;
+
+    @Override
+    @Transactional
+    public OrderResponse finalizeOrder(Order draftOrder) throws OrderNotCompleteException {
+        log.debug("Finalizing order...");
+
+        if (!draftOrder.isComplete()) {
+            throw new OrderNotCompleteException("Order is not complete.");
+        }
+        draftOrder.complete();
+        Order order = orderRepository.save(draftOrder);
+
+        applicationEventPublisher.publishEvent(new OrderSuccessEvent(order));
+
+        log.debug("Order has been successfully saved!");
+
+        return orderMapper.toOrderResponse(order);
+    }
+}

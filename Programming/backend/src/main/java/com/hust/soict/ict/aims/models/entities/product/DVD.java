@@ -51,6 +51,11 @@ public class DVD extends Product {
         return Collections.unmodifiableList(subtitles);
     }
 
+    @Override
+    public Builder toBuilder() {
+        return new Builder(this);
+    }
+
     private DVD(Builder builder) {
         super(builder);
         this.releaseDate = builder.releaseDate;
@@ -87,7 +92,7 @@ public class DVD extends Product {
             super();
         }
 
-        public Builder(DVD existingDVD) {
+        private Builder(DVD existingDVD) {
             super(existingDVD);
             this.releaseDate = existingDVD.releaseDate;
             this.genre = existingDVD.genre;

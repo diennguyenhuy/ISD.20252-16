@@ -1,21 +1,19 @@
 package com.hust.soict.ict.aims.services.order;
 
 import com.hust.soict.ict.aims.context.CartContext;
+import com.hust.soict.ict.aims.dto.request.DeliveryRequest;
+import com.hust.soict.ict.aims.dto.response.order.DeliveryResponse;
 import com.hust.soict.ict.aims.dto.response.order.InvoiceResponse;
 import com.hust.soict.ict.aims.dto.response.order.OrderDraftResponse;
-import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.exceptions.*;
 import com.hust.soict.ict.aims.models.entities.order.*;
 import com.hust.soict.ict.aims.context.OrderDraftContext;
-import com.hust.soict.ict.aims.repositories.OrderRepository;
 import com.hust.soict.ict.aims.dto.mapper.OrderMapper;
+import com.hust.soict.ict.aims.services.order.deliveryfee.DeliveryFeeCalculationMethod;
+import com.hust.soict.ict.aims.services.order.deliveryfee.DeliveryFeeCalculator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 /**
  * Cohesion: Procedural Cohesion<br>
@@ -54,16 +52,14 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PlaceOrderService implements OrderFinalization {
+public class PlaceOrderService {
     private final StockValidator stockValidator;
-    private final OrderRepository orderRepository;
+
+    private final DeliveryFeeCalculator deliveryFeeCalculator;
 
     private final CartContext cartContext;
     private final OrderDraftContext orderDraftContext;
-
     private final OrderMapper orderMapper;
-
-    private final ApplicationEventPublisher applicationEventPublisher;
 
     public OrderDraftResponse placeOrder() throws EmptyCartException, NotEnoughStockException, ProductNotFoundException {
         log.debug("Placing order...");
@@ -72,11 +68,8 @@ public class PlaceOrderService implements OrderFinalization {
         log.debug("Stock availability check done and satisfied.");
 
         try {
-            var existingDelivery = orderDraftContext.getDraftOrder().getDeliveryInformation();
-            if (existingDelivery != null) {
-                DeliveryInformation.of(existingDelivery, draftOrder);
-                draftOrder.setDeliveryFee(orderDraftContext.getDraftOrder().getDeliveryFee());
-            }
+            Order oldDraft = orderDraftContext.getDraftOrder();
+            draftOrder.provideDeliveryInformation(oldDraft.getDeliveryInformation(), oldDraft.getDeliveryFee());
         } catch (OrderNotPlacedException ignored) {}
 
         orderDraftContext.saveDraftOrder(draftOrder);
@@ -84,57 +77,42 @@ public class PlaceOrderService implements OrderFinalization {
         return orderMapper.toOrderDraftResponse(draftOrder);
     }
 
+    public DeliveryResponse submitDeliveryInformation(DeliveryRequest deliveryRequest) {
+        log.debug("Submitting delivery request...");
+        Order draftOrder = orderDraftContext.getDraftOrder();
+
+        var di = draftOrder.provideDeliveryInformation(
+                deliveryRequest.getCustomerName(),
+                deliveryRequest.getCustomerEmail(),
+                deliveryRequest.getPhoneNumber(),
+                deliveryRequest.getProvince(),
+                deliveryRequest.getCommune(),
+                deliveryRequest.getAddress(),
+                deliveryRequest.getDeliveryMethod()
+        );
+
+        long deliveryFee = deliveryFeeCalculator.calculate(DeliveryFeeCalculationMethod.STANDARD, draftOrder);
+
+        draftOrder.updateDeliveryFee(deliveryFee);
+
+        orderDraftContext.saveDraftOrder(draftOrder);
+        log.debug("Delivery information successfully saved!");
+        return orderMapper.toDeliveryResponse(di);
+    }
+
     public InvoiceResponse getInvoice() {
         log.debug("Creating invoice...");
         Order draftOrder = orderDraftContext.getDraftOrder();
-
-        var invoice = Invoice.from(draftOrder);
-        orderDraftContext.saveDraftOrder(draftOrder);
-
-        return orderMapper.toInvoiceResponse(invoice);
-    }
-
-    @Override
-    @Transactional
-    public OrderResponse finalizeOrder(Order draftOrder) throws OrderNotCompleteException {
-        log.debug("Finalizing order...");
-
-        if (draftOrder.getDeliveryInformation() == null
-                || draftOrder.getInvoice() == null
-                || draftOrder.getPaymentTransaction() == null
-        ) {
-            throw new OrderNotCompleteException("Order is not complete.");
+        Invoice invoice = draftOrder.getInvoice();
+        if (invoice == null) {
+            throw new OrderNotCompleteException("Order invoice is not yet generated due to internal logical error or missing delivery info.");
         }
-
-        draftOrder.changeStatus(Order.Status.PENDING);
-
-        Order order = orderRepository.save(draftOrder);
-
-        applicationEventPublisher.publishEvent(new OrderSuccessEvent(order));
-
-        log.debug("Order has been successfully saved!");
-        return orderMapper.toOrderResponse(order);
+        return orderMapper.toInvoiceResponse(invoice);
     }
 
     public void cancelOrder() {
         log.debug("Canceling order...");
         orderDraftContext.clearDraftOrder();
         log.debug("Order successfully canceled!");
-    }
-
-    @Transactional
-    public OrderResponse getOrder(UUID orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        return orderMapper.toOrderResponse(order);
-    }
-
-    @Transactional
-    public void cancelOrder(UUID orderId) throws IllegalStateException, OrderNotFoundException {
-        log.debug("Canceling order #{}...", orderId);
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        order.changeStatus(Order.Status.CANCELLED);
-
-        log.debug("Order #{} successfully canceled!", orderId);
-        orderRepository.save(order);
     }
 }
