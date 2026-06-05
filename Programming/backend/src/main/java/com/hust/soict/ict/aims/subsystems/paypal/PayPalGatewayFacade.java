@@ -2,7 +2,6 @@ package com.hust.soict.ict.aims.subsystems.paypal;
 
 import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.exceptions.UserCancelledException;
-import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalApiModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,15 +35,14 @@ public class PayPalGatewayFacade implements IPaymentProvider {
     private final PayPalProperties props;
 
     @Override
-    public PaymentInitiation createPayment(Order order) throws PaymentException {
-        String orderRef = order.getId().toString();
+    public PaymentInitiation createPayment(String orderId, long totalAmount) throws PaymentException {
 
         var amount = new PayPalApiModel.Amount(
                 props.getCurrency(),
-                amountConverter.toProviderValue(order.getTotalAmount()));
+                amountConverter.toProviderValue(totalAmount));
 
         // reference_id AND custom_id carry the AIMS order id so we can verify it on capture.
-        var unit = new PayPalApiModel.PurchaseUnit(orderRef, orderRef, amount, null);
+        var unit = new PayPalApiModel.PurchaseUnit(orderId, orderId, amount, null);
 
         var appCtx = new PayPalApiModel.ApplicationContext(
                 props.getReturnUrl(), props.getCancelUrl(),
@@ -56,10 +54,10 @@ public class PayPalGatewayFacade implements IPaymentProvider {
             PayPalApiModel.OrderResponse resp = ordersClient.createOrder(request);
             String approvalUrl = extractApprovalUrl(resp);
             log.info("[PayPalFacade] Created PayPal order {} (status {}) for AIMS order {}",
-                    resp.id(), resp.status(), orderRef);
+                    resp.id(), resp.status(), orderId);
             return new PaymentInitiation(resp.id(), approvalUrl);
         } catch (PayPalApiException e) {
-            log.error("[PayPalFacade] createPayment failed for order {}: {}", orderRef, e.getMessage());
+            log.error("[PayPalFacade] createPayment failed for order {}: {}", orderId, e.getMessage());
             throw new PaymentException("Could not initiate PayPal payment: " + e.getMessage());
         }
     }

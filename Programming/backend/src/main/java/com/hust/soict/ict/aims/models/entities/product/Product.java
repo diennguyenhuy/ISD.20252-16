@@ -154,6 +154,8 @@ public abstract class Product extends AuditableEntity {
         this.imageURL = builder.imageURL;
     }
 
+    public abstract Builder<?, ?> toBuilder();
+
     public static abstract class Builder<P extends Product, B extends Builder<P, B>> {
         protected final P updatingProduct;
         private String title;

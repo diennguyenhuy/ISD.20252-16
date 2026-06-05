@@ -6,8 +6,9 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Immutable;
 
-@Entity
+@Immutable @Entity
 @Table(name = "stock_adjust_log")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

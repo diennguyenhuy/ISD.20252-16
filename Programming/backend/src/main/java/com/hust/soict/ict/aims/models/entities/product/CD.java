@@ -47,6 +47,11 @@ public class CD extends Product {
         tracks.add(track);
     }
 
+    @Override
+    public Builder toBuilder() {
+        return new Builder(this);
+    }
+
     private CD(Builder builder) {
         super(builder);
         this.releaseDate = builder.releaseDate;
@@ -75,7 +80,7 @@ public class CD extends Product {
             super();
         }
 
-        public Builder(CD existingCD) {
+        private Builder(CD existingCD) {
             super(existingCD);
             this.releaseDate = existingCD.releaseDate;
             this.genre = existingCD.genre;

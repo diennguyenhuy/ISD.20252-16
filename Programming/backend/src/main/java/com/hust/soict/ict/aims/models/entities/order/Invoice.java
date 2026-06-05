@@ -47,17 +47,12 @@ public class Invoice {
     @Column(nullable = false)
     private Long totalAmount;
 
-    public static Invoice from(@NonNull Order order) {
-        Invoice invoice = new Invoice();
-
-        order.setInvoice(invoice);
-        invoice.order = order;
-        invoice.totalPriceWithoutVAT = order.getTotalPriceWithoutVAT();
-        invoice.totalPriceWithVAT = order.getTotalPriceWithVAT();
-        invoice.deliveryFee = order.getDeliveryFee();
-        invoice.totalAmount = order.getTotalAmount();
-        invoice.issuedAt = Instant.now();
-
-        return invoice;
+    Invoice(Order order) {
+        this.order = order;
+        this.totalPriceWithoutVAT = order.getTotalPriceWithoutVAT();
+        this.totalPriceWithVAT = order.getTotalPriceWithVAT();
+        this.deliveryFee = order.getDeliveryFee();
+        this.totalAmount = order.getTotalAmount();
+        this.issuedAt = Instant.now();
     }
 }

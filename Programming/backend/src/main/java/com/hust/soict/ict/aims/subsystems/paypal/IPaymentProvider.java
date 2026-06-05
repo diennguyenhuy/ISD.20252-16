@@ -21,11 +21,12 @@ public interface IPaymentProvider {
      * Create a provider-side payment for the given order and return the URL the
      * customer must be redirected to in order to approve it.
      *
-     * @param order the AIMS draft order being paid for
+     * @param orderId the ID of AIMS draft order being paid for
+     * @param totalAmount the total amount of order
      * @return provider order id + approval (redirect) URL
      * @throws PaymentException if the provider rejects the creation request
      */
-    PaymentInitiation createPayment(Order order) throws PaymentException;
+    PaymentInitiation createPayment(String orderId, long totalAmount) throws PaymentException;
 
     /**
      * Capture (settle) a payment the customer has already approved on the

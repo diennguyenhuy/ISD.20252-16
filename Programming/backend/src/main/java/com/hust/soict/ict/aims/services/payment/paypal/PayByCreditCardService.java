@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.payment;
+package com.hust.soict.ict.aims.services.payment.paypal;
 
 import com.hust.soict.ict.aims.context.OrderDraftContext;
 import com.hust.soict.ict.aims.exceptions.OrderNotPlacedException;
@@ -9,6 +9,7 @@ import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 import com.hust.soict.ict.aims.services.order.OrderFinalization;
 import com.hust.soict.ict.aims.services.order.PlaceOrderService;
+import com.hust.soict.ict.aims.services.payment.PaymentMethod;
 import com.hust.soict.ict.aims.subsystems.paypal.IPaymentProvider;
 import com.hust.soict.ict.aims.subsystems.paypal.PaymentCapture;
 import com.hust.soict.ict.aims.subsystems.paypal.PaymentInitiation;
@@ -43,7 +44,7 @@ public class PayByCreditCardService {
      */
     public PayPalCreateResponse createPayment() throws PaymentException {
         Order order = orderDraftContext.getDraftOrder();
-        PaymentInitiation initiation = paymentProvider.createPayment(order);
+        PaymentInitiation initiation = paymentProvider.createPayment(order.getId().toString(), order.getTotalAmount());
 
         log.info("[PayByCreditCardService] PayPal order {} created for AIMS order {}",
                 initiation.providerOrderId(), order.getId());
@@ -77,7 +78,7 @@ public class PayByCreditCardService {
         PaymentTransaction transaction = PaymentTransaction.of(
                 "PAYPAL-" + capture.captureId(),
                 Instant.now(),
-                PaymentTransaction.Method.PAYPAL,
+                PaymentMethod.PAYPAL.name(),
                 order.getTotalAmount(),   // amount kept in VND — the gateway currency stays in the subsystem
                 order
         );

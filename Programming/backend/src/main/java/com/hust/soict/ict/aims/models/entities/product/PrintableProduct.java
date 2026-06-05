@@ -41,11 +41,11 @@ public abstract class PrintableProduct extends Product {
         private LocalDate publicationDate;
         private String language;
 
-        public Builder() {
+        protected Builder() {
             super();
         }
 
-        public Builder(PrintableProduct existingProduct) {
+        protected Builder(PrintableProduct existingProduct) {
             super(existingProduct);
             this.publisher = existingProduct.publisher;
             this.publicationDate = existingProduct.publicationDate;

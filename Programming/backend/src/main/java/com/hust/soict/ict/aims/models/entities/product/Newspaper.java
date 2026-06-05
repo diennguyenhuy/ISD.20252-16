@@ -37,6 +37,11 @@ public class Newspaper extends PrintableProduct {
         return Collections.unmodifiableList(sections);
     }
 
+    @Override
+    public Builder toBuilder() {
+        return new Builder(this);
+    }
+
     private Newspaper(Builder builder) {
         super(builder);
         this.editorInChief = Objects.requireNonNull(builder.editorInChief, "Newspaper editor in chief cannot be null");

@@ -1,5 +1,6 @@
-package com.hust.soict.ict.aims.services.payment;
+package com.hust.soict.ict.aims.services.payment.vietqr;
 
+import com.hust.soict.ict.aims.services.payment.PaymentMethod;
 import com.hust.soict.ict.aims.subsystems.vietqr.IPaymentQRCode;
 import com.hust.soict.ict.aims.context.OrderDraftContext;
 import com.hust.soict.ict.aims.exceptions.PaymentException;
@@ -39,31 +40,28 @@ public class PayOrderService {
 
     private final OrderFinalization orderFinalization;
 
-    private final OrderMapper orderMapper;
-
     private final PaymentMapper paymentMapper;
 
     public QRCodeResponse generatePaymentQR() throws PaymentException {
-        return paymentMapper.toQRCodeResponse(qrPaymentController.generateQRCode(orderDraftContext.getDraftOrder()));
+        return paymentMapper.toQRCodeResponse(qrPaymentController.generateQRCode(orderDraftContext.getDraftOrder().getId().toString(), orderDraftContext.getDraftOrder().getTotalAmount()));
     }
 
     public PaymentStatusResponse checkPaymentStatus() throws PaymentException {
-        return paymentMapper.toPaymentStatusResponse(qrPaymentController.checkPaymentStatus(orderDraftContext.getDraftOrder()));
+        return paymentMapper.toPaymentStatusResponse(qrPaymentController.checkPaymentStatus(orderDraftContext.getDraftOrder().getId().toString(), orderDraftContext.getDraftOrder().getTotalAmount()));
     }
 
     public OrderResponse confirmPayment() throws PaymentException {
         Order order = orderDraftContext.getDraftOrder();
 
-        QRCodePaymentStatus paymentStatus = qrPaymentController.checkPaymentStatus(order);
+        QRCodePaymentStatus paymentStatus = qrPaymentController.checkPaymentStatus(order.getId().toString(), order.getTotalAmount());
         if (!paymentStatus.isCompleted()) {
-            throw new PaymentException(
-                    "Payment verification failed. VietQR status: " + paymentStatus.getStatus());
+            throw new PaymentException("Payment verification failed. VietQR status: " + paymentStatus.getStatus());
         }
         log.info("[PayOrderService] VietQR confirmed COMPLETED — creating PaymentTransaction");
         return orderFinalization.finalizeOrder(PaymentTransaction.of(
                 "ORD" + order.getId(),
                 Instant.now(),
-                PaymentTransaction.Method.VIETQR,
+                PaymentMethod.VIETQR.name(),
                 order.getTotalAmount(),
                 order
         ).getOrder());

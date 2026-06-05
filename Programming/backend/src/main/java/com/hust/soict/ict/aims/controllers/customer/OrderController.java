@@ -6,7 +6,7 @@ import com.hust.soict.ict.aims.dto.response.order.DeliveryResponse;
 import com.hust.soict.ict.aims.dto.response.order.InvoiceResponse;
 import com.hust.soict.ict.aims.dto.response.order.OrderDraftResponse;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
-import com.hust.soict.ict.aims.services.order.DeliveryService;
+import com.hust.soict.ict.aims.services.order.OrderQueryService;
 import com.hust.soict.ict.aims.services.order.PlaceOrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderController {
     private final PlaceOrderService placeOrderService;
-    private final DeliveryService deliveryService;
+    private final OrderQueryService orderQueryService;
 
     /**
      * POST /order - endpoint for request to place order. Return 201 if success
@@ -69,7 +69,7 @@ public class OrderController {
     public DeliveryResponse submitDeliveryInformation(
             @Valid @RequestBody DeliveryRequest deliveryRequest
     ) {
-        return deliveryService.submitDeliveryInformation(deliveryRequest);
+        return placeOrderService.submitDeliveryInformation(deliveryRequest);
     }
 
     /**
@@ -99,7 +99,7 @@ public class OrderController {
     @GetMapping("/{orderId}")
     @ResponseStatus(HttpStatus.OK)
     public OrderResponse getOrder(@PathVariable UUID orderId) {
-        return placeOrderService.getOrder(orderId);
+        return orderQueryService.getOrder(orderId);
     }
 
     /**
@@ -111,6 +111,6 @@ public class OrderController {
     @DeleteMapping("/{orderId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void cancelOrder(@PathVariable UUID orderId) throws OrderNotFoundException, IllegalStateException {
-        placeOrderService.cancelOrder(orderId);
+        orderQueryService.cancelOrder(orderId);
     }
 }
