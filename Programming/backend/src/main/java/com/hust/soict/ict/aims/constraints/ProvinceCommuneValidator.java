@@ -1,6 +1,6 @@
 package com.hust.soict.ict.aims.constraints;
 
-import com.hust.soict.ict.aims.models.dto.request.DeliveryRequest;
+import com.hust.soict.ict.aims.dto.request.DeliveryRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;

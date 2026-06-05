@@ -20,14 +20,14 @@ public class Track {
 
     /// Units: seconds s
     @Column(nullable = false)
-    private Integer length;
+    private int length;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "cd_id", nullable = false)
     @NonNull @Setter(AccessLevel.PACKAGE)
     private CD cd;
 
-    public Track(String title, int length) {
+    public Track(@NonNull String title, int length) {
         this.title = title;
         this.length = length;
     }

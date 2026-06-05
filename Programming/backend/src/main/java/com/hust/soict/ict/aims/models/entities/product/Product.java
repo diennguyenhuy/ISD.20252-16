@@ -3,8 +3,6 @@ package com.hust.soict.ict.aims.models.entities.product;
 import java.math.BigDecimal;
 import java.util.*;
 
-import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
-import com.hust.soict.ict.aims.exceptions.ProductValidationException;
 import com.hust.soict.ict.aims.models.entities.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,13 +16,7 @@ public abstract class Product extends AuditableEntity {
     public enum Status {
         ACTIVE,
         DEACTIVATED,
-        DELETED;
-
-        static final Map<Status, Set<Status>> transitions = Map.of(
-                ACTIVE, Set.of(DEACTIVATED, DELETED),
-                DEACTIVATED, Set.of(ACTIVE, DELETED),
-                DELETED, Set.of(ACTIVE)
-        );
+        DELETED
     }
 
     @Id
@@ -38,7 +30,7 @@ public abstract class Product extends AuditableEntity {
     @Column(nullable = false, length = 50)
     private String category;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     /// Unit: centimeters cm
@@ -57,17 +49,17 @@ public abstract class Product extends AuditableEntity {
     @Column(nullable = false, precision = 10, scale = 3)
     private BigDecimal weight;
 
-    @Column(unique = true, nullable = false, length = 32)
+    @Column(unique = true, nullable = false, updatable = false, length = 32)
     private String barcode;
 
-    @Column(nullable = false)
-    private Long originalValue;
+    @Column(nullable = false, updatable = false)
+    private long originalValue;
 
     @Column(nullable = false)
-    private Long currentPrice;
+    private long currentPrice;
 
     @Column(nullable = false)
-    private Integer stockQuantity;
+    private int stockQuantity;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -79,39 +71,79 @@ public abstract class Product extends AuditableEntity {
     @Version
     private Long version;
 
-    public static final double MIN_PRICE_RELATIVE = 0.3;
-    public static final double MAX_PRICE_RELATIVE = 1.5;
+    public static final int MIN_PRICE_RELATIVE_PERCENTAGE = 30;
+    public static final int MAX_PRICE_RELATIVE_PERCENTAGE = 150;
 
-    public void changePrice(long newPrice) throws ProductValidationException {
+    public void updatePrice(long newPrice) throws IllegalArgumentException {
+        if (newPrice == currentPrice) return;
+
         if (newPrice < 0) {
-            throw new ProductValidationException("New price must not be negative", "currentPrice");
+            throw new IllegalArgumentException("New price must not be negative");
         }
 
-        double minPrice = MIN_PRICE_RELATIVE * originalValue;
-        double maxPrice = MAX_PRICE_RELATIVE * originalValue;
+        long minPrice = originalValue * MIN_PRICE_RELATIVE_PERCENTAGE / 100;
+        long maxPrice = originalValue * MAX_PRICE_RELATIVE_PERCENTAGE / 100;
 
         if (newPrice < minPrice || newPrice > maxPrice) {
-            throw new ProductValidationException("Current price must be between " + (long)minPrice + "VND and " + (long)maxPrice + "VND", "currentPrice");
+            throw new IllegalArgumentException("Current price must be between " + minPrice + "VND and " + maxPrice + "VND");
         }
 
         this.currentPrice = newPrice;
     }
 
-    public void updateStatus(@NonNull Status status) throws IllegalStateException {
-        if (status == this.status) return;
+    public void updateStock(int newStock) throws IllegalStateException, IllegalArgumentException {
+        if (newStock == stockQuantity) return;
 
-        if (!Status.transitions.get(this.status).contains(status)) {
-            throw new IllegalStateException("Cannot transition product status from " + this.status + " to " + status);
+        if (newStock < 0)  {
+            throw new IllegalArgumentException("New stock " + newStock + " must not be negative");
         }
 
-        if (status == Status.DELETED && stockQuantity > 0) {
-            status = Status.DEACTIVATED;
+        if (newStock > 0 && status == Status.DELETED) {
+            throw new IllegalStateException("Deleted product should not have positive stock of " + newStock);
         }
 
-        this.status = status;
+        this.stockQuantity = newStock;
     }
 
-    protected Product(Builder<?> builder) {
+    public void delete() {
+        if (status == Status.DELETED) return;
+
+        if (stockQuantity == 0) status = Status.DELETED;
+        else deactivate();
+    }
+
+    private void deactivate() {
+        if (status == Status.DEACTIVATED) return;
+        status = Status.DEACTIVATED;
+    }
+
+    public void activate() throws IllegalStateException {
+        if (status == Status.ACTIVE) return;
+
+        if (status == Status.DELETED) {
+            throw new IllegalStateException("Cannot activate deleted product #" + id);
+        }
+
+        status = Status.ACTIVE;
+    }
+
+    protected Product(Builder<?, ?> builder) {
+        this.title = Objects.requireNonNull(builder.title, "Product title cannot be null");
+        this.category = Objects.requireNonNull(builder.category, "Product category cannot be null");
+        this.description = builder.description;
+        this.height = Objects.requireNonNull(builder.height, "Product height cannot be null");
+        this.width = Objects.requireNonNull(builder.width, "Product width cannot be null");
+        this.length = Objects.requireNonNull(builder.length, "Product length cannot be null");
+        this.weight = Objects.requireNonNull(builder.weight, "Product weight cannot be null");
+        this.barcode = Objects.requireNonNull(builder.barcode, "Product barcode cannot be null");
+        this.originalValue = Objects.requireNonNull(builder.originalValue, "Product original value cannot be null");
+        this.currentPrice = Objects.requireNonNull(builder.currentPrice,  "Product current price cannot be null");
+        this.stockQuantity = Objects.requireNonNull(builder.stockQuantity, "Product stock quantity cannot be null");
+        this.status = Objects.requireNonNull(builder.status, "Product status cannot be null");
+        this.imageURL = builder.imageURL;
+    }
+
+    protected final void apply(Builder<?, ?> builder) {
         this.title = builder.title;
         this.category = builder.category;
         this.description = builder.description;
@@ -119,15 +151,11 @@ public abstract class Product extends AuditableEntity {
         this.width = builder.width;
         this.length = builder.length;
         this.weight = builder.weight;
-        this.barcode = builder.barcode;
-        this.originalValue = builder.originalValue;
-        this.currentPrice = builder.currentPrice;
-        this.stockQuantity = builder.stockQuantity;
-        this.status = builder.status;
         this.imageURL = builder.imageURL;
     }
 
-    public static abstract class Builder<B extends Builder<B>> {
+    public static abstract class Builder<P extends Product, B extends Builder<P, B>> {
+        protected final P updatingProduct;
         private String title;
         private String category;
         private String description;
@@ -142,16 +170,38 @@ public abstract class Product extends AuditableEntity {
         private Status status = Status.ACTIVE;
         private String imageURL;
 
+        protected Builder() {
+            this.updatingProduct = null;
+        }
+
+        @SuppressWarnings("unchecked")
+        protected Builder(Product existingProduct) {
+            this.updatingProduct = (P) existingProduct;
+            this.title = existingProduct.title;
+            this.category = existingProduct.category;
+            this.description = existingProduct.description;
+            this.height = existingProduct.height;
+            this.width = existingProduct.width;
+            this.length = existingProduct.length;
+            this.weight = existingProduct.weight;
+            this.barcode = existingProduct.barcode;
+            this.originalValue = existingProduct.originalValue;
+            this.currentPrice = existingProduct.currentPrice;
+            this.stockQuantity = existingProduct.stockQuantity;
+            this.status = existingProduct.status;
+            this.imageURL = existingProduct.imageURL;
+        }
+
         protected abstract B self();
 
-        public abstract Product build() throws ProductConstructionException;
+        public abstract P build();
 
-        public B title(String title) {
+        public B title(@NonNull String title) {
             this.title = title;
             return self();
         }
 
-        public B category(String category) {
+        public B category(@NonNull String category) {
             this.category = category;
             return self();
         }
@@ -161,139 +211,59 @@ public abstract class Product extends AuditableEntity {
             return self();
         }
 
-        public B height(BigDecimal height) {
+        public B height(@NonNull BigDecimal height) {
             this.height = height;
             return self();
         }
 
-        public B width(BigDecimal width) {
+        public B width(@NonNull BigDecimal width) {
             this.width = width;
             return self();
         }
 
-        public B length(BigDecimal length) {
+        public B length(@NonNull BigDecimal length) {
             this.length = length;
             return self();
         }
 
-        public B weight(BigDecimal weight) {
+        public B weight(@NonNull BigDecimal weight) {
             this.weight = weight;
             return self();
         }
 
-        public B barcode(String barcode) {
+        public B barcode(@NonNull String barcode) {
             this.barcode = barcode;
             return self();
         }
 
-        public B originalValue(Long originalValue) {
+        public B originalValue(long originalValue) {
             this.originalValue = originalValue;
             return self();
         }
 
-        public B currentPrice(Long currentPrice) {
+        public B currentPrice(long currentPrice) {
             this.currentPrice = currentPrice;
             return self();
         }
 
-        public B stockQuantity(Integer stockQuantity) {
+        public B stockQuantity(int stockQuantity) {
             this.stockQuantity = stockQuantity;
             return self();
         }
 
-        public B status(Status status) {
+        public B status(@NonNull Status status) {
             this.status = status;
+            return self();
+        }
+
+        public B status(@NonNull String status) {
+            this.status = Status.valueOf(status.toUpperCase());
             return self();
         }
 
         public B imageURL(String imageURL) {
             this.imageURL = imageURL;
             return self();
-        }
-
-        private final Map<String, List<String>> invalidFields = new HashMap<>();
-
-        protected final void throwProductConstructionExceptionIfAny() throws ProductConstructionException {
-            if (!this.invalidFields.isEmpty()) {
-                throw new ProductConstructionException(this.invalidFields);
-            }
-        }
-
-        protected final void validate(Runnable step) {
-            try {
-                step.run();
-            } catch (ProductValidationException e) {
-                invalidFields.computeIfAbsent(e.getInvalidFieldName(), k -> new ArrayList<>()).add(e.getMessage());
-            }
-        }
-
-        protected B validate() {
-            this.validate(() -> requireNonBlank(this.title, "title"));
-            this.validate(() -> requireNonBlank(this.category, "category"));
-            this.validate(() -> requireNonBlank(this.description, "description"));
-
-            this.validate(() -> requirePositive(this.height, "height"));
-            this.validate(() -> requirePositive(this.width, "width"));
-            this.validate(() -> requirePositive(this.length, "length"));
-            this.validate(() -> requirePositive(this.weight, "weight"));
-
-            this.validate(() -> requireNonBlank(this.barcode, "barcode"));
-
-            this.validate(() -> requireNotNull(this.originalValue, "originalValue"));
-            this.validate(() -> requireNonNegative(this.originalValue, "originalValue"));
-            this.validate(() -> requireNotNull(this.currentPrice, "currentPrice"));
-            this.validate(() -> requireNonNegative(this.currentPrice, "currentPrice"));
-            this.validate(() -> requireNotNull(this.stockQuantity, "stockQuantity"));
-            this.validate(() -> requireNonNegative(this.stockQuantity, "stockQuantity"));
-
-            this.validate(() -> {
-                if (this.originalValue != null && this.currentPrice != null && this.stockQuantity != null) {
-                    double minPrice = MIN_PRICE_RELATIVE * this.originalValue;
-                    double maxPrice = MAX_PRICE_RELATIVE * this.originalValue;
-
-                    if (this.currentPrice < minPrice || this.currentPrice > maxPrice) {
-                        throw new ProductValidationException("Current price must be between " + (long)minPrice + "VND and " + (long)maxPrice + "VND", "currentPrice");
-                    }
-                }
-            });
-
-            return self();
-        }
-    }
-
-    protected static void requireNonBlank(String value, String field) throws ProductValidationException {
-        if (value == null || value.isBlank()) {
-            throw new ProductValidationException(field + " must not be blank", field);
-        }
-    }
-
-    protected static void requireNonNegative(long value, String field) throws ProductValidationException {
-        if (value < 0) {
-            throw new ProductValidationException(field + " must not be negative", field);
-        }
-    }
-
-    protected static void requirePositive(BigDecimal value, String field) throws ProductValidationException {
-        if (value.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ProductValidationException(field + " must be positive", field);
-        }
-    }
-
-    protected static void requirePositive(long value, String field) throws ProductValidationException {
-        if (value <= 0) {
-            throw new ProductValidationException(field + " must be positive", field);
-        }
-    }
-
-    protected static void requireNotEmpty(List<?> list, String field) throws ProductValidationException {
-        if (list == null || list.isEmpty()) {
-            throw new ProductValidationException(field + " must not be empty", field);
-        }
-    }
-
-    protected static void requireNotNull(Object value, String field) throws ProductValidationException {
-        if (value == null) {
-            throw new ProductValidationException(field + " must not be null", field);
         }
     }
 }

@@ -1,14 +1,12 @@
 package com.hust.soict.ict.aims.models.entities.product;
 
-import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "book")
@@ -29,7 +27,7 @@ public class Book extends PrintableProduct {
     private List<String> authors = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 9)
+    @Column(nullable = false, updatable = false, length = 9)
     private CoverType coverType;
 
     private Integer numberOfPages;
@@ -41,20 +39,38 @@ public class Book extends PrintableProduct {
         return Collections.unmodifiableList(authors);
     }
 
-    private Book(Builder builder) throws ProductConstructionException {
+    private Book(Builder builder) {
         super(builder);
-
-        this.authors = new ArrayList<>(builder.authors);
+        this.authors = List.copyOf(builder.authors);
+        this.coverType = Objects.requireNonNull(builder.coverType, "Book cover type cannot be null");
         this.numberOfPages = builder.numberOfPages;
         this.genre = builder.genre;
-        this.coverType = builder.coverType;
     }
 
-    public static class Builder extends PrintableProduct.Builder<Builder> {
+    private void apply(Builder builder) {
+        super.apply(builder);
+        this.authors = List.copyOf(builder.authors);
+        this.numberOfPages = builder.numberOfPages;
+        this.genre = builder.genre;
+    }
+
+    public static class Builder extends PrintableProduct.Builder<Book, Builder> {
         private List<String> authors = new ArrayList<>();
         private CoverType coverType;
-        private int numberOfPages;
+        private Integer numberOfPages;
         private String genre;
+
+        public Builder() {
+            super();
+        }
+
+        public Builder(Book existingBook) {
+            super(existingBook);
+            this.authors = existingBook.authors;
+            this.coverType = existingBook.coverType;
+            this.numberOfPages = existingBook.numberOfPages;
+            this.genre = existingBook.genre;
+        }
 
         @Override
         protected Builder self() {
@@ -62,18 +78,35 @@ public class Book extends PrintableProduct {
         }
 
         @Override
-        public Book build() throws ProductConstructionException {
-            this.validate().throwProductConstructionExceptionIfAny();
-            return new Book(this);
+        public Book build() {
+            if (updatingProduct != null) {
+                updatingProduct.apply(this);
+                return updatingProduct;
+            } else return new Book(this);
         }
 
-        public Builder authors(List<String> authors) {
-            this.authors = authors;
+        public Builder author(@NonNull String author) {
+            this.authors.add(author);
             return this;
         }
 
-        public Builder coverType(CoverType coverType) {
+        public Builder authors(@NonNull Collection<String> authors) {
+            this.authors = List.copyOf(authors);
+            return this;
+        }
+
+        public Builder authors(@NonNull String... authors) {
+            this.authors = List.of(authors);
+            return this;
+        }
+
+        public Builder coverType(@NonNull CoverType coverType) {
             this.coverType = coverType;
+            return this;
+        }
+
+        public Builder coverType(@NonNull String coverType) {
+            this.coverType = CoverType.valueOf(coverType.toUpperCase());
             return this;
         }
 
@@ -84,15 +117,6 @@ public class Book extends PrintableProduct {
 
         public Builder genre(String genre) {
             this.genre = genre;
-            return this;
-        }
-
-        @Override
-        protected Builder validate() {
-            super.validate();
-            this.validate(() -> requireNotEmpty(this.authors, "authors"));
-            this.validate(() -> requireNotNull(this.coverType, "coverType"));
-
             return this;
         }
     }

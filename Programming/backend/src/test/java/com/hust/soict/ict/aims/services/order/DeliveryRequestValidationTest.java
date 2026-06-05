@@ -1,7 +1,7 @@
 package com.hust.soict.ict.aims.services.order;
 
 import com.hust.soict.ict.aims.constraints.LocationProvider;
-import com.hust.soict.ict.aims.models.dto.request.DeliveryRequest;
+import com.hust.soict.ict.aims.dto.request.DeliveryRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

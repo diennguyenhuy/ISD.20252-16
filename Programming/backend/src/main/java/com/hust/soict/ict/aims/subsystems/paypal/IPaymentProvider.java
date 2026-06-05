@@ -3,25 +3,17 @@ package com.hust.soict.ict.aims.subsystems.paypal;
 import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 
-/**
- * Facade boundary for any external "card / wallet" payment provider.
- *
- * <p>Design notes
- * <ul>
- *   <li><b>Pattern:</b> Facade. This is the <i>only</i> type the AIMS core
- *       (services / controllers) is allowed to know about. Everything below it
- *       — OAuth token retrieval, PayPal v2 Orders JSON, currency conversion,
- *       link parsing — is hidden inside the {@code subsystems.paypal} package.</li>
- *   <li><b>Cohesion:</b> Functional — exposes exactly the two operations the
- *       PayPal "create then capture" redirect flow needs.</li>
- *   <li><b>Coupling:</b> DATA. Callers exchange only provider-agnostic value
- *       objects ({@link PaymentInitiation}, {@link PaymentCapture}) and the
- *       domain {@link Order} aggregate. No PayPal SDK type ever leaks out.</li>
- *   <li><b>SOLID:</b> DIP — {@code PayByCreditCardService} depends on this
- *       abstraction, not on the concrete {@code PayPalGatewayFacade}. A future
- *       Stripe/Momo provider can implement the same interface with zero changes
- *       to the service layer (OCP).</li>
- * </ul>
+/*
+ * [SOLID DIP: ownership/packaging improvement, not a hard violation][cite: 1]
+ * Principle: Dependency Inversion (D) "Ownership Inversion"[cite: 1]
+ * Why: This is the abstraction the AIMS core (PayByCreditCardService) depends on,[cite: 1]
+ *      yet it lives INSIDE the low-level subsystems.paypal package. Per ownership[cite: 1]
+ *      inversion, the client/core layer should OWN the contract, not the low-level[cite: 1]
+ *      provider. As written, the core must import from subsystems.paypal, and a[cite: 1]
+ *      future Stripe/Momo subsystem would also have to import its contract from th[cite: 1]
+ *      PayPal package.[cite: 1]
+ * Proposed Solution: Move IPaymentProvider + PaymentInitiation + PaymentCapture ir[cite: 1]
+ *      a core-owned package (e.g. .payment.port). PayPal then depends inward on[cite: 1]
  */
 public interface IPaymentProvider {
 

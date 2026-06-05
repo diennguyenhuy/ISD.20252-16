@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS product(
 	id 				UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	title			VARCHAR(255) NOT NULL,
 	category		VARCHAR(50) NOT NULL,
-	description		TEXT NOT NULL,
+	description		TEXT,
 	height			NUMERIC(10, 2) NOT NULL, --cm
 	width			NUMERIC(10, 2) NOT NULL, --cm
 	length			NUMERIC(10, 2) NOT NULL, --cm

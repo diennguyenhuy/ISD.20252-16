@@ -1,39 +1,9 @@
 package com.hust.soict.ict.aims.services.productmanagement;
 
-import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
-import com.hust.soict.ict.aims.exceptions.ProductValidationException;
-import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
-import com.hust.soict.ict.aims.mapper.ProductMapper;
-import com.hust.soict.ict.aims.models.dto.request.CreateBookRequest;
-import com.hust.soict.ict.aims.models.dto.request.UpdateBookRequest;
-import com.hust.soict.ict.aims.models.dto.response.product.BookDetail;
-import com.hust.soict.ict.aims.models.dto.response.product.ProductDetail;
-import com.hust.soict.ict.aims.models.entities.product.Book;
-import com.hust.soict.ict.aims.models.entities.product.Product;
-import com.hust.soict.ict.aims.models.entities.product.Product.Status;
-import com.hust.soict.ict.aims.models.entities.product.*;
-import com.hust.soict.ict.aims.repositories.ProductRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductManagementServiceTest {

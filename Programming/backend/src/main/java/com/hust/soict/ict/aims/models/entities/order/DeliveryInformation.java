@@ -47,6 +47,10 @@ public class DeliveryInformation {
     @Column(length = 50)
     private String deliveryMethod;
 
+    public boolean isHanoiOrHoChiMinh() {
+        return province.equalsIgnoreCase("Thành phố Hà Nội") || province.equalsIgnoreCase("Thành phố Hồ Chí Minh");
+    }
+
     public static DeliveryInformation of(
             String customerName,
             String customerEmail,

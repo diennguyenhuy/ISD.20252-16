@@ -1,19 +1,15 @@
 package com.hust.soict.ict.aims.subsystems.vietqr;
+
+import lombok.Getter;
+import lombok.Setter;
+
 /*
  * + Cohesion level: FUNCTIONAL
  * + Coupling level with VietQRController: DATA
- * + Reason: QRCodePaymentStatus has one clear responsibility: representing and
- *           interpreting the payment status returned from VietQR. Its fields
- *           status and message, together with methods such as isCompleted(),
- *           isPending(), isFailed(), isCancelled(), and parseResponseString(),
- *           all support the same purpose of checking payment result status.
- *
- *           The coupling with VietQRController is DATA coupling because
- *           VietQRController only needs to receive or use simple status data,
- *           such as status and message, through this object or its getter methods.
- *           No control flags are passed, and QRCodePaymentStatus does not control
- *           the internal logic of VietQRController.
+ * + Reason: VietQRController only reads status and message via getters or
+ *   isCompleted(); no control flags or internal parsing logic is shared.
  */
+@Getter @Setter
 public class QRCodePaymentStatus {
     private String status;    // "PENDING", "COMPLETED", "FAILED", "CANCELLED"
     private String message;   // Additional message about payment status
@@ -24,14 +20,7 @@ public class QRCodePaymentStatus {
         this.status = status;
         this.message = message;
     }
-    
-    // Getters and Setters
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
-    
+
     // Helper methods
     public boolean isCompleted() {
         return "COMPLETED".equalsIgnoreCase(status);
