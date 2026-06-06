@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Past;
@@ -20,5 +21,6 @@ public class CreateCDRequest extends CreateProductRequest {
     @NotBlank(message = "Record label cannot be blank")
     private String recordLabel;
     @NotEmpty(message = "Tracks cannot be empty")
-    private List<TrackRequest> tracks;
+    @Valid
+    private List<CreateTrackRequest> tracks;
 }

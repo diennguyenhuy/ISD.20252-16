@@ -4,7 +4,7 @@ import com.hust.soict.ict.aims.context.CartContext;
 import com.hust.soict.ict.aims.context.OrderDraftContext;
 import com.hust.soict.ict.aims.services.notification.NotificationMethod;
 import com.hust.soict.ict.aims.services.notification.NotificationService;
-import com.hust.soict.ict.aims.services.notification.email.OrderConfirmationEmail;
+import com.hust.soict.ict.aims.services.notification.email.OrderConfirmationEmailMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -34,6 +34,6 @@ public class PlaceOrderSuccessListener {
     void handle(OrderSuccessEvent event) {
         cartContext.getOrCreateCart().clear();
         orderDraftContext.clearDraftOrder();
-        notificationService.send(NotificationMethod.EMAIL, new OrderConfirmationEmail(event.order()));
+        notificationService.send(NotificationMethod.EMAIL, OrderConfirmationEmailMessage.class, event.order());
     }
 }

@@ -22,7 +22,8 @@ import java.util.Objects;
  */
 @Getter
 public class CartItem {
-    private final Product product;
+    @Setter(AccessLevel.PACKAGE)
+    private Product product;
     @Setter(AccessLevel.PACKAGE)
     private int quantity;
 
@@ -46,6 +47,10 @@ public class CartItem {
             return this.product.getId().equals(that.product.getId());
         }
         return false;
+    }
+
+    public boolean isStockAvailable() {
+        return product.getStockQuantity() >= quantity;
     }
 
     @Override

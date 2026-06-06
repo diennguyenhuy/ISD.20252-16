@@ -16,10 +16,12 @@ public class Track {
     private UUID id;
 
     @Column(nullable = false)
+    @NonNull @Setter
     private String title;
 
     /// Units: seconds s
     @Column(nullable = false)
+    @Setter
     private int length;
 
     @ManyToOne(optional = false)

@@ -51,11 +51,6 @@ public class DVD extends Product {
         return Collections.unmodifiableList(subtitles);
     }
 
-    @Override
-    public Builder toBuilder() {
-        return new Builder(this);
-    }
-
     private DVD(Builder builder) {
         super(builder);
         this.releaseDate = builder.releaseDate;
@@ -65,17 +60,22 @@ public class DVD extends Product {
         this.runtime = Objects.requireNonNull(builder.runtime, "DVD Runtime cannot be null");
         this.studio = Objects.requireNonNull(builder.studio, "DVD Studio cannot be null");
         this.language = Objects.requireNonNull(builder.language, "DVD Language cannot be null");
-        this.subtitles = List.copyOf(builder.subtitles);
+        this.subtitles = List.copyOf(Objects.requireNonNull(builder.subtitles, "DVD Subtitles cannot be null"));
+    }
+
+    @Override
+    public Builder toBuilder() {
+        return new Builder(this);
     }
 
     private void apply(Builder builder) {
         super.apply(builder);
-        this.genre = builder.genre;
-        this.director = builder.director;
-        this.runtime = builder.runtime;
-        this.studio = builder.studio;
-        this.language = builder.language;
-        this.subtitles = builder.subtitles;
+        Optional.ofNullable(builder.genre).ifPresent(v -> this.genre = v);
+        Optional.ofNullable(builder.director).ifPresent(v -> this.director = v);
+        Optional.ofNullable(builder.runtime).ifPresent(v -> this.runtime = v);
+        Optional.ofNullable(builder.studio).ifPresent(v -> this.studio = v);
+        Optional.ofNullable(builder.language).ifPresent(v -> this.language = v);
+        Optional.ofNullable(builder.subtitles).ifPresent(v -> this.subtitles = List.copyOf(v));
     }
 
     public static class Builder extends Product.Builder<DVD, Builder> {
@@ -86,22 +86,14 @@ public class DVD extends Product {
         private Integer runtime;
         private String studio;
         private String language;
-        private List<String> subtitles = new ArrayList<>();
+        private List<String> subtitles;
 
         public Builder() {
             super();
         }
 
-        private Builder(DVD existingDVD) {
-            super(existingDVD);
-            this.releaseDate = existingDVD.releaseDate;
-            this.genre = existingDVD.genre;
-            this.discType = existingDVD.discType;
-            this.director = existingDVD.director;
-            this.runtime = existingDVD.runtime;
-            this.studio = existingDVD.studio;
-            this.language = existingDVD.language;
-            this.subtitles = existingDVD.subtitles;
+        private Builder(DVD updatingDVD) {
+            super(updatingDVD);
         }
 
         @Override
@@ -127,17 +119,17 @@ public class DVD extends Product {
             return this;
         }
 
-        public Builder discType(@NonNull DiscType discType) {
+        public Builder discType(DiscType discType) {
             this.discType = discType;
             return this;
         }
 
-        public Builder discType(@NonNull String discType) {
+        public Builder discType(String discType) {
             this.discType = DiscType.valueOf(discType.toUpperCase());
             return this;
         }
 
-        public Builder director(@NonNull String director) {
+        public Builder director(String director) {
             this.director = director;
             return this;
         }
@@ -147,28 +139,23 @@ public class DVD extends Product {
             return this;
         }
 
-        public Builder studio(@NonNull String studio) {
+        public Builder studio(String studio) {
             this.studio = studio;
             return this;
         }
 
-        public Builder language(@NonNull String language) {
+        public Builder language(String language) {
             this.language = language;
             return this;
         }
 
-        public Builder subtitle(@NonNull String subtitle) {
-            this.subtitles.add(subtitle);
+        public Builder subtitles(Collection<String> subtitles) {
+            this.subtitles = List.copyOf(subtitles);
             return this;
         }
 
-        public Builder subtitles(@NonNull Collection<String> subtitles) {
-            this.subtitles.addAll(subtitles);
-            return this;
-        }
-
-        public Builder subtitles(@NonNull String... subtitles) {
-            Collections.addAll(this.subtitles, subtitles);
+        public Builder subtitles(String... subtitles) {
+            this.subtitles = List.of(subtitles);
             return this;
         }
     }

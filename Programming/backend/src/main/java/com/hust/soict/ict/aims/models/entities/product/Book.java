@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 import java.util.*;
 
@@ -39,28 +38,28 @@ public class Book extends PrintableProduct {
         return Collections.unmodifiableList(authors);
     }
 
-    @Override
-    public Builder toBuilder() {
-        return new Builder(this);
-    }
-
     private Book(Builder builder) {
         super(builder);
-        this.authors = List.copyOf(builder.authors);
+        this.authors = List.copyOf(Objects.requireNonNull(builder.authors, "List of authors cannot be null"));
         this.coverType = Objects.requireNonNull(builder.coverType, "Book cover type cannot be null");
         this.numberOfPages = builder.numberOfPages;
         this.genre = builder.genre;
     }
 
+    @Override
+    public Builder toBuilder() {
+        return new Builder(this);
+    }
+
     private void apply(Builder builder) {
         super.apply(builder);
-        this.authors = List.copyOf(builder.authors);
-        this.numberOfPages = builder.numberOfPages;
-        this.genre = builder.genre;
+        Optional.ofNullable(builder.authors).ifPresent(v -> this.authors = List.copyOf(v));
+        Optional.ofNullable(builder.numberOfPages).ifPresent(v -> this.numberOfPages = v);
+        Optional.ofNullable(builder.genre).ifPresent(v -> this.genre = v);
     }
 
     public static class Builder extends PrintableProduct.Builder<Book, Builder> {
-        private List<String> authors = new ArrayList<>();
+        private List<String> authors;
         private CoverType coverType;
         private Integer numberOfPages;
         private String genre;
@@ -69,12 +68,8 @@ public class Book extends PrintableProduct {
             super();
         }
 
-        private Builder(Book existingBook) {
-            super(existingBook);
-            this.authors = existingBook.authors;
-            this.coverType = existingBook.coverType;
-            this.numberOfPages = existingBook.numberOfPages;
-            this.genre = existingBook.genre;
+        private Builder(Book updatingBook) {
+            super(updatingBook);
         }
 
         @Override
@@ -90,27 +85,22 @@ public class Book extends PrintableProduct {
             } else return new Book(this);
         }
 
-        public Builder author(@NonNull String author) {
-            this.authors.add(author);
-            return this;
-        }
-
-        public Builder authors(@NonNull Collection<String> authors) {
+        public Builder authors(Collection<String> authors) {
             this.authors = List.copyOf(authors);
             return this;
         }
 
-        public Builder authors(@NonNull String... authors) {
+        public Builder authors(String... authors) {
             this.authors = List.of(authors);
             return this;
         }
 
-        public Builder coverType(@NonNull CoverType coverType) {
+        public Builder coverType(CoverType coverType) {
             this.coverType = coverType;
             return this;
         }
 
-        public Builder coverType(@NonNull String coverType) {
+        public Builder coverType(String coverType) {
             this.coverType = CoverType.valueOf(coverType.toUpperCase());
             return this;
         }

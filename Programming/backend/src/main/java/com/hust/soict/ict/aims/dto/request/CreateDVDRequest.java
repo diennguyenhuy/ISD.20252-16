@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.dto.request;
 
+import com.hust.soict.ict.aims.constraints.NullOrNotBlank;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,9 +12,9 @@ import java.util.List;
 public class CreateDVDRequest extends CreateProductRequest {
     @Past(message = "Release date must be in the past compared to now")
     private LocalDate releaseDate;
+    @NullOrNotBlank(message = "Genre must not be blank if provided")
     private String genre;
-
-    @NotNull(message = "Disc type is required for DVD")
+    @NotBlank(message = "Disc type is required for DVD")
     private String discType;
     @NotBlank(message = "Director cannot be blank")
     private String director;

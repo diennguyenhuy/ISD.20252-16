@@ -2,18 +2,19 @@ package com.hust.soict.ict.aims.services.notification.email;
 
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
+import com.hust.soict.ict.aims.services.notification.NotificationMessage;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-@RequiredArgsConstructor
-public class OrderConfirmationEmail implements EmailNotificationMessage {
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+public class OrderConfirmationEmailMessage implements EmailMessage {
     private final Order order;
-
-    @Value("${app.frontend.url}")
-    private String frontendUrl;
+    private final String frontendUrl;
 
     @Override
     public String subject() {
@@ -154,5 +155,21 @@ public class OrderConfirmationEmail implements EmailNotificationMessage {
         sb.append("</div></body></html>");
 
         return sb.toString();
+    }
+
+    @Component
+    public static class Factory extends EmailMessage.Factory<OrderConfirmationEmailMessage, Order> {
+        @Value("${app.frontend.url}")
+        private String frontendUrl;
+
+        @Override
+        public Class<OrderConfirmationEmailMessage> messageType() {
+            return OrderConfirmationEmailMessage.class;
+        }
+
+        @Override
+        public OrderConfirmationEmailMessage createMessage(Order payload) {
+            return new OrderConfirmationEmailMessage(payload, frontendUrl);
+        }
     }
 }

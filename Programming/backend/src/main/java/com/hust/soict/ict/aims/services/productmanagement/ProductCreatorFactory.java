@@ -21,8 +21,8 @@ public class ProductCreatorFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public <P extends Product, C extends CreateProductRequest>
-    ProductCreator<P, C> getCreator(C request) {
-        return (ProductCreator<P, C>) productCreators.get(request.getClass());
+    public <P extends Product, C extends CreateProductRequest> P createProduct(C request) {
+        ProductCreator<P, C> creator = (ProductCreator<P, C>) productCreators.get(request.getClass());
+        return creator.createFrom(request);
     }
 }

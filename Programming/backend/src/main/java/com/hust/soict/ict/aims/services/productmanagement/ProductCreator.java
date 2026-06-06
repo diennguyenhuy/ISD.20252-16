@@ -20,7 +20,6 @@ public interface ProductCreator<P extends Product, C extends CreateProductReques
                 .originalValue(request.getOriginalValue())
                 .currentPrice(request.getCurrentPrice())
                 .stockQuantity(request.getStockQuantity())
-                .status(Product.Status.ACTIVE)
                 .imageURL(request.getImageURL());
     }
 }

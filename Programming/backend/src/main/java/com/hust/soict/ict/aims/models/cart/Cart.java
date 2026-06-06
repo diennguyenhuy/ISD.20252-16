@@ -73,9 +73,9 @@ public class Cart {
         items.remove(productId);
     }
 
-    public void replaceProductItemWith(@NonNull Product product) {
+    public void synchronizeProduct(@NonNull Product product) {
         CartItem item = Optional.ofNullable(items.get(product.getId())).orElseThrow(() -> new NoSuchElementException("No product with id " + product.getId() + " in cart"));
-        items.replace(item.getProduct().getId(), new CartItem(product, item.getQuantity()));
+        item.setProduct(product);
     }
 
     public void clear() {

@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 @Entity
 @Table(name = "newspaper")
@@ -37,25 +36,25 @@ public class Newspaper extends PrintableProduct {
         return Collections.unmodifiableList(sections);
     }
 
-    @Override
-    public Builder toBuilder() {
-        return new Builder(this);
-    }
-
     private Newspaper(Builder builder) {
         super(builder);
         this.editorInChief = Objects.requireNonNull(builder.editorInChief, "Newspaper editor in chief cannot be null");
         this.issueNumber = builder.issueNumber;
         this.publicationFrequency = builder.publicationFrequency;
         this.ISSN = builder.ISSN;
-        this.sections = List.copyOf(builder.sections);
+        this.sections = builder.sections == null ? List.of() : List.copyOf(builder.sections);
+    }
+
+    @Override
+    public Builder toBuilder() {
+        return new Builder(this);
     }
 
     private void apply(Builder builder) {
         super.apply(builder);
-        this.editorInChief = builder.editorInChief;
-        this.publicationFrequency = builder.publicationFrequency;
-        this.sections = List.copyOf(builder.sections);
+        Optional.ofNullable(builder.editorInChief).ifPresent(v -> this.editorInChief = v);
+        Optional.ofNullable(builder.publicationFrequency).ifPresent(v -> this.publicationFrequency = v);
+        Optional.ofNullable(builder.sections).ifPresent(v -> this.sections = List.copyOf(v));
     }
 
     public static class Builder extends PrintableProduct.Builder<Newspaper, Builder> {
@@ -63,19 +62,14 @@ public class Newspaper extends PrintableProduct {
         private String issueNumber;
         private String publicationFrequency;
         private String ISSN;
-        private List<String> sections = new ArrayList<>();
+        private List<String> sections;
 
         public Builder() {
             super();
         }
 
-        public Builder(Newspaper existingNewspaper) {
-            super(existingNewspaper);
-            this.editorInChief = existingNewspaper.editorInChief;
-            this.issueNumber = existingNewspaper.issueNumber;
-            this.publicationFrequency = existingNewspaper.publicationFrequency;
-            this.ISSN = existingNewspaper.ISSN;
-            this.sections = existingNewspaper.sections;
+        public Builder(Newspaper updatingNewspaper) {
+            super(updatingNewspaper);
         }
 
         @Override
@@ -91,7 +85,7 @@ public class Newspaper extends PrintableProduct {
             } else return new Newspaper(this);
         }
 
-        public Builder editorInChief(@NonNull String editorInChief) {
+        public Builder editorInChief(String editorInChief) {
             this.editorInChief = editorInChief;
             return this;
         }
@@ -108,11 +102,6 @@ public class Newspaper extends PrintableProduct {
 
         public Builder ISSN(String ISSN) {
             this.ISSN = ISSN;
-            return this;
-        }
-
-        public Builder section(String section) {
-            this.sections.add(section);
             return this;
         }
 

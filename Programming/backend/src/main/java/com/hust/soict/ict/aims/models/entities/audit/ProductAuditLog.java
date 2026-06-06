@@ -30,10 +30,10 @@ public abstract class ProductAuditLog extends AuditLog {
     @Column(updatable = false, nullable = false)
     protected String productTitle;
 
-    protected ProductAuditLog(User managerUser, Product product) {
+    protected ProductAuditLog(User manager, Product product) {
         super();
-        this.manager = managerUser;
-        this.managerUsername = managerUser.getUsername();
+        this.manager = manager;
+        this.managerUsername = manager.getUsername();
         this.product = product;
         this.productTitle = product.getTitle();
     }

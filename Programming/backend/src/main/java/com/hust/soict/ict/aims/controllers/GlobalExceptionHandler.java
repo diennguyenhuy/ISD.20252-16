@@ -78,9 +78,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotEnoughStockException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, Object> handle(NotEnoughStockException e) {
-        return Map.of(
-                "message", e.getMessage(),
-                "details", e.getInsufficientQuantity()
+        return Map.ofEntries(
+                Map.entry("message", e.getMessage()),
+                Map.entry("details", Map.of(
+                        Map.entry("insufficient", e.getInsufficientQuantity()),
+                        Map.entry("missing", e.getMissingProducts())
+                ))
         );
     }
 

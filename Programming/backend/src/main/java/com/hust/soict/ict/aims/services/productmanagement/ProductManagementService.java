@@ -62,7 +62,7 @@ public class ProductManagementService {
             throw new ProductValidationException("Barcode already exists: " + dto.getBarcode(), "barcode");
         }
 
-        Product product = productCreatorFactory.getCreator(dto).createFrom(dto);
+        Product product = productCreatorFactory.createProduct(dto);
         Product savedProduct = productRepo.save(product);
 
         log.info("[CREATE SUCCESS] Successfully saved new product. ID: {}", savedProduct.getId());
@@ -82,7 +82,7 @@ public class ProductManagementService {
             product.updatePrice(dto.getCurrentPrice()); // Validate price 30% - 150%
         }
 
-        Product updatedProduct = productUpdaterFactory.getUpdater(dto).updateFrom(product, dto);
+        Product updatedProduct = productUpdaterFactory.updateProduct(product, dto);
         Product savedProduct = productRepo.save(updatedProduct);
         log.info("[UPDATE SUCCESS] Successfully updated product. ID: {}, Current Price: {}", savedProduct.getId(), savedProduct.getCurrentPrice());
 

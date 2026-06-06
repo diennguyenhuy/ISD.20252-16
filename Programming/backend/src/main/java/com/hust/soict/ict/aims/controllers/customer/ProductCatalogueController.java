@@ -4,6 +4,9 @@ import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
 import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.services.customer.ProductCatalogueService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -26,6 +29,7 @@ public class ProductCatalogueController {
      * <br>Fetch 20 random products
      * @return the list of summaries of the products
      */
+    @Operation(summary = "Get 20 random products")
     @GetMapping("/initiate")
     public List<ProductSummary> get20RandomProducts() {
         return productCatalogueService.get20RandomProducts();
@@ -41,6 +45,7 @@ public class ProductCatalogueController {
      * @param pageable page number
      * @return the list of summaries of the products
      */
+    @Operation(summary = "Filter products by title, category, min price, max price")
     @GetMapping
     public List<ProductSummary> filterProductsBy(
             @RequestParam(required = false) String title,
@@ -59,6 +64,11 @@ public class ProductCatalogueController {
      * @return the details of the product
      * @throws ProductNotFoundException if product does not exist
      */
+    @Operation(summary = "Get product by ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Product found"),
+            @ApiResponse(responseCode = "404", description = "Product not found")
+    })
     @GetMapping("/{id}")
     public ProductDetail getProductById(@PathVariable UUID id) throws ProductNotFoundException {
         return productCatalogueService.getProductById(id);

@@ -1,19 +1,22 @@
 package com.hust.soict.ict.aims.dto.request;
 
+import com.hust.soict.ict.aims.constraints.NullOrNotBlank;
+import com.hust.soict.ict.aims.constraints.NullOrNotEmpty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.time.LocalDate;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class UpdateNewspaperRequest extends UpdateProductRequest {
+    @NullOrNotBlank(message = "Publisher must not be blank if provided")
     private String publisher;
-    private LocalDate publicationDate;
+    @NullOrNotBlank(message = "Language must not be blank if provided")
     private String language;
+    @NullOrNotBlank(message = "Editor-in-chief must not be blank if provided")
     private String editorInChief;
-    private String issueNumber;
+    @NullOrNotBlank(message = "Publication frequency must not be blank if provided")
     private String publicationFrequency;
-    private String ISSN;
+    @NullOrNotEmpty(message = "Sections must not be empty if provided")
     private List<String> sections;
 }

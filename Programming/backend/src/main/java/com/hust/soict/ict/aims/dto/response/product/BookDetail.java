@@ -15,7 +15,7 @@ public class BookDetail extends ProductDetail {
     private String language;
     private List<String> authors;
     private String coverType;
-    private int numberOfPages;
+    private Integer numberOfPages;
     private String genre;
 
     public BookDetail() {

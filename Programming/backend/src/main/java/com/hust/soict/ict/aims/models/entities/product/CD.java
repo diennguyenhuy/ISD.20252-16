@@ -42,9 +42,31 @@ public class CD extends Product {
         return Collections.unmodifiableList(tracks);
     }
 
-    public void addTrack(@NonNull Track track) throws IllegalArgumentException {
+    public void addTrack(@NonNull Track track) {
         track.setCd(this);
         tracks.add(track);
+    }
+
+    public Track getTrack(UUID trackId) {
+        for (Track track : tracks) {
+            if (track.getId().equals(trackId)) {
+                return track;
+            }
+        }
+        return null;
+    }
+
+    public void removeTrack(UUID trackId) {
+        tracks.removeIf(track -> track.getId().equals(trackId));
+    }
+
+    private CD(Builder builder) {
+        super(builder);
+        this.releaseDate = builder.releaseDate;
+        this.genre = Objects.requireNonNull(builder.genre, "CD genre cannot be null");
+        this.artists = List.copyOf(Objects.requireNonNull(builder.artists, "List of artists cannot be null"));
+        this.recordLabel = Objects.requireNonNull(builder.recordLabel, "CD record label cannot be null");
+        this.tracks = List.copyOf(Objects.requireNonNull(builder.tracks, "List of tracks cannot be null"));
     }
 
     @Override
@@ -52,41 +74,26 @@ public class CD extends Product {
         return new Builder(this);
     }
 
-    private CD(Builder builder) {
-        super(builder);
-        this.releaseDate = builder.releaseDate;
-        this.genre = Objects.requireNonNull(builder.genre, "CD genre cannot be null");
-        this.artists = List.copyOf(builder.artists);
-        this.recordLabel = builder.recordLabel;
-        this.tracks = List.copyOf(builder.tracks);
-    }
-
     private void apply(Builder builder) {
         super.apply(builder);
-        this.genre = builder.genre;
-        this.artists = List.copyOf(builder.artists);
-        this.recordLabel = builder.recordLabel;
-        builder.tracks.forEach(this::addTrack);
+        Optional.ofNullable(builder.genre).ifPresent(v -> this.genre = v);
+        Optional.ofNullable(builder.artists).ifPresent(v -> this.artists = List.copyOf(v));
+        Optional.ofNullable(builder.recordLabel).ifPresent(v -> this.recordLabel = v);
     }
 
     public static class Builder extends Product.Builder<CD, Builder> {
         private LocalDate releaseDate;
         private String genre;
-        private List<String> artists = new ArrayList<>();
+        private List<String> artists;
         private String recordLabel;
-        private List<Track> tracks = new ArrayList<>();
+        private List<Track> tracks;
 
         public Builder() {
             super();
         }
 
-        private Builder(CD existingCD) {
-            super(existingCD);
-            this.releaseDate = existingCD.releaseDate;
-            this.genre = existingCD.genre;
-            this.artists = existingCD.artists;
-            this.recordLabel = existingCD.recordLabel;
-            this.tracks = existingCD.tracks;
+        private Builder(CD updatingCD) {
+            super(updatingCD);
         }
 
         @Override
@@ -107,42 +114,32 @@ public class CD extends Product {
             return this;
         }
 
-        public Builder genre(@NonNull String genre) {
+        public Builder genre(String genre) {
             this.genre = genre;
             return this;
         }
 
-        public Builder artist(@NonNull String artist) {
-            this.artists.add(artist);
-            return this;
-        }
-
-        public Builder artists(@NonNull Collection<String> artists) {
+        public Builder artists(Collection<String> artists) {
             this.artists = List.copyOf(artists);
             return this;
         }
 
-        public Builder artists(@NonNull String... artists) {
+        public Builder artists(String... artists) {
             this.artists = List.of(artists);
             return this;
         }
 
-        public Builder recordLabel(@NonNull String recordLabel) {
+        public Builder recordLabel(String recordLabel) {
             this.recordLabel = recordLabel;
             return this;
         }
 
-        public Builder track(@NonNull Track track) {
-            this.tracks.add(track);
-            return this;
-        }
-
-        public Builder tracks(@NonNull Collection<Track> tracks) {
+        public Builder tracks(Collection<Track> tracks) {
             this.tracks = List.copyOf(tracks);
             return this;
         }
 
-        public Builder tracks(@NonNull Track... tracks) {
+        public Builder tracks(Track... tracks) {
             this.tracks = List.of(tracks);
             return this;
         }

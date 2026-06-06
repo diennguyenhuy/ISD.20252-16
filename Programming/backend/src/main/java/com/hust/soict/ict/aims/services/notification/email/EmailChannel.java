@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Component
 @Slf4j
-public abstract class EmailNotificationChannel<M extends EmailNotificationMessage> implements NotificationChannel<M> {
-    protected final JavaMailSender mailSender;
+public class EmailChannel implements NotificationChannel<EmailMessage> {
+    private final JavaMailSender mailSender;
 
     @Value("${spring.mail.username}")
     protected String from;
@@ -29,8 +29,8 @@ public abstract class EmailNotificationChannel<M extends EmailNotificationMessag
     }
 
     @Override
-    public final void send(M message) {
-        log.debug("Sending {} email...", notificationName());
+    public void send(EmailMessage message) {
+        log.debug("Sending {} email...", notificationName(message));
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
@@ -39,7 +39,7 @@ public abstract class EmailNotificationChannel<M extends EmailNotificationMessag
             helper.setSubject(message.subject());
             helper.setText(message.body(), true);
             mailSender.send(mimeMessage);
-            log.debug("Successfully sent {} email!", notificationName());
+            log.debug("Successfully sent {} email!", notificationName(message));
         } catch (MessagingException e) {
             log.warn("Multipart creation failed: {}", e.getMessage());
         } catch (MailAuthenticationException e) {
@@ -51,5 +51,7 @@ public abstract class EmailNotificationChannel<M extends EmailNotificationMessag
         }
     }
 
-    protected abstract String notificationName();
+    private String notificationName(EmailMessage em) {
+        return em.getClass().getSimpleName().replaceAll("([A-Z])", " $1").trim().toLowerCase();
+    }
 }

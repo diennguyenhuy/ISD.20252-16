@@ -2,13 +2,13 @@ package com.hust.soict.ict.aims.models.entities.product;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Optional;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 @MappedSuperclass
 @Getter
@@ -32,8 +32,8 @@ public abstract class PrintableProduct extends Product {
 
     protected final void apply(Builder<?, ?> builder) {
         super.apply(builder);
-        this.publisher = builder.publisher;
-        this.language = builder.language;
+        Optional.ofNullable(builder.publisher).ifPresent(v -> this.publisher = v);
+        Optional.ofNullable(builder.publisher).ifPresent(v -> this.language = v);
     }
 
     public static abstract class Builder<P extends PrintableProduct, B extends Builder<P, B>> extends Product.Builder<P, B> {
@@ -45,19 +45,16 @@ public abstract class PrintableProduct extends Product {
             super();
         }
 
-        protected Builder(PrintableProduct existingProduct) {
-            super(existingProduct);
-            this.publisher = existingProduct.publisher;
-            this.publicationDate = existingProduct.publicationDate;
-            this.language = existingProduct.language;
+        protected Builder(PrintableProduct updatingProduct) {
+            super(updatingProduct);
         }
 
-        public B publisher(@NonNull String publisher) {
+        public B publisher(String publisher) {
             this.publisher = publisher;
             return self();
         }
 
-        public B publicationDate(@NonNull LocalDate publicationDate) {
+        public B publicationDate(LocalDate publicationDate) {
             this.publicationDate = publicationDate;
             return self();
         }

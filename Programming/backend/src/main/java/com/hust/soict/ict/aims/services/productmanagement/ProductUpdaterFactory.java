@@ -23,7 +23,8 @@ public class ProductUpdaterFactory {
 
     @SuppressWarnings("unchecked")
     public <P extends Product, U extends UpdateProductRequest>
-    ProductUpdater<P, U> getUpdater(U request) {
-        return (ProductUpdater<P, U>) this.productUpdaters.get(request.getClass());
+    P updateProduct(P existingProduct, U request) {
+        ProductUpdater<P, U> updater = (ProductUpdater<P, U>) this.productUpdaters.get(request.getClass());
+        return updater.updateFrom(existingProduct, request);
     }
 }

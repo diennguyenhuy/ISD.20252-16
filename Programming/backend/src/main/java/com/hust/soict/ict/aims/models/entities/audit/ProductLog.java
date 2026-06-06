@@ -24,8 +24,8 @@ public class ProductLog extends ProductAuditLog {
     @Enumerated(EnumType.STRING)
     private Action action;
 
-    public ProductLog(Product product, User user, Action action) {
-        super(user, product);
+    public ProductLog(Product product, User manager, Action action) {
+        super(manager, product);
         this.action = action;
     }
 }
