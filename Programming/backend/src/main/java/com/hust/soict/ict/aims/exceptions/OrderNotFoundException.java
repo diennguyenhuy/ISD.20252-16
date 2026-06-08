@@ -1,15 +1,13 @@
 package com.hust.soict.ict.aims.exceptions;
 
-import lombok.Getter;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.UUID;
 
+@ResponseStatus(HttpStatus.NOT_FOUND)
 public class OrderNotFoundException extends RuntimeException {
-    @Getter
-    private final UUID orderId;
-
     public OrderNotFoundException(UUID orderId) {
-        super("Product with id " + orderId + " is not found");
-        this.orderId = orderId;
+        super("Order with id " + orderId + " is not found");
     }
 }

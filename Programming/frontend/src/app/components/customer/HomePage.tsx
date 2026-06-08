@@ -3,7 +3,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import type { ProductSummary, ProductTypeName } from "../../models/product.interface";
 import { formatVND } from '../../data/mockData';
-import HomepageService from '../../api/homepageService';
+import HomepageService from '../../api/HomepageService';
 import { useCart } from "../../context/CartContext";
 
 const TYPE_LABELS: Record<ProductTypeName, string> = {

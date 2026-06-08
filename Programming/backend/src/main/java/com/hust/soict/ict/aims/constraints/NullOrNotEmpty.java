@@ -5,12 +5,12 @@ import jakarta.validation.Payload;
 
 import java.lang.annotation.*;
 
-@Target(ElementType.FIELD)
+@Target({ElementType.METHOD,ElementType.FIELD,ElementType.ANNOTATION_TYPE,ElementType.CONSTRUCTOR,ElementType.PARAMETER,ElementType.TYPE_USE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Constraint(validatedBy = NullOrNotEmptyValidator.class)
+@Constraint(validatedBy = {NullOrNotEmptyCollectionValidator.class, NullOrNotEmptyCharSequenceValidator.class})
 public @interface NullOrNotEmpty {
-    String message() default "{NullOrNotNot.message}";
+    String message() default "{NullOrNotEmpty.message}";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

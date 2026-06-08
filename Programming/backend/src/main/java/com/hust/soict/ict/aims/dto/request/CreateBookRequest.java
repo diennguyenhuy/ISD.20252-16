@@ -19,7 +19,7 @@ public class CreateBookRequest extends CreateProductRequest {
     @NullOrNotBlank(message = "Language must not be blank if provided")
     private String language;
     @NotEmpty(message = "Authors cannot be empty")
-    private List<String> authors;
+    private List<@NotBlank(message = "Each author must not be blank") String> authors;
     @NotBlank(message = "Cover type cannot be null")
     private String coverType;
     @Positive(message = "A book must have at least 1 page")

@@ -10,33 +10,26 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import java.math.BigDecimal;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "productType", visible = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "productType")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = CreateBookRequest.class, name = "BOOK"),
+        @JsonSubTypes.Type(value = CreateBookRequest.class, name = "Book"),
         @JsonSubTypes.Type(value = CreateCDRequest.class, name = "CD"),
         @JsonSubTypes.Type(value = CreateDVDRequest.class, name = "DVD"),
-        @JsonSubTypes.Type(value = CreateNewspaperRequest.class, name = "NEWSPAPER")
+        @JsonSubTypes.Type(value = CreateNewspaperRequest.class, name = "Newspaper")
 })
 @Data
 public abstract class CreateProductRequest {
-    @NotBlank(message = "Product type is required (BOOK, CD, DVD, NEWSPAPER)")
-    private String productType;
-
     @NotBlank(message = "Title is required")
     private String title;
-
     @NotBlank(message = "Category is required")
     private String category;
     @NullOrNotBlank(message = "Description must not be blank if provided")
     private String description;
-
     @NotBlank(message = "Barcode is required")
     private String barcode;
-
     @NotNull(message = "Original value is required")
     @PositiveOrZero(message = "Original value cannot be negative")
     private Long originalValue;
-
     @NotNull(message = "Current price is required")
     @PositiveOrZero(message = "Current price cannot be negative")
     @ValidPriceRange(message = "Current price must be within "
@@ -44,11 +37,9 @@ public abstract class CreateProductRequest {
             + MAX_PRICE_RELATIVE_PERCENTAGE + "% of original price"
     )
     private Long currentPrice;
-
     @NotNull(message = "Stock quantity is required")
     @PositiveOrZero(message = "Stock quantity cannot be negative")
     private Integer stockQuantity;
-
     @NullOrNotBlank(message = "Image URL must not be blank if provided")
     private String imageURL;
     @NotNull(message = "Height is required")

@@ -2,7 +2,6 @@ package com.hust.soict.ict.aims.services.notification.email;
 
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
-import com.hust.soict.ict.aims.services.notification.NotificationMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

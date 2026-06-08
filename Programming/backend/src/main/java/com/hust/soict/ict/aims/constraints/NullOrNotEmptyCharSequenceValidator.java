@@ -4,12 +4,10 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-
 @Component
-public class NullOrNotEmptyValidator implements ConstraintValidator<NullOrNotEmpty, Collection<?>> {
+public class NullOrNotEmptyCharSequenceValidator implements ConstraintValidator<NullOrNotEmpty, CharSequence> {
     @Override
-    public boolean isValid(Collection<?> value, ConstraintValidatorContext context) {
+    public boolean isValid(CharSequence value, ConstraintValidatorContext context) {
         return value == null || !value.isEmpty();
     }
 }

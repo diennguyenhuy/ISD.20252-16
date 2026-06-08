@@ -18,7 +18,7 @@ public class CreateDVDRequest extends CreateProductRequest {
     private String discType;
     @NotBlank(message = "Director cannot be blank")
     private String director;
-    @NotNull
+    @NotNull(message = "Runtime is required")
     @Positive(message = "Runtime must be positive")
     private Integer runtime;
     @NotBlank(message = "Studio cannot be blank")
@@ -26,5 +26,5 @@ public class CreateDVDRequest extends CreateProductRequest {
     @NotBlank(message = "Language cannot be blank")
     private String language;
     @NotEmpty(message = "Subtitles cannot be blank")
-    private List<String> subtitles;
+    private List<@NotBlank(message = "Each subtitle cannot be blank") String> subtitles;
 }

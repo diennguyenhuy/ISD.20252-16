@@ -41,7 +41,7 @@ public class StockValidator {
      * @throws ProductNotFoundException if a product "vanishes" (gets deactivated) during checkout
      */
     @Transactional(readOnly = true)
-    public Cart checkStockAvailability(Cart cart) throws NotEnoughStockException, EmptyCartException, ProductNotFoundException {
+    public Cart checkStockAvailability(Cart cart) throws NotEnoughStockException, EmptyCartException {
         if (cart.isEmpty()) {
             throw new EmptyCartException();
         }

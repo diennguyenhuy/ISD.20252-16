@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router';
 import { CheckCircle, Home, Package, User, MapPin, Phone, CreditCard, Hash, Calendar, FileText, Loader2 } from 'lucide-react';
 import { formatVND, formatDateTime } from '../../data/mockData';
-import OrderService from '../../api/orderService';
+import OrderService from '../../api/OrderService';
 import type { Order } from '../../models/order.interface';
 import { useCart } from "../../context/CartContext";
 

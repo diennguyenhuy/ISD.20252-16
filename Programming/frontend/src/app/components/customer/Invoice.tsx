@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router';
 import { ArrowLeft, Truck, ShoppingBag, User, MapPin, FileText, Loader2, AlertCircle } from 'lucide-react';
 
 import { useCart } from '../../context/CartContext';
-import OrderService from '../../api/orderService';
+import OrderService from '../../api/OrderService';
 import { formatVND } from '../../data/mockData';
 
 import type { DeliveryInformation, Invoice as InvoiceType } from '../../models/order.interface';

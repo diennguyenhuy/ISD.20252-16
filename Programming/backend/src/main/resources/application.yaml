@@ -8,7 +8,7 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: aims.ict16@gmail.com
+    username: diennguyen5003@gmail.com
     password: ${APP_EMAIL_PASSWORD}
     properties:
       mail:
@@ -43,13 +43,13 @@ vietqr:
   accountNo: 03349966868
   accountName: NGUYEN TIEN DAT
   bankCode: MB
-  expectedpassword: 12345qwertW
+  expectedpassword: ${VIETQR_EXPECTED_PASSWORD}
   expectedusername: maybeez
 
 paypal:
   base-url: https://api-m.sandbox.paypal.com      # live: https://api-m.paypal.com
   client-id: AdMTfa7iXh-wBCivX8N05MMJFfxkk3FRML_-g7dRW4QB6PGH_Rgoipj-BRktMyuxiZPGiCEkVdpZJ0tw
-  client-secret: EIyRBDJ0E3BqqfPumeC1uokmAotH9HUyNMJd3UpLxCYpXVh5lM1mqhGc-99KJ3mo_1uAZlkgwseCS4DZ
+  client-secret: ${PAYPAL_CLIENT_SECRET}
 
   # PayPal sandbox does not settle VND, so AIMS VND prices are converted for the
   # gateway only. Adjust rate as needed; the converted value never leaves the subsystem.

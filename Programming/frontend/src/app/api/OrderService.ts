@@ -1,11 +1,9 @@
 import {apiClient} from './client';
 import type {DeliveryInformation, Invoice, Order, OrderDraft} from "../models/order.interface";
 
-const ORDER_URL = '/order';
-
 const OrderService = {
     placeOrder: async (): Promise<OrderDraft> => {
-        const response = await apiClient.post<OrderDraft>(ORDER_URL)
+        const response = await apiClient.post<OrderDraft>('/order')
         return response.data;
     },
 
@@ -25,11 +23,11 @@ const OrderService = {
     },
 
     cancelOrderPlacement: async (): Promise<void> => {
-        await apiClient.delete<void>(ORDER_URL);
+        await apiClient.delete<void>('/order');
     },
 
     cancelOrder: async (orderId: string): Promise<void> => {
-        await apiClient.delete<void>(`order/${orderId}`);
+        await apiClient.post<void>(`order/${orderId}/cancel`);
     },
 
     getOrder: async (orderId: string): Promise<Order> => {

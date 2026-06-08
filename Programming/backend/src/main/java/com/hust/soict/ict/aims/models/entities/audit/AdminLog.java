@@ -18,7 +18,7 @@ public class AdminLog extends AuditLog {
         DEACTIVATE,
         BLOCK,
         UNBLOCK,
-        ASSIGN_ROLE,
+        MODIFY_ROLE,
         RESET_PASSWORD,
         UPDATE_EMAIL
     }
@@ -31,14 +31,22 @@ public class AdminLog extends AuditLog {
     @JoinColumn(name = "admin_id", updatable = false)
     private User admin;
 
+    @Column(nullable = false, updatable = false)
+    private String adminUsername;
+
     @ManyToOne
     @JoinColumn(name = "affected_user_id", updatable = false)
     private User affectedUser;
 
+    @Column(nullable = false, updatable = false)
+    private String affectedUsername;
+
     public AdminLog(User admin, User affectedUser, Action action) {
         super();
         this.admin = admin;
+        this.adminUsername = admin.getUsername();
         this.affectedUser = affectedUser;
+        this.affectedUsername = affectedUser.getUsername();
         this.action = action;
     }
 }

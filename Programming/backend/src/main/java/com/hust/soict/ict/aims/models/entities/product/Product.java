@@ -3,16 +3,17 @@ package com.hust.soict.ict.aims.models.entities.product;
 import java.math.BigDecimal;
 import java.util.*;
 
-import com.hust.soict.ict.aims.models.entities.AuditableEntity;
+import com.hust.soict.ict.aims.models.entities.VersionedEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Immutable;
 
 @Entity
 @Table(name = "product")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class Product extends AuditableEntity {
+public abstract class Product extends VersionedEntity {
     public enum Status {
         ACTIVE,
         DEACTIVATED,
@@ -49,9 +50,11 @@ public abstract class Product extends AuditableEntity {
     @Column(nullable = false, precision = 10, scale = 3)
     private BigDecimal weight;
 
+    @Immutable
     @Column(unique = true, nullable = false, updatable = false, length = 32)
     private String barcode;
 
+    @Immutable
     @Column(nullable = false, updatable = false)
     private long originalValue;
 
@@ -67,9 +70,6 @@ public abstract class Product extends AuditableEntity {
 
     @Column(name = "image_url", length = 2048)
     private String imageURL;
-
-    @Version
-    private Long version;
 
     public static final int MIN_PRICE_RELATIVE_PERCENTAGE = 30;
     public static final int MAX_PRICE_RELATIVE_PERCENTAGE = 150;
@@ -106,24 +106,27 @@ public abstract class Product extends AuditableEntity {
     }
 
     public void delete() {
-        if (status == Status.DELETED) return;
-
+        if (status == Status.DELETED) {
+            throw new IllegalStateException("Cannot delete already deleted product " + title);
+        }
         if (stockQuantity == 0) status = Status.DELETED;
         else deactivate();
     }
 
     private void deactivate() {
-        if (status == Status.DEACTIVATED) return;
+        if (status == Status.DEACTIVATED) {
+            throw new IllegalStateException("Cannot deactivate already deactivated product " + title);
+        }
         status = Status.DEACTIVATED;
     }
 
     public void activate() throws IllegalStateException {
-        if (status == Status.ACTIVE) return;
-
-        if (status == Status.DELETED) {
-            throw new IllegalStateException("Cannot activate deleted product #" + id);
+        if (status == Status.ACTIVE) {
+            throw new IllegalStateException("Cannot activate already activated product " + title);
         }
-
+        if (status == Status.DELETED) {
+            throw new IllegalStateException("Cannot activate deleted product " + title);
+        }
         status = Status.ACTIVE;
     }
 

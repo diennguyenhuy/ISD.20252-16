@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Immutable;
 
 @Entity
 @Table(name = "newspaper")
@@ -15,12 +16,14 @@ public class Newspaper extends PrintableProduct {
     @Column(nullable = false)
     private String editorInChief;
 
+    @Immutable
     @Column(length = 25, updatable = false)
     private String issueNumber;
 
     @Column(length = 25)
     private String publicationFrequency;
 
+    @Immutable
     @Column(length = 9, updatable = false)
     private String ISSN;
 

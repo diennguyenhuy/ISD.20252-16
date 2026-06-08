@@ -11,7 +11,7 @@ export interface ProductFilterParams {
 
 const HomepageService = {
     get20RandomProducts: async (): Promise<ProductSummary[]> => {
-        const response= await apiClient.get<ProductSummary[]>('products/initiate');
+        const response= await apiClient.get<ProductSummary[]>('products/random');
         return response.data;
     },
 

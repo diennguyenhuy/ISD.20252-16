@@ -38,7 +38,9 @@ public interface ProductMapper {
     default List<String> mapCreators(Product product) {
         return switch (product) {
             case Book b -> b.getAuthors();
+            case Newspaper n -> List.of(n.getPublisher());
             case CD cd -> cd.getArtists();
+            case DVD dvd -> List.of(dvd.getStudio());
             default -> Collections.emptyList();
         };
     }

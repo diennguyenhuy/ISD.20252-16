@@ -96,6 +96,7 @@ CREATE TABLE IF NOT EXISTS dvd_subtitles(
 CREATE TABLE IF NOT EXISTS "order"(
     id				UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     status			VARCHAR(10) NOT NULL,
+    version         BIGINT NOT NULL DEFAULT 0,
     created_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -145,6 +146,9 @@ CREATE TABLE IF NOT EXISTS "user"(
     username		VARCHAR(255) NOT NULL,
     email			VARCHAR(255) NOT NULL UNIQUE,
     hashed_password	TEXT NOT NULL,
+    active          BOOLEAN NOT NULL,
+    blocked         BOOLEAN NOT NULL,
+    version         BIGINT NOT NULL DEFAULT 0,
     created_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -163,6 +167,14 @@ CREATE TABLE IF NOT EXISTS product_log(
     product_id	        UUID REFERENCES product(id) ON DELETE SET NULL,
     product_title       VARCHAR(255) NOT NULL,
     timestamp	        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS product_update_log(
+    log_id      UUID REFERENCES product_log(id) ON DELETE CASCADE,
+    field_name  VARCHAR(255),
+    old_value   TEXT,
+    new_value   TEXT,
+    PRIMARY KEY (log_id, field_name)
 );
 
 CREATE TABLE IF NOT EXISTS stock_adjust_log(

@@ -7,8 +7,11 @@ import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.dto.mapper.ProductMapper;
 import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
 import com.hust.soict.ict.aims.dto.request.UpdateProductRequest;
+import com.hust.soict.ict.aims.models.entities.audit.ProductLog;
 import com.hust.soict.ict.aims.models.entities.product.*;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
+import com.hust.soict.ict.aims.services.audit.ProductLogging;
+import com.hust.soict.ict.aims.services.audit.StockAdjustLogging;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -50,9 +53,9 @@ public class ProductManagementService {
 
     private final ProductRepository productRepo;
     private final ProductMapper productMapper;
-    private final ProductCreatorFactory productCreatorFactory;
-    private final ProductUpdaterFactory productUpdaterFactory;
+    private final ProductFactory productFactory;
 
+    @ProductLogging(action = ProductLog.Action.CREATE)
     @Transactional
     public ProductDetail createProduct(CreateProductRequest dto) {
         log.info("[CREATE] Received request to create new product. Barcode: {}", dto.getBarcode());
@@ -62,13 +65,14 @@ public class ProductManagementService {
             throw new ProductValidationException("Barcode already exists: " + dto.getBarcode(), "barcode");
         }
 
-        Product product = productCreatorFactory.createProduct(dto);
+        Product product = productFactory.createProduct(dto);
         Product savedProduct = productRepo.save(product);
 
         log.info("[CREATE SUCCESS] Successfully saved new product. ID: {}", savedProduct.getId());
         return productMapper.toProductDetail(savedProduct);
     }
 
+    @ProductLogging(action = ProductLog.Action.UPDATE)
     @Transactional
     public ProductDetail updateProduct(UUID id, UpdateProductRequest dto) {
         log.info("[UPDATE] Received request to update product. ID: {}", id);
@@ -82,13 +86,14 @@ public class ProductManagementService {
             product.updatePrice(dto.getCurrentPrice()); // Validate price 30% - 150%
         }
 
-        Product updatedProduct = productUpdaterFactory.updateProduct(product, dto);
+        Product updatedProduct = productFactory.updateProduct(product, dto);
         Product savedProduct = productRepo.save(updatedProduct);
         log.info("[UPDATE SUCCESS] Successfully updated product. ID: {}, Current Price: {}", savedProduct.getId(), savedProduct.getCurrentPrice());
 
         return productMapper.toProductDetail(savedProduct);
     }
 
+    @ProductLogging(action = ProductLog.Action.DELETE)
     @Transactional
     public void deleteProducts(List<UUID> productIds) {
         log.info("[DELETE BATCH] Received request to delete {} products.", productIds != null ? productIds.size() : 0);
@@ -127,7 +132,6 @@ public class ProductManagementService {
         log.info("[DELETE BATCH SUCCESS] Successfully processed {} products.", processedCount);
     }
 
-    // 1. Product list for Manager
     @Transactional(readOnly = true)
     public List<ProductSummary> getAllProductsForManager() {
         log.info("[FETCH] Fetching all products for manager dashboard.");
@@ -136,7 +140,6 @@ public class ProductManagementService {
                 .toList();
     }
 
-    // 2. Product detail for Manager
     @Transactional(readOnly = true)
     public ProductDetail getProductByIdForManager(UUID id) {
         log.info("[FETCH] Fetching product details. ID: {}", id);
@@ -148,7 +151,7 @@ public class ProductManagementService {
         return productMapper.toProductDetail(product);
     }
 
-    // 3. Adjust Stock
+    @StockAdjustLogging
     @Transactional
     public void adjustStock(UUID id, int delta, String reason) {
         log.info("[ADJUST STOCK] Received request for Product ID: {}. Delta: {}, Reason: '{}'", id, delta, reason);
@@ -165,12 +168,11 @@ public class ProductManagementService {
 
         productRepo.save(product);
         log.info("[ADJUST STOCK SUCCESS] Successfully updated stock. ID: {}, New Stock: {}", product.getId(), product.getStockQuantity());
-
-        // TODO: (Tương lai) Ghi log lý do (reason) vào bảng StockAdjustLog tại đây
     }
 
+    @ProductLogging(action = ProductLog.Action.ACTIVATE)
     @Transactional
-    public void activateProduct(UUID id) {
+    public ProductDetail activateProduct(UUID id) {
         log.info("[ACTIVATE] Received request to reactivate product. ID: {}", id);
 
         Product product = productRepo.findById(id)
@@ -180,8 +182,31 @@ public class ProductManagementService {
                 });
 
         product.activate();
-        productRepo.save(product);
+        product = productRepo.save(product);
 
         log.info("[ACTIVATE SUCCESS] Successfully reactivated product. ID: {}", id);
+
+        return productMapper.toProductDetail(product);
+    }
+
+    @ProductLogging(action = ProductLog.Action.DELETE)
+    @Transactional
+    public ProductDetail deleteProduct(UUID id) {
+        log.info("[DELETE] Received request to delete product. ID: {}", id);
+
+        Product product = productRepo.findById(id)
+                .orElseThrow(() -> {
+                    log.error("[DELETE FAILED] Product not found. ID: {}", id);
+                    return new ProductNotFoundException(id);
+                });
+
+        product.delete();
+        product = productRepo.save(product);
+
+        Product.Status actualStatus = product.getStatus();
+
+        log.info("[DELETE SUCCESS] Successfully {} product. ID: {}", actualStatus.name().toLowerCase(), id);
+
+        return productMapper.toProductDetail(product);
     }
 }

@@ -29,5 +29,5 @@ public class CreateNewspaperRequest extends CreateProductRequest {
     @NullOrNotBlank(message = "ISSN must not be blank if provided")
     private String ISSN;
     @NullOrNotEmpty(message = "Sections must not be empty if provided")
-    private List<String> sections;
+    private List<@NotBlank(message = "Each section must not be blank if provided") String> sections;
 }

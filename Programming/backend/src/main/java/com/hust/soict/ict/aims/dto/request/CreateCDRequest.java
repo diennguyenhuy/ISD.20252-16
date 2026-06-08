@@ -17,10 +17,9 @@ public class CreateCDRequest extends CreateProductRequest {
     @NotBlank(message = "Genre cannot be blank")
     private String genre;
     @NotEmpty(message = "Artists cannot be empty")
-    private List<String> artists;
+    private List<@NotBlank(message = "Each artist cannot be blank") String> artists;
     @NotBlank(message = "Record label cannot be blank")
     private String recordLabel;
     @NotEmpty(message = "Tracks cannot be empty")
-    @Valid
-    private List<CreateTrackRequest> tracks;
+    private List<@Valid CreateTrackRequest> tracks;
 }

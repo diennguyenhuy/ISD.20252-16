@@ -1,6 +1,7 @@
 package com.hust.soict.ict.aims.repositories;
 
 import com.hust.soict.ict.aims.models.entities.product.Product;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -33,7 +34,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     "(:minPrice IS NULL OR p.currentPrice >= :minPrice) AND " +
     "(:maxPrice IS NULL OR p.currentPrice <= :maxPrice) AND " +
     "p.status = ACTIVE")
-    List<Product> searchActiveProductsBy(
+    Page<Product> searchActiveProductsBy(
             @Param("title") String title,
             @Param("category") String category,
             @Param("minPrice") Long minPrice,

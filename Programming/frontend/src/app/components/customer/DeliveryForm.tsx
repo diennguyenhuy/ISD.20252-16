@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 
 import { useCart } from '../../context/CartContext';
-import OrderService from '../../api/orderService';
+import OrderService from '../../api/OrderService';
 import { formatVND } from '../../data/mockData';
 import { provinces, provinceToWards } from '../../data/provinceData';
 import type { DeliveryInformation } from '../../models/order.interface';

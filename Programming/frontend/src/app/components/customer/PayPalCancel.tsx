@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { XCircle, RefreshCw, Smartphone } from 'lucide-react';
-import PayByCreditCardService from '../../api/payByCreditCardService';
+import PayByCreditCardService from '../../api/PayByCreditCardService';
 
 /**
  * PayPal cancel handler (route: /checkout/payment/paypal/cancel).

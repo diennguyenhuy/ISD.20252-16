@@ -13,7 +13,7 @@ const PAYPAL_URL = '/order/payment/paypal';
  *   3. capturePayPalPayment(token) → backend captures, finalizes the order, returns Order
  *   4. cancelPayPalPayment()  → best-effort notify backend the customer cancelled
  *
- * Kept in its own file (not payOrderService.ts) to preserve single-responsibility:
+ * Kept in its own file (not PayOrderService.ts) to preserve single-responsibility:
  * PayOrderService stays VietQR-only, this stays PayPal-only.
  */
 const PayByCreditCardService = {

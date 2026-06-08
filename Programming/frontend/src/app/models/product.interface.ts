@@ -21,7 +21,7 @@ export interface Product {
     stockQuantity: number;
     status: ProductStatus;
     imageURL: string;
-    readonly addedAt?: string;
+    readonly createdAt?: string;
     readonly updatedAt?: string;
     productType: ProductTypeName;
 }

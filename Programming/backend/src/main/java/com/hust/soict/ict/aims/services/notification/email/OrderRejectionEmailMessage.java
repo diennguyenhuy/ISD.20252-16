@@ -1,11 +1,11 @@
 package com.hust.soict.ict.aims.services.notification.email;
 
 import com.hust.soict.ict.aims.models.entities.order.Order;
-import com.hust.soict.ict.aims.services.notification.NotificationMessage;
 import com.hust.soict.ict.aims.services.payment.PaymentMethod;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
@@ -96,6 +96,7 @@ public class OrderRejectionEmailMessage implements EmailMessage {
         return sb.toString();
     }
 
+    @Component
     public static class Factory extends EmailMessage.Factory<OrderRejectionEmailMessage, Order> {
         @Value("${app.frontend.url}")
         private String frontendUrl;
