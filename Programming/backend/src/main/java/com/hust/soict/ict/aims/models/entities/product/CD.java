@@ -31,7 +31,12 @@ public class CD extends Product {
     @Column(nullable = false)
     private String recordLabel;
 
-    @OneToMany(mappedBy = "cd", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ElementCollection
+    @CollectionTable(
+            name = "cd_tracks",
+            joinColumns = @JoinColumn(name = "cd_id")
+    )
+    @OrderColumn(name = "track_number")
     private List<Track> tracks = new ArrayList<>();
 
     public List<String> getArtists() {
@@ -42,31 +47,13 @@ public class CD extends Product {
         return Collections.unmodifiableList(tracks);
     }
 
-    public void addTrack(@NonNull Track track) {
-        track.setCd(this);
-        tracks.add(track);
-    }
-
-    public Track getTrack(UUID trackId) {
-        for (Track track : tracks) {
-            if (track.getId().equals(trackId)) {
-                return track;
-            }
-        }
-        return null;
-    }
-
-    public void removeTrack(UUID trackId) {
-        tracks.removeIf(track -> track.getId().equals(trackId));
-    }
-
     private CD(Builder builder) {
         super(builder);
         this.releaseDate = builder.releaseDate;
         this.genre = Objects.requireNonNull(builder.genre, "CD genre cannot be null");
-        this.artists = List.copyOf(Objects.requireNonNull(builder.artists, "List of artists cannot be null"));
+        this.artists = new ArrayList<>(Objects.requireNonNull(builder.artists, "List of artists cannot be null"));
         this.recordLabel = Objects.requireNonNull(builder.recordLabel, "CD record label cannot be null");
-        this.tracks = List.copyOf(Objects.requireNonNull(builder.tracks, "List of tracks cannot be null"));
+        this.tracks = new ArrayList<>(Objects.requireNonNull(builder.tracks, "List of tracks cannot be null"));
     }
 
     @Override
@@ -77,8 +64,9 @@ public class CD extends Product {
     private void apply(Builder builder) {
         super.apply(builder);
         Optional.ofNullable(builder.genre).ifPresent(v -> this.genre = v);
-        Optional.ofNullable(builder.artists).ifPresent(v -> this.artists = List.copyOf(v));
+        Optional.ofNullable(builder.artists).ifPresent(v -> this.artists = new ArrayList<>(v));
         Optional.ofNullable(builder.recordLabel).ifPresent(v -> this.recordLabel = v);
+        Optional.ofNullable(builder.tracks).ifPresent(v -> this.tracks = new ArrayList<>(v));
     }
 
     public static class Builder extends Product.Builder<CD, Builder> {

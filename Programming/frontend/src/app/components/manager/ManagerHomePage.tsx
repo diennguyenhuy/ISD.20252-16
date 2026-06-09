@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { Plus, Search, Pencil, Trash2, Package, BookOpen, Disc, Tv, FileText, AlertTriangle, ChevronDown, Loader2, CheckCircle } from 'lucide-react';
-import { useProductManagement } from '../../hooks/useProductManagement';
+import { useProductManagement } from './hooks/useProductManagement';
 import type { ProductSummary } from '../../models/product.interface';
-import { formatVND } from '../../data/mockData';
+import { formatVND } from '../../data/formatter';
 import AdjustStockModal from './AdjustStockModal';
 
 const TYPE_LABELS: Record<string, string> = { BOOK: 'Book', CD: 'CD', DVD: 'DVD', NEWSPAPER: 'Newspaper' };

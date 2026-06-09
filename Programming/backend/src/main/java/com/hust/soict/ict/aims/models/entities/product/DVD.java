@@ -60,7 +60,7 @@ public class DVD extends Product {
         this.runtime = Objects.requireNonNull(builder.runtime, "DVD Runtime cannot be null");
         this.studio = Objects.requireNonNull(builder.studio, "DVD Studio cannot be null");
         this.language = Objects.requireNonNull(builder.language, "DVD Language cannot be null");
-        this.subtitles = List.copyOf(Objects.requireNonNull(builder.subtitles, "DVD Subtitles cannot be null"));
+        this.subtitles = new ArrayList<>(Objects.requireNonNull(builder.subtitles, "DVD Subtitles cannot be null"));
     }
 
     @Override
@@ -75,7 +75,7 @@ public class DVD extends Product {
         Optional.ofNullable(builder.runtime).ifPresent(v -> this.runtime = v);
         Optional.ofNullable(builder.studio).ifPresent(v -> this.studio = v);
         Optional.ofNullable(builder.language).ifPresent(v -> this.language = v);
-        Optional.ofNullable(builder.subtitles).ifPresent(v -> this.subtitles = List.copyOf(v));
+        Optional.ofNullable(builder.subtitles).ifPresent(v -> this.subtitles = new ArrayList<>(v));
     }
 
     public static class Builder extends Product.Builder<DVD, Builder> {

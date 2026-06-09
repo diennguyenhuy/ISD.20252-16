@@ -68,11 +68,12 @@ CREATE TABLE IF NOT EXISTS cd_artists(
 	PRIMARY KEY (cd_id, artist)
 );
 
-CREATE TABLE IF NOT EXISTS track(
-	id			UUID PRIMARY KEY,
-	cd_id		UUID NOT NULL REFERENCES cd(id) ON DELETE CASCADE,
-	title		VARCHAR(255) NOT NULL,
-	length		INT NOT NULL --seconds
+CREATE TABLE IF NOT EXISTS cd_tracks(
+	cd_id		    UUID REFERENCES cd(id) ON DELETE CASCADE,
+    track_number    INT,
+	title		    VARCHAR(255) NOT NULL,
+	length		    INT NOT NULL, --seconds
+    PRIMARY KEY (cd_id, track_number)
 );
 
 CREATE TABLE IF NOT EXISTS dvd(
@@ -170,11 +171,12 @@ CREATE TABLE IF NOT EXISTS product_log(
 );
 
 CREATE TABLE IF NOT EXISTS product_update_log(
-    log_id      UUID REFERENCES product_log(id) ON DELETE CASCADE,
-    field_name  VARCHAR(255),
-    old_value   TEXT,
-    new_value   TEXT,
-    PRIMARY KEY (log_id, field_name)
+    log_id          UUID REFERENCES product_log(id) ON DELETE CASCADE,
+    field_number    INT,
+    field_name      VARCHAR(255),
+    old_value       TEXT,
+    new_value       TEXT,
+    PRIMARY KEY (log_id, field_number)
 );
 
 CREATE TABLE IF NOT EXISTS stock_adjust_log(

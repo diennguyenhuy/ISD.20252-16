@@ -45,7 +45,7 @@ public class Newspaper extends PrintableProduct {
         this.issueNumber = builder.issueNumber;
         this.publicationFrequency = builder.publicationFrequency;
         this.ISSN = builder.ISSN;
-        this.sections = builder.sections == null ? List.of() : List.copyOf(builder.sections);
+        this.sections = builder.sections == null ? new ArrayList<>() : new ArrayList<>(builder.sections);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class Newspaper extends PrintableProduct {
         super.apply(builder);
         Optional.ofNullable(builder.editorInChief).ifPresent(v -> this.editorInChief = v);
         Optional.ofNullable(builder.publicationFrequency).ifPresent(v -> this.publicationFrequency = v);
-        Optional.ofNullable(builder.sections).ifPresent(v -> this.sections = List.copyOf(v));
+        Optional.ofNullable(builder.sections).ifPresent(v -> this.sections = new ArrayList<>(v));
     }
 
     public static class Builder extends PrintableProduct.Builder<Newspaper, Builder> {

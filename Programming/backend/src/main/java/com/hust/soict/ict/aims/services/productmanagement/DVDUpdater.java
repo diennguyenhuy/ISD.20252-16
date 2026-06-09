@@ -13,7 +13,7 @@ public class DVDUpdater implements ProductUpdater<DVD, UpdateDVDRequest> {
 
     @Override
     public DVD updateFrom(DVD existingProduct, UpdateDVDRequest updateRequest) {
-        return populateCommonFields(existingProduct.toBuilder(), updateRequest)
+        return buildCommonFields(existingProduct.toBuilder(), updateRequest)
                 .genre(updateRequest.getGenre())
                 .director(updateRequest.getDirector())
                 .runtime(updateRequest.getRuntime())

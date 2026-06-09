@@ -2,7 +2,7 @@ import { Search, SlidersHorizontal, ShoppingCart, X, Loader2, AlertCircle, Refre
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import type { ProductSummary, ProductTypeName } from "../../models/product.interface";
-import { formatVND } from '../../data/mockData';
+import { formatVND } from '../../data/formatter';
 import HomepageService from '../../api/HomepageService';
 import { useCart } from "../../context/CartContext";
 

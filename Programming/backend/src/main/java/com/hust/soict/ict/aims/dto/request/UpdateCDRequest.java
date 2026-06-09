@@ -17,6 +17,6 @@ public class UpdateCDRequest extends UpdateProductRequest {
     private List<@NotBlank(message = "Each artist must not be blank if provided") String> artists;
     @NullOrNotBlank(message = "Record label must not be blank if provided")
     private String recordLabel;
-    @NullOrNotEmpty(message = "Track list must not be blank if provided")
-    private List<@Valid UpdateTrackRequest> tracks;
+    @NullOrNotEmpty(message = "Track list must not be empty if provided")
+    private List<@Valid TrackRequest> tracks;
 }

@@ -26,9 +26,6 @@ public class OrderFinalizer implements OrderFinalization {
     public OrderResponse finalizeOrder(Order draftOrder) throws OrderNotCompleteException {
         log.debug("Finalizing order...");
 
-        if (!draftOrder.isComplete()) {
-            throw new OrderNotCompleteException("Order is not complete.");
-        }
         draftOrder.complete();
         Order order = orderRepository.save(draftOrder);
 

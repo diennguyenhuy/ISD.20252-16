@@ -14,7 +14,7 @@ public class NewspaperUpdater implements ProductUpdater<Newspaper, UpdateNewspap
 
     @Override
     public Newspaper updateFrom(Newspaper existingProduct, UpdateNewspaperRequest updateRequest) {
-        return populateCommonFields(existingProduct.toBuilder(), updateRequest)
+        return buildCommonFields(existingProduct.toBuilder(), updateRequest)
                 .publisher(updateRequest.getPublisher())
                 .language(updateRequest.getLanguage())
                 .editorInChief(updateRequest.getEditorInChief())

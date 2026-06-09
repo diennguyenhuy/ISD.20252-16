@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.models.entities.order;
 
+import com.hust.soict.ict.aims.exceptions.OrderNotCompleteException;
 import com.hust.soict.ict.aims.exceptions.OrderStateTransitionException;
 import com.hust.soict.ict.aims.models.cart.Cart;
 import com.hust.soict.ict.aims.models.entities.VersionedEntity;
@@ -166,14 +167,14 @@ public class Order extends VersionedEntity {
         this.invoice = new Invoice(this);
     }
 
-    public boolean isComplete() {
+    private boolean isComplete() {
         return (deliveryInformation != null && deliveryFee != null && invoice != null && paymentTransaction != null)
                 || status != Status.DRAFT;
     }
 
     public void complete() {
         if (!isComplete()) {
-            throw new IllegalStateException("Cannot complete order when order is not completed!");
+            throw new OrderNotCompleteException("Cannot check out order when order is not completed!");
         }
         changeStatus(Status.PENDING);
     }

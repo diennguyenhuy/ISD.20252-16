@@ -13,7 +13,7 @@ public class NewspaperCreator implements ProductCreator<Newspaper, CreateNewspap
 
     @Override
     public Newspaper createFrom(CreateNewspaperRequest createRequest) {
-        return populateCommonFields(new Newspaper.Builder(), createRequest)
+        return buildCommonFields(new Newspaper.Builder(), createRequest)
                 .publisher(createRequest.getPublisher())
                 .publicationDate(createRequest.getPublicationDate())
                 .language(createRequest.getLanguage())

@@ -18,6 +18,11 @@ import java.math.BigDecimal;
         @JsonSubTypes.Type(value = CreateNewspaperRequest.class, name = "Newspaper")
 })
 @Data
+@ValidPriceRange(
+        message = "Current price must be within "
+        + MIN_PRICE_RELATIVE_PERCENTAGE + "% and "
+        + MAX_PRICE_RELATIVE_PERCENTAGE + "% of original price"
+)
 public abstract class CreateProductRequest {
     @NotBlank(message = "Title is required")
     private String title;
@@ -32,10 +37,6 @@ public abstract class CreateProductRequest {
     private Long originalValue;
     @NotNull(message = "Current price is required")
     @PositiveOrZero(message = "Current price cannot be negative")
-    @ValidPriceRange(message = "Current price must be within "
-            + MIN_PRICE_RELATIVE_PERCENTAGE + "% and "
-            + MAX_PRICE_RELATIVE_PERCENTAGE + "% of original price"
-    )
     private Long currentPrice;
     @NotNull(message = "Stock quantity is required")
     @PositiveOrZero(message = "Stock quantity cannot be negative")

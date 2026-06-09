@@ -7,7 +7,7 @@ public interface ProductCreator<P extends Product, C extends CreateProductReques
     Class<C> createRequestType();
     P createFrom(C createRequest);
 
-    default <B extends Product.Builder<P, B>> B populateCommonFields(B builder, C request) {
+    default <B extends Product.Builder<P, B>> B buildCommonFields(B builder, C request) {
         return builder
                 .title(request.getTitle())
                 .category(request.getCategory())

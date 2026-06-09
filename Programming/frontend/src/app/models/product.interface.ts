@@ -1,12 +1,12 @@
 export type ProductTypeName = 'Book' | 'Newspaper' | 'CD' | 'DVD';
 
-export type ProductType = Book | Newspaper | CD | DVD;
+export type Product = Book | Newspaper | CD | DVD;
 
 export type ProductStatus = 'ACTIVE' | 'DEACTIVATED' | 'DELETED';
 
-export type ProductSummary = Pick<Product, 'id' | 'title' | 'originalValue' | 'currentPrice' | 'stockQuantity' | 'productType' | 'imageURL'> & { creators: string[] };
+export type ProductSummary = Pick<BaseProduct, 'id' | 'title' | 'originalValue' | 'currentPrice' | 'stockQuantity' | 'productType' | 'imageURL'> & { creators: string[] };
 
-export interface Product {
+interface BaseProduct {
     readonly id: string;
     title: string;
     category: string;
@@ -26,7 +26,7 @@ export interface Product {
     productType: ProductTypeName;
 }
 
-export interface PrintableProduct extends Product {
+export interface PrintableProduct extends BaseProduct {
     publisher: string;
     publicationDate: string;
     language?: string;
@@ -51,7 +51,7 @@ export interface Newspaper extends PrintableProduct {
     sections?: string[];
 }
 
-export interface CD extends Product {
+export interface CD extends BaseProduct {
     readonly productType: 'CD';
     artists: string[];
     recordLabel: string;
@@ -63,12 +63,11 @@ export interface CD extends Product {
 export type DiscType = 'HD_DVD' | 'BLU_RAY';
 
 export interface Track {
-    id: string;
     title: string;
     length: number; // length in seconds
 }
 
-export interface DVD extends Product {
+export interface DVD extends BaseProduct {
     readonly productType: 'DVD';
     discType: DiscType;
     director: string;

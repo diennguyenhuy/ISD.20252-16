@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { Search, ChevronDown, CheckCircle2, XCircle, Clock, ClipboardList, Loader2, Eye, ChevronLeft, ChevronRight, RefreshCcw } from 'lucide-react';
 import OrderManagementService from '../../api/OrderManagementService'; // Adjust path as needed
-import { formatVND } from '../../data/mockData';
+import { formatVND } from '../../data/formatter';
 import type { Order, OrderStatus } from '../../models/order.interface';
 
 // Theme-safe status badges using opacity layers

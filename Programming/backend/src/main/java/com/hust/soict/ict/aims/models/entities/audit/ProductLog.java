@@ -30,6 +30,7 @@ public class ProductLog extends ProductAuditLog {
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "product_update_log", joinColumns = @JoinColumn(name = "log_id"))
+    @OrderColumn(name = "field_number")
     private List<ProductEditDetail> details = new ArrayList<>();
 
     public ProductLog(Product product, User manager, Action action) {
@@ -43,6 +44,6 @@ public class ProductLog extends ProductAuditLog {
     public ProductLog(Product product, User manager, List<ProductEditDetail> details) {
         super(manager, product);
         this.action = Action.UPDATE;
-        this.details = List.copyOf(details);
+        this.details = new ArrayList<>(details);
     }
 }

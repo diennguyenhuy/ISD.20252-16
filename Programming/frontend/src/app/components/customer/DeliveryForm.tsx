@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router';
 
 import { useCart } from '../../context/CartContext';
 import OrderService from '../../api/OrderService';
-import { formatVND } from '../../data/mockData';
+import { formatVND } from '../../data/formatter';
 import { provinces, provinceToWards } from '../../data/provinceData';
 import type { DeliveryInformation } from '../../models/order.interface';
 

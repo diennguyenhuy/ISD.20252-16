@@ -4,7 +4,7 @@ import { ArrowLeft, Truck, ShoppingBag, User, MapPin, FileText, Loader2, AlertCi
 
 import { useCart } from '../../context/CartContext';
 import OrderService from '../../api/OrderService';
-import { formatVND } from '../../data/mockData';
+import { formatVND } from '../../data/formatter';
 
 import type { DeliveryInformation, Invoice as InvoiceType } from '../../models/order.interface';
 import type { ProductTypeName } from '../../models/product.interface';

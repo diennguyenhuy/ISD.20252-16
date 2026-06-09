@@ -14,7 +14,7 @@ public class BookUpdater implements ProductUpdater<Book, UpdateBookRequest> {
 
     @Override
     public Book updateFrom(Book existingProduct, UpdateBookRequest updateRequest) {
-        return populateCommonFields(existingProduct.toBuilder(), updateRequest)
+        return buildCommonFields(existingProduct.toBuilder(), updateRequest)
                 .publisher(updateRequest.getPublisher())
                 .language(updateRequest.getLanguage())
                 .authors(updateRequest.getAuthors())

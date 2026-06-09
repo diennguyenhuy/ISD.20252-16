@@ -40,7 +40,7 @@ public class Book extends PrintableProduct {
 
     private Book(Builder builder) {
         super(builder);
-        this.authors = List.copyOf(Objects.requireNonNull(builder.authors, "List of authors cannot be null"));
+        this.authors = new ArrayList<>(Objects.requireNonNull(builder.authors, "List of authors cannot be null"));
         this.coverType = Objects.requireNonNull(builder.coverType, "Book cover type cannot be null");
         this.numberOfPages = builder.numberOfPages;
         this.genre = builder.genre;
@@ -53,7 +53,7 @@ public class Book extends PrintableProduct {
 
     private void apply(Builder builder) {
         super.apply(builder);
-        Optional.ofNullable(builder.authors).ifPresent(v -> this.authors = List.copyOf(v));
+        Optional.ofNullable(builder.authors).ifPresent(v -> this.authors = new ArrayList<>(v));
         Optional.ofNullable(builder.numberOfPages).ifPresent(v -> this.numberOfPages = v);
         Optional.ofNullable(builder.genre).ifPresent(v -> this.genre = v);
     }

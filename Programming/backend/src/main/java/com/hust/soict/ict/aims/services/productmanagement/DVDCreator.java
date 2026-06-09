@@ -13,7 +13,7 @@ public class DVDCreator implements ProductCreator<DVD, CreateDVDRequest> {
 
     @Override
     public DVD createFrom(CreateDVDRequest createRequest) {
-        return populateCommonFields(new DVD.Builder(), createRequest)
+        return buildCommonFields(new DVD.Builder(), createRequest)
                 .releaseDate(createRequest.getReleaseDate())
                 .genre(createRequest.getGenre())
                 .discType(createRequest.getDiscType())

@@ -21,5 +21,5 @@ public class CreateCDRequest extends CreateProductRequest {
     @NotBlank(message = "Record label cannot be blank")
     private String recordLabel;
     @NotEmpty(message = "Tracks cannot be empty")
-    private List<@Valid CreateTrackRequest> tracks;
+    private List<@Valid TrackRequest> tracks;
 }
