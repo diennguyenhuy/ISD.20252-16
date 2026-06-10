@@ -1,8 +1,8 @@
 package com.hust.soict.ict.aims.controllers;
 
 import com.hust.soict.ict.aims.exceptions.*;
-import jakarta.persistence.OptimisticLockException;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -90,9 +90,9 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(OptimisticLockException.class)
+    @ExceptionHandler(OptimisticLockingFailureException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public Map<String, String> handle(OptimisticLockException e) {
+    public Map<String, String> handle(OptimisticLockingFailureException e) {
         return Map.of("message", e.getMessage());
     }
 

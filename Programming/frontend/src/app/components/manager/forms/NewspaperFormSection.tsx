@@ -5,7 +5,7 @@ import type { Newspaper } from '../../../models/product.interface';
 // @ts-ignore
 export class NewspaperFormSection extends ProductFormSection<
     ReturnType<NewspaperFormSection['buildCreatePayload']>,
-    ReturnType<NewspaperFormSection['buildUpdatePayload']>
+    Partial<ReturnType<NewspaperFormSection['buildCreatePayload']>>
 > {
     readonly productType = 'Newspaper';
 
@@ -18,6 +18,8 @@ export class NewspaperFormSection extends ProductFormSection<
     ISSN: string = '';
     sections: string = '';
 
+    private _originalState: Record<string, string> = {};
+
     setPublisher!: (v: string) => void;
     setPublicationDate!: (v: string) => void;
     setEditorInChief!: (v: string) => void;
@@ -28,19 +30,35 @@ export class NewspaperFormSection extends ProductFormSection<
     setSections!: (v: string) => void;
 
     populateFromProduct(product: Newspaper) {
+        const sectionsStr = product.sections?.join(', ') ?? '';
+        const issueNumStr = product.issueNumber ? String(product.issueNumber) : '';
+
+        // 1. Populate UI State
         this.setPublisher(product.publisher ?? '');
         this.setPublicationDate(product.publicationDate ?? '');
         this.setEditorInChief(product.editorInChief ?? '');
         this.setLanguage(product.language ?? '');
-        this.setIssueNumber(product.issueNumber ? String(product.issueNumber) : '');
+        this.setIssueNumber(issueNumStr);
         this.setPublicationFrequency(product.publicationFrequency ?? '');
         this.setISSN(product.ISSN ?? '');
-        this.setSections(product.sections?.join(', ') ?? '');
+        this.setSections(sectionsStr);
+
+        // 2. Save Snapshot for diffing later
+        this._originalState = {
+            publisher: product.publisher ?? '',
+            publicationDate: product.publicationDate ?? '',
+            editorInChief: product.editorInChief ?? '',
+            language: product.language ?? '',
+            issueNumber: issueNumStr,
+            publicationFrequency: product.publicationFrequency ?? '',
+            ISSN: product.ISSN ?? '',
+            sections: sectionsStr,
+        };
     }
 
     renderCreateFields(ic: (e?: string) => string, Field: FieldComponent, isSubmitting: boolean) {
         return (
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <Field label="Editor in Chief" required>
                     <input disabled={isSubmitting} value={this.editorInChief} onChange={e => this.setEditorInChief(e.target.value)} className={ic()} />
                 </Field>
@@ -62,7 +80,7 @@ export class NewspaperFormSection extends ProductFormSection<
                 <Field label="ISSN">
                     <input disabled={isSubmitting} value={this.ISSN} onChange={e => this.setISSN(e.target.value)} className={ic()} />
                 </Field>
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                     <Field label="Sections">
                         <input
                             disabled={isSubmitting}
@@ -79,7 +97,7 @@ export class NewspaperFormSection extends ProductFormSection<
 
     renderEditFields(ic: (e?: string) => string, Field: FieldComponent, isSubmitting: boolean) {
         return (
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <Field label="Editor in Chief">
                     <input disabled={isSubmitting} value={this.editorInChief} onChange={e => this.setEditorInChief(e.target.value)} className={ic()} />
                 </Field>
@@ -101,7 +119,7 @@ export class NewspaperFormSection extends ProductFormSection<
                 <Field label="ISSN">
                     <input disabled value={this.ISSN} onChange={e => this.setISSN(e.target.value)} className={`${ic()} opacity-70 bg-muted/50 cursor-not-allowed`} />
                 </Field>
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                     <Field label="Sections">
                         <input
                             disabled={isSubmitting}
@@ -132,15 +150,25 @@ export class NewspaperFormSection extends ProductFormSection<
     }
 
     buildUpdatePayload() {
-        return {
-            publisher: this.publisher || undefined,
-            language: this.language || undefined,
-            editorInChief: this.editorInChief || undefined,
-            publicationFrequency: this.publicationFrequency || undefined,
-            sections: this.sections
-                ? this.sections.split(',').map(s => s.trim()).filter(Boolean)
-                : undefined,
-        };
+        const payload: Record<string, any> = {};
+
+        if (this.publisher !== this._originalState.publisher) {
+            payload.publisher = this.publisher;
+        }
+        if (this.editorInChief !== this._originalState.editorInChief) {
+            payload.editorInChief = this.editorInChief;
+        }
+        if (this.language !== this._originalState.language) {
+            payload.language = this.language;
+        }
+        if (this.publicationFrequency !== this._originalState.publicationFrequency) {
+            payload.publicationFrequency = this.publicationFrequency;
+        }
+        if (this.sections !== this._originalState.sections) {
+            payload.sections = this.sections.split(',').map(s => s.trim()).filter(Boolean);
+        }
+
+        return payload;
     }
 }
 

@@ -10,7 +10,7 @@ import org.hibernate.annotations.Immutable;
 
 @Embeddable
 @Getter
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Immutable
 public class ProductEditDetail {

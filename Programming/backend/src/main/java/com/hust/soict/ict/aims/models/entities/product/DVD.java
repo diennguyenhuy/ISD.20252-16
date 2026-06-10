@@ -134,7 +134,7 @@ public class DVD extends Product {
             return this;
         }
 
-        public Builder runtime(int runtime) {
+        public Builder runtime(Integer runtime) {
             this.runtime = runtime;
             return this;
         }

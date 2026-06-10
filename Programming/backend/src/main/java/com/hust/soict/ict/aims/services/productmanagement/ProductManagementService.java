@@ -1,13 +1,15 @@
 package com.hust.soict.ict.aims.services.productmanagement;
 
+import com.hust.soict.ict.aims.dto.request.AdjustStockRequest;
 import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
 import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
+import com.hust.soict.ict.aims.exceptions.ExceededDeletionQuotaException;
 import com.hust.soict.ict.aims.exceptions.ProductValidationException;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.dto.mapper.ProductMapper;
 import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
 import com.hust.soict.ict.aims.dto.request.UpdateProductRequest;
-import com.hust.soict.ict.aims.models.entities.audit.ProductLog;
+import com.hust.soict.ict.aims.models.entities.audit.ProductAction;
 import com.hust.soict.ict.aims.models.entities.product.*;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import com.hust.soict.ict.aims.services.audit.ProductLogging;
@@ -55,7 +57,25 @@ public class ProductManagementService {
     private final ProductMapper productMapper;
     private final ProductFactory productFactory;
 
-    @ProductLogging(action = ProductLog.Action.CREATE)
+    @Transactional(readOnly = true)
+    public List<ProductSummary> getAllProductsForManager() {
+        log.info("[FETCH] Fetching all products for manager dashboard.");
+        return productRepo.findAll().stream()
+                .map(productMapper::toProductSummary)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public ProductDetail getProductByIdForManager(UUID id) {
+        log.info("[FETCH] Fetching product details. ID: {}", id);
+        Product product = productRepo.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("[FETCH FAILED] Product not found. ID: {}", id);
+                    return new ProductNotFoundException(id);
+                });
+        return productMapper.toProductDetail(product);
+    }
+    @ProductLogging(action = ProductAction.CREATE)
     @Transactional
     public ProductDetail createProduct(CreateProductRequest dto) {
         log.info("[CREATE] Received request to create new product. Barcode: {}", dto.getBarcode());
@@ -72,7 +92,7 @@ public class ProductManagementService {
         return productMapper.toProductDetail(savedProduct);
     }
 
-    @ProductLogging(action = ProductLog.Action.UPDATE)
+    @ProductLogging(action = ProductAction.UPDATE)
     @Transactional
     public ProductDetail updateProduct(UUID id, UpdateProductRequest dto) {
         log.info("[UPDATE] Received request to update product. ID: {}", id);
@@ -93,15 +113,10 @@ public class ProductManagementService {
         return productMapper.toProductDetail(savedProduct);
     }
 
-    @ProductLogging(action = ProductLog.Action.DELETE)
+    @ProductLogging(action = ProductAction.DELETE)
     @Transactional
-    public void deleteProducts(List<UUID> productIds) {
-        log.info("[DELETE BATCH] Received request to delete {} products.", productIds != null ? productIds.size() : 0);
-
-        if (productIds == null || productIds.size() > 10) {
-            log.warn("[DELETE BATCH FAILED] Exceeded maximum allowed limit of 10 products per request.");
-            throw new ProductValidationException("Cannot delete more than 10 products at a time.", "productIds");
-        }
+    public List<ProductSummary> deleteProducts(List<UUID> productIds) {
+        log.info("[DELETE BATCH] Received request to delete {} products.", productIds.size());
 
         java.time.Instant startOfToday = java.time.LocalDate.now()
                 .atStartOfDay(java.time.ZoneId.systemDefault())
@@ -114,47 +129,22 @@ public class ProductManagementService {
 
         if (deletedToday + productIds.size() > 20) {
             log.warn("[DELETE BATCH FAILED] Daily quota exceeded! Already deleted today: {}, Requested: {}", deletedToday, productIds.size());
-            throw new ProductValidationException("Daily deletion quota exceeded (Max 20 per day).", "status");
+            throw new ExceededDeletionQuotaException("Daily deletion quota exceeded (Max 20 per day). Already deleted today: " + deletedToday + ", requested: " + productIds.size());
         }
 
-        int processedCount = 0;
-        for (UUID id : productIds) {
-            productRepo.findById(id).ifPresent(product -> {
-                product.delete();
+        List<Product> products = productRepo.findAllById(productIds);
 
-                productRepo.save(product);
+        products.forEach(Product::delete);
 
-                log.info("[DELETE PROCESS] Product ID: {} status updated to: {}", id, product.getStatus());
-            });
-            processedCount++;
-        }
+        log.info("[DELETE BATCH SUCCESS] Successfully processed {} products.", products.size());
 
-        log.info("[DELETE BATCH SUCCESS] Successfully processed {} products.", processedCount);
-    }
-
-    @Transactional(readOnly = true)
-    public List<ProductSummary> getAllProductsForManager() {
-        log.info("[FETCH] Fetching all products for manager dashboard.");
-        return productRepo.findAll().stream()
-                .map(productMapper::toProductSummary)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public ProductDetail getProductByIdForManager(UUID id) {
-        log.info("[FETCH] Fetching product details. ID: {}", id);
-        Product product = productRepo.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("[FETCH FAILED] Product not found. ID: {}", id);
-                    return new ProductNotFoundException(id);
-                });
-        return productMapper.toProductDetail(product);
+        return products.stream().map(productMapper::toProductSummary).toList();
     }
 
     @StockAdjustLogging
     @Transactional
-    public void adjustStock(UUID id, int delta, String reason) {
-        log.info("[ADJUST STOCK] Received request for Product ID: {}. Delta: {}, Reason: '{}'", id, delta, reason);
+    public void adjustStock(UUID id, AdjustStockRequest adjustStockRequest) {
+        log.info("[ADJUST STOCK] Received request for Product ID: {}. Delta: {}, Reason: '{}'", id, adjustStockRequest.getDelta(), adjustStockRequest.getReason());
 
         Product product = productRepo.findById(id)
                 .orElseThrow(() -> {
@@ -163,14 +153,14 @@ public class ProductManagementService {
                 });
 
 
-        int newStock = product.getStockQuantity() + delta;
+        int newStock = product.getStockQuantity() + adjustStockRequest.getDelta();
         product.updateStock(newStock);
 
         productRepo.save(product);
         log.info("[ADJUST STOCK SUCCESS] Successfully updated stock. ID: {}, New Stock: {}", product.getId(), product.getStockQuantity());
     }
 
-    @ProductLogging(action = ProductLog.Action.ACTIVATE)
+    @ProductLogging(action = ProductAction.ACTIVATE)
     @Transactional
     public ProductDetail activateProduct(UUID id) {
         log.info("[ACTIVATE] Received request to reactivate product. ID: {}", id);
@@ -189,7 +179,7 @@ public class ProductManagementService {
         return productMapper.toProductDetail(product);
     }
 
-    @ProductLogging(action = ProductLog.Action.DELETE)
+    @ProductLogging(action = ProductAction.DELETE)
     @Transactional
     public ProductDetail deleteProduct(UUID id) {
         log.info("[DELETE] Received request to delete product. ID: {}", id);

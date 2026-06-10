@@ -9,6 +9,7 @@ import com.hust.soict.ict.aims.services.productmanagement.ProductManagementServi
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,9 +37,19 @@ public class ProductManagementController {
 
     private final ProductManagementService productManagementService;
 
+    @GetMapping
+    public List<ProductSummary> getAllProducts() {
+        return productManagementService.getAllProductsForManager();
+    }
+
+    @GetMapping("/{id}")
+    public ProductDetail getProductById(@PathVariable UUID id) {
+        return productManagementService.getProductByIdForManager(id);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductDetail createProduct(@RequestBody @Valid CreateProductRequest request) {
+    public ProductDetail createProduct(@Valid @RequestBody CreateProductRequest request) {
         return productManagementService.createProduct(request);
     }
 
@@ -52,27 +63,17 @@ public class ProductManagementController {
     }
 
     @DeleteMapping
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteProducts(
-            @NotEmpty(message = "List of product IDs to delete cannot be empty")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<ProductSummary> deleteProducts(
+            @Size(min = 1, max = 10, message = "List of product IDs to delete must contain at least 1 product and a maximum of 10 products at a time")
             List<@NotNull(message = "Each ID must not be null") UUID> request
     ) {
-        productManagementService.deleteProducts(request);
-    }
-
-    @GetMapping
-    public ResponseEntity<List<ProductSummary>> getAllProducts() {
-        return ResponseEntity.ok(productManagementService.getAllProductsForManager());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ProductDetail> getProductById(@PathVariable UUID id) {
-        return ResponseEntity.ok(productManagementService.getProductByIdForManager(id));
+        return productManagementService.deleteProducts(request);
     }
 
     @PostMapping("/{id}/stock")
-    public void adjustStock(@PathVariable UUID id, @RequestBody @Valid AdjustStockRequest request) {
-        productManagementService.adjustStock(id, request.getDelta(), request.getReason());
+    public void adjustStock(@PathVariable UUID id, @Valid @RequestBody AdjustStockRequest request) {
+        productManagementService.adjustStock(id, request);
     }
 
     @PostMapping("/{id}/activate")

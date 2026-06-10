@@ -41,6 +41,19 @@ export default function ManagerProductDetail() {
         });
     }, [id]);
 
+    const handleGoback = () => {
+        if (existingProduct) {
+            navigate('/manager');
+            return;
+        }
+
+        if (window.history.state && window.history.state.idx > 0) {
+            navigate(-1);
+        } else {
+            navigate('/manager');
+        }
+    }
+
     // ── Action handlers ───────────────────────────────────────────────────────
     const handleDelete = async () => {
         if (!product) return;
@@ -110,8 +123,9 @@ export default function ManagerProductDetail() {
             <div className="flex flex-col md:flex-row md:items-center gap-4 mb-8">
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                     <button
-                        onClick={() => navigate('/manager')}
+                        onClick={handleGoback}
                         className="p-2.5 bg-card border border-border rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shadow-sm shrink-0"
+                        title="Go back"
                     >
                         <ArrowLeft size={20} />
                     </button>

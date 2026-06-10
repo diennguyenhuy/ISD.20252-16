@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import type { ProductSummary, ProductType } from "../models/product.interface";
+import type { ProductSummary, Product } from "../models/product.interface";
 
 export interface ProductFilterParams {
     title: string | undefined;
@@ -25,8 +25,8 @@ const HomepageService = {
         return response.data;
     },
 
-    getProductDetail: async (productId: string): Promise<ProductType> => {
-        const response = await apiClient.get<ProductType>(`products/${productId}`);
+    getProductDetail: async (productId: string): Promise<Product> => {
+        const response = await apiClient.get<Product>(`products/${productId}`);
         return response.data;
     }
 }

@@ -12,20 +12,10 @@ import org.hibernate.annotations.Immutable;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AdminLog extends AuditLog {
-    public enum Action {
-        CREATE,
-        ACTIVATE,
-        DEACTIVATE,
-        BLOCK,
-        UNBLOCK,
-        MODIFY_ROLE,
-        RESET_PASSWORD,
-        UPDATE_EMAIL
-    }
 
     @Column(nullable = false, updatable = false, length = 20)
     @Enumerated(EnumType.STRING)
-    private Action action;
+    private UserAction action;
 
     @ManyToOne
     @JoinColumn(name = "admin_id", updatable = false)
@@ -41,7 +31,7 @@ public class AdminLog extends AuditLog {
     @Column(nullable = false, updatable = false)
     private String affectedUsername;
 
-    public AdminLog(User admin, User affectedUser, Action action) {
+    public AdminLog(User admin, User affectedUser, UserAction action) {
         super();
         this.admin = admin;
         this.adminUsername = admin.getUsername();

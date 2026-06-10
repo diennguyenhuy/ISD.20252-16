@@ -45,7 +45,7 @@ export interface Book extends PrintableProduct {
 export interface Newspaper extends PrintableProduct {
     readonly productType: 'Newspaper';
     editorInChief: string;
-    issueNumber?: number;
+    issueNumber?: string;
     publicationFrequency?: string;
     ISSN?: string;
     sections?: string[];

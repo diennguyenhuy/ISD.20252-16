@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 public class OrderItemResponse {
     private String productId;
     private String productName;
+    private String productImage;
     private int quantity;
     private long unitPrice;
     private long itemTotalPrice;

@@ -5,7 +5,7 @@ import type { Book, CoverType } from '../../../models/product.interface';
 // @ts-ignore
 export class BookFormSection extends ProductFormSection<
     ReturnType<BookFormSection['buildCreatePayload']>,
-    ReturnType<BookFormSection['buildUpdatePayload']>
+    Partial<ReturnType<BookFormSection['buildCreatePayload']>>
 > {
     readonly productType = 'Book';
 
@@ -17,6 +17,8 @@ export class BookFormSection extends ProductFormSection<
     genre: string = '';
     coverType: CoverType = 'PAPERBACK';
 
+    private _originalState: Record<string, string> = {};
+
     // Setters injected by the form screen after useState wiring
     setAuthors!: (v: string) => void;
     setPublisher!: (v: string) => void;
@@ -27,27 +29,36 @@ export class BookFormSection extends ProductFormSection<
     setCoverType!: (v: CoverType) => void;
 
     populateFromProduct(product: Book) {
-        this.setAuthors(product.authors?.join(', ') ?? '');
+        const authorsStr = product.authors?.join(', ') ?? '';
+        const pagesStr = String(product.numberOfPages ?? '');
+
+        // 1. Populate UI State
+        this.setAuthors(authorsStr);
         this.setPublisher(product.publisher ?? '');
         this.setPublicationDate(product.publicationDate ?? '');
-        this.setNumberOfPages(String(product.numberOfPages ?? ''));
+        this.setNumberOfPages(pagesStr);
         this.setLanguage(product.language ?? '');
         this.setGenre(product.genre ?? '');
         this.setCoverType(product.coverType ?? 'PAPERBACK');
+
+        // 2. Save Snapshot for diffing later
+        this._originalState = {
+            authors: authorsStr,
+            publisher: product.publisher ?? '',
+            publicationDate: product.publicationDate ?? '',
+            numberOfPages: pagesStr,
+            language: product.language ?? '',
+            genre: product.genre ?? '',
+            coverType: product.coverType ?? 'PAPERBACK'
+        };
     }
 
     renderCreateFields(ic: (e?: string) => string, Field: FieldComponent, isSubmitting: boolean) {
         return (
-            <div className="grid grid-cols-2 gap-5">
-                <div className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="sm:col-span-2">
                     <Field label="Authors" required>
-                        <input
-                            disabled={isSubmitting}
-                            value={this.authors}
-                            onChange={e => this.setAuthors(e.target.value)}
-                            placeholder="Comma-separated, e.g. J.K. Rowling, George R.R. Martin"
-                            className={ic()}
-                        />
+                        <input disabled={isSubmitting} value={this.authors} onChange={e => this.setAuthors(e.target.value)} placeholder="Comma-separated, e.g. J.K. Rowling, George R.R. Martin" className={ic()} />
                     </Field>
                 </div>
                 <Field label="Publisher" required>
@@ -57,7 +68,7 @@ export class BookFormSection extends ProductFormSection<
                     <input disabled={isSubmitting} type="date" value={this.publicationDate} onChange={e => this.setPublicationDate(e.target.value)} className={ic()} />
                 </Field>
                 <Field label="Cover Type" required>
-                    <select disabled={isSubmitting} value={this.coverType} onChange={e => this.setCoverType(e.target.value as any)} className={ic()}>
+                    <select disabled={isSubmitting} value={this.coverType} onChange={e => this.setCoverType(e.target.value as CoverType)} className={ic()}>
                         <option value="PAPERBACK">Paperback</option>
                         <option value="HARDCOVER">Hardcover</option>
                     </select>
@@ -77,16 +88,10 @@ export class BookFormSection extends ProductFormSection<
 
     renderEditFields(ic: (e?: string) => string, Field: FieldComponent, isSubmitting: boolean) {
         return (
-            <div className="grid grid-cols-2 gap-5">
-                <div className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="sm:col-span-2">
                     <Field label="Authors">
-                        <input
-                            disabled={isSubmitting}
-                            value={this.authors}
-                            onChange={e => this.setAuthors(e.target.value)}
-                            placeholder="Comma-separated"
-                            className={ic()}
-                        />
+                        <input disabled={isSubmitting} value={this.authors} onChange={e => this.setAuthors(e.target.value)} placeholder="Comma-separated" className={ic()} />
                     </Field>
                 </div>
                 <Field label="Publisher">
@@ -96,7 +101,7 @@ export class BookFormSection extends ProductFormSection<
                     <input disabled type="date" value={this.publicationDate} onChange={e => this.setPublicationDate(e.target.value)} className={`${ic()} opacity-70 bg-muted/50 cursor-not-allowed`} />
                 </Field>
                 <Field label="Cover Type">
-                    <select disabled value={this.coverType} onChange={e => this.setCoverType(e.target.value as any)} className={`${ic()} opacity-70 bg-muted/50 cursor-not-allowed`}>
+                    <select disabled value={this.coverType} onChange={e => this.setCoverType(e.target.value as CoverType)} className={`${ic()} opacity-70 bg-muted/50 cursor-not-allowed`}>
                         <option value="PAPERBACK">Paperback</option>
                         <option value="HARDCOVER">Hardcover</option>
                     </select>
@@ -127,14 +132,25 @@ export class BookFormSection extends ProductFormSection<
     }
 
     buildUpdatePayload() {
-        const authors = this.authors.split(',').map(s => s.trim()).filter(Boolean);
-        return {
-            authors: authors.length ? authors : undefined,
-            publisher: this.publisher || undefined,
-            language: this.language || undefined,
-            numberOfPages: this.numberOfPages ? Number(this.numberOfPages) : undefined,
-            genre: this.genre || undefined,
-        };
+        const payload: Record<string, any> = {};
+
+        if (this.authors !== this._originalState.authors) {
+            payload.authors = this.authors.split(',').map(s => s.trim()).filter(Boolean);
+        }
+        if (this.publisher !== this._originalState.publisher) {
+            payload.publisher = this.publisher;
+        }
+        if (this.language !== this._originalState.language) {
+            payload.language = this.language;
+        }
+        if (this.numberOfPages !== this._originalState.numberOfPages) {
+            payload.numberOfPages = this.numberOfPages ? Number(this.numberOfPages) : null;
+        }
+        if (this.genre !== this._originalState.genre) {
+            payload.genre = this.genre;
+        }
+
+        return payload;
     }
 }
 

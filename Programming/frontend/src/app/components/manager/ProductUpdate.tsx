@@ -21,6 +21,7 @@ export default function ProductUpdate() {
 
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [originalData, setOriginalData] = useState<any>(null);
 
     // Fixed/Immutable fields
     const [barcode, setBarcode] = useState('');
@@ -51,6 +52,8 @@ export default function ProductUpdate() {
         if (!id) return;
         getProductById(id).then(data => {
             if (!data) { setLoading(false); return; }
+
+            setOriginalData(data);
 
             const type = data.productType as ProductTypeName;
             setActiveType(type);
@@ -83,22 +86,31 @@ export default function ProductUpdate() {
         setIsSubmitting(true);
 
         // PATCH semantics: only send fields that have a value.
-        const payload = {
-            productType: activeSection.productType,
-            title: title || undefined,
-            category: category || undefined,
-            currentPrice: currentPrice ? Number(currentPrice) : undefined,
-            imageURL: imageURL || undefined,
-            description: description || undefined,
-            weight: weight ? Number(weight) : undefined,
-            height: height ? Number(height) : undefined,
-            width: width ? Number(width) : undefined,
-            length: length ? Number(length) : undefined,
-            ...activeSection.buildUpdatePayload(),
+        const payload: Record<string, any> = {};
+
+        if (title !== originalData.title) payload.title = title;
+        if (category !== (originalData.category ?? '')) payload.category = category;
+        if (currentPrice && Number(currentPrice) !== originalData.currentPrice) payload.currentPrice = Number(currentPrice);
+        if (imageURL !== (originalData.imageURL ?? '')) payload.imageURL = imageURL;
+        if (description !== (originalData.description ?? '')) payload.description = description;
+        if (weight && Number(weight) !== originalData.weight) payload.weight = Number(weight);
+        if (height && Number(height) !== originalData.height) payload.height = Number(height);
+        if (width && Number(width) !== originalData.width) payload.width = Number(width);
+        if (length && Number(length) !== originalData.length) payload.length = Number(length);
+
+        const finalPayload = {
+            productType: activeType,
+            ...payload,
+            ...activeSection.buildUpdatePayload()
         };
 
+        if (Object.keys(finalPayload).length === 0) {
+            navigate(-1);
+            return;
+        }
+
         try {
-            const result = await updateProduct(id!, payload);
+            const result = await updateProduct(id!, finalPayload);
             navigate(`/manager/products/${result.id}`, {
                 state: { product: result },
             });
@@ -221,15 +233,66 @@ export default function ProductUpdate() {
                             <input disabled={isSubmitting} type="number" onWheel={e => e.currentTarget.blur()} value={length} onChange={e => setLength(e.target.value)} className={inputClass()} />
                         </Field>
 
-                        <div className="sm:col-span-2">
-                            <Field label="Image URL">
-                                <input disabled={isSubmitting} value={imageURL} onChange={e => setImageURL(e.target.value)} className={inputClass()} />
-                            </Field>
-                        </div>
-                        <div className="sm:col-span-2">
-                            <Field label="Description">
-                                <textarea disabled={isSubmitting} value={description} onChange={e => setDescription(e.target.value)} rows={4} className={`${inputClass()} resize-none`} />
-                            </Field>
+                        {/* ── Image & Description with Live Preview ── */}
+                        <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-5 gap-6 mt-4 pt-6 border-t border-border/50">
+
+                            {/* Left Side: URL and Description Inputs */}
+                            <div className="sm:col-span-3 flex flex-col gap-5">
+                                <Field label="Image URL">
+                                    <input
+                                        disabled={isSubmitting}
+                                        value={imageURL}
+                                        onChange={e => setImageURL(e.target.value)}
+                                        placeholder="https://example.com/image.jpg"
+                                        className={inputClass()}
+                                    />
+                                </Field>
+
+                                <Field label="Description">
+                                    <textarea
+                                        disabled={isSubmitting}
+                                        value={description}
+                                        onChange={e => setDescription(e.target.value)}
+                                        rows={5}
+                                        placeholder="Enter detailed product description..."
+                                        className={`${inputClass()} resize-none`}
+                                    />
+                                </Field>
+                            </div>
+
+                            {/* Right Side: Live Image Preview */}
+                            <div className="sm:col-span-2 flex flex-col">
+                                <label className="text-sm font-bold text-foreground mb-2 flex items-center gap-1">
+                                    Live Preview
+                                </label>
+                                <div className="flex-1 min-h-[200px] border-2 border-dashed border-border rounded-xl bg-muted/20 flex items-center justify-center overflow-hidden relative group">
+                                    {imageURL ? (
+                                        <img
+                                            src={imageURL}
+                                            alt="Preview"
+                                            className="w-full h-full object-contain transition-opacity duration-300"
+                                            onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                                if (e.currentTarget.nextElementSibling) {
+                                                    (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex';
+                                                }
+                                            }}
+                                            onLoad={(e) => {
+                                                e.currentTarget.style.display = 'block';
+                                                if (e.currentTarget.nextElementSibling) {
+                                                    (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'none';
+                                                }
+                                            }}
+                                        />
+                                    ) : null}
+
+                                    {/* Fallback Display */}
+                                    <div className={`absolute inset-0 flex flex-col items-center justify-center text-muted-foreground ${imageURL ? 'hidden' : 'flex'}`}>
+                                        <Package size={40} className="mb-2 opacity-20" />
+                                        <span className="text-xs font-medium uppercase tracking-widest opacity-50">No Image</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

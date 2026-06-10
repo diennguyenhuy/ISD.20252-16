@@ -96,11 +96,11 @@ export default function CustomerProductDetail() {
             {/* ── Breadcrumb ── */}
             <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
                 <button
-                    onClick={() => navigate('/')}
+                    onClick={() => navigate(-1)}
                     className="hover:text-foreground transition-colors flex items-center gap-1"
                 >
                     <ArrowLeft size={16} className="mr-1" />
-                    Back to Home
+                    Back
                 </button>
                 <ChevronRight size={14} className="opacity-50" />
                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${color}`}>

@@ -11,7 +11,7 @@ export interface TrackFormRow {
 // @ts-ignore
 export class CDFormSection extends ProductFormSection<
     ReturnType<CDFormSection['buildCreatePayload']>,
-    ReturnType<CDFormSection['buildUpdatePayload']>
+    Partial<ReturnType<CDFormSection['buildCreatePayload']>>
 > {
     readonly productType = 'CD';
 
@@ -21,6 +21,8 @@ export class CDFormSection extends ProductFormSection<
     releaseDate: string = '';
     tracks: TrackFormRow[] = [];
 
+    private _originalState: Record<string, any> = {};
+
     setArtists!: (v: string) => void;
     setRecordLabel!: (v: string) => void;
     setGenre!: (v: string) => void;
@@ -28,16 +30,28 @@ export class CDFormSection extends ProductFormSection<
     setTracks!: (v: TrackFormRow[] | ((prev: TrackFormRow[]) => TrackFormRow[])) => void;
 
     populateFromProduct(product: CD) {
-        this.setArtists(product.artists?.join(', ') ?? '');
+        const artistsStr = product.artists?.join(', ') ?? '';
+        const tracksArr = (product.tracks ?? []).map((t: Track) => ({
+            title: t.title,
+            length: String(t.length),
+        }));
+
+        // 1. Populate UI State
+        this.setArtists(artistsStr);
         this.setRecordLabel(product.recordLabel ?? '');
         this.setGenre(product.genre ?? '');
         this.setReleaseDate(product.releaseDate ?? '');
-        this.setTracks(
-            (product.tracks ?? []).map((t: Track) => ({
-                title: t.title,
-                length: String(t.length),
-            }))
-        );
+        this.setTracks(tracksArr);
+
+        // 2. Save Snapshot for diffing later
+        // Note: We stringify the tracks array so we can easily perform a deep equality check later
+        this._originalState = {
+            artists: artistsStr,
+            recordLabel: product.recordLabel ?? '',
+            genre: product.genre ?? '',
+            releaseDate: product.releaseDate ?? '',
+            tracksJson: JSON.stringify(tracksArr),
+        };
     }
 
     private addTrack() {
@@ -56,10 +70,10 @@ export class CDFormSection extends ProductFormSection<
 
     private renderTrackEditor(ic: (e?: string) => string, isEdit: boolean, isSubmitting: boolean) {
         return (
-            <div className="col-span-2 flex flex-col gap-2">
+            <div className="sm:col-span-2 flex flex-col gap-2 mt-2 border-t border-border/50 pt-6">
                 <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-bold text-foreground">
-                        Tracks {!isEdit && <span className="text-destructive">*</span>}
+                        Track List {!isEdit && <span className="text-destructive">*</span>}
                         <span className="text-muted-foreground font-normal ml-1">
                             ({this.tracks.length})
                         </span>
@@ -68,7 +82,7 @@ export class CDFormSection extends ProductFormSection<
                         disabled={isSubmitting}
                         type="button"
                         onClick={() => this.addTrack()}
-                        className="flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary/80 px-3 py-1.5 rounded-lg border border-primary/30 hover:bg-primary/5 transition-colors"
+                        className="flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary/80 px-3 py-1.5 rounded-lg border border-primary/30 hover:bg-primary/5 transition-colors disabled:opacity-50"
                     >
                         <Plus size={14} /> Add Track
                     </button>
@@ -115,7 +129,7 @@ export class CDFormSection extends ProductFormSection<
                                     disabled={isSubmitting}
                                     type="button"
                                     onClick={() => this.removeTrack(idx)}
-                                    className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                                    className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors disabled:opacity-50"
                                 >
                                     <Trash2 size={14} />
                                 </button>
@@ -129,16 +143,10 @@ export class CDFormSection extends ProductFormSection<
 
     renderCreateFields(ic: (e?: string) => string, Field: FieldComponent, isSubmitting: boolean) {
         return (
-            <div className="grid grid-cols-2 gap-5">
-                <div className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="sm:col-span-2">
                     <Field label="Artists" required>
-                        <input
-                            disabled={isSubmitting}
-                            value={this.artists}
-                            onChange={e => this.setArtists(e.target.value)}
-                            placeholder="Comma-separated, e.g. The Beatles, John Lennon"
-                            className={ic()}
-                        />
+                        <input disabled={isSubmitting} value={this.artists} onChange={e => this.setArtists(e.target.value)} placeholder="Comma-separated, e.g. The Beatles, John Lennon" className={ic()} />
                     </Field>
                 </div>
                 <Field label="Record Label" required>
@@ -157,16 +165,10 @@ export class CDFormSection extends ProductFormSection<
 
     renderEditFields(ic: (e?: string) => string, Field: FieldComponent, isSubmitting: boolean) {
         return (
-            <div className="grid grid-cols-2 gap-5">
-                <div className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="sm:col-span-2">
                     <Field label="Artists">
-                        <input
-                            disabled={isSubmitting}
-                            value={this.artists}
-                            onChange={e => this.setArtists(e.target.value)}
-                            placeholder="Comma-separated"
-                            className={ic()}
-                        />
+                        <input disabled={isSubmitting} value={this.artists} onChange={e => this.setArtists(e.target.value)} placeholder="Comma-separated" className={ic()} />
                     </Field>
                 </div>
                 <Field label="Record Label">
@@ -197,19 +199,31 @@ export class CDFormSection extends ProductFormSection<
     }
 
     buildUpdatePayload() {
-        const artists = this.artists.split(',').map(s => s.trim()).filter(Boolean);
-        return {
-            artists: artists.length ? artists : undefined,
-            recordLabel: this.recordLabel || undefined,
-            genre: this.genre || undefined,
-            // Value Object — same shape as create; full array replaces stored list
-            tracks: this.tracks.length
-                ? this.tracks.map(t => ({
-                    title: t.title,
-                    length: Number(t.length),
-                }))
-                : undefined,
-        };
+        const payload: Record<string, any> = {};
+
+        if (this.artists !== this._originalState.artists) {
+            payload.artists = this.artists.split(',').map(s => s.trim()).filter(Boolean);
+        }
+
+        if (this.recordLabel !== this._originalState.recordLabel) {
+            payload.recordLabel = this.recordLabel;
+        }
+
+        if (this.genre !== this._originalState.genre) {
+            payload.genre = this.genre;
+        }
+
+        // Deep equality check via JSON stringification
+        const currentTracksJson = JSON.stringify(this.tracks);
+        if (currentTracksJson !== this._originalState.tracksJson) {
+            // Maps the array if there are tracks, otherwise sends [] to wipe all tracks
+            payload.tracks = this.tracks.map(t => ({
+                title: t.title,
+                length: Number(t.length),
+            }));
+        }
+
+        return payload;
     }
 }
 

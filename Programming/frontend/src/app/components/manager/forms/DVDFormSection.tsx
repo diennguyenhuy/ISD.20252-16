@@ -5,7 +5,7 @@ import type { DVD, DiscType } from '../../../models/product.interface';
 // @ts-ignore
 export class DVDFormSection extends ProductFormSection<
     ReturnType<DVDFormSection['buildCreatePayload']>,
-    ReturnType<DVDFormSection['buildUpdatePayload']>
+    Partial<ReturnType<DVDFormSection['buildCreatePayload']>>
 > {
     readonly productType = 'DVD';
 
@@ -18,6 +18,8 @@ export class DVDFormSection extends ProductFormSection<
     releaseDate: string = '';
     discType: DiscType = 'BLU_RAY';
 
+    private _originalState: Record<string, string> = {};
+
     setDirector!: (v: string) => void;
     setStudio!: (v: string) => void;
     setRuntime!: (v: string) => void;
@@ -28,19 +30,35 @@ export class DVDFormSection extends ProductFormSection<
     setDiscType!: (v: DiscType) => void;
 
     populateFromProduct(product: DVD) {
+        const subtitlesStr = product.subtitles?.join(', ') ?? '';
+        const runtimeStr = String(product.runtime ?? '');
+
+        // 1. Populate UI State
         this.setDirector(product.director ?? '');
         this.setStudio(product.studio ?? '');
-        this.setRuntime(String(product.runtime ?? ''));
+        this.setRuntime(runtimeStr);
         this.setLanguage(product.language ?? '');
-        this.setSubtitles(product.subtitles?.join(', ') ?? '');
+        this.setSubtitles(subtitlesStr);
         this.setGenre(product.genre ?? '');
         this.setReleaseDate(product.releaseDate ?? '');
         this.setDiscType(product.discType ?? 'BLU_RAY');
+
+        // 2. Save Snapshot for diffing later
+        this._originalState = {
+            director: product.director ?? '',
+            studio: product.studio ?? '',
+            runtime: runtimeStr,
+            language: product.language ?? '',
+            subtitles: subtitlesStr,
+            genre: product.genre ?? '',
+            releaseDate: product.releaseDate ?? '',
+            discType: product.discType ?? 'BLU_RAY'
+        };
     }
 
     renderCreateFields(ic: (e?: string) => string, Field: FieldComponent, isSubmitting: boolean) {
         return (
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <Field label="Director" required>
                     <input disabled={isSubmitting} value={this.director} onChange={e => this.setDirector(e.target.value)} className={ic()} />
                 </Field>
@@ -65,7 +83,7 @@ export class DVDFormSection extends ProductFormSection<
                 <Field label="Release Date">
                     <input disabled={isSubmitting} type="date" value={this.releaseDate} onChange={e => this.setReleaseDate(e.target.value)} className={ic()} />
                 </Field>
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                     <Field label="Subtitles" required>
                         <input
                             disabled={isSubmitting}
@@ -81,9 +99,8 @@ export class DVDFormSection extends ProductFormSection<
     }
 
     renderEditFields(ic: (e?: string) => string, Field: FieldComponent, isSubmitting: boolean) {
-        // discType intentionally absent — immutable after creation
         return (
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <Field label="Director">
                     <input disabled={isSubmitting} value={this.director} onChange={e => this.setDirector(e.target.value)} className={ic()} />
                 </Field>
@@ -108,7 +125,7 @@ export class DVDFormSection extends ProductFormSection<
                 <Field label="Release Date">
                     <input disabled type="date" value={this.releaseDate} onChange={e => this.setReleaseDate(e.target.value)} className={`${ic()} opacity-70 bg-muted/50 cursor-not-allowed`} />
                 </Field>
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                     <Field label="Subtitles">
                         <input
                             disabled={isSubmitting}
@@ -137,15 +154,31 @@ export class DVDFormSection extends ProductFormSection<
     }
 
     buildUpdatePayload() {
-        const subtitles = this.subtitles.split(',').map(s => s.trim()).filter(Boolean);
-        return {
-            director: this.director || undefined,
-            studio: this.studio || undefined,
-            runtime: this.runtime ? Number(this.runtime) : undefined,
-            language: this.language || undefined,
-            genre: this.genre || undefined,
-            subtitles: subtitles.length ? subtitles : undefined,
-        };
+        const payload: Record<string, any> = {};
+
+        if (this.director !== this._originalState.director) {
+            payload.director = this.director;
+        }
+        if (this.studio !== this._originalState.studio) {
+            payload.studio = this.studio;
+        }
+        if (this.runtime !== this._originalState.runtime) {
+            // Send null or undefined if cleared
+            payload.runtime = this.runtime ? Number(this.runtime) : null;
+        }
+        if (this.language !== this._originalState.language) {
+            payload.language = this.language;
+        }
+        if (this.genre !== this._originalState.genre) {
+            payload.genre = this.genre;
+        }
+        if (this.subtitles !== this._originalState.subtitles) {
+            payload.subtitles = this.subtitles
+                ? this.subtitles.split(',').map(s => s.trim()).filter(Boolean)
+                : []; // Clears the array in DB if completely wiped out by user
+        }
+
+        return payload;
     }
 }
 

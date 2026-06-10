@@ -18,4 +18,9 @@ public class Track {
         this.title = title;
         this.length = length;
     }
+
+    @Override
+    public String toString() {
+        return "Track(title=" + title + ", length=" + length + ")";
+    }
 }

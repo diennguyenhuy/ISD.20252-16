@@ -131,7 +131,7 @@ export default function CustomerOrderDetail() {
             )}
 
             {/* ── Shared display cards ── */}
-            <OrderItemList items={order.items} invoice={order.invoice} />
+            <OrderItemList items={order.items} invoice={order.invoice} isManagerScreen={false} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <ShippingInfoCard delivery={order.deliveryInformation} />
@@ -147,7 +147,7 @@ export default function CustomerOrderDetail() {
                     onClick={handleGoBack}
                     className="flex-1 py-3.5 px-6 rounded-xl border border-border bg-card text-foreground font-semibold hover:bg-muted transition-colors flex items-center justify-center gap-2 shadow-sm"
                 >
-                    <ArrowLeft size={18} /> Back
+                    <ArrowLeft size={18} /> Back {passedOrder ? 'to Success Screen' : 'to Home'}
                 </button>
 
                 {/* Cancel — only available before the order is approved (PENDING) */}
