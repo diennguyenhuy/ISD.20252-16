@@ -5,6 +5,8 @@ import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
 import com.hust.soict.ict.aims.dto.request.UpdateProductRequest;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.entities.audit.ProductAction;
+import com.hust.soict.ict.aims.models.entities.audit.ProductEditDetail;
+import com.hust.soict.ict.aims.models.entities.audit.ProductLog;
 import com.hust.soict.ict.aims.models.entities.product.Product;
 import com.hust.soict.ict.aims.repositories.ProductLogRepository;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
@@ -26,7 +28,7 @@ import java.util.*;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class AuditLoggingAspect {
+public class ProductAuditLoggingAspect {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final StockAdjustLogRepository stockAdjustLogRepository;
@@ -135,12 +137,21 @@ public class AuditLoggingAspect {
 
         Map<String, Object> newValueMap = extractUpdatingFields(requestedFieldNames, result);
 
+        List<ProductEditDetail> details = new ArrayList<>();
+
+        for (String fieldName : requestedFieldNames) {
+            Object oldValue = oldValueMap.get(fieldName);
+            Object newValue = newValueMap.get(fieldName);
+
+            if (!Objects.equals(oldValue, newValue)) {
+                details.add(new ProductEditDetail(fieldName, Objects.toString(oldValue), Objects.toString(newValue)));
+            }
+        }
+
 //        ProductLog productLog = new ProductLog(
-//                null, <----- TODO: ADD AUTHENTICATED PRODUCT MANAGER
+//                null, //<----- TODO: ADD AUTHENTICATED PRODUCT MANAGER
 //                product,
-//                requestedFieldNames,
-//                oldValueMap,
-//                newValueMap
+//                details
 //        );
 //        productLogRepository.save(productLog);
 

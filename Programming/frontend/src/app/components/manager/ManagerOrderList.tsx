@@ -22,9 +22,11 @@ export default function ManagerOrderList() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
 
-    // Default to PENDING to utilize the specific /pending endpoint
     const [filterStatus, setFilterStatus] = useState<OrderStatus | 'ALL'>('PENDING');
     const [page, setPage] = useState(0);
+
+    const [isLastPage, setIsLastPage] = useState(false);
+
     const [confirmAction, setConfirmAction] = useState<{ id: string; action: 'APPROVE' | 'REJECT' } | null>(null);
 
     useEffect(() => {
@@ -35,7 +37,7 @@ export default function ManagerOrderList() {
         setLoading(true);
         try {
             let data: any;
-            // Smart Endpoint Routing based on Status
+
             if (filterStatus === 'PENDING') {
                 data = await OrderManagementService.getPendingOrders(page);
             } else {
@@ -43,9 +45,18 @@ export default function ManagerOrderList() {
                 data = await OrderManagementService.getOrders(page, statusParam);
             }
 
-            // Safely handle Spring Boot Page<T> unwrapping
+            // Extract the list
             const orderList = Array.isArray(data) ? data : (data.content || []);
             setOrders(orderList);
+
+            if (!Array.isArray(data) && data.last !== undefined) {
+                // If it's a Spring Boot Page<T>, use the exact 'last' boolean
+                setIsLastPage(data.last);
+            } else {
+                // Fallback: If it's just an array, assume it's the last page if we received less than 30 items
+                setIsLastPage(orderList.length < 30);
+            }
+
         } catch (err) {
             console.error("Failed to load orders:", err);
         } finally {
@@ -61,7 +72,6 @@ export default function ManagerOrderList() {
                 await OrderManagementService.rejectOrder(id);
             }
 
-            // Optimistically remove from list if we are strictly viewing PENDING
             if (filterStatus === 'PENDING') {
                 setOrders(prev => prev.filter(o => o.id !== id));
             } else {
@@ -73,7 +83,6 @@ export default function ManagerOrderList() {
         }
     };
 
-    // Client-side search filter
     const filtered = orders.filter(o => {
         const q = search.toLowerCase();
         return !q ||
@@ -109,7 +118,7 @@ export default function ManagerOrderList() {
                 <div className="relative min-w-[180px]">
                     <select
                         value={filterStatus}
-                        onChange={e => { setFilterStatus(e.target.value as OrderStatus | 'ALL'); setPage(0); }} // Reset page on filter change
+                        onChange={e => { setFilterStatus(e.target.value as OrderStatus | 'ALL'); setPage(0); setIsLastPage(false); }}
                         className={`w-full appearance-none pr-10 cursor-pointer ${inputClass}`}
                     >
                         <option value="PENDING">Pending Approval</option>
@@ -160,21 +169,21 @@ export default function ManagerOrderList() {
                                         onClick={() => navigate(`/manager/orders/${order.id}`)}
                                     >
                                         <td className="px-5 py-4">
-                        <span className="font-mono text-primary font-bold bg-primary/10 px-2 py-1 rounded border border-primary/20">
-                          {order.id.substring(0, 8)}...
-                        </span>
+                                            <span className="font-mono text-primary font-bold bg-primary/10 px-2 py-1 rounded border border-primary/20">
+                                              {order.id.substring(0, 8)}...
+                                            </span>
                                         </td>
                                         <td className="px-5 py-4 font-bold text-foreground">
                                             {order.deliveryInformation?.customerName || 'N/A'}
                                         </td>
                                         <td className="px-5 py-4 text-right font-extrabold text-foreground">
-                                            {formatVND(order.invoice?.totalAmount || order.invoice.deliveryFee || 0)}
+                                            {formatVND(order.invoice?.totalAmount || order.invoice?.deliveryFee || 0)}
                                         </td>
                                         <td className="px-5 py-4 text-center">
-                        <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-md font-bold border shadow-sm ${cfg.color}`}>
-                          <StatusIcon size={12} />
-                            {cfg.label}
-                        </span>
+                                            <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-md font-bold border shadow-sm ${cfg.color}`}>
+                                              <StatusIcon size={12} />
+                                                {cfg.label}
+                                            </span>
                                         </td>
                                         <td className="px-5 py-4">
                                             <div className="flex items-center justify-end gap-1.5" onClick={e => e.stopPropagation()}>
@@ -186,7 +195,6 @@ export default function ManagerOrderList() {
                                                     <Eye size={18} />
                                                 </button>
 
-                                                {/* Only show Approve/Reject for PENDING orders */}
                                                 {order.status === 'PENDING' && (
                                                     <>
                                                         <button
@@ -216,7 +224,7 @@ export default function ManagerOrderList() {
                 )}
 
                 {/* Pagination Controls */}
-                {!loading && filtered.length > 0 && (
+                {!loading && (orders.length > 0 || page > 0) && (
                     <div className="px-5 py-4 border-t border-border flex items-center justify-between bg-muted/10">
                         <span className="text-sm text-muted-foreground font-medium">Page {page + 1}</span>
                         <div className="flex gap-2">
@@ -228,8 +236,9 @@ export default function ManagerOrderList() {
                                 <ChevronLeft size={18} />
                             </button>
                             <button
+                                disabled={isLastPage} // NEW: Properly disable Next button
                                 onClick={() => setPage(p => p + 1)}
-                                className="p-1.5 rounded-lg border border-border bg-card text-foreground hover:bg-muted transition-colors shadow-sm"
+                                className="p-1.5 rounded-lg border border-border bg-card text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted transition-colors shadow-sm"
                             >
                                 <ChevronRight size={18} />
                             </button>

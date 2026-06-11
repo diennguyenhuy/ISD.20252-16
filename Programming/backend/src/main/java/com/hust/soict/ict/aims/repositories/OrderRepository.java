@@ -24,8 +24,4 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     @EntityGraph(value = "Order-summary")
     Page<Order> findAllByStatus(Order.Status status, Pageable pageable);
 
-    @EntityGraph(value = "Order-summary")
-    Page<Order> findByStatusNot(Order.Status status, Pageable pageable);
-
-    Page<Order> findAllByStatusNot(Order.Status status, Pageable pageable);
 }

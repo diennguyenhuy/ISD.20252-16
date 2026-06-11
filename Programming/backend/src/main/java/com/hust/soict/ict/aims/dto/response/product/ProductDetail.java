@@ -4,10 +4,11 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 @Data
 public abstract class ProductDetail {
-    private String id;
+    private UUID id;
     private String title;
     private String category;
     private String description;

@@ -29,10 +29,7 @@ public class OrderManagementService {
 
     public Page<OrderResponse> getOrders(Order.Status status, Pageable pageable) {
         if (status == null) {
-            return orderRepository.findAllByStatusNot(Order.Status.PENDING, pageable).map(orderMapper::toOrderResponse);
-        }
-        if (status == Order.Status.PENDING) {
-            throw new IllegalArgumentException("Pending orders must be retrieved using other endpoint");
+            return orderRepository.findAll(pageable).map(orderMapper::toOrderResponse);
         }
         return orderRepository.findAllByStatus(status, pageable).map(orderMapper::toOrderResponse);
     }

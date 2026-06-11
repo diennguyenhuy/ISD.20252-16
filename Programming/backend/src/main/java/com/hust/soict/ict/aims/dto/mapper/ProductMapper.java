@@ -13,7 +13,6 @@ import java.util.List;
 )
 public interface ProductMapper {
     @Mapping(target = "productType", ignore = true)
-    @Mapping(target = "id", expression = "java(product.getId().toString())")
     @SubclassMapping(source = Book.class, target = BookDetail.class)
     @SubclassMapping(source = Newspaper.class, target = NewspaperDetail.class)
     @SubclassMapping(source = CD.class, target = CDDetail.class)

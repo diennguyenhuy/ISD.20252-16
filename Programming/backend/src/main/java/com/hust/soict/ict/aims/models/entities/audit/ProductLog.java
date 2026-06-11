@@ -32,17 +32,9 @@ public class ProductLog extends ProductAuditLog {
         this.action = action;
     }
 
-    public ProductLog(User manager, Product product, Set<String> fieldNames, Map<String, Object> oldValueMap, Map<String, Object> newValueMap) {
+    public ProductLog(User manager, Product product, List<ProductEditDetail> details) {
         super(manager, product);
         this.action = ProductAction.UPDATE;
-
-        for (String fieldName : fieldNames) {
-            Object oldValue = oldValueMap.get(fieldName);
-            Object newValue = newValueMap.get(fieldName);
-
-            if (!Objects.equals(oldValue, newValue)) {
-                details.add(new ProductEditDetail(fieldName, Objects.toString(oldValue), Objects.toString(newValue)));
-            }
-        }
+        this.details = new ArrayList<>(details);
     }
 }
