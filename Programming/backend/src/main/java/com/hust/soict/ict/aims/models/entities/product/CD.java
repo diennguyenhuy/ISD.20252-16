@@ -108,12 +108,12 @@ public class CD extends Product {
         }
 
         public Builder artists(Collection<String> artists) {
-            this.artists = List.copyOf(artists);
+            this.artists = artists == null ? null : List.copyOf(artists);
             return this;
         }
 
         public Builder artists(String... artists) {
-            this.artists = List.of(artists);
+            this.artists = artists == null ? null : List.of(artists);
             return this;
         }
 
@@ -123,12 +123,12 @@ public class CD extends Product {
         }
 
         public Builder tracks(Collection<Track> tracks) {
-            this.tracks = List.copyOf(tracks);
+            this.tracks = tracks == null ? null : List.copyOf(tracks);
             return this;
         }
 
         public Builder tracks(Track... tracks) {
-            this.tracks = List.of(tracks);
+            this.tracks = tracks == null ? null : List.of(tracks);
             return this;
         }
     }

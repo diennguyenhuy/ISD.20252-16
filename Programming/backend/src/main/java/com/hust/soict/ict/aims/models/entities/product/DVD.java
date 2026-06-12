@@ -150,12 +150,12 @@ public class DVD extends Product {
         }
 
         public Builder subtitles(Collection<String> subtitles) {
-            this.subtitles = List.copyOf(subtitles);
+            this.subtitles = subtitles == null ? null : List.copyOf(subtitles);
             return this;
         }
 
         public Builder subtitles(String... subtitles) {
-            this.subtitles = List.of(subtitles);
+            this.subtitles = subtitles == null ? null : List.of(subtitles);
             return this;
         }
     }

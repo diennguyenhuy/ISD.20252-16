@@ -29,6 +29,7 @@ import ProductUpdate from "./components/manager/ProductUpdate";
 import ManagerProductDetail from "./components/manager/ManagerProductDetail";
 import ManagerOrderDetail from "./components/manager/ManagerOrderDetail";
 import ManagerOrderList from "./components/manager/ManagerOrderList";
+import ManagerProductLogs from "./components/manager/ManagerProductLogs";
 
 export const router = createBrowserRouter([
     { path: '/login', Component: LoginSignup },
@@ -65,6 +66,7 @@ export const router = createBrowserRouter([
             { path: 'products/:id', Component: ManagerProductDetail },
             { path: 'orders', Component: ManagerOrderList },
             { path: 'orders/:id', Component: ManagerOrderDetail },
+            { path: 'logs', Component: ManagerProductLogs }
         ],
     },
     {

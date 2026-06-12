@@ -1,27 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Plus, Search, Pencil, Trash2, Package, BookOpen, Disc, Tv, FileText, AlertTriangle, ChevronDown, Loader2, CheckCircle } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, Package, AlertTriangle, ChevronDown, Loader2, CheckCircle } from 'lucide-react';
 import { useProductManagement } from './hooks/useProductManagement';
-import type { ProductSummary } from '../../models/product.interface';
+import type {ProductStatus, ProductSummary, ProductTypeName} from '../../models/product.interface';
 import { formatVND } from '../../data/formatter';
 import AdjustStockModal from './AdjustStockModal';
-
-const TYPE_LABELS: Record<string, string> = { BOOK: 'Book', CD: 'CD', DVD: 'DVD', NEWSPAPER: 'Newspaper' };
-const TYPE_ICONS: Record<string, React.ElementType> = { BOOK: BookOpen, CD: Disc, DVD: Tv, NEWSPAPER: FileText };
-const TYPE_COLORS: Record<string, string> = {
-  BOOK: 'bg-primary/10 text-primary border border-primary/20',
-  CD: 'bg-secondary text-secondary-foreground border border-border',
-  DVD: 'bg-accent/50 text-accent-foreground border border-accent',
-  NEWSPAPER: 'bg-muted text-muted-foreground border border-border',
-};
+import { PRODUCT_TYPES } from "../../models/product.interface";
+import { PRODUCT_TYPE_META } from "../shared/product/productTypeMetadata";
 
 export default function ManagerHomePage() {
   const navigate = useNavigate();
   const { products, loading, fetchProducts, deleteProducts, activateProduct } = useProductManagement();
 
   const [search, setSearch] = useState('');
-  const [filterType, setFilterType] = useState<string>('ALL');
-  const [filterStatus, setFilterStatus] = useState<string>('ALL');
+  const [filterType, setFilterType] = useState<ProductTypeName | 'ALL'>('ALL');
+  const [filterStatus, setFilterStatus] = useState<ProductStatus | 'ALL'>('ALL');
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -40,7 +33,7 @@ export default function ManagerHomePage() {
   const filtered = products.filter(p => {
     const q = search.toLowerCase();
     const matchSearch = !q || p.title.toLowerCase().includes(q) || (p.creators && p.creators.join(' ').toLowerCase().includes(q));
-    const matchType = filterType === 'ALL' || p.productType.toUpperCase() === filterType;
+    const matchType = filterType === 'ALL' || p.productType === filterType;
     const pStatus = (p as any).status || 'ACTIVE';
     const matchStatus = filterStatus === 'ALL' || pStatus === filterStatus;
 
@@ -133,7 +126,7 @@ export default function ManagerHomePage() {
             <input type="text" placeholder="Search by name, creator..." value={search} onChange={e => setSearch(e.target.value)} className={`w-full pl-10 pr-4 ${inputClass}`} />
           </div>
           <div className="relative min-w-[180px]">
-            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className={`w-full appearance-none pr-10 cursor-pointer ${inputClass}`}>
+            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as ProductStatus | 'ALL')} className={`w-full appearance-none pr-10 cursor-pointer ${inputClass}`}>
               <option value="ALL">All Statuses</option>
               <option value="ACTIVE">Active</option>
               <option value="DEACTIVATED">Deactivated</option>
@@ -144,18 +137,18 @@ export default function ManagerHomePage() {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-          {(['BOOK', 'CD', 'DVD', 'NEWSPAPER']).map(type => {
-            const count = products.filter(p => p.productType.toUpperCase() === type).length;
-            const Icon = TYPE_ICONS[type] || Package;
+          {PRODUCT_TYPES.map(type => {
+            const count = products.filter(p => p.productType === type).length;
+            const Icon = PRODUCT_TYPE_META[type].icon || Package;
             const isActive = filterType === type;
 
             return (
                 <button key={type} onClick={() => setFilterType(isActive ? 'ALL' : type)} className={`flex items-center gap-3.5 p-4 rounded-2xl border transition-all duration-200 text-left ${isActive ? 'border-primary bg-primary/10 shadow-sm shadow-primary/5' : 'border-border bg-card hover:border-primary/40 hover:bg-muted/30 shadow-sm'}`}>
-                  <div className={`p-2.5 rounded-xl shadow-inner ${isActive ? 'bg-primary text-primary-foreground' : TYPE_COLORS[type]}`}>
+                  <div className={`p-2.5 rounded-xl shadow-inner ${isActive ? 'bg-primary text-primary-foreground' : PRODUCT_TYPE_META[type].color}`}>
                     <Icon size={18} />
                   </div>
                   <div>
-                    <p className={`text-xs font-semibold mb-0.5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>{TYPE_LABELS[type]}</p>
+                    <p className={`text-xs font-semibold mb-0.5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>{PRODUCT_TYPE_META[type].label}</p>
                     <p className="text-xl font-extrabold text-foreground tracking-tight">{count}</p>
                   </div>
                 </button>
@@ -187,9 +180,9 @@ export default function ManagerHomePage() {
               </thead>
               <tbody>
               {filtered.map(product => {
-                const uType = product.productType.toUpperCase();
-                const Icon = TYPE_ICONS[uType] || Package;
-                const status = (product as any).status || 'ACTIVE';
+                const uType = product.productType;
+                const Icon = PRODUCT_TYPE_META[uType].icon || Package;
+                const status = product.status;
                 const isSelected = selectedIds.includes(product.id);
 
                 return (
@@ -199,7 +192,7 @@ export default function ManagerHomePage() {
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => toggleSelect(product.id)}
-                            disabled={status === 'DELETED'}
+                            disabled={status === 'DELETED' || status === 'DEACTIVATED'}
                             className="w-4 h-4 rounded border-border text-primary focus:ring-primary cursor-pointer disabled:cursor-not-allowed"
                         />
                       </td>
@@ -215,8 +208,8 @@ export default function ManagerHomePage() {
                         </div>
                       </td>
                       <td className="px-5 py-3.5">
-                      <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-md font-semibold ${TYPE_COLORS[uType] || TYPE_COLORS['BOOK']}`}>
-                        <Icon size={12} /> {TYPE_LABELS[uType] || 'Product'}
+                      <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-md font-semibold ${PRODUCT_TYPE_META[uType].color || PRODUCT_TYPE_META['Book'].color}`}>
+                        <Icon size={12} /> {PRODUCT_TYPE_META[uType].label || 'Product'}
                       </span>
                       </td>
                       <td className="px-5 py-3.5 text-right font-bold">{formatVND(product.currentPrice)}</td>

@@ -1,10 +1,14 @@
+import type {ProductFormSection} from "../components/manager/forms/ProductFormSection";
+
 export type ProductTypeName = 'Book' | 'Newspaper' | 'CD' | 'DVD';
+
+export const PRODUCT_TYPES: ProductTypeName[] = ['Book', 'CD', 'DVD', 'Newspaper'] as const;
 
 export type Product = Book | Newspaper | CD | DVD;
 
 export type ProductStatus = 'ACTIVE' | 'DEACTIVATED' | 'DELETED';
 
-export type ProductSummary = Pick<BaseProduct, 'id' | 'title' | 'originalValue' | 'currentPrice' | 'stockQuantity' | 'productType' | 'imageURL'> & { creators: string[] };
+export type ProductSummary = Pick<BaseProduct, 'id' | 'title' | 'originalValue' | 'currentPrice' | 'stockQuantity' | 'productType' | 'imageURL' | 'status'> & { creators: string[] };
 
 interface BaseProduct {
     readonly id: string;

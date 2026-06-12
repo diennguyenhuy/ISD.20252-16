@@ -86,12 +86,12 @@ public class Book extends PrintableProduct {
         }
 
         public Builder authors(Collection<String> authors) {
-            this.authors = List.copyOf(authors);
+            this.authors = authors == null ? null : List.copyOf(authors);
             return this;
         }
 
         public Builder authors(String... authors) {
-            this.authors = List.of(authors);
+            this.authors = authors == null ? null : List.of(authors);
             return this;
         }
 

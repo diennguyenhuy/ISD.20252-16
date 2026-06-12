@@ -4,8 +4,8 @@ import { ArrowLeft, Save, AlertCircle, Package, FileText, LayoutGrid, Loader2 } 
 import ProductManagementService from '../../api/ProductManagementService';
 import { extractErrorMessage } from "./hooks/useProductManagement";
 import { Field, inputClass } from './forms/FormField';
-import { PRODUCT_TYPES, useAllFormSections } from './forms/ProductFormSectionRegistry';
-import type { ProductTypeName } from '../../models/product.interface';
+import { useAllFormSections } from './forms/ProductFormSectionRegistry';
+import { type ProductTypeName, PRODUCT_TYPES } from '../../models/product.interface';
 
 export default function ProductCreation() {
     const navigate = useNavigate();

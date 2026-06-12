@@ -109,12 +109,12 @@ public class Newspaper extends PrintableProduct {
         }
 
         public Builder sections(Collection<String> sections) {
-            this.sections = List.copyOf(sections);
+            this.sections = sections == null ? null : List.copyOf(sections);
             return this;
         }
 
         public Builder sections(String... sections) {
-            this.sections = List.of(sections);
+            this.sections = sections == null ? null : List.of(sections);
             return this;
         }
     }

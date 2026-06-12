@@ -1,10 +1,11 @@
 import { Outlet, useNavigate, useLocation } from 'react-router';
-import { Package, ShoppingBag, User, LogOut, ChevronRight, Menu, X, Sun, Moon } from 'lucide-react';
+import { Package, ShoppingBag, User, LogOut, ChevronRight, Menu, X, Sun, Moon, Activity } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 const NAV_ITEMS = [
   { path: '/manager', label: 'Product Management', icon: Package, exact: true },
   { path: '/manager/orders', label: 'Order Management', icon: ShoppingBag },
+  { path: '/manager/logs', label: 'Product Audit Logs', icon: Activity },
 ];
 
 export default function ManagerLayout() {

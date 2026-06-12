@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -24,13 +25,17 @@ public class ProductAuditLogService {
 
     @Transactional(readOnly = true)
     public List<ProductAuditLogResponse> getProductAuditLogs() {
-        List<ProductLog> productLogs = productLogRepository.findAll();
-        List<StockAdjustLog> stockAdjustLogs = stockAdjustLogRepository.findAll();
+        List<ProductLog> productLogs = productLogRepository.findTop100ByOrderByTimestampDesc();
+        List<StockAdjustLog> stockAdjustLogs = stockAdjustLogRepository.findTop100ByOrderByTimestampDesc();
 
         List<ProductAuditLog> logs = new ArrayList<>();
         logs.addAll(productLogs);
         logs.addAll(stockAdjustLogs);
 
-        return logs.stream().map(productAuditLogMapper::toProductAuditLogResponse).toList();
+        return logs.stream()
+                .sorted(Comparator.comparing(ProductAuditLog::getTimestamp).reversed())
+                .limit(100)
+                .map(productAuditLogMapper::toProductAuditLogResponse)
+                .toList();
     }
 }

@@ -4,8 +4,10 @@ import com.hust.soict.ict.aims.models.entities.audit.ProductLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface ProductLogRepository extends JpaRepository<ProductLog, UUID> {
+    List<ProductLog> findTop100ByOrderByTimestampDesc();
 }
