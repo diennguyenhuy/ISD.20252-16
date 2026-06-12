@@ -31,7 +31,12 @@ public class CD extends Product {
     @Column(nullable = false)
     private String recordLabel;
 
-    @OneToMany(mappedBy = "cd", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ElementCollection
+    @CollectionTable(
+            name = "cd_tracks",
+            joinColumns = @JoinColumn(name = "cd_id")
+    )
+    @OrderColumn(name = "track_number")
     private List<Track> tracks = new ArrayList<>();
 
     public List<String> getArtists() {
@@ -42,29 +47,13 @@ public class CD extends Product {
         return Collections.unmodifiableList(tracks);
     }
 
-    public void addTrack(@NonNull Track track) throws IllegalArgumentException {
-        track.setCd(this);
-        tracks.add(track);
-    }
-
-    public Track getTrack(UUID trackId) {
-        return this.tracks.stream()
-                .filter(track -> track.getId() != null && track.getId().equals(trackId))
-                .findFirst()
-                .orElse(null);
-    }
-
-    public void removeTrack(Track track) {
-        if (track != null) {
-            this.tracks.remove(track);
-            track.setCd(null); // Cắt đứt liên kết để Hibernate hiểu là cần xóa (orphan removal)
-        }
-    }
-
-    // (Tùy chọn) Hàm nạp chồng để xóa trực tiếp bằng ID cho tiện lợi
-    public void removeTrack(UUID trackId) {
-        Track trackToRemove = getTrack(trackId);
-        removeTrack(trackToRemove);
+    private CD(Builder builder) {
+        super(builder);
+        this.releaseDate = builder.releaseDate;
+        this.genre = Objects.requireNonNull(builder.genre, "CD genre cannot be null");
+        this.artists = new ArrayList<>(Objects.requireNonNull(builder.artists, "List of artists cannot be null"));
+        this.recordLabel = Objects.requireNonNull(builder.recordLabel, "CD record label cannot be null");
+        this.tracks = new ArrayList<>(Objects.requireNonNull(builder.tracks, "List of tracks cannot be null"));
     }
 
     @Override
@@ -72,41 +61,27 @@ public class CD extends Product {
         return new Builder(this);
     }
 
-    private CD(Builder builder) {
-        super(builder);
-        this.releaseDate = builder.releaseDate;
-        this.genre = Objects.requireNonNull(builder.genre, "CD genre cannot be null");
-        this.artists = List.copyOf(builder.artists);
-        this.recordLabel = builder.recordLabel;
-        this.tracks = List.copyOf(builder.tracks);
-    }
-
     private void apply(Builder builder) {
         super.apply(builder);
-        this.genre = builder.genre;
-        this.artists = List.copyOf(builder.artists);
-        this.recordLabel = builder.recordLabel;
-        builder.tracks.forEach(this::addTrack);
+        Optional.ofNullable(builder.genre).ifPresent(v -> this.genre = v);
+        Optional.ofNullable(builder.artists).ifPresent(v -> this.artists = new ArrayList<>(v));
+        Optional.ofNullable(builder.recordLabel).ifPresent(v -> this.recordLabel = v);
+        Optional.ofNullable(builder.tracks).ifPresent(v -> this.tracks = new ArrayList<>(v));
     }
 
     public static class Builder extends Product.Builder<CD, Builder> {
         private LocalDate releaseDate;
         private String genre;
-        private List<String> artists = new ArrayList<>();
+        private List<String> artists;
         private String recordLabel;
-        private List<Track> tracks = new ArrayList<>();
+        private List<Track> tracks;
 
         public Builder() {
             super();
         }
 
-        public Builder(CD existingCD) {
-            super(existingCD);
-            this.releaseDate = existingCD.releaseDate;
-            this.genre = existingCD.genre;
-            this.artists = existingCD.artists;
-            this.recordLabel = existingCD.recordLabel;
-            this.tracks = existingCD.tracks;
+        private Builder(CD updatingCD) {
+            super(updatingCD);
         }
 
         @Override
@@ -127,42 +102,32 @@ public class CD extends Product {
             return this;
         }
 
-        public Builder genre(@NonNull String genre) {
+        public Builder genre(String genre) {
             this.genre = genre;
             return this;
         }
 
-        public Builder artist(@NonNull String artist) {
-            this.artists.add(artist);
-            return this;
-        }
-
-        public Builder artists(@NonNull Collection<String> artists) {
+        public Builder artists(Collection<String> artists) {
             this.artists = List.copyOf(artists);
             return this;
         }
 
-        public Builder artists(@NonNull String... artists) {
+        public Builder artists(String... artists) {
             this.artists = List.of(artists);
             return this;
         }
 
-        public Builder recordLabel(@NonNull String recordLabel) {
+        public Builder recordLabel(String recordLabel) {
             this.recordLabel = recordLabel;
             return this;
         }
 
-        public Builder track(@NonNull Track track) {
-            this.tracks.add(track);
-            return this;
-        }
-
-        public Builder tracks(@NonNull Collection<Track> tracks) {
+        public Builder tracks(Collection<Track> tracks) {
             this.tracks = List.copyOf(tracks);
             return this;
         }
 
-        public Builder tracks(@NonNull Track... tracks) {
+        public Builder tracks(Track... tracks) {
             this.tracks = List.of(tracks);
             return this;
         }

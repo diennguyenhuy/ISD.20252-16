@@ -7,6 +7,7 @@ import com.hust.soict.ict.aims.models.entities.product.Product;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import com.hust.soict.ict.aims.dto.mapper.ProductMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,11 +33,11 @@ public class ProductCatalogueService {
                 .orElseThrow(() -> new ProductNotFoundException(productId));
     }
 
-    public List<ProductSummary> getProductsBy(String title, String category, Long minPrice, Long maxPrice, Pageable pageable) {
+    public Page<ProductSummary> getProductsBy(String title, String category, Long minPrice, Long maxPrice, Pageable pageable) {
         String reqTitle = title == null ? null : "%" + title.toLowerCase() + "%";
         String reqCategory = category == null ? null : "%" + category.toLowerCase() + "%";
 
         return productRepository.searchActiveProductsBy(reqTitle, reqCategory, minPrice, maxPrice, pageable)
-                .stream().map(productMapper::toProductSummary).toList();
+                .map(productMapper::toProductSummary);
     }
 }

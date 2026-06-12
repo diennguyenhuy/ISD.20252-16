@@ -1,5 +1,5 @@
 import React, {createContext, useContext, useState, useEffect, type ReactNode} from 'react';
-import CartService from '../api/cartService';
+import CartService from '../api/CartService';
 import type {Cart} from '../models/cart.interface';
 
 interface CartContextType {

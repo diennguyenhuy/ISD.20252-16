@@ -4,11 +4,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 @NoArgsConstructor
 @Data
 public class ProductSummary {
-    private String id;
+    private UUID id;
     private String title;
     private long originalValue;
     private long currentPrice;

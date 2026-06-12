@@ -1,32 +1,60 @@
 package com.hust.soict.ict.aims.services.notification;
 
-import com.hust.soict.ict.aims.exceptions.UnsupportedNotificationMethod;
-import com.hust.soict.ict.aims.models.entities.order.Order;
-import com.hust.soict.ict.aims.services.notification.email.OrderConfirmationEmail;
+import com.hust.soict.ict.aims.exceptions.UnsupportedNotificationException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
 public class NotificationService {
-    private final Map<NotificationMethod, Map<Class<? extends NotificationMessage>, NotificationChannel<?>>> notificationChannels;
+    private final Map<Class<? extends NotificationMessage>, NotificationChannel<?>> channels = new HashMap<>();
+    private final Map<Class<? extends NotificationMessage>, NotificationMessage.Factory<?, ?>> factories = new HashMap<>();
 
-    public NotificationService(List<NotificationChannel<?>> notificationChannels) {
-        this.notificationChannels = new EnumMap<>(NotificationMethod.class);
-        notificationChannels.forEach(c ->
-                this.notificationChannels.computeIfAbsent(
-                c.method(),
-                k -> new HashMap<>()
-        ).putIfAbsent(c.messageType(), c));
+    public NotificationService(
+            List<NotificationChannel<?>> channels,
+            List<NotificationMessage.Factory<?, ?>> factories
+    ) {
+        final Map<NotificationMethod, NotificationChannel<?>> methodToChannel = new EnumMap<>(NotificationMethod.class);
+        channels.forEach(c -> methodToChannel.put(c.method(), c));
+
+        factories.forEach(f -> {
+            Class<? extends NotificationMessage> messageType = f.messageType();
+            NotificationMethod method = f.supportedMethod();
+
+            this.factories.put(messageType, f);
+
+            NotificationChannel<?> channel = methodToChannel.get(method);
+            if (channel != null) {
+                this.channels.put(messageType, channel);
+            } else {
+                throw new UnsupportedNotificationException("Unsupported notification channel for method: " + method);
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")
-    public <M extends NotificationMessage> void send(NotificationMethod method, M message) {
-        NotificationChannel<M> channel = (NotificationChannel<M>) Optional.ofNullable(
-                Optional.ofNullable(notificationChannels.get(method))
-                .orElseThrow(() -> new UnsupportedNotificationMethod("Unsupported notification method: " + method.name()))
-                        .get(message.getClass())
-        ).orElseThrow(() -> new UnsupportedNotificationMethod("Mismatching notification message type: " + message.getClass().getName() + " while method is: " + method.name()));
+    private <M extends NotificationMessage>
+    NotificationChannel<M> getChannel(Class<? extends NotificationMessage> messageType) {
+        return (NotificationChannel<M>) Optional.ofNullable(channels.get(messageType))
+                .orElseThrow(() -> new UnsupportedNotificationException("No channel registered for message type: " + messageType.getName()));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <M extends NotificationMessage, P>
+    NotificationMessage.Factory<M, P> getFactory(Class<M> messageType) {
+        return (NotificationMessage.Factory<M, P>) Optional.ofNullable(factories.get(messageType))
+                .orElseThrow(() -> new UnsupportedNotificationException("No factory registered for message type: " + messageType.getName()));
+    }
+
+
+    public <M extends NotificationMessage> void send(M message) {
+        NotificationChannel<M> channel = getChannel(message.getClass());
         channel.send(message);
+    }
+
+    public <M extends NotificationMessage, P> void send(Class<M> messageType, P payload) {
+        NotificationMessage.Factory<M, P> factory = getFactory(messageType);
+        M message = factory.createMessage(payload);
+        send(message);
     }
 }

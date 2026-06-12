@@ -7,7 +7,7 @@ public interface ProductUpdater<P extends Product, U extends UpdateProductReques
     Class<U> updateRequestType();
     P updateFrom(P existingProduct, U updateRequest);
 
-    default <B extends Product.Builder<P, B>> B populateCommonFields(B builder, U request) {
+    default <B extends Product.Builder<P, B>> B buildCommonFields(B builder, U request) {
         return builder
                 .title(request.getTitle())
                 .category(request.getCategory())

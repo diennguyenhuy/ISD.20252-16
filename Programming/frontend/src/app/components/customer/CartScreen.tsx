@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { Trash2, ShoppingCart, ArrowLeft, AlertTriangle, ShoppingBag, Loader2 } from 'lucide-react';
-import { formatVND } from '../../data/mockData';
+import { formatVND } from '../../data/formatter';
 
 // Import Services and Interfaces
 import { useCart } from "../../context/CartContext";
-import OrderService from '../../api/orderService';
-import type { Cart } from '../../models/cart.interface';
+import OrderService from '../../api/OrderService';
 import type { ProductTypeName } from '../../models/product.interface';
 
 const TYPE_LABELS: Record<ProductTypeName, string> = {

@@ -17,10 +17,12 @@ public class CDCreator implements ProductCreator<CD, CreateCDRequest> {
 
     @Override
     public CD createFrom(CreateCDRequest createRequest) {
-        List<Track> cdTracks = createRequest.getTracks() == null ? List.of() : createRequest.getTracks().stream()
-                .map(t -> new Track(t.getTitle(), t.getLength())).collect(Collectors.toList());
+        List<Track> cdTracks = createRequest.getTracks() == null ?
+                List.of() : createRequest.getTracks().stream()
+                .map(t -> new Track(t.getTitle(), t.getLength()))
+                .toList();
 
-        return populateCommonFields(new CD.Builder(), createRequest)
+        return buildCommonFields(new CD.Builder(), createRequest)
                 .releaseDate(createRequest.getReleaseDate())
                 .genre(createRequest.getGenre())
                 .artists(createRequest.getArtists())

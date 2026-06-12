@@ -3,16 +3,17 @@ package com.hust.soict.ict.aims.models.entities.product;
 import java.math.BigDecimal;
 import java.util.*;
 
-import com.hust.soict.ict.aims.models.entities.AuditableEntity;
+import com.hust.soict.ict.aims.models.entities.VersionedEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Immutable;
 
 @Entity
 @Table(name = "product")
 @Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class Product extends AuditableEntity {
+public abstract class Product extends VersionedEntity {
     public enum Status {
         ACTIVE,
         DEACTIVATED,
@@ -49,9 +50,11 @@ public abstract class Product extends AuditableEntity {
     @Column(nullable = false, precision = 10, scale = 3)
     private BigDecimal weight;
 
+    @Immutable
     @Column(unique = true, nullable = false, updatable = false, length = 32)
     private String barcode;
 
+    @Immutable
     @Column(nullable = false, updatable = false)
     private long originalValue;
 
@@ -67,9 +70,6 @@ public abstract class Product extends AuditableEntity {
 
     @Column(name = "image_url", length = 2048)
     private String imageURL;
-
-    @Version
-    private Long version;
 
     public static final int MIN_PRICE_RELATIVE_PERCENTAGE = 30;
     public static final int MAX_PRICE_RELATIVE_PERCENTAGE = 150;
@@ -106,24 +106,27 @@ public abstract class Product extends AuditableEntity {
     }
 
     public void delete() {
-        if (status == Status.DELETED) return;
-
+        if (status == Status.DELETED) {
+            throw new IllegalStateException("Cannot delete already deleted product " + title);
+        }
         if (stockQuantity == 0) status = Status.DELETED;
         else deactivate();
     }
 
     private void deactivate() {
-        if (status == Status.DEACTIVATED) return;
+        if (status == Status.DEACTIVATED) {
+            throw new IllegalStateException("Cannot deactivate already deactivated product " + title);
+        }
         status = Status.DEACTIVATED;
     }
 
     public void activate() throws IllegalStateException {
-        if (status == Status.ACTIVE) return;
-
-        if (status == Status.DELETED) {
-            throw new IllegalStateException("Cannot activate deleted product #" + id);
+        if (status == Status.ACTIVE) {
+            throw new IllegalStateException("Cannot activate already activated product " + title);
         }
-
+        if (status == Status.DELETED) {
+            throw new IllegalStateException("Cannot activate deleted product " + title);
+        }
         status = Status.ACTIVE;
     }
 
@@ -139,22 +142,22 @@ public abstract class Product extends AuditableEntity {
         this.originalValue = Objects.requireNonNull(builder.originalValue, "Product original value cannot be null");
         this.currentPrice = Objects.requireNonNull(builder.currentPrice,  "Product current price cannot be null");
         this.stockQuantity = Objects.requireNonNull(builder.stockQuantity, "Product stock quantity cannot be null");
-        this.status = Objects.requireNonNull(builder.status, "Product status cannot be null");
-        this.imageURL = builder.imageURL;
-    }
-
-    protected final void apply(Builder<?, ?> builder) {
-        this.title = builder.title;
-        this.category = builder.category;
-        this.description = builder.description;
-        this.height = builder.height;
-        this.width = builder.width;
-        this.length = builder.length;
-        this.weight = builder.weight;
+        this.status = Status.ACTIVE;
         this.imageURL = builder.imageURL;
     }
 
     public abstract Builder<?, ?> toBuilder();
+
+    protected final void apply(Builder<?, ?> builder) {
+        Optional.ofNullable(builder.title).ifPresent(v -> this.title = v);
+        Optional.ofNullable(builder.category).ifPresent(v -> this.category = v);
+        Optional.ofNullable(builder.description).ifPresent(v -> this.description = v);
+        Optional.ofNullable(builder.height).ifPresent(v -> this.height = v);
+        Optional.ofNullable(builder.width).ifPresent(v -> this.width = v);
+        Optional.ofNullable(builder.length).ifPresent(v -> this.length = v);
+        Optional.ofNullable(builder.weight).ifPresent(v -> this.weight = v);
+        Optional.ofNullable(builder.imageURL).ifPresent(v -> this.imageURL = v);
+    }
 
     public static abstract class Builder<P extends Product, B extends Builder<P, B>> {
         protected final P updatingProduct;
@@ -169,7 +172,6 @@ public abstract class Product extends AuditableEntity {
         private Long originalValue;
         private Long currentPrice;
         private Integer stockQuantity;
-        private Status status = Status.ACTIVE;
         private String imageURL;
 
         protected Builder() {
@@ -177,33 +179,20 @@ public abstract class Product extends AuditableEntity {
         }
 
         @SuppressWarnings("unchecked")
-        protected Builder(Product existingProduct) {
-            this.updatingProduct = (P) existingProduct;
-            this.title = existingProduct.title;
-            this.category = existingProduct.category;
-            this.description = existingProduct.description;
-            this.height = existingProduct.height;
-            this.width = existingProduct.width;
-            this.length = existingProduct.length;
-            this.weight = existingProduct.weight;
-            this.barcode = existingProduct.barcode;
-            this.originalValue = existingProduct.originalValue;
-            this.currentPrice = existingProduct.currentPrice;
-            this.stockQuantity = existingProduct.stockQuantity;
-            this.status = existingProduct.status;
-            this.imageURL = existingProduct.imageURL;
+        protected Builder(Product updatingProduct) {
+            this.updatingProduct = (P) updatingProduct;
         }
 
         protected abstract B self();
 
         public abstract P build();
 
-        public B title(@NonNull String title) {
+        public B title(String title) {
             this.title = title;
             return self();
         }
 
-        public B category(@NonNull String category) {
+        public B category(String category) {
             this.category = category;
             return self();
         }
@@ -213,27 +202,27 @@ public abstract class Product extends AuditableEntity {
             return self();
         }
 
-        public B height(@NonNull BigDecimal height) {
+        public B height(BigDecimal height) {
             this.height = height;
             return self();
         }
 
-        public B width(@NonNull BigDecimal width) {
+        public B width(BigDecimal width) {
             this.width = width;
             return self();
         }
 
-        public B length(@NonNull BigDecimal length) {
+        public B length(BigDecimal length) {
             this.length = length;
             return self();
         }
 
-        public B weight(@NonNull BigDecimal weight) {
+        public B weight(BigDecimal weight) {
             this.weight = weight;
             return self();
         }
 
-        public B barcode(@NonNull String barcode) {
+        public B barcode(String barcode) {
             this.barcode = barcode;
             return self();
         }
@@ -250,16 +239,6 @@ public abstract class Product extends AuditableEntity {
 
         public B stockQuantity(int stockQuantity) {
             this.stockQuantity = stockQuantity;
-            return self();
-        }
-
-        public B status(@NonNull Status status) {
-            this.status = status;
-            return self();
-        }
-
-        public B status(@NonNull String status) {
-            this.status = Status.valueOf(status.toUpperCase());
             return self();
         }
 

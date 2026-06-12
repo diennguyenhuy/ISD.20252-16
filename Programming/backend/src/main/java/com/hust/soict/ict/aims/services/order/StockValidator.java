@@ -1,6 +1,5 @@
 package com.hust.soict.ict.aims.services.order;
 
-import com.hust.soict.ict.aims.context.CartContext;
 import com.hust.soict.ict.aims.exceptions.EmptyCartException;
 import com.hust.soict.ict.aims.exceptions.NotEnoughStockException;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
@@ -12,10 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -37,14 +33,15 @@ public class StockValidator {
     private final ProductRepository productRepository;
 
     /**
-     * Check for stock availability
+     * Check for stock availability.
+     * This works by syncing products in cart with the repository.
      * @return the cart instance
      * @throws NotEnoughStockException if some products do not satisfy stock availability
      * @throws EmptyCartException if cart is empty
-     * @throws ProductNotFoundException if product "vanishes" (gets deactivated) during checkout
+     * @throws ProductNotFoundException if a product "vanishes" (gets deactivated) during checkout
      */
-    @Transactional
-    public Cart checkStockAvailability(Cart cart) throws NotEnoughStockException, EmptyCartException, ProductNotFoundException {
+    @Transactional(readOnly = true)
+    public Cart checkStockAvailability(Cart cart) throws NotEnoughStockException, EmptyCartException {
         if (cart.isEmpty()) {
             throw new EmptyCartException();
         }
@@ -59,25 +56,31 @@ public class StockValidator {
                 .collect(Collectors.toMap(Product::getId, p -> p));
 
         Map<UUID, Integer> insufficientQuantity = new HashMap<>();
+        List<UUID> missingProducts = new ArrayList<>();
 
         for (CartItem item : cart.getItems()) {
-            Product managedProduct = productMap.get(item.getProduct().getId());
+            UUID productId = item.getProduct().getId();
 
-            if (managedProduct != null) {
-                cart.replaceProductItemWith(managedProduct);
+            Product managedProduct = productMap.get(productId);
 
-                if (item.getProduct().getStockQuantity() < item.getQuantity()) {
-                    insufficientQuantity.put(item.getProduct().getId(), item.getProduct().getStockQuantity());
-                }
-            } else {
-                cart.removeItem(item.getProduct().getId());
-                throw new ProductNotFoundException(item.getProduct().getId());
+            if (managedProduct == null) {
+                missingProducts.add(productId);
+                continue;
             }
 
+            cart.synchronizeProduct(managedProduct);
+
+            if (!item.isStockAvailable()) {
+                insufficientQuantity.put(productId, item.getProduct().getStockQuantity());
+            }
         }
 
-        if (!insufficientQuantity.isEmpty()) {
-            throw new NotEnoughStockException(insufficientQuantity);
+        for (UUID missing : missingProducts) {
+            cart.removeItem(missing);
+        }
+
+        if (!insufficientQuantity.isEmpty() || !missingProducts.isEmpty()) {
+            throw new NotEnoughStockException(insufficientQuantity, missingProducts);
         }
 
         return cart;

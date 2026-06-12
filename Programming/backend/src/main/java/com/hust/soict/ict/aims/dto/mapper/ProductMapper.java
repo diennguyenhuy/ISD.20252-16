@@ -13,7 +13,6 @@ import java.util.List;
 )
 public interface ProductMapper {
     @Mapping(target = "productType", ignore = true)
-    @Mapping(target = "id", expression = "java(product.getId().toString())")
     @SubclassMapping(source = Book.class, target = BookDetail.class)
     @SubclassMapping(source = Newspaper.class, target = NewspaperDetail.class)
     @SubclassMapping(source = CD.class, target = CDDetail.class)
@@ -38,7 +37,9 @@ public interface ProductMapper {
     default List<String> mapCreators(Product product) {
         return switch (product) {
             case Book b -> b.getAuthors();
+            case Newspaper n -> List.of(n.getPublisher());
             case CD cd -> cd.getArtists();
+            case DVD dvd -> List.of(dvd.getStudio());
             default -> Collections.emptyList();
         };
     }

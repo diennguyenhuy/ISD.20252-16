@@ -13,7 +13,7 @@ public class BookCreator implements ProductCreator<Book, CreateBookRequest> {
 
     @Override
     public Book createFrom(CreateBookRequest createRequest) {
-        return populateCommonFields(new Book.Builder(), createRequest)
+        return buildCommonFields(new Book.Builder(), createRequest)
                 .publisher(createRequest.getPublisher())
                 .publicationDate(createRequest.getPublicationDate())
                 .language(createRequest.getLanguage())

@@ -1,10 +1,11 @@
 package com.hust.soict.ict.aims.models.entities.user;
 
-import com.hust.soict.ict.aims.models.entities.AuditableEntity;
+import com.hust.soict.ict.aims.models.entities.VersionedEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.util.*;
 
@@ -12,7 +13,7 @@ import java.util.*;
 @Table(name = "\"user\"")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User extends AuditableEntity {
+public class User extends VersionedEntity {
     public enum Role {
         PRODUCT_MANAGER,
         ADMINISTRATOR,
@@ -33,47 +34,60 @@ public class User extends AuditableEntity {
     @Getter
     private String hashedPassword;
 
+    private boolean active = true;
+    private boolean blocked = false;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "role", length = 20)
     private Set<Role> roles = new HashSet<>();
 
-    public User(Builder builder) {
-        this.username = builder.username;
-        this.email = builder.email;
-        this.hashedPassword = builder.hashedPassword;
-        this.roles = new HashSet<>(builder.roles);
+    public void addRole(@NonNull Role role) {
+        this.roles.add(role);
     }
 
-    public static class Builder {
-        private String username;
-        private String email;
-        private String hashedPassword;
-        private Set<Role> roles = new HashSet<>();
+    public void removeRole(@NonNull Role role) {
+        this.roles.remove(role);
+    }
 
-        public Builder username(String username) {
-            this.username = username;
-            return this;
-        }
+    public Set<Role> getRoles() {
+        return Collections.unmodifiableSet(this.roles);
+    }
 
-        public Builder email(String email) {
-            this.email = email;
-            return this;
+    public void activate() {
+        if (this.active) {
+            throw new IllegalStateException("User " + username + " is already active.");
         }
+        this.active = true;
+    }
 
-        public Builder hashedPassword(String hashedPassword) {
-            this.hashedPassword = hashedPassword;
-            return this;
+    public void deactivate() {
+        if (!this.active) {
+            throw new IllegalStateException("User " + username + " is already deactivated.");
         }
+        this.active = false;
+    }
 
-        public Builder roles(Set<Role> roles) {
-            this.roles = roles;
-            return this;
+    public void block() {
+        if (this.blocked) {
+            throw new IllegalStateException("User " + username + " is already blocked.");
         }
+        this.blocked = true;
+    }
 
-        public User build() {
-            return new User(this);
+    public void unblock() {
+        if (!this.blocked) {
+            throw new IllegalStateException("User " + username + " is already unblocked.");
         }
+        this.blocked = false;
+    }
+
+    public User(String username, String email, String hashedPassword, Set<Role> roles) {
+        this.username = Objects.requireNonNull(username, "User name cannot be null");
+        this.email = Objects.requireNonNull(email, "Email cannot be null");
+        this.hashedPassword = Objects.requireNonNull(hashedPassword, "Hashed password cannot be null");
+        this.roles = new HashSet<>(Objects.requireNonNull(roles, "Roles cannot be null"));
+
     }
 }

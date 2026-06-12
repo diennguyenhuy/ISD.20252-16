@@ -17,4 +17,5 @@ public class OrderResponse {
     private InvoiceResponse invoice;
     private PaymentTransactionResponse paymentTransaction;
     private Instant createdAt;
+    private Instant updatedAt;
 }

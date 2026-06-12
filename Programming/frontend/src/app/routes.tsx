@@ -25,7 +25,8 @@ import PayPalCancel from './components/customer/PayPalCancel';
 
 // Manager Components
 import ManagerHomePage from "./components/manager/ManagerHomePage";
-import ProductAddition from "./components/manager/ProductAddition";
+import ProductCreation from "./components/manager/ProductCreation";
+import ProductUpdate from "./components/manager/ProductUpdate";
 import ManagerProductDetail from "./components/manager/ManagerProductDetail";
 import ManagerOrderDetail from "./components/manager/ManagerOrderDetail";
 import ManagerOrderList from "./components/manager/ManagerOrderList";
@@ -64,8 +65,8 @@ export const router = createBrowserRouter([
                 Component: ManagerLayout,
                 children: [
                     { index: true, Component: ManagerHomePage },
-                    { path: 'products/add', Component: ProductAddition },
-                    { path: 'products/edit/:id', Component: ProductAddition },
+                    { path: 'products/add', Component: ProductCreation },
+                    { path: 'products/edit/:id', Component: ProductUpdate },
                     { path: 'products/:id', Component: ManagerProductDetail },
                     { path: 'orders', Component: ManagerOrderList },
                     { path: 'orders/:id', Component: ManagerOrderDetail },

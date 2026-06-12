@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Past;
@@ -16,9 +17,9 @@ public class CreateCDRequest extends CreateProductRequest {
     @NotBlank(message = "Genre cannot be blank")
     private String genre;
     @NotEmpty(message = "Artists cannot be empty")
-    private List<String> artists;
+    private List<@NotBlank(message = "Each artist cannot be blank") String> artists;
     @NotBlank(message = "Record label cannot be blank")
     private String recordLabel;
     @NotEmpty(message = "Tracks cannot be empty")
-    private List<TrackRequest> tracks;
+    private List<@Valid TrackRequest> tracks;
 }

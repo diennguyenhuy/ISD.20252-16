@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { CreditCard, ExternalLink, Loader2, AlertCircle, ArrowLeft, ShieldCheck } from 'lucide-react';
-import PayByCreditCardService from '../../api/payByCreditCardService';
+import PayByCreditCardService from '../../api/PayByCreditCardService';
 
 /**
  * PayPal payment landing screen (route: /checkout/payment/paypal).

@@ -1,4 +1,4 @@
-export type OrderStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'REFUNDED';
+export type OrderStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'REFUNDED';
 
 export interface Order {
     readonly id: string;
@@ -8,6 +8,7 @@ export interface Order {
     invoice: Invoice;
     paymentTransaction: PaymentTransaction;
     readonly createdAt: string;
+    readonly updatedAt: string;
 }
 
 export type OrderDraft = Pick<Order, 'items'> & Partial<Pick<Order, 'deliveryInformation' | 'invoice'>>;
@@ -15,6 +16,7 @@ export type OrderDraft = Pick<Order, 'items'> & Partial<Pick<Order, 'deliveryInf
 export interface OrderItem {
     readonly productId?: string;
     productName: string;
+    productImage?: string;
     quantity: number;
     unitPrice: number;
     unitWeight: number;
