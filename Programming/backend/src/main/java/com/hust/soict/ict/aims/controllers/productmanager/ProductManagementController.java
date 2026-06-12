@@ -1,15 +1,19 @@
 package com.hust.soict.ict.aims.controllers.productmanager;
 
-import com.hust.soict.ict.aims.models.dto.request.CreateProductRequest;
-import com.hust.soict.ict.aims.models.dto.request.UpdateProductRequest;
-import com.hust.soict.ict.aims.models.dto.request.DeleteProductRequest;
-import com.hust.soict.ict.aims.models.dto.response.product.ProductDetail;
-import com.hust.soict.ict.aims.models.dto.response.product.ProductSummary;
+import com.hust.soict.ict.aims.dto.request.AdjustStockRequest;
+import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
+import com.hust.soict.ict.aims.dto.request.UpdateProductRequest;
+import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
+import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.services.productmanagement.ProductManagementService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,55 +30,59 @@ import java.util.UUID;
  */
 
 @RestController
-@RequestMapping("manager/products")
+@RequestMapping("/manager/products")
 @RequiredArgsConstructor
+@Validated
 public class ProductManagementController {
 
     private final ProductManagementService productManagementService;
 
-    @PostMapping
-    public ResponseEntity<ProductDetail> createProduct(@RequestBody @Valid CreateProductRequest request) {
-        ProductDetail createdProduct = productManagementService.createProduct(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdProduct);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<ProductDetail> updateProduct(
-            @PathVariable UUID id,
-            @RequestBody @Valid UpdateProductRequest request) {
-        ProductDetail updatedProduct = productManagementService.updateProduct(id, request);
-        return ResponseEntity.ok(updatedProduct);
-    }
-
-    @DeleteMapping
-    public ResponseEntity<Void> deleteProducts(@RequestBody @Valid DeleteProductRequest request) {
-        productManagementService.deleteProducts(request.getProductIds());
-        return ResponseEntity.noContent().build();
-    }
-    public static class AdjustStockRequest {
-        public int delta;
-        public String reason;
-    }
-
     @GetMapping
-    public ResponseEntity<List<ProductSummary>> getAllProducts() {
-        return ResponseEntity.ok(productManagementService.getAllProductsForManager());
+    public List<ProductSummary> getAllProducts() {
+        return productManagementService.getAllProductsForManager();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDetail> getProductById(@PathVariable UUID id) {
-        return ResponseEntity.ok(productManagementService.getProductByIdForManager(id));
+    public ProductDetail getProductById(@PathVariable UUID id) {
+        return productManagementService.getProductByIdForManager(id);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ProductDetail createProduct(@Valid @RequestBody CreateProductRequest request) {
+        return productManagementService.createProduct(request);
+    }
+
+    @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ProductDetail updateProduct(
+            @PathVariable UUID id,
+            @RequestBody @Valid UpdateProductRequest request
+    ) {
+        return productManagementService.updateProduct(id, request);
+    }
+
+    @DeleteMapping
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<ProductSummary> deleteProducts(
+            @Size(min = 1, max = 10, message = "List of product IDs to delete must contain at least 1 product and a maximum of 10 products at a time")
+            List<@NotNull(message = "Each ID must not be null") UUID> request
+    ) {
+        return productManagementService.deleteProducts(request);
     }
 
     @PostMapping("/{id}/stock")
-    public ResponseEntity<Void> adjustStock(@PathVariable UUID id, @RequestBody AdjustStockRequest request) {
-        productManagementService.adjustStock(id, request.delta, request.reason);
-        return ResponseEntity.ok().build();
+    public void adjustStock(@PathVariable UUID id, @Valid @RequestBody AdjustStockRequest request) {
+        productManagementService.adjustStock(id, request);
     }
 
-    @PatchMapping("/{id}/activate")
-    public ResponseEntity<Void> activateProduct(@PathVariable UUID id) {
-        productManagementService.activateProduct(id);
-        return ResponseEntity.ok().build();
+    @PostMapping("/{id}/activate")
+    public ProductDetail activateProduct(@PathVariable UUID id) {
+        return productManagementService.activateProduct(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public ProductDetail deleteProduct(@PathVariable UUID id) {
+        return productManagementService.deleteProduct(id);
     }
 }

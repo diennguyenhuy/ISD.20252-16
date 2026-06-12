@@ -1,6 +1,7 @@
 package com.hust.soict.ict.aims.repositories;
 
 import com.hust.soict.ict.aims.models.entities.product.Product;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,8 +25,9 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     Optional<Product> findByIdAndStatus(UUID id, Product.Status status);
 
     boolean existsByBarcode(String barcode);
+    Optional<Product> findByBarcode(String barcode);
     long countByStatusIn(Collection<Product.Status> statuses);
-    long countByStatusInAndUpdatedAtAfter(List<Product.Status> statuses, java.time.Instant startOfDay);
+    long countByStatusInAndUpdatedAtAfter(Collection<Product.Status> statuses, java.time.Instant startOfDay);
   
     @Query("SELECT p FROM Product p WHERE " +
     "(:title IS NULL OR LOWER(p.title) LIKE :title) AND " +
@@ -33,7 +35,7 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     "(:minPrice IS NULL OR p.currentPrice >= :minPrice) AND " +
     "(:maxPrice IS NULL OR p.currentPrice <= :maxPrice) AND " +
     "p.status = ACTIVE")
-    List<Product> searchActiveProductsBy(
+    Page<Product> searchActiveProductsBy(
             @Param("title") String title,
             @Param("category") String category,
             @Param("minPrice") Long minPrice,

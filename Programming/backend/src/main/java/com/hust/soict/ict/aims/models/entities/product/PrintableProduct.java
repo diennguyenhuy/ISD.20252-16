@@ -1,6 +1,8 @@
 package com.hust.soict.ict.aims.models.entities.product;
 
 import java.time.LocalDate;
+import java.util.Objects;
+import java.util.Optional;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
@@ -15,24 +17,37 @@ public abstract class PrintableProduct extends Product {
     @Column(nullable = false)
     private String publisher;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDate publicationDate;
 
     @Column(length = 50)
     private String language;
 
-    protected PrintableProduct(Builder<? extends Builder<?>> builder) {
+    protected PrintableProduct(Builder<?, ?> builder) {
         super(builder);
-
-        this.publisher = builder.publisher;
-        this.publicationDate = builder.publicationDate;
+        this.publisher = Objects.requireNonNull(builder.publisher, "Printable Product publisher cannot be null.");
+        this.publicationDate = Objects.requireNonNull(builder.publicationDate, "Printable Product publication date cannot be null.");
         this.language = builder.language;
     }
 
-    public static abstract class Builder<B extends Builder<B>> extends Product.Builder<B> {
+    protected final void apply(Builder<?, ?> builder) {
+        super.apply(builder);
+        Optional.ofNullable(builder.publisher).ifPresent(v -> this.publisher = v);
+        Optional.ofNullable(builder.publisher).ifPresent(v -> this.language = v);
+    }
+
+    public static abstract class Builder<P extends PrintableProduct, B extends Builder<P, B>> extends Product.Builder<P, B> {
         private String publisher;
         private LocalDate publicationDate;
         private String language;
+
+        protected Builder() {
+            super();
+        }
+
+        protected Builder(PrintableProduct updatingProduct) {
+            super(updatingProduct);
+        }
 
         public B publisher(String publisher) {
             this.publisher = publisher;
@@ -46,15 +61,6 @@ public abstract class PrintableProduct extends Product {
 
         public B language(String language) {
             this.language = language;
-            return self();
-        }
-
-        @Override
-        protected B validate() {
-            super.validate();
-            this.validate(() -> requireNonBlank(this.publisher, "publisher"));
-            this.validate(() -> requireNotNull(this.publicationDate, "publicationDate"));
-
             return self();
         }
     }

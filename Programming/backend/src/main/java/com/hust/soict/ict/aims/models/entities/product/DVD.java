@@ -1,15 +1,13 @@
 package com.hust.soict.ict.aims.models.entities.product;
 
-import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "dvd")
@@ -21,13 +19,14 @@ public class DVD extends Product {
         HD_DVD,
     }
 
+    @Column(updatable = false)
     private LocalDate releaseDate;
 
     @Column(length = 50)
     private String genre;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 7)
+    @Column(nullable = false, updatable = false, length = 7)
     private DiscType discType;
 
     @Column(nullable = false)
@@ -35,7 +34,7 @@ public class DVD extends Product {
 
     /// Units: minutes min
     @Column(nullable = false)
-    private Integer runtime;
+    private int runtime;
 
     @Column(nullable = false)
     private String studio;
@@ -54,18 +53,32 @@ public class DVD extends Product {
 
     private DVD(Builder builder) {
         super(builder);
-
         this.releaseDate = builder.releaseDate;
         this.genre = builder.genre;
-        this.discType = builder.discType;
-        this.director = builder.director;
-        this.runtime = builder.runtime;
-        this.studio = builder.studio;
-        this.language = builder.language;
-        this.subtitles = new ArrayList<>(builder.subtitles);
+        this.discType = Objects.requireNonNull(builder.discType, "DVD Disc Type cannot be null");
+        this.director = Objects.requireNonNull(builder.director, "DVD Director cannot be null");
+        this.runtime = Objects.requireNonNull(builder.runtime, "DVD Runtime cannot be null");
+        this.studio = Objects.requireNonNull(builder.studio, "DVD Studio cannot be null");
+        this.language = Objects.requireNonNull(builder.language, "DVD Language cannot be null");
+        this.subtitles = new ArrayList<>(Objects.requireNonNull(builder.subtitles, "DVD Subtitles cannot be null"));
     }
 
-    public static class Builder extends Product.Builder<Builder> {
+    @Override
+    public Builder toBuilder() {
+        return new Builder(this);
+    }
+
+    private void apply(Builder builder) {
+        super.apply(builder);
+        Optional.ofNullable(builder.genre).ifPresent(v -> this.genre = v);
+        Optional.ofNullable(builder.director).ifPresent(v -> this.director = v);
+        Optional.ofNullable(builder.runtime).ifPresent(v -> this.runtime = v);
+        Optional.ofNullable(builder.studio).ifPresent(v -> this.studio = v);
+        Optional.ofNullable(builder.language).ifPresent(v -> this.language = v);
+        Optional.ofNullable(builder.subtitles).ifPresent(v -> this.subtitles = new ArrayList<>(v));
+    }
+
+    public static class Builder extends Product.Builder<DVD, Builder> {
         private LocalDate releaseDate;
         private String genre;
         private DiscType discType;
@@ -73,7 +86,15 @@ public class DVD extends Product {
         private Integer runtime;
         private String studio;
         private String language;
-        private List<String> subtitles = new ArrayList<>();
+        private List<String> subtitles;
+
+        public Builder() {
+            super();
+        }
+
+        private Builder(DVD updatingDVD) {
+            super(updatingDVD);
+        }
 
         @Override
         protected Builder self() {
@@ -81,9 +102,11 @@ public class DVD extends Product {
         }
 
         @Override
-        public DVD build() throws ProductConstructionException {
-            this.validate().throwProductConstructionExceptionIfAny();
-            return new DVD(this);
+        public DVD build() {
+            if (updatingProduct != null) {
+                updatingProduct.apply(this);
+                return updatingProduct;
+            } else return new DVD(this);
         }
 
         public Builder releaseDate(LocalDate releaseDate) {
@@ -98,6 +121,11 @@ public class DVD extends Product {
 
         public Builder discType(DiscType discType) {
             this.discType = discType;
+            return this;
+        }
+
+        public Builder discType(String discType) {
+            this.discType = DiscType.valueOf(discType.toUpperCase());
             return this;
         }
 
@@ -121,21 +149,13 @@ public class DVD extends Product {
             return this;
         }
 
-        public Builder subtitles(List<String> subtitles) {
-            this.subtitles = subtitles;
+        public Builder subtitles(Collection<String> subtitles) {
+            this.subtitles = List.copyOf(subtitles);
             return this;
         }
 
-        @Override
-        protected Builder validate() throws ProductConstructionException {
-            super.validate();
-            this.validate(() -> requireNotNull(this.discType, "discType"));
-            this.validate(() -> requireNonBlank(this.director, "director"));
-            this.validate(() -> requirePositive(this.runtime, "runtime"));
-            this.validate(() -> requireNonBlank(this.studio, "studio"));
-            this.validate(() -> requireNonBlank(this.language, "language"));
-            this.validate(() -> requireNotEmpty(this.subtitles, "subtitles"));
-
+        public Builder subtitles(String... subtitles) {
+            this.subtitles = List.of(subtitles);
             return this;
         }
     }

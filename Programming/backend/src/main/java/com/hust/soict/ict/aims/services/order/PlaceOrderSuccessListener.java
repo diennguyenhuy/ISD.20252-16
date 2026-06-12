@@ -3,6 +3,7 @@ package com.hust.soict.ict.aims.services.order;
 import com.hust.soict.ict.aims.context.CartContext;
 import com.hust.soict.ict.aims.context.OrderDraftContext;
 import com.hust.soict.ict.aims.services.notification.NotificationService;
+import com.hust.soict.ict.aims.services.notification.email.OrderConfirmationEmailMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -30,8 +31,8 @@ public class PlaceOrderSuccessListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     void handle(OrderSuccessEvent event) {
-        notificationService.sendOrderConfirmation(event.order());
         cartContext.getOrCreateCart().clear();
         orderDraftContext.clearDraftOrder();
+        notificationService.send(OrderConfirmationEmailMessage.class, event.order());
     }
 }

@@ -1,12 +1,12 @@
 package com.hust.soict.ict.aims.controllers.customer;
 
 import com.hust.soict.ict.aims.exceptions.*;
-import com.hust.soict.ict.aims.models.dto.request.DeliveryRequest;
-import com.hust.soict.ict.aims.models.dto.response.order.DeliveryResponse;
-import com.hust.soict.ict.aims.models.dto.response.order.InvoiceResponse;
-import com.hust.soict.ict.aims.models.dto.response.order.OrderDraftResponse;
-import com.hust.soict.ict.aims.models.dto.response.order.OrderResponse;
-import com.hust.soict.ict.aims.services.order.DeliveryService;
+import com.hust.soict.ict.aims.dto.request.DeliveryRequest;
+import com.hust.soict.ict.aims.dto.response.order.DeliveryResponse;
+import com.hust.soict.ict.aims.dto.response.order.InvoiceResponse;
+import com.hust.soict.ict.aims.dto.response.order.OrderDraftResponse;
+import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
+import com.hust.soict.ict.aims.services.customer.OrderService;
 import com.hust.soict.ict.aims.services.order.PlaceOrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderController {
     private final PlaceOrderService placeOrderService;
-    private final DeliveryService deliveryService;
+    private final OrderService orderService;
 
     /**
      * POST /order - endpoint for request to place order. Return 201 if success
@@ -69,11 +69,11 @@ public class OrderController {
     public DeliveryResponse submitDeliveryInformation(
             @Valid @RequestBody DeliveryRequest deliveryRequest
     ) {
-        return deliveryService.submitDeliveryInformation(deliveryRequest);
+        return placeOrderService.submitDeliveryInformation(deliveryRequest);
     }
 
     /**
-     * GET /order/invoice endpoint for getting invoice info. Return status 202
+     * GET /order/invoice endpoint for getting invoice info. Return status 200
      * @return response of invoice
      */
     @GetMapping("/invoice")
@@ -99,18 +99,18 @@ public class OrderController {
     @GetMapping("/{orderId}")
     @ResponseStatus(HttpStatus.OK)
     public OrderResponse getOrder(@PathVariable UUID orderId) {
-        return placeOrderService.getOrder(orderId);
+        return orderService.getOrder(orderId);
     }
 
     /**
-     * DELETE /order/{orderId} endpoint for cancelling order. Return status 204 if success
+     * POST /order/{orderId}/cancel endpoint for cancelling order. Return status 204 if success
      * @param orderId the requested order id of order to be canceled
      * @throws OrderNotFoundException if the order is somehow not found in database
      * @throws IllegalStateException if the order status cannot be set to canceled
      */
-    @DeleteMapping("/{orderId}")
+    @PostMapping("/{orderId}/cancel")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void cancelOrder(@PathVariable UUID orderId) throws OrderNotFoundException, IllegalStateException {
-        placeOrderService.cancelOrder(orderId);
+    public void cancelOrder(@PathVariable UUID orderId) throws OrderNotFoundException, OrderStateTransitionException {
+        orderService.cancelOrder(orderId);
     }
 }

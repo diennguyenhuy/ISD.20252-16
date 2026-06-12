@@ -1,10 +1,14 @@
 package com.hust.soict.ict.aims.subsystems.vietqr;
+
+import lombok.Getter;
+
 /*
  * + Cohesion level: FUNCTIONAL
  * + Coupling level with VietQRController: DATA
  * + Reason: VietQRController only reads accessToken and expiresIn via getters;
  *   no control flags or internal parsing logic is shared.
  */
+@Getter
 class QRAccessTokenResponse {
     private String accessToken;
     private String tokenType;
@@ -55,8 +59,4 @@ class QRAccessTokenResponse {
     boolean isValid() {
         return accessToken != null && !accessToken.isEmpty();
     }
-    
-    String getAccessToken() { return accessToken; }  
-    String getTokenType() { return tokenType; }
-    int getExpiresIn() { return expiresIn; }
 }

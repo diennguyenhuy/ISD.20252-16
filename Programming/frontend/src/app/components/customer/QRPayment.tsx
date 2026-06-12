@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { CreditCard, X, Smartphone, CheckCircle2, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import QRCode from 'qrcode';
-import PayOrderService from '../../api/payOrderService';
-import OrderService from '../../api/orderService';
+import PayOrderService from '../../api/PayOrderService';
+import OrderService from '../../api/OrderService';
 import type { QRCodeResponse } from '../../models/payment.interface';
 
 type ConfirmState =

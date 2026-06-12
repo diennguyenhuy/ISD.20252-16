@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS product(
 	id 				UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	title			VARCHAR(255) NOT NULL,
 	category		VARCHAR(50) NOT NULL,
-	description		TEXT NOT NULL,
+	description		TEXT,
 	height			NUMERIC(10, 2) NOT NULL, --cm
 	width			NUMERIC(10, 2) NOT NULL, --cm
 	length			NUMERIC(10, 2) NOT NULL, --cm
@@ -68,11 +68,12 @@ CREATE TABLE IF NOT EXISTS cd_artists(
 	PRIMARY KEY (cd_id, artist)
 );
 
-CREATE TABLE IF NOT EXISTS track(
-	id			UUID PRIMARY KEY,
-	cd_id		UUID NOT NULL REFERENCES cd(id) ON DELETE CASCADE,
-	title		VARCHAR(255) NOT NULL,
-	length		INT NOT NULL --seconds
+CREATE TABLE IF NOT EXISTS cd_tracks(
+	cd_id		    UUID REFERENCES cd(id) ON DELETE CASCADE,
+    track_number    INT,
+	title		    VARCHAR(255) NOT NULL,
+	length		    INT NOT NULL, --seconds
+    PRIMARY KEY (cd_id, track_number)
 );
 
 CREATE TABLE IF NOT EXISTS dvd(
@@ -96,6 +97,7 @@ CREATE TABLE IF NOT EXISTS dvd_subtitles(
 CREATE TABLE IF NOT EXISTS "order"(
     id				UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     status			VARCHAR(10) NOT NULL,
+    version         BIGINT NOT NULL DEFAULT 0,
     created_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -145,6 +147,9 @@ CREATE TABLE IF NOT EXISTS "user"(
     username		VARCHAR(255) NOT NULL,
     email			VARCHAR(255) NOT NULL UNIQUE,
     hashed_password	TEXT NOT NULL,
+    active          BOOLEAN NOT NULL,
+    blocked         BOOLEAN NOT NULL,
+    version         BIGINT NOT NULL DEFAULT 0,
     created_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -163,6 +168,15 @@ CREATE TABLE IF NOT EXISTS product_log(
     product_id	        UUID REFERENCES product(id) ON DELETE SET NULL,
     product_title       VARCHAR(255) NOT NULL,
     timestamp	        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS product_update_log(
+    log_id          UUID REFERENCES product_log(id) ON DELETE CASCADE,
+    field_number    INT,
+    field_name      VARCHAR(255),
+    old_value       TEXT,
+    new_value       TEXT,
+    PRIMARY KEY (log_id, field_number)
 );
 
 CREATE TABLE IF NOT EXISTS stock_adjust_log(

@@ -1,14 +1,11 @@
 package com.hust.soict.ict.aims.models.entities.product;
 
-import com.hust.soict.ict.aims.exceptions.ProductConstructionException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "book")
@@ -29,7 +26,7 @@ public class Book extends PrintableProduct {
     private List<String> authors = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 9)
+    @Column(nullable = false, updatable = false, length = 9)
     private CoverType coverType;
 
     private Integer numberOfPages;
@@ -41,20 +38,39 @@ public class Book extends PrintableProduct {
         return Collections.unmodifiableList(authors);
     }
 
-    private Book(Builder builder) throws ProductConstructionException {
+    private Book(Builder builder) {
         super(builder);
-
-        this.authors = new ArrayList<>(builder.authors);
+        this.authors = new ArrayList<>(Objects.requireNonNull(builder.authors, "List of authors cannot be null"));
+        this.coverType = Objects.requireNonNull(builder.coverType, "Book cover type cannot be null");
         this.numberOfPages = builder.numberOfPages;
         this.genre = builder.genre;
-        this.coverType = builder.coverType;
     }
 
-    public static class Builder extends PrintableProduct.Builder<Builder> {
-        private List<String> authors = new ArrayList<>();
+    @Override
+    public Builder toBuilder() {
+        return new Builder(this);
+    }
+
+    private void apply(Builder builder) {
+        super.apply(builder);
+        Optional.ofNullable(builder.authors).ifPresent(v -> this.authors = new ArrayList<>(v));
+        Optional.ofNullable(builder.numberOfPages).ifPresent(v -> this.numberOfPages = v);
+        Optional.ofNullable(builder.genre).ifPresent(v -> this.genre = v);
+    }
+
+    public static class Builder extends PrintableProduct.Builder<Book, Builder> {
+        private List<String> authors;
         private CoverType coverType;
-        private int numberOfPages;
+        private Integer numberOfPages;
         private String genre;
+
+        public Builder() {
+            super();
+        }
+
+        private Builder(Book updatingBook) {
+            super(updatingBook);
+        }
 
         @Override
         protected Builder self() {
@@ -62,18 +78,30 @@ public class Book extends PrintableProduct {
         }
 
         @Override
-        public Book build() throws ProductConstructionException {
-            this.validate().throwProductConstructionExceptionIfAny();
-            return new Book(this);
+        public Book build() {
+            if (updatingProduct != null) {
+                updatingProduct.apply(this);
+                return updatingProduct;
+            } else return new Book(this);
         }
 
-        public Builder authors(List<String> authors) {
-            this.authors = authors;
+        public Builder authors(Collection<String> authors) {
+            this.authors = List.copyOf(authors);
+            return this;
+        }
+
+        public Builder authors(String... authors) {
+            this.authors = List.of(authors);
             return this;
         }
 
         public Builder coverType(CoverType coverType) {
             this.coverType = coverType;
+            return this;
+        }
+
+        public Builder coverType(String coverType) {
+            this.coverType = CoverType.valueOf(coverType.toUpperCase());
             return this;
         }
 
@@ -84,15 +112,6 @@ public class Book extends PrintableProduct {
 
         public Builder genre(String genre) {
             this.genre = genre;
-            return this;
-        }
-
-        @Override
-        protected Builder validate() {
-            super.validate();
-            this.validate(() -> requireNotEmpty(this.authors, "authors"));
-            this.validate(() -> requireNotNull(this.coverType, "coverType"));
-
             return this;
         }
     }

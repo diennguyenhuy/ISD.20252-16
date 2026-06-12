@@ -1,5 +1,7 @@
 package com.hust.soict.ict.aims.subsystems.vietqr;
 
+import lombok.Getter;
+
 import java.util.Base64;
 /*
  * SOLID Principles: No violations.
@@ -9,6 +11,7 @@ import java.util.Base64;
  * + Reason: Only two primitive Strings (username, password) are passed in;
  *   buildAuthorizationHeader() returns a plain String.
  */
+@Getter
 class QRAccessTokenRequest {
     private String username;
     private String password;
@@ -24,8 +27,4 @@ class QRAccessTokenRequest {
         String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
         return "Basic " + encodedCredentials;
     }
-    
-    String getUsername() { return username; }
-    String getPassword() { return password; }
 }
-
