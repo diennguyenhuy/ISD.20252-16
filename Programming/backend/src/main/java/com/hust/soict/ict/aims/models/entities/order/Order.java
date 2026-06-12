@@ -48,6 +48,7 @@ import java.util.*;
         )
 })
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order extends AuditableEntity {
     public enum Status {

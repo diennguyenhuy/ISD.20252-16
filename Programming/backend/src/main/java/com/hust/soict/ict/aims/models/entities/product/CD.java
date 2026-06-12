@@ -47,6 +47,26 @@ public class CD extends Product {
         tracks.add(track);
     }
 
+    public Track getTrack(UUID trackId) {
+        return this.tracks.stream()
+                .filter(track -> track.getId() != null && track.getId().equals(trackId))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public void removeTrack(Track track) {
+        if (track != null) {
+            this.tracks.remove(track);
+            track.setCd(null); // Cắt đứt liên kết để Hibernate hiểu là cần xóa (orphan removal)
+        }
+    }
+
+    // (Tùy chọn) Hàm nạp chồng để xóa trực tiếp bằng ID cho tiện lợi
+    public void removeTrack(UUID trackId) {
+        Track trackToRemove = getTrack(trackId);
+        removeTrack(trackToRemove);
+    }
+
     @Override
     public Builder toBuilder() {
         return new Builder(this);
@@ -80,7 +100,7 @@ public class CD extends Product {
             super();
         }
 
-        private Builder(CD existingCD) {
+        public Builder(CD existingCD) {
             super(existingCD);
             this.releaseDate = existingCD.releaseDate;
             this.genre = existingCD.genre;

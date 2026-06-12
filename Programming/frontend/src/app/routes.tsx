@@ -7,6 +7,7 @@ import ManagerLayout from "./components/layout/ManagerLayout";
 // Shared
 import LoginSignup from "./components/shared/LoginSignup";
 import { CartProvider } from "./context/CartContext";
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Customer Components
 import HomePage from './components/customer/HomePage';
@@ -55,16 +56,22 @@ export const router = createBrowserRouter([
         ],
     },
     {
-        path: '/manager',
-        Component: ManagerLayout,
+        element: <ProtectedRoute />,
         children: [
-            { index: true, Component: ManagerHomePage },
-            { path: 'products/add', Component: ProductAddition },
-            { path: 'products/edit/:id', Component: ProductAddition },
-            { path: 'products/:id', Component: ManagerProductDetail },
-            { path: 'orders', Component: ManagerOrderList },
-            { path: 'orders/:id', Component: ManagerOrderDetail },
-        ],
+            // Toàn bộ nhánh /manager bị nhốt vào bên trong children của ProtectedRoute
+            {
+                path: '/manager',
+                Component: ManagerLayout,
+                children: [
+                    { index: true, Component: ManagerHomePage },
+                    { path: 'products/add', Component: ProductAddition },
+                    { path: 'products/edit/:id', Component: ProductAddition },
+                    { path: 'products/:id', Component: ManagerProductDetail },
+                    { path: 'orders', Component: ManagerOrderList },
+                    { path: 'orders/:id', Component: ManagerOrderDetail },
+                ],
+            }
+        ]
     },
     {
         //TODO: ADMIN ROUTES

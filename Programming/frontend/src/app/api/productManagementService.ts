@@ -75,5 +75,17 @@ export const ProductManagementService = {
 
     activateProduct: async (id: string): Promise<void> => {
         await apiClient.patch(`manager/products/${id}/activate`);
+    },
+
+    updatePrice: async (id: string, newPrice: number): Promise<void> => {
+        await apiClient.patch(`manager/products/${id}/price?newPrice=${newPrice}`);
+    },
+
+    addTrackToCD: async (cdId: string, track: { title: string; length: number }): Promise<void> => {
+        await apiClient.post(`manager/products/${cdId}/tracks`, track);
+    },
+
+    removeTrackFromCD: async (cdId: string, trackId: string): Promise<void> => {
+        await apiClient.delete(`manager/products/${cdId}/tracks/${trackId}`);
     }
 };

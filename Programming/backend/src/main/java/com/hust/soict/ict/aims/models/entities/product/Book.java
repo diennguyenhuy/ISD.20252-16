@@ -69,7 +69,7 @@ public class Book extends PrintableProduct {
             super();
         }
 
-        private Builder(Book existingBook) {
+        public Builder(Book existingBook) {
             super(existingBook);
             this.authors = existingBook.authors;
             this.coverType = existingBook.coverType;

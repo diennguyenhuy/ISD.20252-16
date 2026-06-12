@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.*;
 
 @Entity
-@Table(name = "user")
+@Table(name = "\"user\"")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends AuditableEntity {
@@ -30,10 +30,10 @@ public class User extends AuditableEntity {
     private String email;
 
     @Column(nullable = false)
-    @Getter(AccessLevel.NONE)
+    @Getter
     private String hashedPassword;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "role", length = 20)

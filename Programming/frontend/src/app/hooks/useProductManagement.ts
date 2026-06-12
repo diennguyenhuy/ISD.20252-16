@@ -98,6 +98,34 @@ export function useProductManagement() {
         }
     };
 
+    const updatePrice = async (id: string, newPrice: number) => {
+        try {
+            await ProductManagementService.updatePrice(id, newPrice);
+            await fetchProducts();
+            return { success: true };
+        } catch (err: any) {
+            return { success: false, error: err.response?.data?.message || err.message };
+        }
+    };
+
+    const addTrackToCD = async (cdId: string, track: { title: string; length: number }) => {
+        try {
+            await ProductManagementService.addTrackToCD(cdId, track);
+            return { success: true };
+        } catch (err: any) {
+            return { success: false, error: err.response?.data?.message || err.message };
+        }
+    };
+
+    const removeTrackFromCD = async (cdId: string, trackId: string) => {
+        try {
+            await ProductManagementService.removeTrackFromCD(cdId, trackId);
+            return { success: true };
+        } catch (err: any) {
+            return { success: false, error: err.response?.data?.message || err.message };
+        }
+    };
+
     return {
         products,
         setProducts,
@@ -109,6 +137,9 @@ export function useProductManagement() {
         updateProduct,
         deleteProducts,
         adjustStock,
-        activateProduct
+        activateProduct,
+        updatePrice,
+        addTrackToCD,
+        removeTrackFromCD
     };
 }

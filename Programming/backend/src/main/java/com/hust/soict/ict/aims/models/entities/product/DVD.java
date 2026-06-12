@@ -92,7 +92,7 @@ public class DVD extends Product {
             super();
         }
 
-        private Builder(DVD existingDVD) {
+        public Builder(DVD existingDVD) {
             super(existingDVD);
             this.releaseDate = existingDVD.releaseDate;
             this.genre = existingDVD.genre;
