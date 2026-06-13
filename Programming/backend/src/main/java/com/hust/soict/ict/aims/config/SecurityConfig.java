@@ -55,7 +55,9 @@ public class SecurityConfig {
                                     .requestMatchers("/vqr/**").permitAll()
 
                                     // 2. CÁC ENDPOINT MỚI BỔ SUNG
-                                    .requestMatchers("/api/auth/**").permitAll() // Mở cửa cho Login/Register
+                                    .requestMatchers("/api/auth/**").permitAll() // Mở cửa cho Login
+                                    .requestMatchers("/api/admin/**").hasRole("ADMINISTRATOR") // Chỉ Admin mới vào được
+                                    .requestMatchers("/api/profile/**").authenticated() // Tất cả user đã đăng nhập
                                     .requestMatchers("/manager/**").authenticated() // Manager bắt buộc phải có Token
 
                                     // 3. THAY ĐỔI QUAN TRỌNG: Đổi từ permitAll() sang authenticated()

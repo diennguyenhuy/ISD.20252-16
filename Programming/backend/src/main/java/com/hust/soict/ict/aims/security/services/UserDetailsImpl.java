@@ -25,7 +25,18 @@ public class UserDetailsImpl implements UserDetails {
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    // Hàm chuyển đổi từ Entity User sang UserDetailsImpl
+    /** Mirrors User.isActive(). False → Spring Security rejects login with DisabledException. */
+    private boolean active;
+
+    /** Mirrors User.isBlocked(). Exposed so service layer can check without re-querying DB. */
+    private boolean blocked;
+
+    /** True when an admin has triggered a password reset for this user. */
+    private boolean mustChangePassword;
+
+    // --- Factory method ---
+
+    /** Converts a User entity into a UserDetailsImpl for the security context. */
     public static UserDetailsImpl build(User user) {
         List<GrantedAuthority> authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
@@ -35,19 +46,35 @@ public class UserDetailsImpl implements UserDetails {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getHashedPassword(), // Lấy password đã băm
-                authorities);
+                user.getHashedPassword(),
+                authorities,
+                user.isActive(),
+                user.isBlocked(),
+                user.isMustChangePassword());
+    }
+
+    // --- UserDetails contract ---
+
+    /**
+     * Returns false for deactivated accounts.
+     * Spring Security will throw DisabledException during authentication,
+     * which we map to HTTP 403 in the GlobalExceptionHandler.
+     */
+    @Override
+    public boolean isEnabled() {
+        return active;
     }
 
     @Override
     public boolean isAccountNonExpired() { return true; }
 
+    /**
+     * Blocked users CAN still authenticate (isAccountNonLocked = true).
+     * The blocked check is enforced at the service layer, not here.
+     */
     @Override
     public boolean isAccountNonLocked() { return true; }
 
     @Override
     public boolean isCredentialsNonExpired() { return true; }
-
-    @Override
-    public boolean isEnabled() { return true; }
 }

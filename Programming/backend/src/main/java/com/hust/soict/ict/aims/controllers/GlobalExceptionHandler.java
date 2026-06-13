@@ -5,6 +5,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -105,6 +106,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handle(IllegalArgumentException e) {
+        return Map.of("message", e.getMessage());
+    }
+
+    /** Deactivated account — Spring Security's DisabledException surfaces through the filter chain. */
+    @ExceptionHandler(DisabledException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Map<String, String> handle(DisabledException e) {
+        return Map.of("message", "This account has been deactivated. Please contact an administrator.");
+    }
+
+    /** Deactivated account — thrown explicitly by AuthService for a clear typed exception. */
+    @ExceptionHandler(AccountDeactivatedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Map<String, String> handle(AccountDeactivatedException e) {
         return Map.of("message", e.getMessage());
     }
 
