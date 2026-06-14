@@ -1,6 +1,5 @@
 package com.hust.soict.ict.aims.dto.response.product;
 
-import com.hust.soict.ict.aims.models.entities.product.CD;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,8 +14,4 @@ public class CDDetail extends ProductDetail {
     private List<String> artists;
     private String recordLabel;
     private List<TrackDetail> tracks;
-
-    public CDDetail() {
-        super(CD.class.getSimpleName());
-    }
 }

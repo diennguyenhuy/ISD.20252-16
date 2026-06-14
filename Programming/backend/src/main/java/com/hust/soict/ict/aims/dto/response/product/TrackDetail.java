@@ -6,5 +6,5 @@ import lombok.NoArgsConstructor;
 @Data
 public class TrackDetail {
     private String title;
-    private String length;
+    private int length;
 }

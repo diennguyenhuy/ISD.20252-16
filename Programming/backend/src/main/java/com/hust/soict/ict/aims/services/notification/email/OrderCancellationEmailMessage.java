@@ -4,7 +4,6 @@ import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.services.payment.PaymentMethod;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -96,9 +95,6 @@ public class OrderCancellationEmailMessage implements EmailMessage {
 
     @Component
     public static class Factory extends EmailMessage.Factory<OrderCancellationEmailMessage, Order> {
-        @Value("${app.frontend.url}")
-        private String frontendUrl;
-
         @Override
         public Class<OrderCancellationEmailMessage> messageType() {
             return OrderCancellationEmailMessage.class;

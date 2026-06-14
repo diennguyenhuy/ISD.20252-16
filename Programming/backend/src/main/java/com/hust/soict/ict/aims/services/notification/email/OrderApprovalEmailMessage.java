@@ -3,7 +3,6 @@ package com.hust.soict.ict.aims.services.notification.email;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -81,9 +80,6 @@ public class OrderApprovalEmailMessage implements EmailMessage {
 
     @Component
     public static class Factory extends EmailMessage.Factory<OrderApprovalEmailMessage, Order> {
-        @Value("${app.frontend.url}")
-        private String frontendUrl;
-
         @Override
         public Class<OrderApprovalEmailMessage> messageType() {
             return OrderApprovalEmailMessage.class;

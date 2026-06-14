@@ -1,7 +1,5 @@
 package com.hust.soict.ict.aims.dto.response.product;
 
-
-import com.hust.soict.ict.aims.models.entities.product.DVD;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -19,8 +17,4 @@ public class DVDDetail extends ProductDetail {
     private String studio;
     private String language;
     private List<String> subtitles;
-
-    public DVDDetail() {
-        super(DVD.class.getSimpleName());
-    }
 }

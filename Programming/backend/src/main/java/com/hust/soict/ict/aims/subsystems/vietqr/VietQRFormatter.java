@@ -5,7 +5,7 @@ package com.hust.soict.ict.aims.subsystems.vietqr;
  * + Cohesion level: FUNCTIONAL
  * + Coupling level: NONE — depends only on standard Java types.
  */
-public class VietQRFormatter {
+class VietQRFormatter {
     
 
     /**

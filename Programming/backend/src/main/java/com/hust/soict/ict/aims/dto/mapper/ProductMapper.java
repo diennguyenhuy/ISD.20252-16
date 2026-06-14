@@ -1,46 +1,37 @@
 package com.hust.soict.ict.aims.dto.mapper;
 
-import com.hust.soict.ict.aims.dto.response.product.*;
-import com.hust.soict.ict.aims.models.entities.product.*;
-import org.mapstruct.*;
-import java.util.Collections;
+import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
+import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
+import com.hust.soict.ict.aims.models.entities.product.Product;
+import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-@Mapper(
-        componentModel = MappingConstants.ComponentModel.SPRING,
-        unmappedTargetPolicy = ReportingPolicy.ERROR,
-        subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION
-)
-public interface ProductMapper {
-    @Mapping(target = "productType", ignore = true)
-    @SubclassMapping(source = Book.class, target = BookDetail.class)
-    @SubclassMapping(source = Newspaper.class, target = NewspaperDetail.class)
-    @SubclassMapping(source = CD.class, target = CDDetail.class)
-    @SubclassMapping(source = DVD.class, target = DVDDetail.class)
-    ProductDetail toProductDetail(Product product);
+@Component
+public class ProductMapper {
+    private final Map<Class<? extends Product>, ProductMapping<?, ?>> productMappings;
 
-    BookDetail toBookDetail(Book book);
+    public ProductMapper(List<ProductMapping<?, ?>> productMappings) {
+        this.productMappings = productMappings.stream()
+                .collect(Collectors.toMap(
+                        ProductMapping::getProductClass,
+                        Function.identity()
+                ));
+    }
 
-    NewspaperDetail toNewspaperDetail(Newspaper newspaper);
+    @SuppressWarnings("unchecked")
+    public <P extends Product, D extends ProductDetail> D toProductDetail(P product) {
+        ProductMapping<P, D> mapping = (ProductMapping<P, D>) this.productMappings.get(product.getClass());
+        return mapping.map(product);
+    }
 
-    CDDetail toCDDetail(CD cd);
-
-    DVDDetail toDVDDetail(DVD dvd);
-
-    TrackDetail toTrackDetail(Track track);
-
-    @Mapping(target = "creators", expression = "java(mapCreators(product))")
-    @Mapping(target = "productType", expression = "java(org.hibernate.Hibernate.getClass(product).getSimpleName())")
-    ProductSummary toProductSummary(Product product);
-
-    @Named("mapCreators")
-    default List<String> mapCreators(Product product) {
-        return switch (product) {
-            case Book b -> b.getAuthors();
-            case Newspaper n -> List.of(n.getPublisher());
-            case CD cd -> cd.getArtists();
-            case DVD dvd -> List.of(dvd.getStudio());
-            default -> Collections.emptyList();
-        };
+    @SuppressWarnings("unchecked")
+    public <P extends Product> ProductSummary toProductSummary(P product) {
+        ProductMapping<P, ?> mapping = (ProductMapping<P, ?>) this.productMappings.get(product.getClass());
+        return mapping.mapSummary(product);
     }
 }
