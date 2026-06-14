@@ -67,7 +67,6 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
             { path: '/change-password', Component: ChangePasswordScreen },
-            // Toàn bộ nhánh /manager bị nhốt vào bên trong children của ProtectedRoute
             {
                 path: '/manager',
                 Component: ManagerLayout,
@@ -80,7 +79,6 @@ export const router = createBrowserRouter([
                     { path: 'orders/:id', Component: ManagerOrderDetail },
                 ],
             },
-            // Toàn bộ nhánh /admin
             {
                 path: '/admin',
                 Component: AdminLayout,

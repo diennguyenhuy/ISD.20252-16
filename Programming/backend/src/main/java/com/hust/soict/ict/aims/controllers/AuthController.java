@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
  * All business logic is delegated to {@link AuthService}.
  */
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 

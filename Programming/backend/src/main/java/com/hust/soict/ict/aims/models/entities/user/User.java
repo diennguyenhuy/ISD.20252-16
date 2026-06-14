@@ -37,7 +37,6 @@ public class User extends VersionedEntity {
     private boolean active = true;
     private boolean blocked = false;
 
-    /** Set by an admin-triggered password reset. Forces user to change password on next login. */
     private boolean mustChangePassword = false;
 
     @ElementCollection(fetch = FetchType.EAGER)

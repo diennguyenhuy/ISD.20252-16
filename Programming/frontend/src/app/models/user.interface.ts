@@ -2,12 +2,12 @@ export interface User {
     readonly id: string;
     username: string;
     email: string;
-    hashedPassword: string;
-    createdAt: string;
-    status: UserStatus;
     roles: UserRole[];
+    active: boolean;
+    blocked: boolean;
+    mustChangePassword: boolean;
+    createdAt: string;
+    updatedAt: string;
 }
-
-export type UserStatus = 'ACTIVE' | 'DEACTIVATED' | 'BLOCKED';
 
 export type UserRole = "PRODUCT_MANAGER" | "ADMINISTRATOR";

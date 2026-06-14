@@ -2,16 +2,17 @@ import { useParams, useNavigate } from 'react-router';
 import {
   ArrowLeft, UserCheck, UserX, Shield, ShieldOff, Key, ChevronDown, Mail, Calendar, CheckCircle2, Loader2, AlertTriangle
 } from 'lucide-react';
-import { AdminService, type UserResponse } from '../../api/AdminService';
+import { AdminService } from '../../api/AdminService';
 import { useState, useEffect } from 'react';
+import type {UserRole, User} from "../../models/user.interface";
 
-const ROLE_LABELS: Record<string, string> = {
+const ROLE_LABELS: Record<UserRole | 'customer', string> = {
   customer: 'Customer',
   PRODUCT_MANAGER: 'Product Manager',
   ADMINISTRATOR: 'Administrator',
 };
 
-const ROLE_COLORS: Record<string, string> = {
+const ROLE_COLORS: Record<UserRole | 'customer', string> = {
   customer: 'bg-secondary text-secondary-foreground border-border',
   PRODUCT_MANAGER: 'bg-primary/10 text-primary border-primary/20',
   ADMINISTRATOR: 'bg-destructive/10 text-destructive border-destructive/20',
@@ -33,13 +34,13 @@ export default function AdminUserDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
-  const [user, setUser] = useState<UserResponse | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
   const [confirmAction, setConfirmAction] = useState<string | null>(null);
-  const [newRoles, setNewRoles] = useState<string[]>([]);
+  const [newRoles, setNewRoles] = useState<UserRole[]>([]);
   const [showRoleAssign, setShowRoleAssign] = useState(false);
   const [passwordResetDone, setPasswordResetDone] = useState(false);
 
@@ -61,15 +62,15 @@ export default function AdminUserDetail() {
       }
   };
 
-  const getStatus = (u: UserResponse) => {
+  const getStatus = (u: User) => {
     if (u.blocked) return 'blocked';
     if (!u.active) return 'inactive';
     return 'active';
   };
 
-  const getMainRole = (u: UserResponse) => {
-    if (u.roles.includes('ADMINISTRATOR') || u.roles.includes('ROLE_ADMINISTRATOR')) return 'ADMINISTRATOR';
-    if (u.roles.includes('PRODUCT_MANAGER') || u.roles.includes('ROLE_PRODUCT_MANAGER')) return 'PRODUCT_MANAGER';
+  const getMainRole = (u: User) => {
+    if (u.roles.includes('ADMINISTRATOR')) return 'ADMINISTRATOR';
+    if (u.roles.includes('PRODUCT_MANAGER')) return 'PRODUCT_MANAGER';
     return 'customer';
   };
 
@@ -327,8 +328,8 @@ export default function AdminUserDetail() {
             <h3 className="font-bold text-lg text-foreground tracking-tight mb-5">Assign Role to <span className="text-primary">{user.username}</span></h3>
             <div className="flex flex-col gap-3 mb-6">
               {[
-                { value: 'PRODUCT_MANAGER', label: 'Product Manager' },
-                { value: 'ADMINISTRATOR', label: 'Administrator' }
+                { value: 'PRODUCT_MANAGER' as UserRole, label: 'Product Manager' },
+                { value: 'ADMINISTRATOR' as UserRole, label: 'Administrator' }
               ].map(roleOption => {
                 const isSelected = newRoles.includes(roleOption.value);
                 return (

@@ -23,6 +23,7 @@ public class UserResponse {
     private boolean blocked;
     private boolean mustChangePassword;
     private Instant createdAt;
+    private Instant updatedAt;
 
     /** Convenience factory method — keeps mapping logic in one place. */
     public static UserResponse from(User user) {
@@ -34,6 +35,8 @@ public class UserResponse {
                 user.isActive(),
                 user.isBlocked(),
                 user.isMustChangePassword(),
-                user.getCreatedAt());
+                user.getCreatedAt(),
+                user.getUpdatedAt()
+        );
     }
 }

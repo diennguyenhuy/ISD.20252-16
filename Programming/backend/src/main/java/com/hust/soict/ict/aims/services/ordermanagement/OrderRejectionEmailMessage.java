@@ -1,6 +1,7 @@
-package com.hust.soict.ict.aims.services.notification.email;
+package com.hust.soict.ict.aims.services.ordermanagement;
 
 import com.hust.soict.ict.aims.models.entities.order.Order;
+import com.hust.soict.ict.aims.services.notification.email.EmailMessage;
 import com.hust.soict.ict.aims.services.payment.PaymentMethod;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -97,18 +98,15 @@ public class OrderRejectionEmailMessage implements EmailMessage {
     }
 
     @Component
-    public static class Factory extends EmailMessage.Factory<OrderRejectionEmailMessage, Order> {
-        @Value("${app.frontend.url}")
-        private String frontendUrl;
-
+    public static class Factory extends EmailMessage.Factory<OrderRejectionEmailMessage, OrderRejectionEvent> {
         @Override
         public Class<OrderRejectionEmailMessage> messageType() {
             return OrderRejectionEmailMessage.class;
         }
 
         @Override
-        public OrderRejectionEmailMessage createMessage(Order payload) {
-            return new  OrderRejectionEmailMessage(payload, frontendUrl);
+        public OrderRejectionEmailMessage createMessage(OrderRejectionEvent payload) {
+            return new OrderRejectionEmailMessage(payload.order(), frontendUrl);
         }
     }
 }

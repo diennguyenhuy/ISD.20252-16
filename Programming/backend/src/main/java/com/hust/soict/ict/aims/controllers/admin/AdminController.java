@@ -1,19 +1,23 @@
 package com.hust.soict.ict.aims.controllers.admin;
 
-import com.hust.soict.ict.aims.dto.request.AssignRolesRequest;
 import com.hust.soict.ict.aims.dto.request.CreateUserRequest;
 import com.hust.soict.ict.aims.dto.response.UserResponse;
+import com.hust.soict.ict.aims.models.entities.user.User;
 import com.hust.soict.ict.aims.services.admin.AdminService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -26,8 +30,9 @@ import java.util.UUID;
  * is delegated to {@link AdminService}.
  */
 @RestController
-@RequestMapping("/api/admin/users")
+@RequestMapping("/admin/users")
 @RequiredArgsConstructor
+@Validated
 public class AdminController {
 
     private final AdminService adminService;
@@ -73,9 +78,13 @@ public class AdminController {
     }
 
     @PutMapping("/{id}/roles")
-    public ResponseEntity<UserResponse> assignRoles(@PathVariable UUID id,
-                                                    @Valid @RequestBody AssignRolesRequest request) {
-        return ResponseEntity.ok(adminService.assignRoles(id, request));
+    public ResponseEntity<UserResponse> assignRoles(
+            @PathVariable UUID id,
+            @RequestBody
+            @NotEmpty
+            Set<User.@NotNull Role> newRoles
+    ) {
+        return ResponseEntity.ok(adminService.assignRoles(id, newRoles));
     }
 
     @PostMapping("/{id}/reset-password")

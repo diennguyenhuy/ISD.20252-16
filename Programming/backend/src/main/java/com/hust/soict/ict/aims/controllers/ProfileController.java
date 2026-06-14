@@ -18,7 +18,7 @@ import java.util.Map;
  * users with {@code mustChangePassword = true} can reach it.
  */
 @RestController
-@RequestMapping("/api/profile")
+@RequestMapping("/profile")
 @RequiredArgsConstructor
 public class ProfileController {
 

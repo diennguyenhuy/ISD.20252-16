@@ -60,7 +60,7 @@ public class AuthService {
         String jwt = jwtUtils.generateJwtToken(authentication);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        List<String> roles = userDetails.getAuthorities() == null
+        List<String> roles = userDetails == null
                 ? List.of()
                 : userDetails.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)

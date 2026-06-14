@@ -1,15 +1,5 @@
 import { apiClient } from './client';
-
-export interface UserResponse {
-    id: string;
-    username: string;
-    email: string;
-    roles: string[];
-    active: boolean;
-    blocked: boolean;
-    mustChangePassword: boolean;
-    createdAt: string;
-}
+import type { UserRole, User} from "../models/user.interface";
 
 export interface PagedResponse<T> {
     content: T[];
@@ -26,7 +16,7 @@ export interface CreateUserPayload {
 }
 
 export interface AssignRolesPayload {
-    roles: string[];
+    roles: UserRole[];
 }
 
 export interface ChangePasswordPayload {
@@ -37,34 +27,34 @@ export interface ChangePasswordPayload {
 
 export const AdminService = {
     getUsers: (page = 0, size = 100) =>
-        apiClient.get<PagedResponse<UserResponse>>(`/api/admin/users?page=${page}&size=${size}`),
+        apiClient.get<PagedResponse<User>>(`/admin/users?page=${page}&size=${size}`),
 
     getUser: (id: string) =>
-        apiClient.get<UserResponse>(`/api/admin/users/${id}`),
+        apiClient.get<User>(`/admin/users/${id}`),
 
     createUser: (data: CreateUserPayload) =>
-        apiClient.post<UserResponse>('/api/admin/users', data),
+        apiClient.post<User>('/admin/users', data),
 
     deactivateUser: (id: string) =>
-        apiClient.patch(`/api/admin/users/${id}/deactivate`),
+        apiClient.patch(`/admin/users/${id}/deactivate`),
 
     activateUser: (id: string) =>
-        apiClient.patch(`/api/admin/users/${id}/activate`),
+        apiClient.patch(`/admin/users/${id}/activate`),
 
     blockUser: (id: string) =>
-        apiClient.patch(`/api/admin/users/${id}/block`),
+        apiClient.patch(`/admin/users/${id}/block`),
 
     unblockUser: (id: string) =>
-        apiClient.patch(`/api/admin/users/${id}/unblock`),
+        apiClient.patch(`/admin/users/${id}/unblock`),
 
     assignRoles: (id: string, data: AssignRolesPayload) =>
-        apiClient.put<UserResponse>(`/api/admin/users/${id}/roles`, data),
+        apiClient.put<User>(`/admin/users/${id}/roles`, data),
 
     resetPassword: (id: string) =>
-        apiClient.post(`/api/admin/users/${id}/reset-password`),
+        apiClient.post(`/admin/users/${id}/reset-password`),
 };
 
 export const ProfileService = {
     changePassword: (data: ChangePasswordPayload) =>
-        apiClient.post('/api/profile/password', data),
+        apiClient.post('/profile/password', data),
 };

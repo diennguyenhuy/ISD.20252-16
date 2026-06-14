@@ -34,8 +34,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
      * Everything else is blocked until they change their password.
      */
     private static final Set<String> PASSWORD_CHANGE_WHITELIST = Set.of(
-            "/api/profile/password",
-            "/api/auth/login"
+            "/profile/password",
+            "/auth/login"
     );
 
     @Override
@@ -60,8 +60,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 String requestPath = request.getRequestURI();
                 if (Boolean.TRUE.equals(mustChangePassword) && !isWhitelistedPath(requestPath)) {
                     writeErrorResponse(response, HttpServletResponse.SC_FORBIDDEN,
-                            "You must change your password before performing any other action. "
-                                    + "Please use POST /api/profile/password.");
+                            "You must change your password before performing any other action.");
                     return; // Short-circuit
                 }
 

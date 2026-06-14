@@ -1,5 +1,6 @@
-package com.hust.soict.ict.aims.services.notification.email;
+package com.hust.soict.ict.aims.services.profile;
 
+import com.hust.soict.ict.aims.services.notification.email.EmailMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
  * <p>Follows the team's extensible notification pattern:
  * private constructor + inner {@link Factory} + record-based {@link Payload}.
  */
+@Deprecated
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class ProfileUpdateEmailMessage implements EmailMessage {
 

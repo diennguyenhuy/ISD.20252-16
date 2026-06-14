@@ -4,7 +4,6 @@ import {
   Search, Plus, UserCheck, UserX, Shield, ShieldOff, Eye, ChevronDown, Users, Loader2, AlertTriangle
 } from 'lucide-react';
 import { AdminService, type UserResponse } from '../../api/AdminService';
-import { formatDate } from '../../data/formatter'; // Assuming we have a formatter, or I can write a simple one. Wait, let's use standard JS dates to avoid errors if formatter doesn't exist.
 
 const ROLE_LABELS: Record<string, string> = {
   customer: 'Customer',

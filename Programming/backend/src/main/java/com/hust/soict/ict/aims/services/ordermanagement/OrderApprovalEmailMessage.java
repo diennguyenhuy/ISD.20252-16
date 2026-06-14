@@ -1,6 +1,7 @@
-package com.hust.soict.ict.aims.services.notification.email;
+package com.hust.soict.ict.aims.services.ordermanagement;
 
 import com.hust.soict.ict.aims.models.entities.order.Order;
+import com.hust.soict.ict.aims.services.notification.email.EmailMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -80,18 +81,15 @@ public class OrderApprovalEmailMessage implements EmailMessage {
     }
 
     @Component
-    public static class Factory extends EmailMessage.Factory<OrderApprovalEmailMessage, Order> {
-        @Value("${app.frontend.url}")
-        private String frontendUrl;
-
+    public static class Factory extends EmailMessage.Factory<OrderApprovalEmailMessage, OrderApprovalEvent> {
         @Override
         public Class<OrderApprovalEmailMessage> messageType() {
             return OrderApprovalEmailMessage.class;
         }
 
         @Override
-        public OrderApprovalEmailMessage createMessage(Order payload) {
-            return new OrderApprovalEmailMessage(payload, frontendUrl);
+        public OrderApprovalEmailMessage createMessage(OrderApprovalEvent payload) {
+            return new OrderApprovalEmailMessage(payload.order(), frontendUrl);
         }
     }
 }

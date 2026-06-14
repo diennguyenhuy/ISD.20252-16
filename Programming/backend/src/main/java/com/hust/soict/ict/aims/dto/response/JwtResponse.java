@@ -22,7 +22,6 @@ public class JwtResponse {
     private String username;
     private String email;
     private List<String> roles;
-    /** Signals that the user must change their password before performing any actions. */
     private boolean mustChangePassword;
 
     public JwtResponse(String token, UUID id, String username, String email,

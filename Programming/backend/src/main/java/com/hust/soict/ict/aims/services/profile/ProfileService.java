@@ -4,9 +4,9 @@ import com.hust.soict.ict.aims.dto.request.ChangePasswordRequest;
 import com.hust.soict.ict.aims.models.entities.user.User;
 import com.hust.soict.ict.aims.repositories.UserRepository;
 import com.hust.soict.ict.aims.services.notification.NotificationService;
-import com.hust.soict.ict.aims.services.notification.email.ProfileUpdateEmailMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +28,6 @@ public class ProfileService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final NotificationService notificationService;
 
     /**
      * Changes the authenticated user's password.
@@ -44,6 +43,7 @@ public class ProfileService {
      * @param userId  the ID of the authenticated user (from SecurityContext)
      * @param request the password change payload
      */
+    @Transactional
     public void changePassword(UUID userId, ChangePasswordRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + userId));
@@ -67,14 +67,6 @@ public class ProfileService {
         String hashedNewPassword = passwordEncoder.encode(request.getNewPassword());
         user.updatePassword(hashedNewPassword);
         userRepository.save(user);
-
-        // 5. Send audit email
-        notificationService.send(
-                ProfileUpdateEmailMessage.class,
-                new ProfileUpdateEmailMessage.Payload(
-                        user.getEmail(),
-                        user.getUsername(),
-                        "Password Changed"));
 
         log.info("User {} ({}) changed their password.", user.getUsername(), user.getEmail());
     }

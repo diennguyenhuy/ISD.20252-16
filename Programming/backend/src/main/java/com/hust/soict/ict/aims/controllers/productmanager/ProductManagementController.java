@@ -7,12 +7,10 @@ import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
 import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.services.productmanagement.ProductManagementService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,10 +63,15 @@ public class ProductManagementController {
     @DeleteMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<ProductSummary> deleteProducts(
-            @Size(min = 1, max = 10, message = "List of product IDs to delete must contain at least 1 product and a maximum of 10 products at a time")
-            List<@NotNull(message = "Each ID must not be null") UUID> request
+            @RequestBody
+            @Size(
+                    min = 1,
+                    max = 10,
+                    message = "List of product IDs to delete must contain at least 1 product and a maximum of 10 products at a time"
+            )
+            List<@NotNull(message = "Each ID must not be null") UUID> productIds
     ) {
-        return productManagementService.deleteProducts(request);
+        return productManagementService.deleteProducts(productIds);
     }
 
     @PostMapping("/{id}/stock")

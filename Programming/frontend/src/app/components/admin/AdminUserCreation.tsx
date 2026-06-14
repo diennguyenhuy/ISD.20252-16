@@ -2,15 +2,16 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ArrowLeft, UserPlus, AlertCircle, ChevronDown, Loader2 } from 'lucide-react';
 import { AdminService } from '../../api/AdminService';
+import type {UserRole} from "../../models/user.interface";
 
 interface FormData {
   username: string;
   email: string;
-  roles: string[];
+  roles: UserRole[];
 }
-type Errors = Partial<Record<keyof FormData, string>>;
+type Errors = Partial<Record<keyof FormData, string | undefined>>;
 
-function Field({ label, required, error, children }: { label: string; required?: boolean; error?: string; children: React.ReactNode }) {
+function Field({ label, required, error, children }: { label: string; required?: boolean; error?: string | undefined; children: React.ReactNode }) {
   return (
     <div className="flex flex-col">
       <label className="text-sm font-bold text-foreground mb-2 flex items-center gap-1">
@@ -138,8 +139,8 @@ export default function AdminUserCreation() {
             <Field label="Roles" required error={errors.roles as any}>
               <div className="flex flex-col sm:flex-row gap-4">
                 {[
-                  { value: 'PRODUCT_MANAGER', label: 'Product Manager', desc: 'Manage products and orders' },
-                  { value: 'ADMINISTRATOR', label: 'Administrator', desc: 'Full system control' }
+                  { value: 'PRODUCT_MANAGER' as UserRole, label: 'Product Manager', desc: 'Manage products and orders' },
+                  { value: 'ADMINISTRATOR' as UserRole, label: 'Administrator', desc: 'Full system control' }
                 ].map(roleOption => {
                   const isSelected = form.roles.includes(roleOption.value);
                   return (

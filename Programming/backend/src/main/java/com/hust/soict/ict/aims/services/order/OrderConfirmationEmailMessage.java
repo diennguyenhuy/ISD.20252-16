@@ -1,7 +1,8 @@
-package com.hust.soict.ict.aims.services.notification.email;
+package com.hust.soict.ict.aims.services.order;
 
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
+import com.hust.soict.ict.aims.services.notification.email.EmailMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -157,18 +158,15 @@ public class OrderConfirmationEmailMessage implements EmailMessage {
     }
 
     @Component
-    public static class Factory extends EmailMessage.Factory<OrderConfirmationEmailMessage, Order> {
-        @Value("${app.frontend.url}")
-        private String frontendUrl;
-
+    public static class Factory extends EmailMessage.Factory<OrderConfirmationEmailMessage, OrderSuccessEvent> {
         @Override
         public Class<OrderConfirmationEmailMessage> messageType() {
             return OrderConfirmationEmailMessage.class;
         }
 
         @Override
-        public OrderConfirmationEmailMessage createMessage(Order payload) {
-            return new OrderConfirmationEmailMessage(payload, frontendUrl);
+        public OrderConfirmationEmailMessage createMessage(OrderSuccessEvent payload) {
+            return new OrderConfirmationEmailMessage(payload.order(), frontendUrl);
         }
     }
 }
