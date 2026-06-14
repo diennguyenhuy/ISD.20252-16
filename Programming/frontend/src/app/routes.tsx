@@ -3,10 +3,13 @@ import { createBrowserRouter } from 'react-router';
 // Layouts
 import CustomerLayout from './components/layout/CustomerLayout';
 import ManagerLayout from "./components/layout/ManagerLayout";
+import AdminLayout from "./components/layout/AdminLayout";
 
 // Shared
 import LoginSignup from "./components/shared/LoginSignup";
+import ChangePasswordScreen from "./components/shared/ChangePasswordScreen";
 import { CartProvider } from "./context/CartContext";
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Customer Components
 import HomePage from './components/customer/HomePage';
@@ -30,6 +33,11 @@ import ManagerProductDetail from "./components/manager/ManagerProductDetail";
 import ManagerOrderDetail from "./components/manager/ManagerOrderDetail";
 import ManagerOrderList from "./components/manager/ManagerOrderList";
 import ManagerProductLogs from "./components/manager/ManagerProductLogs";
+
+// Admin Components
+import AdminUserList from "./components/admin/AdminUserList";
+import AdminUserCreation from "./components/admin/AdminUserCreation";
+import AdminUserDetail from "./components/admin/AdminUserDetail";
 
 export const router = createBrowserRouter([
     { path: '/login', Component: LoginSignup },
@@ -57,19 +65,31 @@ export const router = createBrowserRouter([
         ],
     },
     {
-        path: '/manager',
-        Component: ManagerLayout,
+        element: <ProtectedRoute />,
         children: [
-            { index: true, Component: ManagerHomePage },
-            { path: 'products/add', Component: ProductCreation },
-            { path: 'products/edit/:id', Component: ProductUpdate },
-            { path: 'products/:id', Component: ManagerProductDetail },
-            { path: 'orders', Component: ManagerOrderList },
-            { path: 'orders/:id', Component: ManagerOrderDetail },
-            { path: 'logs', Component: ManagerProductLogs }
-        ],
-    },
-    {
-        //TODO: ADMIN ROUTES
+            { path: '/change-password', Component: ChangePasswordScreen },
+            {
+                path: '/manager',
+                Component: ManagerLayout,
+                children: [
+                    { index: true, Component: ManagerHomePage },
+                    { path: 'products/add', Component: ProductCreation },
+                    { path: 'products/edit/:id', Component: ProductUpdate },
+                    { path: 'products/:id', Component: ManagerProductDetail },
+                    { path: 'orders', Component: ManagerOrderList },
+                    { path: 'orders/:id', Component: ManagerOrderDetail },
+                    { path: 'logs', Component: ManagerProductLogs }
+                ],
+            },
+            {
+                path: '/admin',
+                Component: AdminLayout,
+                children: [
+                    { index: true, Component: AdminUserList },
+                    { path: 'users/create', Component: AdminUserCreation },
+                    { path: 'users/:id', Component: AdminUserDetail },
+                ],
+            }
+        ]
     }
 ]);

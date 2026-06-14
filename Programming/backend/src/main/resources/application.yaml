@@ -66,3 +66,12 @@ paypal:
 app:
   frontend:
     url: ${APP_FRONTEND_URL:http://localhost:5173}
+
+aims:
+  app:
+    jwtSecret: ${JWT_SECRET}
+    jwtExpirationMs: 1800000
+  admin:
+    email: aims.ict16@gmail.com
+    username: admin
+    initial-password: ${ADMIN_INITIAL_PASSWORD:ChangeMe@2026}

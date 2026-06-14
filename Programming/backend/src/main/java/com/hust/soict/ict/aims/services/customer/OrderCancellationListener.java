@@ -1,7 +1,6 @@
 package com.hust.soict.ict.aims.services.customer;
 
 import com.hust.soict.ict.aims.services.notification.NotificationService;
-import com.hust.soict.ict.aims.services.notification.email.OrderCancellationEmailMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -14,6 +13,6 @@ public class OrderCancellationListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     void handle(OrderCancelEvent event) {
-        notificationService.send(OrderCancellationEmailMessage.class, event.order());
+        notificationService.send(OrderCancellationEmailMessage.class, event);
     }
 }

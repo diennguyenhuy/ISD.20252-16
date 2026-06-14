@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.ordermanagement;
+package com.hust.soict.ict.aims.services.admin;
 
 import com.hust.soict.ict.aims.services.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -8,17 +8,16 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 @RequiredArgsConstructor
-public class OrderManagementEventListener {
+public class AdminEventListener {
     private final NotificationService notificationService;
-    //TODO: REFUND PAYPAL
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    void handle(OrderApprovalEvent event) {
-        notificationService.send(OrderApprovalEmailMessage.class, event.order());
+    void handle(PasswordResetEvent event) {
+        notificationService.send(PasswordResetEmailMessage.class, event);
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    void handle(OrderRejectionEvent event) {
-        notificationService.send(OrderRejectionEmailMessage.class, event.order());
+    void handle(AccountCreatedEvent event) {
+        notificationService.send(AccountCreatedEmailMessage.class, event);
     }
 }

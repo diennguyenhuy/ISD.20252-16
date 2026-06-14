@@ -1,6 +1,7 @@
-package com.hust.soict.ict.aims.services.notification.email;
+package com.hust.soict.ict.aims.services.customer;
 
 import com.hust.soict.ict.aims.models.entities.order.Order;
+import com.hust.soict.ict.aims.services.notification.email.EmailMessage;
 import com.hust.soict.ict.aims.services.payment.PaymentMethod;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -94,15 +95,15 @@ public class OrderCancellationEmailMessage implements EmailMessage {
     }
 
     @Component
-    public static class Factory extends EmailMessage.Factory<OrderCancellationEmailMessage, Order> {
+    public static class Factory extends EmailMessage.Factory<OrderCancellationEmailMessage, OrderCancelEvent> {
         @Override
         public Class<OrderCancellationEmailMessage> messageType() {
             return OrderCancellationEmailMessage.class;
         }
 
         @Override
-        public OrderCancellationEmailMessage createMessage(Order payload) {
-            return new OrderCancellationEmailMessage(payload, frontendUrl);
+        public OrderCancellationEmailMessage createMessage(OrderCancelEvent payload) {
+            return new OrderCancellationEmailMessage(payload.order(), frontendUrl);
         }
     }
 }

@@ -10,7 +10,7 @@ import lombok.NonNull;
 import java.util.*;
 
 @Entity
-@Table(name = "user")
+@Table(name = "\"user\"")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends VersionedEntity {
@@ -31,13 +31,15 @@ public class User extends VersionedEntity {
     private String email;
 
     @Column(nullable = false)
-    @Getter(AccessLevel.NONE)
+    @Getter
     private String hashedPassword;
 
     private boolean active = true;
     private boolean blocked = false;
 
-    @ElementCollection
+    private boolean mustChangePassword = false;
+
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "role", length = 20)
@@ -83,11 +85,28 @@ public class User extends VersionedEntity {
         this.blocked = false;
     }
 
+    /**
+     * Updates the user's hashed password and clears the mustChangePassword flag.
+     * This is the ONLY way to change a password through the domain model.
+     */
+    public void updatePassword(@NonNull String newHashedPassword) {
+        this.hashedPassword = newHashedPassword;
+        this.mustChangePassword = false;
+    }
+
+    /**
+     * Called by an admin to force the user to change their password on next login.
+     * Sets a temporary hashed password and raises the mustChangePassword flag.
+     */
+    public void setTemporaryPassword(@NonNull String temporaryHashedPassword) {
+        this.hashedPassword = temporaryHashedPassword;
+        this.mustChangePassword = true;
+    }
+
     public User(String username, String email, String hashedPassword, Set<Role> roles) {
         this.username = Objects.requireNonNull(username, "User name cannot be null");
         this.email = Objects.requireNonNull(email, "Email cannot be null");
         this.hashedPassword = Objects.requireNonNull(hashedPassword, "Hashed password cannot be null");
         this.roles = new HashSet<>(Objects.requireNonNull(roles, "Roles cannot be null"));
-
     }
 }

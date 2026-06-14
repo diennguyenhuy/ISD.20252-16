@@ -7,11 +7,13 @@ import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.entities.audit.ProductAction;
 import com.hust.soict.ict.aims.models.entities.audit.ProductEditDetail;
 import com.hust.soict.ict.aims.models.entities.audit.ProductLog;
+import com.hust.soict.ict.aims.models.entities.audit.StockAdjustLog;
 import com.hust.soict.ict.aims.models.entities.product.Product;
 import com.hust.soict.ict.aims.repositories.ProductLogRepository;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import com.hust.soict.ict.aims.repositories.StockAdjustLogRepository;
 import com.hust.soict.ict.aims.repositories.UserRepository;
+import com.hust.soict.ict.aims.security.AuthenticationFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -30,7 +32,7 @@ import java.util.*;
 @Slf4j
 public class ProductAuditLoggingAspect {
     private final ProductRepository productRepository;
-    private final UserRepository userRepository;
+    private final AuthenticationFacade authenticationFacade;
     private final StockAdjustLogRepository stockAdjustLogRepository;
     private final ProductLogRepository productLogRepository;
 
@@ -53,12 +55,12 @@ public class ProductAuditLoggingAspect {
                     return new IllegalStateException("Cannot find created product with barcode: " + request.getBarcode());
                 });
 
-//        ProductLog productLog = new ProductLog(
-//                null, <----- TODO: ADD AUTHENTICATED PRODUCT MANAGER
-//                product,
-//                productLogging.action()
-//        );
-//        productLogRepository.save(productLog);
+        ProductLog productLog = new ProductLog(
+                authenticationFacade.getCurrentUser(),
+                product,
+                productLogging.action()
+        );
+        productLogRepository.save(productLog);
 
         log.info(
                 "[AUDIT] Product creation logged. Product ID: {}, Title: {}",
@@ -67,7 +69,7 @@ public class ProductAuditLoggingAspect {
         );
     }
 
-    private Map<String, Object> extractUpdatingFields(Set<String> requestedFieldNames, Object object) {
+    private static Map<String, Object> extractUpdatingFields(Set<String> requestedFieldNames, Object object) {
         Map<String, Object> valueMap = new HashMap<>();
 
         for (Class<?> clazz = object.getClass(); clazz != Object.class; clazz = clazz.getSuperclass()) {
@@ -148,12 +150,12 @@ public class ProductAuditLoggingAspect {
             }
         }
 
-//        ProductLog productLog = new ProductLog(
-//                null, //<----- TODO: ADD AUTHENTICATED PRODUCT MANAGER
-//                product,
-//                details
-//        );
-//        productLogRepository.save(productLog);
+        ProductLog productLog = new ProductLog(
+                authenticationFacade.getCurrentUser(),
+                product,
+                details
+        );
+        productLogRepository.save(productLog);
 
         log.info("[AUDIT SUCCESS] Product Update Logged. Product ID: {}. Changes:", id);
         for (String fieldName : requestedFieldNames) {
@@ -179,14 +181,14 @@ public class ProductAuditLoggingAspect {
 
         int newStock = oldStock + adjustStockRequest.getDelta();
 
-//        StockAdjustLog stockAdjustLog = new StockAdjustLog(
-//                null, <----- TODO: ADD AUTHENTICATED PRODUCT MANAGER
-//                product,
-//                oldStock,
-//                newStock,
-//                adjustStockRequest.getReason()
-//        );
-//        stockAdjustLogRepository.save(stockAdjustLog);
+        StockAdjustLog stockAdjustLog = new StockAdjustLog(
+                authenticationFacade.getCurrentUser(),
+                product,
+                oldStock,
+                newStock,
+                adjustStockRequest.getReason()
+        );
+        stockAdjustLogRepository.save(stockAdjustLog);
 
         log.info(
                 "[AUDIT SUCCESS] Stock adjustment logged. Product ID: {}, Old Stock: {}, New Stock: {}, Delta: {}",
@@ -213,12 +215,12 @@ public class ProductAuditLoggingAspect {
             return new ProductNotFoundException(id);
         });
 
-//        ProductLog productLog = new ProductLog(
-//                null, <----- TODO: ADD AUTHENTICATED PRODUCT MANAGER
-//                product,
-//                productLogging.action()
-//        );
-//        productLogRepository.save(productLog);
+        ProductLog productLog = new ProductLog(
+                authenticationFacade.getCurrentUser(),
+                product,
+                productLogging.action()
+        );
+        productLogRepository.save(productLog);
 
         log.info(
                 "[AUDIT] Product activated. ID: {}, Title: {}",
@@ -255,12 +257,12 @@ public class ProductAuditLoggingAspect {
             }
         };
 
-//        ProductLog productLog = new ProductLog(
-//                null, <----- TODO: ADD AUTHENTICATED PRODUCT MANAGER
-//                product,
-//                actualAction
-//        );
-//        productLogRepository.save(productLog);
+        ProductLog productLog = new ProductLog(
+                authenticationFacade.getCurrentUser(),
+                product,
+                actualAction
+        );
+        productLogRepository.save(productLog);
 
         log.info(
                 "[AUDIT] Product {}d. ID: {}, Title: {}",
@@ -281,7 +283,7 @@ public class ProductAuditLoggingAspect {
 
         List<Product> products = productRepository.findAllById(ids);
 
-//        List<ProductLog> productLogs = new ArrayList<>();
+        List<ProductLog> productLogs = new ArrayList<>();
 
         products.forEach(product -> {
             ProductAction actualAction;
@@ -298,11 +300,11 @@ public class ProductAuditLoggingAspect {
                 }
             }
 
-//            productLogs.add(new ProductLog(
-//                    null, <----- TODO: ADD AUTHENTICATED PRODUCT MANAGER
-//                    product,
-//                    actualAction
-//            ));
+            productLogs.add(new ProductLog(
+                    authenticationFacade.getCurrentUser(),
+                    product,
+                    actualAction
+            ));
 
             log.info(
                     "[AUDIT] Product {}d. ID: {}, Title: {}",
@@ -311,6 +313,6 @@ public class ProductAuditLoggingAspect {
                     product.getTitle()
             );
         });
-//        productLogRepository.saveAll(productLogs);
+        productLogRepository.saveAll(productLogs);
     }
 }

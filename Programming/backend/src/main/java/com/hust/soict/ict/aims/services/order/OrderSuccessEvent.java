@@ -10,5 +10,5 @@ import com.hust.soict.ict.aims.models.entities.order.Order;
  * - Stamp coupling with Order
  * because full domain objects are carried in the event.
  */
-record OrderSuccessEvent(Order order) {
+public record OrderSuccessEvent(Order order) {
 }
