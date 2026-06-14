@@ -6,6 +6,7 @@ export interface User {
     username: string;
     email: string;
     roles: string[];
+    mustChangePassword?: boolean;
 }
 
 interface AuthContextType {
@@ -14,6 +15,7 @@ interface AuthContextType {
     isAuthenticated: boolean;
     login: (token: string, user: User) => void;
     logout: () => void;
+    hasRole: (role: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,8 +44,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem('user');
     };
 
+    const hasRole = (role: string): boolean => {
+        if (!user) return false;
+        return user.roles.includes(`ROLE_${role}`) || user.roles.includes(role);
+    };
+
     return (
-        <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, login, logout }}>
+        <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, login, logout, hasRole }}>
             {children}
         </AuthContext.Provider>
     );

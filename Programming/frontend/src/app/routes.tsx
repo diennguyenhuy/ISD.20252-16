@@ -3,9 +3,11 @@ import { createBrowserRouter } from 'react-router';
 // Layouts
 import CustomerLayout from './components/layout/CustomerLayout';
 import ManagerLayout from "./components/layout/ManagerLayout";
+import AdminLayout from "./components/layout/AdminLayout";
 
 // Shared
 import LoginSignup from "./components/shared/LoginSignup";
+import ChangePasswordScreen from "./components/shared/ChangePasswordScreen";
 import { CartProvider } from "./context/CartContext";
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -30,6 +32,11 @@ import ProductUpdate from "./components/manager/ProductUpdate";
 import ManagerProductDetail from "./components/manager/ManagerProductDetail";
 import ManagerOrderDetail from "./components/manager/ManagerOrderDetail";
 import ManagerOrderList from "./components/manager/ManagerOrderList";
+
+// Admin Components
+import AdminUserList from "./components/admin/AdminUserList";
+import AdminUserCreation from "./components/admin/AdminUserCreation";
+import AdminUserDetail from "./components/admin/AdminUserDetail";
 
 export const router = createBrowserRouter([
     { path: '/login', Component: LoginSignup },
@@ -59,6 +66,7 @@ export const router = createBrowserRouter([
     {
         element: <ProtectedRoute />,
         children: [
+            { path: '/change-password', Component: ChangePasswordScreen },
             // Toàn bộ nhánh /manager bị nhốt vào bên trong children của ProtectedRoute
             {
                 path: '/manager',
@@ -71,10 +79,17 @@ export const router = createBrowserRouter([
                     { path: 'orders', Component: ManagerOrderList },
                     { path: 'orders/:id', Component: ManagerOrderDetail },
                 ],
+            },
+            // Toàn bộ nhánh /admin
+            {
+                path: '/admin',
+                Component: AdminLayout,
+                children: [
+                    { index: true, Component: AdminUserList },
+                    { path: 'users/create', Component: AdminUserCreation },
+                    { path: 'users/:id', Component: AdminUserDetail },
+                ],
             }
         ]
-    },
-    {
-        //TODO: ADMIN ROUTES
     }
 ]);
