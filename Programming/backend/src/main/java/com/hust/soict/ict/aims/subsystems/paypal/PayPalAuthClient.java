@@ -1,6 +1,5 @@
 package com.hust.soict.ict.aims.subsystems.paypal;
 
-import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalApiModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;

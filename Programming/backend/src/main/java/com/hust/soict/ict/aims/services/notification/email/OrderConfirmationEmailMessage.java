@@ -4,7 +4,6 @@ import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.ZoneId;
@@ -158,9 +157,6 @@ public class OrderConfirmationEmailMessage implements EmailMessage {
 
     @Component
     public static class Factory extends EmailMessage.Factory<OrderConfirmationEmailMessage, Order> {
-        @Value("${app.frontend.url}")
-        private String frontendUrl;
-
         @Override
         public Class<OrderConfirmationEmailMessage> messageType() {
             return OrderConfirmationEmailMessage.class;

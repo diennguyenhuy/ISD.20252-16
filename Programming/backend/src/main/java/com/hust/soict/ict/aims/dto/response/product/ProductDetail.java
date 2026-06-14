@@ -24,9 +24,5 @@ public abstract class ProductDetail {
     private String imageURL;
     private Instant createdAt;
     private Instant updatedAt;
-    protected final String productType;
-
-    protected ProductDetail(String productType) {
-        this.productType = productType;
-    }
+    private String productType;
 }

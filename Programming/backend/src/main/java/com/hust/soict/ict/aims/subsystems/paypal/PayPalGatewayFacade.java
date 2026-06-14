@@ -2,7 +2,9 @@ package com.hust.soict.ict.aims.subsystems.paypal;
 
 import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.exceptions.UserCancelledException;
-import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalApiModel;
+import com.hust.soict.ict.aims.services.payment.contract.IRedirectPaymentGateway;
+import com.hust.soict.ict.aims.subsystems.paypal.model.PaymentCapture;
+import com.hust.soict.ict.aims.subsystems.paypal.model.PaymentInitiation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -15,7 +17,7 @@ import java.util.Objects;
  *
  * <p>Hides three collaborators ({@link PayPalOrdersClient}, {@link PayPalAuthClient}
  * via the orders client, and {@link PayPalAmountConverter}) plus all PayPal JSON
- * and link-parsing behind the simple {@link IPaymentProvider} contract.
+ * and link-parsing behind the simple {@link IRedirectPaymentGateway} contract.
  *
  * <ul>
  *   <li><b>Cohesion:</b> Functional — orchestrates exactly the PayPal
@@ -28,7 +30,7 @@ import java.util.Objects;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class PayPalGatewayFacade implements IPaymentProvider {
+class PayPalGatewayFacade implements IRedirectPaymentGateway {
 
     private final PayPalOrdersClient ordersClient;
     private final PayPalAmountConverter amountConverter;

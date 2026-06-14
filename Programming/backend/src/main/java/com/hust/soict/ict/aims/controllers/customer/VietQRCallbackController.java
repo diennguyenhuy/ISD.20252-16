@@ -1,10 +1,10 @@
 package com.hust.soict.ict.aims.controllers.customer;
 
-import com.hust.soict.ict.aims.dto.vietqr.request.VietQRTransactionSyncRequest;
-import com.hust.soict.ict.aims.dto.vietqr.response.VietQRTokenResponse;
-import com.hust.soict.ict.aims.dto.vietqr.response.VietQRTransactionSyncResponse;
-import com.hust.soict.ict.aims.services.payment.vietqr.VietQRCallbackAuthService;
-import com.hust.soict.ict.aims.services.payment.vietqr.VietQRTransactionSyncService;
+import com.hust.soict.ict.aims.dto.request.payment.vietqr.synccallback.VietQRTransactionSyncRequest;
+import com.hust.soict.ict.aims.dto.response.payment.vietqr.synccallback.VietQRTokenResponse;
+import com.hust.soict.ict.aims.dto.response.payment.vietqr.synccallback.VietQRTransactionSyncResponse;
+import com.hust.soict.ict.aims.services.payment.vietqr.synccallback.VietQRCallbackAuthService;
+import com.hust.soict.ict.aims.services.payment.vietqr.synccallback.VietQRTransactionSyncService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;

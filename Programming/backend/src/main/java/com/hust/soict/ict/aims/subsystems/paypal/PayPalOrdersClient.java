@@ -1,6 +1,5 @@
 package com.hust.soict.ict.aims.subsystems.paypal;
 
-import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalApiModel;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;

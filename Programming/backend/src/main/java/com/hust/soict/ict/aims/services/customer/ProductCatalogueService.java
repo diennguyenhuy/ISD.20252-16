@@ -28,9 +28,9 @@ public class ProductCatalogueService {
     }
 
     public ProductDetail getProductById(UUID productId) throws ProductNotFoundException {
-        return productRepository.findByIdAndStatus(productId, Product.Status.ACTIVE)
-                .map(productMapper::toProductDetail)
+        Product product = productRepository.findByIdAndStatus(productId, Product.Status.ACTIVE)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
+        return productMapper.toProductDetail(product);
     }
 
     public Page<ProductSummary> getProductsBy(String title, String category, Long minPrice, Long maxPrice, Pageable pageable) {

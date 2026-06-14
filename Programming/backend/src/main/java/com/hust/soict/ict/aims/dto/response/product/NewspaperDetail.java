@@ -1,6 +1,5 @@
 package com.hust.soict.ict.aims.dto.response.product;
 
-import com.hust.soict.ict.aims.models.entities.product.Newspaper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -19,8 +18,4 @@ public class NewspaperDetail extends ProductDetail {
     private String publicationFrequency;
     private String ISSN;
     private List<String> sections = new ArrayList<>();
-
-    public NewspaperDetail() {
-        super(Newspaper.class.getSimpleName());
-    }
 }

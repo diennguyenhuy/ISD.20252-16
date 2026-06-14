@@ -2,15 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { Trash2, ShoppingCart, ArrowLeft, AlertTriangle, ShoppingBag, Loader2 } from 'lucide-react';
 import { formatVND } from '../../data/formatter';
+import { PRODUCT_TYPE_META } from '../shared/product/productTypeMetadata';
 
 // Import Services and Interfaces
 import { useCart } from "../../context/CartContext";
 import OrderService from '../../api/OrderService';
 import type { ProductTypeName } from '../../models/product.interface';
-
-const TYPE_LABELS: Record<ProductTypeName, string> = {
-    Book: 'Book', CD: 'CD', DVD: 'DVD', Newspaper: 'Newspaper'
-};
 
 export default function CartScreen() {
     const navigate = useNavigate();
@@ -165,7 +162,7 @@ export default function CartScreen() {
                                                 {item.product.title}
                                             </h3>
                                             <p className="text-xs text-muted-foreground mt-1 capitalize font-medium">
-                                                {TYPE_LABELS[item.product.productType]}
+                                                {PRODUCT_TYPE_META[item.product.productType].label}
                                             </p>
                                         </div>
                                         <button
