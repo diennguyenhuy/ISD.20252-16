@@ -6,7 +6,7 @@ import ManagerLayout from "./components/layout/ManagerLayout";
 import AdminLayout from "./components/layout/AdminLayout";
 
 // Shared
-import LoginSignup from "./components/shared/LoginSignup";
+import Login from "./components/shared/Login";
 import ChangePasswordScreen from "./components/shared/ChangePasswordScreen";
 import { CartProvider } from "./context/CartContext";
 import ProtectedRoute from './components/ProtectedRoute';
@@ -40,7 +40,7 @@ import AdminUserCreation from "./components/admin/AdminUserCreation";
 import AdminUserDetail from "./components/admin/AdminUserDetail";
 
 export const router = createBrowserRouter([
-    { path: '/login', Component: LoginSignup },
+    { path: '/login', Component: Login },
     {
         path: '/',
         element: (

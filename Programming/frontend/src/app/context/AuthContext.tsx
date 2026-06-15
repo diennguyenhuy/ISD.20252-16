@@ -1,13 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
-
-// Định nghĩa kiểu dữ liệu User trả về từ Backend
-export interface User {
-    id: string;
-    username: string;
-    email: string;
-    roles: string[];
-    mustChangePassword?: boolean;
-}
+import type { User } from "../models/user.interface";
 
 interface AuthContextType {
     user: User | null;
@@ -46,7 +38,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const hasRole = (role: string): boolean => {
         if (!user) return false;
-        return user.roles.includes(`ROLE_${role}`) || user.roles.includes(role);
+        return (user.roles as string[]).includes(`ROLE_${role}`) || (user.roles as string[]).includes(role);
     };
 
     return (

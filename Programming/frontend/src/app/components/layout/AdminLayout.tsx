@@ -1,7 +1,8 @@
 import { Outlet, useNavigate, useLocation } from 'react-router';
-import { Users, LogOut, ChevronRight, Menu, X, Sun, Moon, Shield } from 'lucide-react';
+import { Users, ChevronRight, Menu, X, Sun, Moon, Shield } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import SidebarUserProfile from '../shared/SibebarUserProfile';
 
 const NAV_ITEMS = [
   { path: '/admin', label: 'User Management', icon: Users, exact: false }
@@ -10,7 +11,7 @@ const NAV_ITEMS = [
 export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout, hasRole } = useAuth();
+  const { user, hasRole } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
 
@@ -25,11 +26,6 @@ export default function AdminLayout() {
     document.documentElement.classList.toggle('dark');
     setIsDark(!isDark);
   };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  }
 
   const isActive = (path: string, exact = false) =>
       exact ? location.pathname === path : location.pathname.startsWith(path);
@@ -63,20 +59,8 @@ export default function AdminLayout() {
             ))}
           </nav>
 
-          <div className="p-4 border-t border-border bg-muted/10">
-            <div className="mb-3 flex items-center gap-3 px-3 py-3 rounded-xl bg-card border border-border shadow-sm">
-              <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold shrink-0 shadow-inner">
-                {user.username.charAt(0).toUpperCase()}
-              </div>
-              <div className="overflow-hidden text-left flex-1">
-                <p className="text-sm font-bold text-foreground truncate">{user.username}</p>
-                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-              </div>
-            </div>
-            <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-destructive hover:bg-destructive/10 border border-transparent hover:border-destructive/20 transition-colors">
-              <LogOut size={16} /> Logout
-            </button>
-          </div>
+          <SidebarUserProfile />
+
         </aside>
 
         <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">

@@ -3,15 +3,16 @@ import { useNavigate } from 'react-router';
 import {
   Search, Plus, UserCheck, UserX, Shield, ShieldOff, Eye, ChevronDown, Users, Loader2, AlertTriangle
 } from 'lucide-react';
-import { AdminService, type UserResponse } from '../../api/AdminService';
+import { AdminService } from '../../api/AdminService';
+import type { UserRole, User} from "../../models/user.interface";
 
-const ROLE_LABELS: Record<string, string> = {
+const ROLE_LABELS: Record<UserRole | 'customer', string> = {
   customer: 'Customer',
   PRODUCT_MANAGER: 'Product Manager',
   ADMINISTRATOR: 'Administrator',
 };
 
-const ROLE_COLORS: Record<string, string> = {
+const ROLE_COLORS: Record<UserRole | 'customer', string> = {
   customer: 'bg-secondary text-secondary-foreground border-border',
   PRODUCT_MANAGER: 'bg-primary/10 text-primary border-primary/20',
   ADMINISTRATOR: 'bg-destructive/10 text-destructive border-destructive/20',
@@ -31,12 +32,12 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function AdminUserList() {
   const navigate = useNavigate();
-  const [users, setUsers] = useState<UserResponse[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [search, setSearch] = useState('');
-  const [filterRole, setFilterRole] = useState<string>('all');
+  const [filterRole, setFilterRole] = useState<UserRole | 'customer' | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
   useEffect(() => {
@@ -55,15 +56,15 @@ export default function AdminUserList() {
     }
   };
 
-  const getStatus = (u: UserResponse) => {
+  const getStatus = (u: User) => {
     if (u.blocked) return 'blocked';
     if (!u.active) return 'inactive';
     return 'active';
   };
 
-  const getMainRole = (u: UserResponse) => {
-    if (u.roles.includes('ADMINISTRATOR') || u.roles.includes('ROLE_ADMINISTRATOR')) return 'ADMINISTRATOR';
-    if (u.roles.includes('PRODUCT_MANAGER') || u.roles.includes('ROLE_PRODUCT_MANAGER')) return 'PRODUCT_MANAGER';
+  const getMainRole = (u: User) => {
+    if (u.roles.includes('ADMINISTRATOR')) return 'ADMINISTRATOR';
+    if (u.roles.includes('PRODUCT_MANAGER')) return 'PRODUCT_MANAGER';
     return 'customer';
   };
 
@@ -78,7 +79,7 @@ export default function AdminUserList() {
     return mainRole !== 'customer' && matchSearch && matchRole && matchStatus;
   });
 
-  const toggleStatus = async (user: UserResponse) => {
+  const toggleStatus = async (user: User) => {
     try {
         if (user.active) {
             await AdminService.deactivateUser(user.id);
@@ -91,7 +92,7 @@ export default function AdminUserList() {
     }
   };
 
-  const toggleBlock = async (user: UserResponse) => {
+  const toggleBlock = async (user: User) => {
     try {
         if (user.blocked) {
             await AdminService.unblockUser(user.id);
@@ -167,7 +168,7 @@ export default function AdminUserList() {
         <div className="relative min-w-[180px]">
           <select
             value={filterRole}
-            onChange={e => setFilterRole(e.target.value)}
+            onChange={e => setFilterRole(e.target.value as UserRole | 'customer' | 'all')}
             className={`w-full appearance-none pr-10 cursor-pointer ${inputClass}`}
           >
             <option value="all">All Roles</option>

@@ -17,18 +17,12 @@ import org.mapstruct.*;
 )
 public interface ProductAuditLogMapper {
 
-    @Mapping(target = "productId", expression = "java(productAuditLog.getProduct().getId())")
-    @Mapping(target = "managerId", expression = "java(productAuditLog.getManager().getId())")
     @SubclassMapping(source = ProductLog.class, target = ProductLogResponse.class)
     @SubclassMapping(source = StockAdjustLog.class, target = StockAdjustLogResponse.class)
     ProductAuditLogResponse toProductAuditLogResponse(ProductAuditLog productAuditLog);
 
-    @Mapping(target = "productId", ignore = true)
-    @Mapping(target = "managerId", ignore = true)
     ProductLogResponse toProductLogResponse(ProductLog productAuditLog);
 
-    @Mapping(target = "productId", ignore = true)
-    @Mapping(target = "managerId", ignore = true)
     StockAdjustLogResponse toStockAdjustLogResponse(StockAdjustLog stockAdjustLog);
 
     ProductEditDetailResponse toProductEditDetailResponse(ProductEditDetail productEditDetail);

@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
 
+import java.util.UUID;
+
 @Immutable @Entity
 @Table(name = "admin_log")
 @Getter
@@ -17,25 +19,23 @@ public class AdminLog extends AuditLog {
     @Enumerated(EnumType.STRING)
     private UserAction action;
 
-    @ManyToOne
-    @JoinColumn(name = "admin_id", updatable = false)
-    private User admin;
+    @Column(updatable = false)
+    private UUID adminId;
 
     @Column(nullable = false, updatable = false)
     private String adminUsername;
 
-    @ManyToOne
-    @JoinColumn(name = "affected_user_id", updatable = false)
-    private User affectedUser;
+    @Column(updatable = false)
+    private UUID affectedUserId;
 
     @Column(nullable = false, updatable = false)
     private String affectedUsername;
 
     public AdminLog(User admin, User affectedUser, UserAction action) {
         super();
-        this.admin = admin;
+        this.adminId = admin.getId();
         this.adminUsername = admin.getUsername();
-        this.affectedUser = affectedUser;
+        this.affectedUserId = affectedUser.getId();
         this.affectedUsername = affectedUser.getUsername();
         this.action = action;
     }

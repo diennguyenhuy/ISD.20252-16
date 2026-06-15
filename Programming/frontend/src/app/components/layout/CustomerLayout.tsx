@@ -70,7 +70,7 @@ export default function CustomerLayout() {
                         <button onClick={() => navigate('/login')}
                             className="flex items-center gap-2 px-3 py-2.5 rounded-xl font-semibold transition-all duration-200 bg-card text-foreground border border-border hover:border-primary/50 hover:text-primary shadow-sm">
                             <User size={18} className="text-primary" />
-                            <span className="hidden sm:inline text-sm">Login/Sign Up</span>
+                            <span className="hidden sm:inline text-sm">Login (for AIMS Staff)</span>
                         </button>
                     </div>
                 </div>

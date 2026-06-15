@@ -161,12 +161,13 @@ export default function ManagerProductLogs() {
                                             </p>
                                         </div>
                                     ) : (
+
                                         // Render Standard ProductLog Details
                                         <div className="space-y-2">
-                                            {!(log as any).details || (log as any).details.length === 0 ? (
+                                            {!log.details || log.details.length === 0 ? (
                                                 <p className="text-xs text-muted-foreground italic">No specific field deltas recorded.</p>
                                             ) : (
-                                                (log as any).details.map((detail: any, idx: number) => (
+                                                log.details.map((detail: any, idx: number) => (
                                                     <div key={idx} className="text-sm flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                                                         <span className="font-semibold text-foreground min-w-[100px] truncate">
                                                             {detail.fieldName}:
