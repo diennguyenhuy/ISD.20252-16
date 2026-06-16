@@ -30,46 +30,51 @@ import java.time.Instant;
  *           OrderFinalization for order persistence, keeping both concerns loosely coupled.
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
-public class VietQRPaymentService implements PaymentService {
-
+public class VietQRPaymentService extends PaymentService {
     private final IQRPaymentGateway qrPaymentGateway;
-    private final OrderDraftContext orderDraftContext;
 
-    private final OrderFinalization orderFinalization;
+    public VietQRPaymentService(IQRPaymentGateway qrPaymentGateway, OrderFinalization orderFinalization, OrderDraftContext orderDraftContext) {
+        super(orderDraftContext, orderFinalization);
+        this.qrPaymentGateway = qrPaymentGateway;
+    }
 
     @Override
     public PaymentMethod method() {
         return PaymentMethod.VIETQR;
     }
 
+    @Override
+    protected PaymentTransaction generatePaymentTransaction(String transactionContent) {
+        return PaymentTransaction.of(
+                transactionContent,
+                Instant.now(),
+                method().name(),
+                currentOrder().getTotalAmount(),
+                currentOrder()
+        );
+    }
+
     public QRCodeResponse generatePaymentQR() throws PaymentException {
-        var code = qrPaymentGateway.generateQRCode(orderDraftContext.getDraftOrder().getId().toString(), orderDraftContext.getDraftOrder().getTotalAmount());
+        var code = qrPaymentGateway.generateQRCode(currentOrder().getId().toString(), currentOrder().getTotalAmount());
 
         return new QRCodeResponse(code.getQrCode(), code.getQrLink(), code.getBankName(), code.getBankAccount(), code.getUserBankName(), code.getContent(), code.getAmount());
     }
 
     public QRPaymentStatusResponse checkPaymentStatus() throws PaymentException {
-        var status = qrPaymentGateway.checkPaymentStatus(orderDraftContext.getDraftOrder().getId().toString(), orderDraftContext.getDraftOrder().getTotalAmount());
+        var status = qrPaymentGateway.checkPaymentStatus(currentOrder().getId().toString(), currentOrder().getTotalAmount());
 
         return new QRPaymentStatusResponse(status.getStatus(), status.getMessage());
     }
 
     public OrderResponse confirmPayment() throws PaymentException {
-        Order order = orderDraftContext.getDraftOrder();
+        Order order = currentOrder();
 
         QRCodePaymentStatus paymentStatus = qrPaymentGateway.checkPaymentStatus(order.getId().toString(), order.getTotalAmount());
         if (!paymentStatus.isCompleted()) {
             throw new PaymentException("Payment verification failed. VietQR status: " + paymentStatus.getStatus());
         }
         log.info("[PayOrderService] VietQR confirmed COMPLETED — creating PaymentTransaction");
-        return orderFinalization.finalizeOrder(PaymentTransaction.of(
-                "ORD" + order.getId(),
-                Instant.now(),
-                method().name(),
-                order.getTotalAmount(),
-                order
-        ).getOrder());
+        return finalizeOrder(generatePaymentTransaction("ORD" + order.getId()));
     }
 }

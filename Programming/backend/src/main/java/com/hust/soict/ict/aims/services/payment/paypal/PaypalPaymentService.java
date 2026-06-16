@@ -12,6 +12,7 @@ import com.hust.soict.ict.aims.services.order.PlaceOrderService;
 import com.hust.soict.ict.aims.services.payment.PaymentMethod;
 import com.hust.soict.ict.aims.services.payment.PaymentService;
 import com.hust.soict.ict.aims.services.payment.contract.IRedirectPaymentGateway;
+import com.hust.soict.ict.aims.services.payment.contract.IRefundCapability;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PaymentCapture;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PaymentInitiation;
 import lombok.RequiredArgsConstructor;
@@ -31,17 +32,29 @@ import java.time.Instant;
  *      (e.g. OrderFinalizer, OrderDraftSource) and inject those instead.[cite: 1]
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
-public class PaypalPaymentService implements PaymentService {
+public class PaypalPaymentService extends PaymentService implements IRefundCapability {
+    private final IRedirectPaymentGateway paymentProvider;
 
-    private final IRedirectPaymentGateway paymentProvider;     // PayPal facade (abstraction)
-    private final OrderDraftContext orderDraftContext;  // session draft source
-    private final OrderFinalization orderFinalization;  // finalize + confirmation email
+    public PaypalPaymentService(IRedirectPaymentGateway paymentProvider, OrderDraftContext orderDraftContext, OrderFinalization orderFinalization) {
+        super(orderDraftContext, orderFinalization);
+        this.paymentProvider = paymentProvider;
+    }
 
     @Override
     public PaymentMethod method() {
         return PaymentMethod.PAYPAL;
+    }
+
+    @Override
+    protected PaymentTransaction generatePaymentTransaction(String transactionContent) {
+        return PaymentTransaction.of(
+                transactionContent,
+                Instant.now(),
+                method().name(),
+                currentOrder().getTotalAmount(),   // amount kept in VND — the gateway currency stays in the subsystem
+                currentOrder()
+        );
     }
 
     /**
@@ -49,7 +62,7 @@ public class PaypalPaymentService implements PaymentService {
      * approval URL the frontend must open.
      */
     public PayPalCreateResponse createPayment() throws PaymentException {
-        Order order = orderDraftContext.getDraftOrder();
+        Order order = currentOrder();
         PaymentInitiation initiation = paymentProvider.createPayment(order.getId().toString(), order.getTotalAmount());
 
         log.info("[PayByCreditCardService] PayPal order {} created for AIMS order {}",
@@ -65,7 +78,7 @@ public class PaypalPaymentService implements PaymentService {
      * @param providerOrderId the PayPal token returned to the frontend on redirect
      */
     public OrderResponse capturePayment(String providerOrderId) throws PaymentException {
-        Order order = orderDraftContext.getDraftOrder();
+        Order order = currentOrder();
 
         PaymentCapture capture = paymentProvider.capturePayment(providerOrderId);
 
@@ -81,19 +94,11 @@ public class PaypalPaymentService implements PaymentService {
                     "Captured PayPal payment does not belong to the current order.");
         }
 
-        PaymentTransaction transaction = PaymentTransaction.of(
-                "PAYPAL-" + capture.captureId(),
-                Instant.now(),
-                method().name(),
-                order.getTotalAmount(),   // amount kept in VND — the gateway currency stays in the subsystem
-                order
-        );
-
         log.info("[PayByCreditCardService] PayPal capture {} COMPLETED — finalizing order {}",
                 capture.captureId(), order.getId());
 
         // Crucial integration rule: persist the order + send confirmation email.
-        return orderFinalization.finalizeOrder(transaction.getOrder());
+        return finalizeOrder(generatePaymentTransaction("PAYPAL-" + capture.captureId()));
     }
 
     /**
@@ -102,11 +107,16 @@ public class PaypalPaymentService implements PaymentService {
      */
     public void cancelPayment() {
         try {
-            Order order = orderDraftContext.getDraftOrder();
+            Order order = currentOrder();
             log.info("[PayByCreditCardService] PayPal payment cancelled for draft order {} — draft kept for retry",
                     order.getId());
         } catch (OrderNotPlacedException e) {
             log.warn("[PayByCreditCardService] Cancel received but no draft order is present in the session");
         }
+    }
+
+    @Override
+    public void refund(PaymentTransaction transaction) {
+        //TODO: REFUND PAYPAL HERE
     }
 }
