@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.admin;
+package com.hust.soict.ict.aims.services.admin.event;
 
 import com.hust.soict.ict.aims.services.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -19,5 +19,11 @@ public class AdminEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     void handle(AccountCreatedEvent event) {
         notificationService.send(AccountCreatedEmailMessage.class, event);
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    void handle(EmailUpdateEvent event) {
+        notificationService.send(EmailUpdateAlertEmailMessage.class, event);
+        notificationService.send(EmailUpdateConfirmationEmailMessage.class, event);
     }
 }

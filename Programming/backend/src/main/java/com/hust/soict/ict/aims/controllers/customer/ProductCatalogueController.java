@@ -3,7 +3,7 @@ package com.hust.soict.ict.aims.controllers.customer;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
 import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
-import com.hust.soict.ict.aims.services.customer.ProductCatalogueService;
+import com.hust.soict.ict.aims.services.customer.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -23,7 +23,7 @@ import java.util.UUID;
 @RequestMapping("/products")
 @RequiredArgsConstructor
 public class ProductCatalogueController {
-    private final ProductCatalogueService productCatalogueService;
+    private final ProductService productService;
 
     /**
      * GET /products/random
@@ -33,7 +33,7 @@ public class ProductCatalogueController {
     @Operation(summary = "Get 20 random products")
     @GetMapping("/random")
     public List<ProductSummary> get20RandomProducts() {
-        return productCatalogueService.get20RandomProducts();
+        return productService.get20RandomProducts();
     }
 
     /**
@@ -55,7 +55,7 @@ public class ProductCatalogueController {
             @RequestParam(required = false) Long maxPrice,
             @PageableDefault(size = 20) Pageable pageable
     ) {
-        return productCatalogueService.getProductsBy(title, category, minPrice, maxPrice, pageable);
+        return productService.getProductsBy(title, category, minPrice, maxPrice, pageable);
     }
 
     /**
@@ -72,6 +72,6 @@ public class ProductCatalogueController {
     })
     @GetMapping("/{id}")
     public ProductDetail getProductById(@PathVariable UUID id) throws ProductNotFoundException {
-        return productCatalogueService.getProductById(id);
+        return productService.getProductById(id);
     }
 }

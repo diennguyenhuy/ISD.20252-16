@@ -5,6 +5,7 @@ import lombok.Getter;
 import java.util.List;
 import java.util.Map;
 
+@Deprecated
 public class ProductConstructionException extends RuntimeException {
     @Getter
     private final Map<String, List<String>> invalidFields;

@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.audit;
+package com.hust.soict.ict.aims.services.audit.aspect;
 
 import com.hust.soict.ict.aims.dto.request.AdjustStockRequest;
 import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
@@ -12,8 +12,9 @@ import com.hust.soict.ict.aims.models.entities.product.Product;
 import com.hust.soict.ict.aims.repositories.ProductLogRepository;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import com.hust.soict.ict.aims.repositories.StockAdjustLogRepository;
-import com.hust.soict.ict.aims.repositories.UserRepository;
 import com.hust.soict.ict.aims.security.AuthenticationFacade;
+import com.hust.soict.ict.aims.services.audit.ProductLogging;
+import com.hust.soict.ict.aims.services.audit.StockAdjustLogging;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;

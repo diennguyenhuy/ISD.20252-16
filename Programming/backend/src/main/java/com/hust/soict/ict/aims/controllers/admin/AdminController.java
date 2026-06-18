@@ -5,6 +5,7 @@ import com.hust.soict.ict.aims.dto.response.UserResponse;
 import com.hust.soict.ict.aims.models.entities.user.User;
 import com.hust.soict.ict.aims.services.admin.AdminService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -92,5 +93,16 @@ public class AdminController {
         adminService.resetPassword(id);
         return ResponseEntity.ok(Map.of("message",
                 "Password has been reset. A temporary password has been sent to the user's email."));
+    }
+
+    @PutMapping("/{id}/email-update")
+    public ResponseEntity<Map<String, String>> updateEmail(
+            @PathVariable UUID id,
+            @RequestBody
+            @NotBlank
+            String newEmail
+    ) {
+        adminService.updateEmail(id, newEmail);
+        return ResponseEntity.ok(Map.of("message", "Email has been updated."));
     }
 }

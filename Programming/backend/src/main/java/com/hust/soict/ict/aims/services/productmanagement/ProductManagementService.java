@@ -4,7 +4,7 @@ import com.hust.soict.ict.aims.dto.request.AdjustStockRequest;
 import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
 import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.exceptions.ExceededDeletionQuotaException;
-import com.hust.soict.ict.aims.exceptions.ProductValidationException;
+import com.hust.soict.ict.aims.exceptions.ProductAlreadyExistedException;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.dto.mapper.ProductMapper;
 import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
@@ -82,7 +82,7 @@ public class ProductManagementService {
 
         if (productRepo.existsByBarcode(dto.getBarcode())) {
             log.warn("[CREATE FAILED] Barcode already exists: {}", dto.getBarcode());
-            throw new ProductValidationException("Barcode already exists: " + dto.getBarcode(), "barcode");
+            throw new ProductAlreadyExistedException("Barcode already exists: " + dto.getBarcode());
         }
 
         Product product = productFactory.createProduct(dto);

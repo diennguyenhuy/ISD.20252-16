@@ -73,24 +73,6 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(InvalidDeliveryException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, Object> handle(InvalidDeliveryException e) {
-        return Map.of(
-                "message", e.getMessage(),
-                "details", e.getInvalidFields()
-        );
-    }
-
-    @ExceptionHandler(ProductConstructionException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, Object> handle(ProductConstructionException e) {
-        return Map.of(
-                "message", e.getMessage(),
-                "details", e.getInvalidFields()
-        );
-    }
-
     @ExceptionHandler(OptimisticLockingFailureException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handle(OptimisticLockingFailureException e) {

@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.order;
+package com.hust.soict.ict.aims.services.order.event;
 
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;

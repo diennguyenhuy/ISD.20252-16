@@ -1,12 +1,10 @@
-package com.hust.soict.ict.aims.services.profile;
+package com.hust.soict.ict.aims.services.auth;
 
 import com.hust.soict.ict.aims.dto.request.ChangePasswordRequest;
 import com.hust.soict.ict.aims.models.entities.user.User;
 import com.hust.soict.ict.aims.repositories.UserRepository;
-import com.hust.soict.ict.aims.services.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

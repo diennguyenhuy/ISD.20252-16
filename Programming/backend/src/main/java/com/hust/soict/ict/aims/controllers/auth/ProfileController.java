@@ -1,8 +1,8 @@
-package com.hust.soict.ict.aims.controllers;
+package com.hust.soict.ict.aims.controllers.auth;
 
 import com.hust.soict.ict.aims.dto.request.ChangePasswordRequest;
 import com.hust.soict.ict.aims.security.services.UserDetailsImpl;
-import com.hust.soict.ict.aims.services.profile.ProfileService;
+import com.hust.soict.ict.aims.services.auth.ProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

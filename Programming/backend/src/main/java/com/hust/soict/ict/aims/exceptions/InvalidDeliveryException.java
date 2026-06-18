@@ -4,6 +4,7 @@ import lombok.Getter;
 
 import java.util.Map;
 
+@Deprecated
 public class InvalidDeliveryException extends RuntimeException {
     private final @Getter Map<String, String> invalidFields;
     public InvalidDeliveryException(Map<String, String> invalidFields) {

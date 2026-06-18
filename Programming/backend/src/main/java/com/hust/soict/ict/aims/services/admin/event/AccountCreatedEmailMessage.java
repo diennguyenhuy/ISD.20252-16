@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.admin;
+package com.hust.soict.ict.aims.services.admin.event;
 
 import com.hust.soict.ict.aims.services.notification.email.EmailMessage;
 import lombok.AccessLevel;

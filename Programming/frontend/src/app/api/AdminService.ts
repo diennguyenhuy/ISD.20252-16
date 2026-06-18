@@ -52,6 +52,9 @@ export const AdminService = {
 
     resetPassword: (id: string) =>
         apiClient.post(`/admin/users/${id}/reset-password`),
+
+    updateEmail: (id: string, newEmail: string) =>
+        apiClient.put(`/admin/users/${id}/email-update`),
 };
 
 export const ProfileService = {

@@ -14,7 +14,7 @@ import java.time.Instant;
 @NoArgsConstructor
 public abstract class VersionedEntity {
     @Version
-    private Long version;
+    protected Long version;
 
     @CreationTimestamp @Immutable
     @Column(updatable = false, nullable = false)

@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.ordermanagement;
+package com.hust.soict.ict.aims.services.customer.event;
 
 import com.hust.soict.ict.aims.repositories.OrderRepository;
 import com.hust.soict.ict.aims.services.notification.NotificationService;
@@ -14,19 +14,14 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class OrderManagementEventListener {
+public class OrderCancellationListener {
     private final NotificationService notificationService;
     private final RefundRegistry refundRegistry;
     private final OrderRepository orderRepository;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    void handle(OrderApprovalEvent event) {
-        notificationService.send(OrderApprovalEmailMessage.class, event.order());
-    }
-
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    void handle(OrderRejectionEvent event) {
+    void handle(OrderCancelEvent event) {
         var transaction = event.order().getPaymentTransaction();
         if (refundRegistry.supports(transaction.getTransactionMethod())) {
             try {
@@ -34,9 +29,9 @@ public class OrderManagementEventListener {
                 event.order().refund();
                 orderRepository.save(event.order());
             } catch (Exception e) {
-                log.error("Unable to refund order {}, order remains REJECTED", event.order().getId(), e);
+                log.error("Unable to refund order {}, order remains CANCELLED", event.order().getId(), e);
             }
         }
-        notificationService.send(OrderRejectionEmailMessage.class, event.order());
+        notificationService.send(OrderCancellationEmailMessage.class, event);
     }
 }

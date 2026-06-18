@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.order;
+package com.hust.soict.ict.aims.services.order.event;
 
 import com.hust.soict.ict.aims.context.CartContext;
 import com.hust.soict.ict.aims.context.OrderDraftContext;

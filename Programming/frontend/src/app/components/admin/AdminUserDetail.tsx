@@ -1,11 +1,12 @@
 import { useParams, useNavigate } from 'react-router';
 import {
-    ArrowLeft, UserCheck, UserX, Shield, ShieldOff, Key, ChevronDown, Mail, Calendar, CheckCircle2, Loader2, AlertTriangle, Info
+    ArrowLeft, UserCheck, UserX, Shield, ShieldOff, Key, Mail, Calendar, CheckCircle2, Loader2, AlertTriangle, Info
 } from 'lucide-react';
 import { AdminService } from '../../api/AdminService';
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext'; // NEW: Need this to check current user
-import type {UserRole, User} from "../../models/user.interface";
+import { useAuth } from '../../context/AuthContext';
+import type { UserRole, User } from "../../models/user.interface";
+import { formatDateTime } from '../../data/formatter';
 
 const ROLE_LABELS: Record<UserRole | 'customer', string> = {
     customer: 'Customer',
@@ -15,7 +16,7 @@ const ROLE_LABELS: Record<UserRole | 'customer', string> = {
 
 const ROLE_COLORS: Record<UserRole | 'customer', string> = {
     customer: 'bg-secondary text-secondary-foreground border-border',
-    PRODUCT_MANAGER: 'bg-primary/10 text-primary border-primary/20',
+    PRODUCT_MANAGER: 'bg-primary/10 text-primary border-primary/20', // Keep PM blue for contrast
     ADMINISTRATOR: 'bg-destructive/10 text-destructive border-destructive/20',
 };
 
@@ -41,10 +42,16 @@ export default function AdminUserDetail() {
     const [error, setError] = useState<string | null>(null);
     const [actionLoading, setActionLoading] = useState(false);
 
+    // Modals & Action States
     const [confirmAction, setConfirmAction] = useState<string | null>(null);
     const [newRoles, setNewRoles] = useState<UserRole[]>([]);
     const [showRoleAssign, setShowRoleAssign] = useState(false);
     const [passwordResetDone, setPasswordResetDone] = useState(false);
+
+    // Email Update States
+    const [showEmailUpdate, setShowEmailUpdate] = useState(false);
+    const [newEmail, setNewEmail] = useState('');
+    const [emailUpdateDone, setEmailUpdateDone] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -75,7 +82,7 @@ export default function AdminUserDetail() {
         setError(null);
         try {
             await action();
-            if (id) await fetchUser(id);
+            if (id) await fetchUser(id); // Refetch to show updated data
             setConfirmAction(null);
         } catch (err: any) {
             setError(err.response?.data?.message || 'Action failed.');
@@ -116,13 +123,10 @@ export default function AdminUserDetail() {
 
     const triggerPasswordReset = () => {
         if (!user) return;
-
-        // NEW: If viewing self, redirect directly to change password
         if (currentUser?.id === user.id) {
             navigate('/change-password');
             return;
         }
-
         handleAction(async () => {
             await AdminService.resetPassword(user.id);
             setPasswordResetDone(true);
@@ -130,10 +134,20 @@ export default function AdminUserDetail() {
         });
     };
 
-    const inputClass = "w-full border border-border rounded-xl px-4 py-3.5 text-sm font-medium outline-none focus:border-destructive focus:ring-1 focus:ring-destructive/50 bg-input-background text-foreground transition-all cursor-pointer appearance-none shadow-inner";
+    const triggerEmailUpdate = () => {
+        if (!user || !newEmail || newEmail === user.email) return;
+        handleAction(async () => {
+            await AdminService.updateEmail(user.id, newEmail); // API Call
+            setShowEmailUpdate(false);
+            setNewEmail(''); // Reset input
+            setEmailUpdateDone(true);
+            setTimeout(() => setEmailUpdateDone(false), 3000);
+        });
+    };
 
     if (loading) {
-        return <div className="flex justify-center items-center h-64"><Loader2 className="animate-spin text-primary" size={48} /></div>;
+        // Changed spinner to destructive red
+        return <div className="flex justify-center items-center h-64"><Loader2 className="animate-spin text-destructive" size={48} /></div>;
     }
 
     if (!user) {
@@ -153,9 +167,23 @@ export default function AdminUserDetail() {
     }
 
     const status = getStatus(user);
-
-    // NEW: Identify if the admin is viewing their own profile
     const isSelf = currentUser?.id === user.id;
+
+    // Dynamic semantic button styling for the confirmation modal
+    const getModalConfirmStyle = () => {
+        if (confirmAction === 'toggle_activation') {
+            return status === 'active'
+                ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-500/20 text-white' // Locking
+                : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20 text-white'; // Activating
+        }
+        if (confirmAction === 'toggle_block') {
+            return status === 'blocked'
+                ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20 text-white' // Unblocking
+                : 'bg-destructive hover:bg-destructive/90 shadow-destructive/20 text-white'; // Blocking
+        }
+        // Default for Password Reset
+        return 'bg-destructive hover:bg-destructive/90 shadow-destructive/20 text-white';
+    };
 
     return (
         <div className="max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -170,6 +198,7 @@ export default function AdminUserDetail() {
                 <h2 className="text-2xl text-foreground font-bold tracking-tight">User Details</h2>
             </div>
 
+            {/* Global Error Banner */}
             {error && (
                 <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl p-4 mb-6 text-sm font-bold flex items-center gap-2 animate-in zoom-in-95 duration-300 shadow-sm">
                     <AlertTriangle size={18} />
@@ -177,6 +206,7 @@ export default function AdminUserDetail() {
                 </div>
             )}
 
+            {/* Success Banners */}
             {passwordResetDone && (
                 <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-2xl p-4 mb-6 text-sm font-bold flex items-center gap-2 animate-in zoom-in-95 duration-300 shadow-sm">
                     <CheckCircle2 size={18} />
@@ -184,12 +214,19 @@ export default function AdminUserDetail() {
                 </div>
             )}
 
+            {emailUpdateDone && (
+                <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-2xl p-4 mb-6 text-sm font-bold flex items-center gap-2 animate-in zoom-in-95 duration-300 shadow-sm">
+                    <CheckCircle2 size={18} />
+                    Email successfully updated. A confirmation has been sent to <strong>{user.email}</strong>
+                </div>
+            )}
+
             {/* Profile Card */}
             <div className="bg-card rounded-3xl border border-border shadow-lg overflow-hidden mb-8 relative">
                 <div className="relative px-6 py-10 text-center border-b border-border bg-muted/10 overflow-hidden">
-                    {/* Subtle background glow tailored for Admin */}
+                    {/* Changed secondary background glow to destructive/5 to match Admin theme */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-destructive/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl -ml-24 -mb-24 pointer-events-none"></div>
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-destructive/5 rounded-full blur-3xl -ml-24 -mb-24 pointer-events-none"></div>
 
                     <div className="w-24 h-24 rounded-full bg-destructive/10 border-4 border-card flex items-center justify-center text-4xl font-extrabold text-destructive mx-auto mb-4 relative z-10 shadow-md">
                         {user.username.charAt(0).toUpperCase()}
@@ -227,8 +264,8 @@ export default function AdminUserDetail() {
                         <div className="flex items-center gap-3.5 bg-muted/30 p-4 rounded-2xl border border-border/50 shadow-inner sm:col-span-2">
                             <div className="p-2 bg-background rounded-lg shadow-sm shrink-0"><Calendar size={16} className="text-muted-foreground" /></div>
                             <div className="min-w-0">
-                                <p className="text-xs text-muted-foreground font-medium mb-0.5">Account Creation Date</p>
-                                <p className="text-sm text-foreground font-bold truncate">{new Date(user.createdAt).toLocaleDateString()}</p>
+                                <p className="text-xs text-muted-foreground font-medium mb-0.5">Account Creation Time</p>
+                                <p className="text-sm text-foreground font-bold truncate">{formatDateTime(user.createdAt)}</p>
                             </div>
                         </div>
                     </div>
@@ -247,6 +284,26 @@ export default function AdminUserDetail() {
               <Info size={14} /> Self-modification restricted
             </span>
                     )}
+                </div>
+
+                {/* Update Email */}
+                <div className={`flex flex-col sm:flex-row sm:items-center justify-between py-4 border-b border-border/50 gap-4 ${isSelf ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <div>
+                        <p className="text-sm font-bold text-foreground">Update Email Address</p>
+                        <p className="text-xs font-medium text-muted-foreground mt-1">Change the primary contact email for this user</p>
+                    </div>
+                    {/* Replaced bg-primary/5 with bg-destructive/5 */}
+                    <button
+                        onClick={() => {
+                            setNewEmail(user.email);
+                            setShowEmailUpdate(true);
+                        }}
+                        disabled={isSelf}
+                        className="flex items-center justify-center sm:justify-start gap-2 px-5 py-2.5 rounded-xl border border-destructive/30 text-destructive bg-destructive/5 hover:bg-destructive/10 text-sm font-bold transition-all shadow-sm"
+                    >
+                        <Mail size={18} />
+                        Update Email
+                    </button>
                 </div>
 
                 {/* Activate/Deactivate */}
@@ -309,13 +366,14 @@ export default function AdminUserDetail() {
               {user.roles.map(r => r.replace('ROLE_', '')).filter(r => r === 'ADMINISTRATOR' || r === 'PRODUCT_MANAGER').map(r => ROLE_LABELS[r] || r).join(', ')}
             </span></p>
                     </div>
+                    {/* Replaced bg-primary/5 with bg-destructive/5 */}
                     <button
                         onClick={() => {
                             setShowRoleAssign(true);
                             setNewRoles(user.roles.map(r => r.replace('ROLE_', '')).filter(r => r === 'ADMINISTRATOR' || r === 'PRODUCT_MANAGER'));
                         }}
                         disabled={isSelf}
-                        className="flex items-center justify-center sm:justify-start gap-2 px-5 py-2.5 rounded-xl border border-primary/30 text-primary bg-primary/5 hover:bg-primary/10 text-sm font-bold transition-all shadow-sm"
+                        className="flex items-center justify-center sm:justify-start gap-2 px-5 py-2.5 rounded-xl border border-destructive/30 text-destructive bg-destructive/5 hover:bg-destructive/10 text-sm font-bold transition-all shadow-sm"
                     >
                         <Shield size={18} />
                         Change Role
@@ -340,11 +398,50 @@ export default function AdminUserDetail() {
                 </div>
             </div>
 
+            {/* Update Email Modal */}
+            {showEmailUpdate && !isSelf && (
+                <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+                    <div className="bg-card rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-border animate-in zoom-in-95 duration-200">
+                        <h3 className="font-bold text-lg text-foreground tracking-tight mb-3">Update Email Address</h3>
+                        <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
+                            Enter the new email address for <span className="font-bold text-foreground">{user.username}</span>. Security notifications will be dispatched to both the old and new addresses.
+                        </p>
+                        <div className="mb-6">
+                            {/* Added focus:border-destructive and ring-destructive */}
+                            <input
+                                type="email"
+                                value={newEmail}
+                                onChange={(e) => setNewEmail(e.target.value)}
+                                placeholder="new.email@example.com"
+                                className="w-full border border-border rounded-xl px-4 py-3 text-sm font-medium outline-none focus:border-destructive focus:ring-1 focus:ring-destructive/50 bg-input-background text-foreground transition-all shadow-sm"
+                                autoFocus
+                            />
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowEmailUpdate(false)}
+                                className="flex-1 py-3.5 rounded-xl border border-border bg-card text-foreground font-bold hover:bg-muted transition-colors shadow-sm"
+                            >
+                                Cancel
+                            </button>
+                            {/* Changed submit button to destructive Red */}
+                            <button
+                                onClick={triggerEmailUpdate}
+                                disabled={actionLoading || !newEmail || newEmail === user.email}
+                                className="flex-1 py-3.5 rounded-xl bg-destructive text-destructive-foreground text-sm font-bold hover:bg-destructive/90 transition-all shadow-md flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {actionLoading ? <Loader2 size={16} className="animate-spin" /> : 'Save Changes'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Role Assign Modal */}
             {showRoleAssign && !isSelf && (
                 <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
                     <div className="bg-card rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border border-border animate-in zoom-in-95 duration-200">
-                        <h3 className="font-bold text-lg text-foreground tracking-tight mb-5">Assign Role to <span className="text-primary">{user.username}</span></h3>
+                        <h3 className="font-bold text-lg text-foreground tracking-tight mb-5">Assign Role to <span className="text-destructive">{user.username}</span></h3>
                         <div className="flex flex-col gap-3 mb-6">
                             {[
                                 { value: 'PRODUCT_MANAGER' as UserRole, label: 'Product Manager' },
@@ -354,15 +451,17 @@ export default function AdminUserDetail() {
                                 return (
                                     <label
                                         key={roleOption.value}
+                                        // Changed active border/bg to destructive
                                         className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
                                             isSelected
-                                                ? 'border-primary bg-primary/5 shadow-sm'
+                                                ? 'border-destructive bg-destructive/5 shadow-sm'
                                                 : 'border-border bg-card hover:bg-muted'
                                         }`}
                                     >
+                                        {/* Changed checkbox to text-destructive focus:ring-destructive */}
                                         <input
                                             type="checkbox"
-                                            className="w-4 h-4 rounded border-border text-primary focus:ring-primary/50"
+                                            className="w-4 h-4 rounded border-border text-destructive focus:ring-destructive/50"
                                             checked={isSelected}
                                             onChange={(e) => {
                                                 const checked = e.target.checked;
@@ -373,7 +472,8 @@ export default function AdminUserDetail() {
                                                 );
                                             }}
                                         />
-                                        <span className={`font-bold text-sm ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                                        {/* Changed selected text to destructive */}
+                                        <span className={`font-bold text-sm ${isSelected ? 'text-destructive' : 'text-foreground'}`}>
                       {roleOption.label}
                     </span>
                                     </label>
@@ -390,7 +490,7 @@ export default function AdminUserDetail() {
                             <button
                                 onClick={assignRole}
                                 disabled={actionLoading}
-                                className="flex-1 py-3.5 rounded-xl bg-destructive text-destructive-foreground text-sm font-bold hover:opacity-90 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 flex justify-center items-center"
+                                className="flex-1 py-3.5 rounded-xl bg-destructive text-destructive-foreground text-sm font-bold hover:opacity-90 transition-all shadow-md flex justify-center items-center"
                             >
                                 {actionLoading ? <Loader2 size={16} className="animate-spin" /> : 'Save Changes'}
                             </button>
@@ -427,11 +527,8 @@ export default function AdminUserDetail() {
                                     else triggerPasswordReset();
                                 }}
                                 disabled={actionLoading}
-                                className={`flex-1 py-3.5 rounded-xl text-primary-foreground font-bold shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 flex justify-center items-center ${
-                                    confirmAction === 'toggle_block' && status !== 'blocked'
-                                        ? 'bg-destructive hover:bg-destructive/90 shadow-destructive/20'
-                                        : 'bg-primary hover:bg-accent shadow-primary/20'
-                                }`}
+                                // Applies the dynamic semantic colors
+                                className={`flex-1 py-3.5 rounded-xl font-bold shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 flex justify-center items-center ${getModalConfirmStyle()}`}
                             >
                                 {actionLoading ? <Loader2 size={16} className="animate-spin" /> : 'Confirm'}
                             </button>

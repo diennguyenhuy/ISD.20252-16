@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.controllers;
+package com.hust.soict.ict.aims.controllers.auth;
 
 import com.hust.soict.ict.aims.dto.request.LoginRequest;
 import com.hust.soict.ict.aims.dto.response.JwtResponse;

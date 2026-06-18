@@ -2,10 +2,7 @@ package com.hust.soict.ict.aims.models.entities.user;
 
 import com.hust.soict.ict.aims.models.entities.VersionedEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import lombok.*;
 
 import java.util.*;
 
@@ -28,6 +25,7 @@ public class User extends VersionedEntity {
     private String username;
 
     @Column(nullable = false, unique = true)
+    @NonNull @Setter
     private String email;
 
     @Column(nullable = false)

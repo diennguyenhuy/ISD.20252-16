@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.ordermanagement;
+package com.hust.soict.ict.aims.services.ordermanagement.event;
 
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.services.notification.email.EmailMessage;

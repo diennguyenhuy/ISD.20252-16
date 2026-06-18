@@ -74,9 +74,9 @@ class VietQRGatewayFacade implements IQRPaymentGateway {
             return this.accessToken;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new UnknownException("Thread interrupted", e);
+            throw new UnknownPaymentException("Thread interrupted", e);
         } catch (IOException e) {
-            throw new UnknownException("Error while fetching access token", e);
+            throw new UnknownPaymentException("Error while fetching access token", e);
         }
     }
 
@@ -111,7 +111,7 @@ class VietQRGatewayFacade implements IQRPaymentGateway {
 
             return qrCode;
         } catch (Exception e) {
-            throw new UnknownException("Failed to generate QR code: ", e);
+            throw new UnknownPaymentException("Failed to generate QR code: ", e);
         }
     }
 
@@ -141,7 +141,7 @@ class VietQRGatewayFacade implements IQRPaymentGateway {
             status.parseResponseString(response);
             return status;
         } catch (Exception e) {
-            throw new UnknownException("Failed to check payment status: " + e.getMessage(), e);
+            throw new UnknownPaymentException("Failed to check payment status: " + e.getMessage(), e);
         }
     }
 

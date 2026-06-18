@@ -2,8 +2,14 @@ package com.hust.soict.ict.aims.services.admin;
 
 import com.hust.soict.ict.aims.dto.request.CreateUserRequest;
 import com.hust.soict.ict.aims.dto.response.UserResponse;
+import com.hust.soict.ict.aims.exceptions.AccountAlreadyExistedException;
+import com.hust.soict.ict.aims.models.entities.audit.UserAction;
 import com.hust.soict.ict.aims.models.entities.user.User;
 import com.hust.soict.ict.aims.repositories.UserRepository;
+import com.hust.soict.ict.aims.services.admin.event.AccountCreatedEvent;
+import com.hust.soict.ict.aims.services.admin.event.EmailUpdateEvent;
+import com.hust.soict.ict.aims.services.admin.event.PasswordResetEvent;
+import com.hust.soict.ict.aims.services.audit.AdminLogging;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -62,13 +68,14 @@ public class AdminService {
 
     // ───── Account Lifecycle ─────
 
+    @AdminLogging(action = UserAction.CREATE)
     @Transactional
     public UserResponse createUser(CreateUserRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email is already in use: " + request.getEmail());
+            throw new AccountAlreadyExistedException("Email is already in use: " + request.getEmail());
         }
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new IllegalArgumentException("Username is already in use: " + request.getUsername());
+            throw new AccountAlreadyExistedException("Username is already in use: " + request.getUsername());
         }
 
         // Generate a temporary password — admin never sees it
@@ -93,6 +100,7 @@ public class AdminService {
         return UserResponse.from(user);
     }
 
+    @AdminLogging(action = UserAction.DEACTIVATE)
     @Transactional
     public void deactivateUser(UUID userId) {
         User user = findUserOrThrow(userId);
@@ -101,6 +109,7 @@ public class AdminService {
         log.info("Admin deactivated user: {} ({})", user.getUsername(), user.getEmail());
     }
 
+    @AdminLogging(action = UserAction.ACTIVATE)
     @Transactional
     public void activateUser(UUID userId) {
         User user = findUserOrThrow(userId);
@@ -109,6 +118,7 @@ public class AdminService {
         log.info("Admin activated user: {} ({})", user.getUsername(), user.getEmail());
     }
 
+    @AdminLogging(action = UserAction.BLOCK)
     @Transactional
     public void blockUser(UUID userId) {
         User user = findUserOrThrow(userId);
@@ -117,6 +127,7 @@ public class AdminService {
         log.info("Admin blocked user: {} ({})", user.getUsername(), user.getEmail());
     }
 
+    @AdminLogging(action = UserAction.UNBLOCK)
     @Transactional
     public void unblockUser(UUID userId) {
         User user = findUserOrThrow(userId);
@@ -127,6 +138,7 @@ public class AdminService {
 
     // ───── Roles ─────
 
+    @AdminLogging(action = UserAction.MODIFY_ROLE)
     @Transactional
     public UserResponse assignRoles(UUID userId, Set<User.Role> newRoles) {
         User user = findUserOrThrow(userId);
@@ -155,6 +167,7 @@ public class AdminService {
      * <p>Sets {@code mustChangePassword = true} so the user is forced to change it
      * on their next login (enforced by the JWT filter).
      */
+    @AdminLogging(action = UserAction.RESET_PASSWORD)
     @Transactional
     public void resetPassword(UUID userId) {
         User user = findUserOrThrow(userId);
@@ -167,7 +180,25 @@ public class AdminService {
         applicationEventPublisher.publishEvent(new PasswordResetEvent(user, tempPassword));
 
         log.info("Admin triggered password reset for user: {} ({})", user.getUsername(), user.getEmail());
-        // tempPassword is now eligible for GC — never stored, never returned
+    }
+
+    @AdminLogging(action = UserAction.UPDATE_EMAIL)
+    @Transactional
+    public void updateEmail(UUID userId, String newEmail) {
+        if (userRepository.existsByEmail(newEmail)) {
+            throw new AccountAlreadyExistedException("Email is already in use: " + newEmail);
+        }
+
+        User user = findUserOrThrow(userId);
+
+        String oldEmail = user.getEmail();
+
+        user.setEmail(newEmail);
+        userRepository.save(user);
+
+        applicationEventPublisher.publishEvent(new EmailUpdateEvent(user, oldEmail, newEmail));
+
+        log.info("Admin updated email for user: {} ({})", user.getUsername(), user.getEmail());
     }
 
     // ───── Helpers ─────
