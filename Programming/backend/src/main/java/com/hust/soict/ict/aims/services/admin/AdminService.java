@@ -9,7 +9,7 @@ import com.hust.soict.ict.aims.repositories.UserRepository;
 import com.hust.soict.ict.aims.services.admin.event.AccountCreatedEvent;
 import com.hust.soict.ict.aims.services.admin.event.EmailUpdateEvent;
 import com.hust.soict.ict.aims.services.admin.event.PasswordResetEvent;
-import com.hust.soict.ict.aims.services.audit.AdminLogging;
+import com.hust.soict.ict.aims.services.audit.aspect.AdminLogging;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;

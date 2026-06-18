@@ -14,13 +14,12 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class OrderCancellationListener {
+class OrderCancellationListener {
     private final NotificationService notificationService;
     private final RefundRegistry refundRegistry;
     private final OrderRepository orderRepository;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     void handle(OrderCancelEvent event) {
         var transaction = event.order().getPaymentTransaction();
         if (refundRegistry.supports(transaction.getTransactionMethod())) {

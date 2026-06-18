@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class AccountCreatedEmailMessage implements EmailMessage {
+public class AccountCreatedEmailMessage implements EmailMessage<AccountCreatedEvent> {
 
     private final String targetEmail;
     private final String username;

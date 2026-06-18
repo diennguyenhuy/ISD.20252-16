@@ -7,8 +7,8 @@ import java.util.*;
 
 @Service
 public class NotificationService {
-    private final Map<Class<? extends NotificationMessage>, NotificationChannel<?>> channels = new HashMap<>();
-    private final Map<Class<? extends NotificationMessage>, NotificationMessage.Factory<?, ?>> factories = new HashMap<>();
+    private final Map<Class<? extends NotificationMessage<?>>, NotificationChannel<?>> channels = new HashMap<>();
+    private final Map<Class<? extends NotificationMessage<?>>, NotificationMessage.Factory<?, ?>> factories = new HashMap<>();
 
     public NotificationService(
             List<NotificationChannel<?>> channels,
@@ -18,7 +18,7 @@ public class NotificationService {
         channels.forEach(c -> methodToChannel.put(c.method(), c));
 
         factories.forEach(f -> {
-            Class<? extends NotificationMessage> messageType = f.messageType();
+            Class<? extends NotificationMessage<?>> messageType = f.messageType();
             NotificationMethod method = f.supportedMethod();
 
             this.factories.put(messageType, f);
@@ -33,28 +33,24 @@ public class NotificationService {
     }
 
     @SuppressWarnings("unchecked")
-    private <M extends NotificationMessage>
-    NotificationChannel<M> getChannel(Class<? extends NotificationMessage> messageType) {
+    private <M extends NotificationMessage<?>>
+    NotificationChannel<M> getChannel(Class<M> messageType) {
         return (NotificationChannel<M>) Optional.ofNullable(channels.get(messageType))
                 .orElseThrow(() -> new UnsupportedNotificationException("No channel registered for message type: " + messageType.getName()));
     }
 
     @SuppressWarnings("unchecked")
-    private <M extends NotificationMessage, P>
-    NotificationMessage.Factory<M, P> getFactory(Class<M> messageType) {
-        return (NotificationMessage.Factory<M, P>) Optional.ofNullable(factories.get(messageType))
+    private <M extends NotificationMessage<E>, E>
+    NotificationMessage.Factory<M, E> getFactory(Class<M> messageType) {
+        return (NotificationMessage.Factory<M, E>) Optional.ofNullable(factories.get(messageType))
                 .orElseThrow(() -> new UnsupportedNotificationException("No factory registered for message type: " + messageType.getName()));
     }
 
-
-    public <M extends NotificationMessage> void send(M message) {
-        NotificationChannel<M> channel = getChannel(message.getClass());
-        channel.send(message);
-    }
-
-    public <M extends NotificationMessage, P> void send(Class<M> messageType, P payload) {
-        NotificationMessage.Factory<M, P> factory = getFactory(messageType);
+    public <M extends NotificationMessage<E>, E> void send(Class<M> messageType, E payload) {
+        NotificationMessage.Factory<M, E> factory = getFactory(messageType);
         M message = factory.createMessage(payload);
-        send(message);
+
+        NotificationChannel<M> channel = getChannel(messageType);
+        channel.send(message);
     }
 }

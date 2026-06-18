@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.audit;
+package com.hust.soict.ict.aims.services.audit.aspect;
 
 import com.hust.soict.ict.aims.models.entities.audit.ProductAction;
 

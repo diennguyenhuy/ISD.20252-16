@@ -12,8 +12,8 @@ import com.hust.soict.ict.aims.dto.request.UpdateProductRequest;
 import com.hust.soict.ict.aims.models.entities.audit.ProductAction;
 import com.hust.soict.ict.aims.models.entities.product.*;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
-import com.hust.soict.ict.aims.services.audit.ProductLogging;
-import com.hust.soict.ict.aims.services.audit.StockAdjustLogging;
+import com.hust.soict.ict.aims.services.audit.aspect.ProductLogging;
+import com.hust.soict.ict.aims.services.audit.aspect.StockAdjustLogging;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -75,6 +75,7 @@ public class ProductManagementService {
                 });
         return productMapper.toProductDetail(product);
     }
+    
     @ProductLogging(action = ProductAction.CREATE)
     @Transactional
     public ProductDetail createProduct(CreateProductRequest dto) {

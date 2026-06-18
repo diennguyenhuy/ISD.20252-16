@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class OrderCancellationEmailMessage implements EmailMessage {
+public class OrderCancellationEmailMessage implements EmailMessage<OrderCancelEvent> {
     private final Order order;
     private final String frontendUrl;
 

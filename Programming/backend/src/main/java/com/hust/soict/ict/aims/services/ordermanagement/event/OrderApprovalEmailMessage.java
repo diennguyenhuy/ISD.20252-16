@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class OrderApprovalEmailMessage implements EmailMessage {
+public class OrderApprovalEmailMessage implements EmailMessage<OrderApprovalEvent> {
     private final Order order;
     private final String frontendUrl;
 

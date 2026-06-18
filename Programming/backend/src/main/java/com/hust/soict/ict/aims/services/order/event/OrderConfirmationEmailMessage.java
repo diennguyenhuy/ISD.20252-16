@@ -11,7 +11,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class OrderConfirmationEmailMessage implements EmailMessage {
+public class OrderConfirmationEmailMessage implements EmailMessage<OrderSuccessEvent> {
     private final Order order;
     private final String frontendUrl;
 

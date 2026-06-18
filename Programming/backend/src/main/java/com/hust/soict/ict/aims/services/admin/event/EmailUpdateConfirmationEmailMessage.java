@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class EmailUpdateConfirmationEmailMessage implements EmailMessage {
+public class EmailUpdateConfirmationEmailMessage implements EmailMessage<EmailUpdateEvent> {
     private final String newEmail;
     private final String username;
     private final String frontendUrl;

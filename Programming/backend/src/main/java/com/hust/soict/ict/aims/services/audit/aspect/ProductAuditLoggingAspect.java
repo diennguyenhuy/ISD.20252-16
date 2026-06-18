@@ -13,8 +13,6 @@ import com.hust.soict.ict.aims.repositories.ProductLogRepository;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import com.hust.soict.ict.aims.repositories.StockAdjustLogRepository;
 import com.hust.soict.ict.aims.security.AuthenticationFacade;
-import com.hust.soict.ict.aims.services.audit.ProductLogging;
-import com.hust.soict.ict.aims.services.audit.StockAdjustLogging;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -31,7 +29,7 @@ import java.util.*;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ProductAuditLoggingAspect {
+class ProductAuditLoggingAspect {
     private final ProductRepository productRepository;
     private final AuthenticationFacade authenticationFacade;
     private final StockAdjustLogRepository stockAdjustLogRepository;
@@ -41,7 +39,7 @@ public class ProductAuditLoggingAspect {
             value = "@annotation(productLogging) && args(request)",
             argNames = "productLogging,request"
     )
-    public void logProductCreation(ProductLogging productLogging, CreateProductRequest request) {
+    void logProductCreation(ProductLogging productLogging, CreateProductRequest request) {
         if (productLogging.action() != ProductAction.CREATE) {
             return;
         }
@@ -101,7 +99,7 @@ public class ProductAuditLoggingAspect {
             value = "@annotation(productLogging) && args(id, request)",
             argNames = "joinPoint,productLogging,id,request"
     )
-    public Object logProductUpdate(ProceedingJoinPoint joinPoint, ProductLogging productLogging, UUID id, UpdateProductRequest request) throws Throwable {
+    Object logProductUpdate(ProceedingJoinPoint joinPoint, ProductLogging productLogging, UUID id, UpdateProductRequest request) throws Throwable {
         if (productLogging.action() != ProductAction.UPDATE) {
             return joinPoint.proceed();
         }
@@ -169,7 +167,7 @@ public class ProductAuditLoggingAspect {
             value = "@annotation(stockAdjustLogging) && args(id, adjustStockRequest)",
             argNames = "joinPoint,stockAdjustLogging,id,adjustStockRequest"
     )
-    public Object logStockAdjustment(ProceedingJoinPoint joinPoint, StockAdjustLogging stockAdjustLogging, UUID id, AdjustStockRequest adjustStockRequest) throws Throwable {
+    Object logStockAdjustment(ProceedingJoinPoint joinPoint, StockAdjustLogging stockAdjustLogging, UUID id, AdjustStockRequest adjustStockRequest) throws Throwable {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("[AUDIT FAILED] Product not found for stock adjustment. ID: {}", id);
@@ -206,7 +204,7 @@ public class ProductAuditLoggingAspect {
             value = "@annotation(productLogging) && args(id)",
             argNames = "productLogging,id"
     )
-    public void logProductActivation(ProductLogging productLogging, UUID id) {
+    void logProductActivation(ProductLogging productLogging, UUID id) {
         if (productLogging.action() != ProductAction.ACTIVATE) {
             return;
         }
@@ -234,7 +232,7 @@ public class ProductAuditLoggingAspect {
             value = "@annotation(productLogging) && args(id)",
             argNames = "productLogging,id"
     )
-    public void logProductDeletion(ProductLogging productLogging, UUID id) {
+    void logProductDeletion(ProductLogging productLogging, UUID id) {
         if (productLogging.action() != ProductAction.DELETE) {
             return;
         }
@@ -277,7 +275,7 @@ public class ProductAuditLoggingAspect {
             value = "@annotation(productLogging) && args(ids)",
             argNames = "productLogging,ids"
     )
-    public void logProductDeletions(ProductLogging productLogging, List<UUID> ids) {
+    void logProductDeletions(ProductLogging productLogging, List<UUID> ids) {
         if (productLogging.action() != ProductAction.DELETE) {
             return;
         }

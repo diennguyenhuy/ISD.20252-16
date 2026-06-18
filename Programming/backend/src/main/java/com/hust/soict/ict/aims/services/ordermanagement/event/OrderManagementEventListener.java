@@ -14,18 +14,17 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class OrderManagementEventListener {
+class OrderManagementEventListener {
     private final NotificationService notificationService;
     private final RefundRegistry refundRegistry;
     private final OrderRepository orderRepository;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     void handle(OrderApprovalEvent event) {
-        notificationService.send(OrderApprovalEmailMessage.class, event.order());
+        notificationService.send(OrderApprovalEmailMessage.class, event);
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     void handle(OrderRejectionEvent event) {
         var transaction = event.order().getPaymentTransaction();
         if (refundRegistry.supports(transaction.getTransactionMethod())) {
@@ -37,6 +36,6 @@ public class OrderManagementEventListener {
                 log.error("Unable to refund order {}, order remains REJECTED", event.order().getId(), e);
             }
         }
-        notificationService.send(OrderRejectionEmailMessage.class, event.order());
+        notificationService.send(OrderRejectionEmailMessage.class, event);
     }
 }

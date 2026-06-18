@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Component
 @Slf4j
-public class EmailChannel implements NotificationChannel<EmailMessage> {
+public class EmailChannel implements NotificationChannel<EmailMessage<?>> {
     private final JavaMailSender mailSender;
 
     @Value("${spring.mail.username}")
@@ -29,7 +29,7 @@ public class EmailChannel implements NotificationChannel<EmailMessage> {
     }
 
     @Override
-    public void send(EmailMessage message) {
+    public void send(EmailMessage<?> message) {
         log.debug("Sending {} email...", notificationName(message));
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -51,7 +51,7 @@ public class EmailChannel implements NotificationChannel<EmailMessage> {
         }
     }
 
-    private String notificationName(EmailMessage em) {
+    private String notificationName(EmailMessage<?> em) {
         return em.getClass().getSimpleName().replaceAll("([A-Z])", " $1").trim().toLowerCase();
     }
 }

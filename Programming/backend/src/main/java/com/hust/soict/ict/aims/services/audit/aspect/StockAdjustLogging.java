@@ -1,6 +1,4 @@
-package com.hust.soict.ict.aims.services.audit;
-
-import com.hust.soict.ict.aims.models.entities.audit.UserAction;
+package com.hust.soict.ict.aims.services.audit.aspect;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,6 +7,5 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface AdminLogging {
-    UserAction action();
+public @interface StockAdjustLogging {
 }

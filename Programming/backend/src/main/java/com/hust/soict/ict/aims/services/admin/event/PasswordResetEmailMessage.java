@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class PasswordResetEmailMessage implements EmailMessage {
+public class PasswordResetEmailMessage implements EmailMessage<PasswordResetEvent> {
 
     private final String targetEmail;
     private final String username;
