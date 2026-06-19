@@ -152,7 +152,7 @@ public class PaypalPaymentService extends PaymentService implements IRefundCapab
      * surfaced to the domain, keeping the capability interface minimal.
      */
     @Override
-    public void refund(PaymentTransaction transaction) {
+    public void refund(PaymentTransaction transaction) throws PaymentException {
         String captureId = extractCaptureId(transaction);
         long vndAmount = resolveRefundAmount(transaction);
 
@@ -178,7 +178,7 @@ public class PaypalPaymentService extends PaymentService implements IRefundCapab
      * convention (chosen in {@link #capturePayment}), so unwrapping it is a domain
      * concern handled here — the subsystem only ever receives a clean capture id.
      */
-    private String extractCaptureId(PaymentTransaction transaction) {
+    private String extractCaptureId(PaymentTransaction transaction) throws PaymentException {
         String content = transaction.getTransactionContent();
         if (content == null || !content.startsWith(TRANSACTION_CONTENT_PREFIX)) {
             throw new PaymentException(
@@ -192,7 +192,7 @@ public class PaypalPaymentService extends PaymentService implements IRefundCapab
         return captureId;
     }
 
-    private long resolveRefundAmount(PaymentTransaction transaction) {
+    private long resolveRefundAmount(PaymentTransaction transaction) throws PaymentException {
         Long amount = transaction.getAmountPaid();
         if (amount == null || amount <= 0) {
             throw new PaymentException(

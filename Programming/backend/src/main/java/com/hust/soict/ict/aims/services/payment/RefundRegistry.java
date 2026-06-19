@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.services.payment;
 
+import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.exceptions.UnsupportedPaymentMethodException;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 import com.hust.soict.ict.aims.services.payment.contract.IRefundCapability;
@@ -37,7 +38,7 @@ public class RefundRegistry {
         return refundServices.containsKey(method);
     }
 
-    public void refund(PaymentTransaction paymentTransaction) {
+    public void refund(PaymentTransaction paymentTransaction) throws PaymentException {
         PaymentMethod method = PaymentMethod.valueOf(paymentTransaction.getTransactionMethod());
         IRefundCapability refundCapability = Optional.ofNullable(refundServices.get(method))
                 .orElseThrow(() -> new UnsupportedPaymentMethodException("Method " + paymentTransaction.getTransactionMethod() + " does not support refund"));

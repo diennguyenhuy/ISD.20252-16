@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  */
 @Deprecated
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class ProfileUpdateEmailMessage implements EmailMessage {
+public class ProfileUpdateEmailMessage implements EmailMessage<ProfileUpdateEmailMessage.Payload> {
 
     /** Immutable payload carrying the data needed to build this email. */
     public record Payload(String targetEmail, String username, String changeType) {}
