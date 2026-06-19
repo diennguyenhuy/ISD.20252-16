@@ -6,6 +6,8 @@ import com.hust.soict.ict.aims.services.payment.RefundRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -23,7 +25,8 @@ class OrderManagementEventListener {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    void handle(OrderRejectionEvent event) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    void handleRefund(OrderRejectionEvent event) {
         var transaction = event.order().getPaymentTransaction();
         if (refundRegistry.supports(transaction.getTransactionMethod())) {
             try {
@@ -34,6 +37,10 @@ class OrderManagementEventListener {
                 log.error("Unable to refund order {}, order remains REJECTED", event.order().getId(), e);
             }
         }
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    void handle(OrderRejectionEvent event) {
         notificationService.send(OrderRejectionEmailMessage.class, event);
     }
 }

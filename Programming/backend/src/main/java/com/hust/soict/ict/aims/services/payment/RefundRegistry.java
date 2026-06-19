@@ -3,7 +3,6 @@ package com.hust.soict.ict.aims.services.payment;
 import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.exceptions.UnsupportedPaymentMethodException;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
-import com.hust.soict.ict.aims.services.payment.contract.IRefundCapability;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

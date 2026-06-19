@@ -12,7 +12,7 @@ import com.hust.soict.ict.aims.services.order.PlaceOrderService;
 import com.hust.soict.ict.aims.services.payment.PaymentMethod;
 import com.hust.soict.ict.aims.services.payment.PaymentService;
 import com.hust.soict.ict.aims.services.payment.contract.IRedirectPaymentGateway;
-import com.hust.soict.ict.aims.services.payment.contract.IRefundCapability;
+import com.hust.soict.ict.aims.services.payment.IRefundCapability;
 import com.hust.soict.ict.aims.services.payment.contract.IRefundGateway;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PaymentCapture;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PaymentInitiation;
