@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 /**
- * PayPal v2 Orders / OAuth wire model.
+ * PayPal v2 Orders / Payments / OAuth wire model.
  *
  * <p>These records represent PayPal's JSON contract and live deep inside the
  * {@code subsystems.paypal.*} boundary. By convention nothing in the AIMS core
@@ -77,5 +77,26 @@ final class PayPalApiModel {
     }
 
     record Capture(String id, String status, Amount amount) {
+    }
+
+    /* ── Refund (request / response) ────────────────────────────────────── */
+
+    /**
+     * Body for {@code POST /v2/payments/captures/{id}/refund}. The {@code amount}
+     * is optional in PayPal's contract (omitting it triggers a full refund), but
+     * AIMS always sends an explicit, currency-converted value. {@code NON_NULL}
+     * keeps the payload minimal if {@code amount} is ever null.
+     */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    record RefundRequest(Amount amount) {
+    }
+
+    /**
+     * Subset of PayPal's refund response we care about. Spring Boot disables
+     * {@code FAIL_ON_UNKNOWN_PROPERTIES}, so the many extra fields (links,
+     * seller_payable_breakdown, ...) are safely ignored — same as
+     * {@link OrderResponse}.
+     */
+    record RefundResponse(String id, String status) {
     }
 }

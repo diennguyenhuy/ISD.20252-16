@@ -13,32 +13,46 @@ import com.hust.soict.ict.aims.services.payment.PaymentMethod;
 import com.hust.soict.ict.aims.services.payment.PaymentService;
 import com.hust.soict.ict.aims.services.payment.contract.IRedirectPaymentGateway;
 import com.hust.soict.ict.aims.services.payment.contract.IRefundCapability;
+import com.hust.soict.ict.aims.services.payment.contract.IRefundGateway;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PaymentCapture;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PaymentInitiation;
-import lombok.RequiredArgsConstructor;
+import com.hust.soict.ict.aims.subsystems.paypal.model.RefundResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
 /*
- * [SOLID DIP: low-severity note][cite: 1]
- * Principle: Dependency Inversion (D)[cite: 1]
- * Why: This service correctly depends on the IPaymentProvider abstraction, but[cite: 1]
- *      PlaceOrderService and OrderDraftContext are injected as CONCRETE classes,[cite: 1]
- *      so orchestration is still bound to two concrete in-process types. Severity[cite: 1]
- *      is low because both are stable Spring beans (same reasoning as OrderContro][cite: 1]
- * Proposed Solution: If finer testability is wanted, depend on narrow ports[cite: 1]
- *      (e.g. OrderFinalizer, OrderDraftSource) and inject those instead.[cite: 1]
+ * [SOLID DIP: low-severity note]
+ * Principle: Dependency Inversion (D)
+ * Why: This service correctly depends on the IRedirectPaymentGateway / IRefundGateway
+ *      abstractions, but PlaceOrderService and OrderDraftContext are injected as
+ *      CONCRETE classes, so orchestration is still bound to two concrete in-process
+ *      types. Severity is low because both are stable Spring beans.
+ * Proposed Solution: If finer testability is wanted, depend on narrow ports
+ *      (e.g. OrderFinalizer, OrderDraftSource) and inject those instead.
  */
 @Service
 @Slf4j
 public class PaypalPaymentService extends PaymentService implements IRefundCapability {
-    private final IRedirectPaymentGateway paymentProvider;
 
-    public PaypalPaymentService(IRedirectPaymentGateway paymentProvider, OrderDraftContext orderDraftContext, OrderFinalization orderFinalization) {
+    /**
+     * Prefix stamped onto {@code PaymentTransaction.transactionContent} at capture
+     * time ({@code "PAYPAL-" + captureId}). Single source of truth so the write
+     * path (capture) and the read path (refund) can never drift apart.
+     */
+    private static final String TRANSACTION_CONTENT_PREFIX = "PAYPAL-";
+
+    private final IRedirectPaymentGateway paymentProvider;
+    private final IRefundGateway refundGateway;
+
+    public PaypalPaymentService(IRedirectPaymentGateway paymentProvider,
+                                IRefundGateway refundGateway,
+                                OrderDraftContext orderDraftContext,
+                                OrderFinalization orderFinalization) {
         super(orderDraftContext, orderFinalization);
         this.paymentProvider = paymentProvider;
+        this.refundGateway = refundGateway;
     }
 
     @Override
@@ -65,7 +79,7 @@ public class PaypalPaymentService extends PaymentService implements IRefundCapab
         Order order = currentOrder();
         PaymentInitiation initiation = paymentProvider.createPayment(order.getId().toString(), order.getTotalAmount());
 
-        log.info("[PayByCreditCardService] PayPal order {} created for AIMS order {}",
+        log.info("[PaypalPaymentService] PayPal order {} created for AIMS order {}",
                 initiation.providerOrderId(), order.getId());
 
         return new PayPalCreateResponse(initiation.approvalUrl(), initiation.providerOrderId());
@@ -94,11 +108,12 @@ public class PaypalPaymentService extends PaymentService implements IRefundCapab
                     "Captured PayPal payment does not belong to the current order.");
         }
 
-        log.info("[PayByCreditCardService] PayPal capture {} COMPLETED — finalizing order {}",
+        log.info("[PaypalPaymentService] PayPal capture {} COMPLETED — finalizing order {}",
                 capture.captureId(), order.getId());
 
         // Crucial integration rule: persist the order + send confirmation email.
-        return finalizeOrder(generatePaymentTransaction("PAYPAL-" + capture.captureId()));
+        // The "PAYPAL-<captureId>" content is later parsed back in refund().
+        return finalizeOrder(generatePaymentTransaction(TRANSACTION_CONTENT_PREFIX + capture.captureId()));
     }
 
     /**
@@ -108,15 +123,81 @@ public class PaypalPaymentService extends PaymentService implements IRefundCapab
     public void cancelPayment() {
         try {
             Order order = currentOrder();
-            log.info("[PayByCreditCardService] PayPal payment cancelled for draft order {} — draft kept for retry",
+            log.info("[PaypalPaymentService] PayPal payment cancelled for draft order {} — draft kept for retry",
                     order.getId());
         } catch (OrderNotPlacedException e) {
-            log.warn("[PayByCreditCardService] Cancel received but no draft order is present in the session");
+            log.warn("[PaypalPaymentService] Cancel received but no draft order is present in the session");
         }
     }
 
+    /**
+     * Refund a previously captured PayPal payment.
+     *
+     * <p>Invoked by {@code RefundRegistry} from the order-cancellation /
+     * order-rejection event handlers, asynchronously and {@code AFTER_COMMIT}.
+     * This path has <b>no draft order in context</b>, so everything needed is read
+     * from the persisted {@link PaymentTransaction}:
+     * <ul>
+     *   <li>the PayPal capture id, parsed out of {@code transactionContent}
+     *       ({@code "PAYPAL-<captureId>"});</li>
+     *   <li>the amount actually paid (VND), used for the refund body.</li>
+     * </ul>
+     *
+     * <p><b>Contract:</b> {@link IRefundCapability#refund} is {@code void} on
+     * purpose — the handlers only need a success/failure signal. We return
+     * normally on a {@code COMPLETED} refund (the handler then moves the order to
+     * REFUNDED); on any problem we throw {@link PaymentException}, which the
+     * handler catches to leave the order in its prior CANCELLED / REJECTED state.
+     * The richer {@link RefundResult} is consumed here for validation rather than
+     * surfaced to the domain, keeping the capability interface minimal.
+     */
     @Override
-    public void refund(PaymentTransaction transaction) {
-        //TODO: REFUND PAYPAL HERE
+    public void refund(PaymentTransaction transaction) throws PaymentException {
+        String captureId = extractCaptureId(transaction);
+        long vndAmount = resolveRefundAmount(transaction);
+
+        log.info("[PaypalPaymentService] Refunding PayPal capture {} for {} VND (order {})",
+                captureId, vndAmount, transaction.getOrder().getId());
+
+        RefundResult result = refundGateway.refund(captureId, vndAmount);
+
+        if (!result.completed()) {
+            throw new PaymentException(
+                    "PayPal refund not completed for capture " + captureId + " (status " + result.status() + ")");
+        }
+
+        log.info("[PaypalPaymentService] PayPal refund {} COMPLETED for order {}",
+                result.refundId(), transaction.getOrder().getId());
+    }
+
+    /* ── refund helpers (defensive parsing of OUR own transaction-content convention) ── */
+
+    /**
+     * Isolate the raw PayPal {@code capture_id} from the persisted
+     * {@code transactionContent}. The {@code "PAYPAL-"} prefix is an AIMS-side
+     * convention (chosen in {@link #capturePayment}), so unwrapping it is a domain
+     * concern handled here — the subsystem only ever receives a clean capture id.
+     */
+    private String extractCaptureId(PaymentTransaction transaction) throws PaymentException {
+        String content = transaction.getTransactionContent();
+        if (content == null || !content.startsWith(TRANSACTION_CONTENT_PREFIX)) {
+            throw new PaymentException(
+                    "Cannot refund: unexpected PayPal transaction content '" + content + "'");
+        }
+        String captureId = content.substring(TRANSACTION_CONTENT_PREFIX.length()).trim();
+        if (captureId.isEmpty()) {
+            throw new PaymentException(
+                    "Cannot refund: transaction content carries no PayPal capture id");
+        }
+        return captureId;
+    }
+
+    private long resolveRefundAmount(PaymentTransaction transaction) throws PaymentException {
+        Long amount = transaction.getAmountPaid();
+        if (amount == null || amount <= 0) {
+            throw new PaymentException(
+                    "Cannot refund: invalid amount on transaction " + transaction.getId());
+        }
+        return amount;
     }
 }
