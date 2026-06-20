@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.dto.response.order;
+package com.hust.soict.ict.aims.dto.response.payment.paypal;
 
 /**
  * Response DTO for Payment Result
