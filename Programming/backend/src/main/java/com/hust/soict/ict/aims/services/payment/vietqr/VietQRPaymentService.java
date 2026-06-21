@@ -8,14 +8,12 @@ import com.hust.soict.ict.aims.context.OrderDraftContext;
 import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.models.entities.order.Order;
-import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 import com.hust.soict.ict.aims.dto.response.payment.vietqr.QRCodeResponse;
 import com.hust.soict.ict.aims.services.order.OrderFinalization;
 import com.hust.soict.ict.aims.subsystems.vietqr.model.QRCodePaymentStatus;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import java.time.Instant;
+
 /*
  * SOLID Principles
  *
@@ -44,17 +42,6 @@ public class VietQRPaymentService extends PaymentService {
         return PaymentMethod.VIETQR;
     }
 
-    @Override
-    protected PaymentTransaction generatePaymentTransaction(String transactionContent) {
-        return PaymentTransaction.of(
-                transactionContent,
-                Instant.now(),
-                method().name(),
-                currentOrder().getTotalAmount(),
-                currentOrder()
-        );
-    }
-
     public QRCodeResponse generatePaymentQR() throws PaymentException {
         var code = qrPaymentGateway.generateQRCode(currentOrder().getId().toString(), currentOrder().getTotalAmount());
 
@@ -75,6 +62,6 @@ public class VietQRPaymentService extends PaymentService {
             throw new PaymentException("Payment verification failed. VietQR status: " + paymentStatus.getStatus());
         }
         log.info("[PayOrderService] VietQR confirmed COMPLETED — creating PaymentTransaction");
-        return finalizeOrder(generatePaymentTransaction("ORD" + order.getId()));
+        return finalizePayment("ORD" + order.getId());
     }
 }

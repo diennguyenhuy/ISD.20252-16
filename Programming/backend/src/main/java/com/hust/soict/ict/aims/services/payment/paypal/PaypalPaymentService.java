@@ -20,8 +20,6 @@ import com.hust.soict.ict.aims.subsystems.paypal.model.RefundResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-
 /*
  * [SOLID DIP: low-severity note]
  * Principle: Dependency Inversion (D)
@@ -60,17 +58,6 @@ public class PaypalPaymentService extends PaymentService implements IRefundCapab
         return PaymentMethod.PAYPAL;
     }
 
-    @Override
-    protected PaymentTransaction generatePaymentTransaction(String transactionContent) {
-        return PaymentTransaction.of(
-                transactionContent,
-                Instant.now(),
-                method().name(),
-                currentOrder().getTotalAmount(),   // amount kept in VND — the gateway currency stays in the subsystem
-                currentOrder()
-        );
-    }
-
     /**
      * Step 1 — create a PayPal payment for the current draft order and return the
      * approval URL the frontend must open.
@@ -97,15 +84,13 @@ public class PaypalPaymentService extends PaymentService implements IRefundCapab
         PaymentCapture capture = paymentProvider.capturePayment(providerOrderId);
 
         if (!capture.completed()) {
-            throw new PaymentException(
-                    "PayPal payment was not completed. Status: " + capture.status());
+            throw new PaymentException("PayPal payment was not completed. Status: " + capture.status());
         }
 
         // Defence in depth: the captured order must reference THIS draft order, so a
         // forged/leaked token cannot be used to finalize someone else's order.
         if (!order.getId().toString().equals(capture.referenceId())) {
-            throw new PaymentException(
-                    "Captured PayPal payment does not belong to the current order.");
+            throw new PaymentException("Captured PayPal payment does not belong to the current order.");
         }
 
         log.info("[PaypalPaymentService] PayPal capture {} COMPLETED — finalizing order {}",
@@ -113,7 +98,7 @@ public class PaypalPaymentService extends PaymentService implements IRefundCapab
 
         // Crucial integration rule: persist the order + send confirmation email.
         // The "PAYPAL-<captureId>" content is later parsed back in refund().
-        return finalizeOrder(generatePaymentTransaction(TRANSACTION_CONTENT_PREFIX + capture.captureId()));
+        return finalizePayment(TRANSACTION_CONTENT_PREFIX + capture.captureId());
     }
 
     /**
