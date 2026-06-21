@@ -6,6 +6,8 @@ import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 import com.hust.soict.ict.aims.services.order.OrderFinalization;
 
+import java.time.Instant;
+
 public abstract class PaymentService {
     private final OrderDraftContext orderDraftContext;
     private final OrderFinalization orderFinalization;
@@ -17,13 +19,21 @@ public abstract class PaymentService {
 
     public abstract PaymentMethod method();
 
-    protected abstract PaymentTransaction generatePaymentTransaction(String transactionContent);
+    private PaymentTransaction generatePaymentTransaction(String transactionContent) {
+        return PaymentTransaction.of(
+                transactionContent,
+                Instant.now(),
+                method().name(),
+                currentOrder().getTotalAmount(),
+                currentOrder()
+        );
+    }
 
     protected final Order currentOrder() {
         return orderDraftContext.getDraftOrder();
     }
 
-    protected final OrderResponse finalizeOrder(PaymentTransaction paymentTransaction) {
-        return orderFinalization.finalizeOrder(paymentTransaction.getOrder());
+    protected final OrderResponse finalizePayment(String transactionContent) {
+        return orderFinalization.finalizeOrder(generatePaymentTransaction(transactionContent).getOrder());
     }
 }
