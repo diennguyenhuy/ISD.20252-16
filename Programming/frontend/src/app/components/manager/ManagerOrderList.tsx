@@ -20,6 +20,10 @@ export default function ManagerOrderList() {
     const navigate = useNavigate();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // NEW: Distinct loading state for modal actions
+    const [actionLoading, setActionLoading] = useState(false);
+
     const [search, setSearch] = useState('');
 
     const [filterStatus, setFilterStatus] = useState<OrderStatus | 'ALL'>('PENDING');
@@ -50,10 +54,8 @@ export default function ManagerOrderList() {
             setOrders(orderList);
 
             if (!Array.isArray(data) && data.last !== undefined) {
-                // If it's a Spring Boot Page<T>, use the exact 'last' boolean
                 setIsLastPage(data.last);
             } else {
-                // Fallback: If it's just an array, assume it's the last page if we received less than 30 items
                 setIsLastPage(orderList.length < 30);
             }
 
@@ -65,6 +67,7 @@ export default function ManagerOrderList() {
     };
 
     const handleAction = async (id: string, action: 'APPROVE' | 'REJECT') => {
+        setActionLoading(true); // START LOADING
         try {
             if (action === 'APPROVE') {
                 await OrderManagementService.approveOrder(id);
@@ -80,6 +83,8 @@ export default function ManagerOrderList() {
             setConfirmAction(null);
         } catch(err) {
             alert("Failed to update status. Please try again.");
+        } finally {
+            setActionLoading(false); // STOP LOADING
         }
     };
 
@@ -236,7 +241,7 @@ export default function ManagerOrderList() {
                                 <ChevronLeft size={18} />
                             </button>
                             <button
-                                disabled={isLastPage} // NEW: Properly disable Next button
+                                disabled={isLastPage}
                                 onClick={() => setPage(p => p + 1)}
                                 className="p-1.5 rounded-lg border border-border bg-card text-foreground disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted transition-colors shadow-sm"
                             >
@@ -269,19 +274,22 @@ export default function ManagerOrderList() {
                         <div className="flex gap-3">
                             <button
                                 onClick={() => setConfirmAction(null)}
-                                className="flex-1 py-3 rounded-xl border border-border bg-card text-foreground font-bold hover:bg-muted transition-colors shadow-sm"
+                                disabled={actionLoading} // Prevent cancelling while loading
+                                className="flex-1 py-3 rounded-xl border border-border bg-card text-foreground font-bold hover:bg-muted transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={() => void handleAction(confirmAction.id, confirmAction.action)}
-                                className={`flex-1 py-3 rounded-xl text-primary-foreground font-bold shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5 ${
+                                disabled={actionLoading} // Prevent double clicks
+                                className={`flex-1 py-3 rounded-xl text-primary-foreground font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed ${
                                     confirmAction.action === 'APPROVE'
                                         ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-500/20'
                                         : 'bg-destructive hover:bg-destructive/90 shadow-destructive/20'
                                 }`}
                             >
-                                Confirm
+                                {actionLoading && <Loader2 size={18} className="animate-spin" />}
+                                {actionLoading ? 'Processing...' : 'Confirm'}
                             </button>
                         </div>
                     </div>

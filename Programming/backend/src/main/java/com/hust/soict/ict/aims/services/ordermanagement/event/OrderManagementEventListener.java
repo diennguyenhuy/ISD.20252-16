@@ -25,7 +25,8 @@ class OrderManagementEventListener {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    void handle(OrderRejectionEvent event) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    void handleRefund(OrderRejectionEvent event) {
         var transaction = event.order().getPaymentTransaction();
         if (refundRegistry.supports(transaction.getTransactionMethod())) {
             try {
@@ -36,6 +37,10 @@ class OrderManagementEventListener {
                 log.error("Unable to refund order {}, order remains REJECTED", event.order().getId(), e);
             }
         }
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    void handle(OrderRejectionEvent event) {
         notificationService.send(OrderRejectionEmailMessage.class, event);
     }
 }

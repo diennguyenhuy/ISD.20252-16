@@ -20,7 +20,8 @@ class OrderCancellationListener {
     private final OrderRepository orderRepository;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    void handle(OrderCancelEvent event) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    void handleRefund(OrderCancelEvent event) {
         var transaction = event.order().getPaymentTransaction();
         if (refundRegistry.supports(transaction.getTransactionMethod())) {
             try {
@@ -31,6 +32,10 @@ class OrderCancellationListener {
                 log.error("Unable to refund order {}, order remains CANCELLED", event.order().getId(), e);
             }
         }
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    void handle(OrderCancelEvent event) {
         notificationService.send(OrderCancellationEmailMessage.class, event);
     }
 }
