@@ -1,8 +1,8 @@
-package com.hust.soict.ict.aims.services.customer.event;
+package com.hust.soict.ict.aims.services.order.event;
 
 import com.hust.soict.ict.aims.repositories.OrderRepository;
 import com.hust.soict.ict.aims.services.notification.NotificationService;
-import com.hust.soict.ict.aims.services.payment.RefundRegistry;
+import com.hust.soict.ict.aims.services.payment.RefundService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,16 +16,16 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 class OrderCancellationListener {
     private final NotificationService notificationService;
-    private final RefundRegistry refundRegistry;
+    private final RefundService refundService;
     private final OrderRepository orderRepository;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     void handleRefund(OrderCancelEvent event) {
         var transaction = event.order().getPaymentTransaction();
-        if (refundRegistry.supports(transaction.getTransactionMethod())) {
+        if (refundService.supports(transaction.getTransactionMethod())) {
             try {
-                refundRegistry.refund(event.order().getPaymentTransaction());
+                refundService.refund(event.order().getPaymentTransaction());
                 event.order().refund();
                 orderRepository.save(event.order());
             } catch (Exception e) {

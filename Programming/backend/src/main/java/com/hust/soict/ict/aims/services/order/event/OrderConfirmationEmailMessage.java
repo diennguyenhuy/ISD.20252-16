@@ -11,7 +11,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class OrderConfirmationEmailMessage implements EmailMessage<OrderSuccessEvent> {
+class OrderConfirmationEmailMessage implements EmailMessage<OrderSuccessEvent> {
     private final Order order;
     private final String frontendUrl;
 
@@ -157,7 +157,7 @@ public class OrderConfirmationEmailMessage implements EmailMessage<OrderSuccessE
     }
 
     @Component
-    public static class Factory extends EmailMessage.Factory<OrderConfirmationEmailMessage, OrderSuccessEvent> {
+    static class Factory extends EmailMessage.Factory<OrderConfirmationEmailMessage, OrderSuccessEvent> {
         @Override
         public Class<OrderConfirmationEmailMessage> messageType() {
             return OrderConfirmationEmailMessage.class;

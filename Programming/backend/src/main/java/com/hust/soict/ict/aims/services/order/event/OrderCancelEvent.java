@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.customer.event;
+package com.hust.soict.ict.aims.services.order.event;
 
 import com.hust.soict.ict.aims.models.entities.order.Order;
 

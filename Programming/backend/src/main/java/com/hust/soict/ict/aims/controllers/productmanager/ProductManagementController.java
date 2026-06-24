@@ -6,6 +6,7 @@ import com.hust.soict.ict.aims.dto.request.UpdateProductRequest;
 import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
 import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.services.productmanagement.ProductManagementService;
+import com.hust.soict.ict.aims.services.productmanagement.ProductQueryService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -34,15 +35,16 @@ import java.util.UUID;
 public class ProductManagementController {
 
     private final ProductManagementService productManagementService;
+    private final ProductQueryService productQueryService;
 
     @GetMapping
     public List<ProductSummary> getAllProducts() {
-        return productManagementService.getAllProductsForManager();
+        return productQueryService.getAllProductsForManager();
     }
 
     @GetMapping("/{id}")
     public ProductDetail getProductById(@PathVariable UUID id) {
-        return productManagementService.getProductByIdForManager(id);
+        return productQueryService.getProductByIdForManager(id);
     }
 
     @PostMapping

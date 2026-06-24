@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class AccountCreatedEmailMessage implements EmailMessage<AccountCreatedEvent> {
+class AccountCreatedEmailMessage implements EmailMessage<AccountCreatedEvent> {
 
     private final String targetEmail;
     private final String username;
@@ -80,7 +80,7 @@ public class AccountCreatedEmailMessage implements EmailMessage<AccountCreatedEv
     }
 
     @Component
-    public static class Factory extends EmailMessage.Factory<AccountCreatedEmailMessage, AccountCreatedEvent> {
+    static class Factory extends EmailMessage.Factory<AccountCreatedEmailMessage, AccountCreatedEvent> {
         @Override
         public Class<AccountCreatedEmailMessage> messageType() {
             return AccountCreatedEmailMessage.class;

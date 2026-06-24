@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SessionOrderDraftProvider implements OrderDraftContext {
+class SessionOrderDraftProvider implements OrderDraftContext {
     private final HttpSession session;
 
     private static final String DRAFT_ORDER_SESSION_KEY = "DRAFT_ORDER_SESSION_KEY";

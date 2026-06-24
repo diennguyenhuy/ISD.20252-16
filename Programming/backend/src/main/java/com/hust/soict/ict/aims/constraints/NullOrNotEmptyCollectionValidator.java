@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.Collection;
 
 @Component
-public class NullOrNotEmptyCollectionValidator implements ConstraintValidator<NullOrNotEmpty, Collection<?>> {
+class NullOrNotEmptyCollectionValidator implements ConstraintValidator<NullOrNotEmpty, Collection<?>> {
     @Override
     public boolean isValid(Collection<?> value, ConstraintValidatorContext context) {
         return value == null || !value.isEmpty();

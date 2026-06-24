@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.customer;
+package com.hust.soict.ict.aims.services.product;
 
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
@@ -17,22 +17,25 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class ProductService {
+class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
     private final ProductMapper productMapper;
 
+    @Override
     public List<ProductSummary> get20RandomProducts() {
         return productRepository.find20RandomActiveProducts(PageRequest.of(0, 20)).stream()
                 .map(productMapper::toProductSummary).toList();
     }
 
+    @Override
     public ProductDetail getProductById(UUID productId) throws ProductNotFoundException {
         Product product = productRepository.findByIdAndStatus(productId, Product.Status.ACTIVE)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
         return productMapper.toProductDetail(product);
     }
 
+    @Override
     public Page<ProductSummary> getProductsBy(String title, String category, Long minPrice, Long maxPrice, Pageable pageable) {
         String reqTitle = title == null ? null : "%" + title.toLowerCase() + "%";
         String reqCategory = category == null ? null : "%" + category.toLowerCase() + "%";

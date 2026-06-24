@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @RequiredArgsConstructor
-public class StockValidator {
+class StockValidator {
     private final ProductRepository productRepository;
 
     /**
@@ -41,7 +41,7 @@ public class StockValidator {
      * @throws ProductNotFoundException if a product "vanishes" (gets deactivated) during checkout
      */
     @Transactional(readOnly = true)
-    public Cart checkStockAvailability(Cart cart) throws NotEnoughStockException, EmptyCartException {
+    Cart checkStockAvailability(Cart cart) throws NotEnoughStockException, EmptyCartException {
         if (cart.isEmpty()) {
             throw new EmptyCartException();
         }

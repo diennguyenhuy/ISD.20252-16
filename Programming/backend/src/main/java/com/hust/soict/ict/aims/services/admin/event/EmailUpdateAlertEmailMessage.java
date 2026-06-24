@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class EmailUpdateAlertEmailMessage implements EmailMessage<EmailUpdateEvent> {
+class EmailUpdateAlertEmailMessage implements EmailMessage<EmailUpdateEvent> {
     private final String oldEmail;
     private final String username;
     private final String frontendUrl;
@@ -75,7 +75,7 @@ public class EmailUpdateAlertEmailMessage implements EmailMessage<EmailUpdateEve
     }
 
     @Component
-    public static class Factory extends EmailMessage.Factory<EmailUpdateAlertEmailMessage, EmailUpdateEvent> {
+    static class Factory extends EmailMessage.Factory<EmailUpdateAlertEmailMessage, EmailUpdateEvent> {
 
         @Override
         public Class<EmailUpdateAlertEmailMessage> messageType() {

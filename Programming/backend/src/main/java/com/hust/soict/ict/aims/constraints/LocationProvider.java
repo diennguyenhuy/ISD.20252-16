@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class LocationProvider {
+class LocationProvider {
     @Getter
     @Setter
     @NoArgsConstructor
@@ -25,7 +25,7 @@ public class LocationProvider {
 
     private final Map<String, Set<String>> locations;
 
-    public LocationProvider(ObjectMapper objectMapper) throws IOException {
+    LocationProvider(ObjectMapper objectMapper) throws IOException {
         InputStream is = this.getClass().getResourceAsStream("/static/tinhthanhvietnam_moi.json");
 
         if (is == null) {
@@ -40,11 +40,11 @@ public class LocationProvider {
         ));
     }
 
-    public boolean isValidProvince(@NonNull String province) {
+    boolean isValidProvince(@NonNull String province) {
         return locations.containsKey(province);
     }
 
-    public boolean isValid(@NonNull String province, @NonNull String commune) {
+    boolean isValid(@NonNull String province, @NonNull String commune) {
         return isValidProvince(province) && locations.get(province).contains(commune);
     }
 }

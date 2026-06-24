@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.customer;
+package com.hust.soict.ict.aims.services.product;
 
 import com.hust.soict.ict.aims.context.CartContext;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
@@ -20,15 +20,17 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CartService {
+class CartServiceImpl implements CartService {
     private final ProductRepository productRepository;
     private final CartContext cartContext;
     private final CartMapper cartMapper;
 
+    @Override
     public CartResponse getOrCreateCart() {
         return cartMapper.toCartResponse(cartContext.getOrCreateCart());
     }
 
+    @Override
     public CartResponse addItem(UUID productId, int quantity) throws ProductNotFoundException, IllegalArgumentException {
         log.debug("Adding item to cart with quantity {} for product #{}...", quantity, productId);
         Product product = productRepository.findByIdAndStatus(productId, Product.Status.ACTIVE)
@@ -41,6 +43,7 @@ public class CartService {
         return cartMapper.toCartResponse(cart);
     }
 
+    @Override
     public CartResponse updateItem(UUID productId, int quantity) throws NoSuchElementException, IllegalArgumentException {
         log.debug("Updating item with product id #{} to quantity {}...", productId, quantity);
         Cart cart = cartContext.getOrCreateCart();
@@ -49,6 +52,7 @@ public class CartService {
         return cartMapper.toCartResponse(cart);
     }
 
+    @Override
     public CartResponse removeItem(UUID productId) {
         log.debug("Removing item from product with id #{}...", productId);
         Cart cart = cartContext.getOrCreateCart();
@@ -57,6 +61,7 @@ public class CartService {
         return cartMapper.toCartResponse(cart);
     }
 
+    @Override
     public CartResponse clearCart() {
         log.debug("Clearing cart...");
         Cart cart = cartContext.getOrCreateCart();
