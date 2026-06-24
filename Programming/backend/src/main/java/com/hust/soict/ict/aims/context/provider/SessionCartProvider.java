@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SessionCartProvider implements CartContext {
+class SessionCartProvider implements CartContext {
     private final HttpSession session;
 
     private static final String CART_SESSION_KEY = "CART_SESSION_KEY";

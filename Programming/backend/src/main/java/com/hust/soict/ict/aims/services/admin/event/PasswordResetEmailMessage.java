@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class PasswordResetEmailMessage implements EmailMessage<PasswordResetEvent> {
+class PasswordResetEmailMessage implements EmailMessage<PasswordResetEvent> {
 
     private final String targetEmail;
     private final String username;
@@ -79,7 +79,7 @@ public class PasswordResetEmailMessage implements EmailMessage<PasswordResetEven
     }
 
     @Component
-    public static class Factory extends EmailMessage.Factory<PasswordResetEmailMessage, PasswordResetEvent> {
+    static class Factory extends EmailMessage.Factory<PasswordResetEmailMessage, PasswordResetEvent> {
         @Override
         public Class<PasswordResetEmailMessage> messageType() {
             return PasswordResetEmailMessage.class;

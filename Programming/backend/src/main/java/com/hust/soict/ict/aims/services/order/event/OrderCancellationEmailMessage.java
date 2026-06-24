@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.customer.event;
+package com.hust.soict.ict.aims.services.order.event;
 
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.services.notification.email.EmailMessage;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class OrderCancellationEmailMessage implements EmailMessage<OrderCancelEvent> {
+class OrderCancellationEmailMessage implements EmailMessage<OrderCancelEvent> {
     private final Order order;
     private final String frontendUrl;
 
@@ -95,7 +95,7 @@ public class OrderCancellationEmailMessage implements EmailMessage<OrderCancelEv
     }
 
     @Component
-    public static class Factory extends EmailMessage.Factory<OrderCancellationEmailMessage, OrderCancelEvent> {
+    static class Factory extends EmailMessage.Factory<OrderCancellationEmailMessage, OrderCancelEvent> {
         @Override
         public Class<OrderCancellationEmailMessage> messageType() {
             return OrderCancellationEmailMessage.class;

@@ -61,13 +61,13 @@ public class Order extends VersionedEntity {
         CANCELLED,
         REFUNDED;
 
-        private static final Map<Status, Set<Status>> transitions = Map.ofEntries(
-                Map.entry(DRAFT, Set.of(PENDING)),
-                Map.entry(PENDING, Set.of(APPROVED, REJECTED, CANCELLED)),
-                Map.entry(APPROVED, Set.of()),
-                Map.entry(REJECTED, Set.of(REFUNDED)),
-                Map.entry(CANCELLED, Set.of(REFUNDED)),
-                Map.entry(REFUNDED, Set.of())
+        private static final Map<Status, EnumSet<Status>> transitions = Map.ofEntries(
+                Map.entry(DRAFT, EnumSet.of(PENDING)),
+                Map.entry(PENDING, EnumSet.of(APPROVED, REJECTED, CANCELLED)),
+                Map.entry(APPROVED, EnumSet.noneOf(Status.class)),
+                Map.entry(REJECTED, EnumSet.of(REFUNDED)),
+                Map.entry(CANCELLED, EnumSet.of(REFUNDED)),
+                Map.entry(REFUNDED, EnumSet.noneOf(Status.class))
         );
 
         boolean isValidTransitionTo(Status status) {
@@ -104,7 +104,7 @@ public class Order extends VersionedEntity {
 
     private void changeStatus(Status newStatus) throws OrderStateTransitionException {
         if (!this.status.isValidTransitionTo(newStatus)) {
-            throw new OrderStateTransitionException("Cannot transition order status map " + status.name() + " to " + newStatus.name());
+            throw new OrderStateTransitionException("Cannot transition order status from " + status.name() + " to " + newStatus.name());
         }
         this.status = newStatus;
     }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ProvinceCommuneValidator implements ConstraintValidator<ValidProvinceCommune, DeliveryRequest> {
+class ProvinceCommuneValidator implements ConstraintValidator<ValidProvinceCommune, DeliveryRequest> {
     private final LocationProvider locationProvider;
 
     @Override
