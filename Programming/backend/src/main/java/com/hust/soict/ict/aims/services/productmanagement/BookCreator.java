@@ -5,7 +5,7 @@ import com.hust.soict.ict.aims.models.entities.product.Book;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BookCreator implements ProductCreator<Book, CreateBookRequest> {
+class BookCreator implements ProductCreator<Book, CreateBookRequest> {
     @Override
     public Class<CreateBookRequest> createRequestType() {
         return CreateBookRequest.class;

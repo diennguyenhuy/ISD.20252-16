@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public class OrderApprovalEmailMessage implements EmailMessage<OrderApprovalEvent> {
+class OrderApprovalEmailMessage implements EmailMessage<OrderApprovalEvent> {
     private final Order order;
     private final String frontendUrl;
 
@@ -80,7 +80,7 @@ public class OrderApprovalEmailMessage implements EmailMessage<OrderApprovalEven
     }
 
     @Component
-    public static class Factory extends EmailMessage.Factory<OrderApprovalEmailMessage, OrderApprovalEvent> {
+    static class Factory extends EmailMessage.Factory<OrderApprovalEmailMessage, OrderApprovalEvent> {
         @Override
         public Class<OrderApprovalEmailMessage> messageType() {
             return OrderApprovalEmailMessage.class;

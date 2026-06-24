@@ -4,6 +4,7 @@ import com.hust.soict.ict.aims.dto.request.CreateUserRequest;
 import com.hust.soict.ict.aims.dto.response.UserResponse;
 import com.hust.soict.ict.aims.models.entities.user.User;
 import com.hust.soict.ict.aims.services.admin.AdminService;
+import com.hust.soict.ict.aims.services.admin.UserQueryService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -35,17 +36,17 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Validated
 public class AdminController {
-
+    private final UserQueryService userQueryService;
     private final AdminService adminService;
 
     @GetMapping
     public ResponseEntity<Page<UserResponse>> getUsers(@PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(adminService.getUsers(pageable));
+        return ResponseEntity.ok(userQueryService.getUsers(pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUser(@PathVariable UUID id) {
-        return ResponseEntity.ok(adminService.getUser(id));
+        return ResponseEntity.ok(userQueryService.getUser(id));
     }
 
     @PostMapping

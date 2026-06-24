@@ -12,10 +12,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
-public class RefundRegistry {
+class RefundServiceImpl implements RefundService {
     private final Map<PaymentMethod, IRefundCapability> refundServices;
 
-    public RefundRegistry(List<IRefundCapability> refundServices) {
+    public RefundServiceImpl(List<IRefundCapability> refundServices) {
         this.refundServices = refundServices.stream()
                 .collect(Collectors.toMap(
                         IRefundCapability::method,
@@ -27,6 +27,7 @@ public class RefundRegistry {
         return refundServices.containsKey(paymentMethod);
     }
 
+    @Override
     public boolean supports(String paymentMethod) {
         PaymentMethod method;
         try {
@@ -37,6 +38,7 @@ public class RefundRegistry {
         return refundServices.containsKey(method);
     }
 
+    @Override
     public void refund(PaymentTransaction paymentTransaction) throws PaymentException {
         PaymentMethod method = PaymentMethod.valueOf(paymentTransaction.getTransactionMethod());
         IRefundCapability refundCapability = Optional.ofNullable(refundServices.get(method))

@@ -3,6 +3,7 @@ package com.hust.soict.ict.aims.controllers.productmanager;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.services.ordermanagement.OrderManagementService;
+import com.hust.soict.ict.aims.services.ordermanagement.OrderQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ import java.util.UUID;
 @RequestMapping("manager/orders")
 @RequiredArgsConstructor
 public class OrderManagementController {
+    private final OrderQueryService orderQueryService;
     private final OrderManagementService orderManagementService;
 
     @GetMapping("/pending")
@@ -25,7 +27,7 @@ public class OrderManagementController {
                     direction = Sort.Direction.ASC
             ) Pageable pageable
     ) {
-        return orderManagementService.getPendingOrders(pageable);
+        return orderQueryService.getPendingOrders(pageable);
     }
 
     @GetMapping
@@ -36,12 +38,12 @@ public class OrderManagementController {
                     direction = Sort.Direction.DESC
             ) Pageable pageable
     ) {
-        return orderManagementService.getOrders(status, pageable);
+        return orderQueryService.getOrders(status, pageable);
     }
 
     @GetMapping("/{orderId}")
     public OrderResponse getOrderById(@PathVariable UUID orderId) {
-        return orderManagementService.getOrderById(orderId);
+        return orderQueryService.getOrderById(orderId);
     }
 
     @PostMapping("/{orderId}/approve")

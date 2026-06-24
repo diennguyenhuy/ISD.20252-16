@@ -8,7 +8,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PriceRangeValidator implements ConstraintValidator<ValidPriceRange, CreateProductRequest> {
+class PriceRangeValidator implements ConstraintValidator<ValidPriceRange, CreateProductRequest> {
     @Override
     public boolean isValid(CreateProductRequest value, ConstraintValidatorContext context) {
         if (value.getCurrentPrice() == null || value.getOriginalValue() == null) {
