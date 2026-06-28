@@ -6,7 +6,7 @@ package com.hust.soict.ict.aims.subsystems.vietqr;
  * + Coupling level: NONE — depends only on standard Java types.
  */
 class VietQRFormatter {
-    
+    private VietQRFormatter() {}
 
     /**
      * Sanitize content to meet VietQR requirements:

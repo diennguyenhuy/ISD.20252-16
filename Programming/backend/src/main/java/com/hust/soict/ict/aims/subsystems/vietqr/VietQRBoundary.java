@@ -1,10 +1,15 @@
 package com.hust.soict.ict.aims.subsystems.vietqr;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+
 /*
  * SOLID Principles: No violations.
  *
@@ -13,60 +18,56 @@ import java.net.http.HttpResponse;
  * + Reason: Only primitive Strings (authorizationHeader, accessToken, requestString)
  *   are exchanged — no composite objects or control flags are involved.
  */
+@Component
+@RequiredArgsConstructor
+@Slf4j
 class VietQRBoundary {
-
     private static final String GET_TOKEN_URL = "/token_generate";
     private static final String GENERATE_QR_URL = "/qr/generate-customer";
     private static final String TEST_CALLBACK_URL = "/vqr/bank/api/test/transaction-callback";
 
-    private final HttpClient httpClient;
-    private final String apiBaseUrl;
-
-    VietQRBoundary(String apiBaseUrl) {
-        this.apiBaseUrl = apiBaseUrl;
-        this.httpClient = HttpClient.newHttpClient();
-    }
+    private final VietQRProperties props;
+    private final HttpClient httpClient = HttpClient.newHttpClient();
 
     String getAccessToken(String authorizationHeader)
             throws IOException, InterruptedException {
 
+        String url = props.getApiBaseUrl() + GET_TOKEN_URL;
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(apiBaseUrl + GET_TOKEN_URL))
+                .uri(URI.create(url))
                 .header("Authorization", authorizationHeader)
                 .POST(HttpRequest.BodyPublishers.ofString(""))
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println("=== VIETQR GET TOKEN ===");
-        System.out.println("URL: " + apiBaseUrl + GET_TOKEN_URL);
-        System.out.println("REQUEST: (Empty Body)");
-        System.out.println("STATUS: " + response.statusCode());
-        System.out.println("BODY: " + response.body());
+        log.info("=== VIETQR GET TOKEN ===");
+        log.info("URL: {}", url);
+        log.info("STATUS: {}", response.statusCode());
         return response.body();
     }
 
     String generateQRCode(String accessToken, String requestString)
             throws IOException, InterruptedException {
 
+        String url = props.getApiBaseUrl() + GENERATE_QR_URL;
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(apiBaseUrl + GENERATE_QR_URL))
+                .uri(URI.create(url))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer " + accessToken)
                 .POST(HttpRequest.BodyPublishers.ofString(requestString))
                 .build();
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());System.out.println("=== VIETQR GENERATE QR ===");
-        System.out.println("URL: " + apiBaseUrl + GENERATE_QR_URL);
-        System.out.println("REQUEST: " + requestString);
-        System.out.println("STATUS: " + response.statusCode());
-        System.out.println("BODY: " + response.body());
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        log.info("=== VIETQR GENERATE QR ===");
+        log.info("URL: {}", url);
+        log.info("STATUS: {}", response.statusCode());
         return response.body();
     }
 
     String checkPaymentStatus(String accessToken, String requestString)
             throws IOException, InterruptedException {
 
-        String callbackUrl = apiBaseUrl.replace("/vqr/api", TEST_CALLBACK_URL);
+        String callbackUrl = props.getApiBaseUrl().replace("/vqr/api", TEST_CALLBACK_URL);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(callbackUrl))
@@ -76,11 +77,9 @@ class VietQRBoundary {
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println("=== VIETQR TEST CALLBACK ===");
-        System.out.println("URL: " + callbackUrl);
-        System.out.println("REQUEST: " + requestString);
-        System.out.println("STATUS: " + response.statusCode());
-        System.out.println("BODY: " + response.body());
+        log.info("=== VIETQR TEST CALLBACK ===");
+        log.info("URL: {}", callbackUrl);
+        log.info("STATUS: {}", response.statusCode());
         return response.body();
     }
 }

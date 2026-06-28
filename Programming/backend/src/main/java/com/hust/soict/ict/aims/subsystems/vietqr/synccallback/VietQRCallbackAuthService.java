@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.payment.vietqr.synccallback;
+package com.hust.soict.ict.aims.subsystems.vietqr.synccallback;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Service
 @Slf4j
-public class VietQRCallbackAuthService {
+class VietQRCallbackAuthService {
 
     @Value("${vietqr.expectedusername}")
     private String EXPECTED_USERNAME;
@@ -50,7 +50,7 @@ public class VietQRCallbackAuthService {
         return token.isEmpty() ? null : token;
     }
 
-    public String authenticate(String username, String password) {
+    private String authenticate(String username, String password) {
         if (!EXPECTED_USERNAME.equals(username) || !EXPECTED_PASSWORD.equals(password)) {
             log.warn("[VietQR-Auth] Invalid credentials for username='{}'", username);
             return null;
@@ -74,9 +74,6 @@ public class VietQRCallbackAuthService {
         return true;
     }
 
-    public void revoke(String token) {
-        tokenStore.remove(token);
-    }
 
     private static String[] parseBasicAuthHeader(String header) {
         if (header == null || !header.startsWith(BASIC_PREFIX)) return null;
@@ -95,3 +92,4 @@ public class VietQRCallbackAuthService {
         }
     }
 }
+

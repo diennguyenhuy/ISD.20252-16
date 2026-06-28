@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.dto.request.payment.vietqr.synccallback;
+package com.hust.soict.ict.aims.subsystems.vietqr.synccallback;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -45,3 +45,4 @@ public class VietQRTransactionSyncRequest {
     @JsonProperty("urlLink")
     private String urlLink;
 }
+

@@ -1,9 +1,6 @@
-package com.hust.soict.ict.aims.services.payment.vietqr.synccallback;
+package com.hust.soict.ict.aims.subsystems.vietqr.synccallback;
 
 
-import com.hust.soict.ict.aims.dto.request.payment.vietqr.synccallback.VietQRTransactionSyncRequest;
-import com.hust.soict.ict.aims.dto.response.payment.vietqr.synccallback.VietQRTransactionSyncObject;
-import com.hust.soict.ict.aims.dto.response.payment.vietqr.synccallback.VietQRTransactionSyncResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +16,7 @@ import java.time.Instant;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class VietQRTransactionSyncService {
+class VietQRTransactionSyncService {
     public VietQRTransactionSyncResponse handleSync(VietQRTransactionSyncRequest request) {
         log.info("[VietQR-Sync] Received transaction-sync: transactionId={} orderId={} amount={} transType={}",
                 request.getTransactionId(), request.getOrderId(),
@@ -65,3 +62,4 @@ public class VietQRTransactionSyncService {
         return new VietQRTransactionSyncResponse(true, reason, reason, null);
     }
 }
+
