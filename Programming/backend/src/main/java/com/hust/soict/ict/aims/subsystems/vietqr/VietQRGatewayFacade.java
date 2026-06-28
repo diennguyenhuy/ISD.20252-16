@@ -1,12 +1,16 @@
 package com.hust.soict.ict.aims.subsystems.vietqr;
 
 import com.hust.soict.ict.aims.exceptions.*;
-import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.services.payment.contract.IQRPaymentGateway;
 import com.hust.soict.ict.aims.subsystems.vietqr.model.QRCode;
 import com.hust.soict.ict.aims.subsystems.vietqr.model.QRCodePaymentStatus;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+
 /*
  * SOLID Principles: No violations.
  *
@@ -15,29 +19,15 @@ import java.io.IOException;
  * + Coupling level with Order: STAMP — only order.getId() and order.getTotalAmount()
  *   are used, but the full Order object is passed.
  */
+@Component
+@RequiredArgsConstructor
+@Slf4j
 class VietQRGatewayFacade implements IQRPaymentGateway {
     private final VietQRBoundary boundary;
+    private final VietQRProperties props;
+    
     private String accessToken;
     private long tokenExpiryTime;
-
-    // VietQR credentials
-    private final String vietqrUsername;
-    private final String vietqrPassword;
-
-    // Bank account info for receiving payments
-    private final String bankCode;
-    private final String accountNo;
-    private final String accountName;
-
-    public VietQRGatewayFacade(String username, String password, String bankCode,
-                               String bankAccount, String userBankName, String apiBaseUrl) {
-        this.boundary = new VietQRBoundary(apiBaseUrl);
-        this.vietqrUsername = username;
-        this.vietqrPassword = password;
-        this.bankCode = bankCode;
-        this.accountNo = bankAccount;
-        this.accountName = userBankName;
-    }
 
     /**
      * Get valid access token (renew if expired)
@@ -56,13 +46,13 @@ class VietQRGatewayFacade implements IQRPaymentGateway {
 
         try {
             // Get new token
-            QRAccessTokenRequest request = new QRAccessTokenRequest(vietqrUsername, vietqrPassword);
+            QRAccessTokenRequest request = new QRAccessTokenRequest(props.getUsername(), props.getPassword());
             String authHeader = request.buildAuthorizationHeader();
 
             String responseString = boundary.getAccessToken(authHeader);
 
-            QRAccessTokenResponse response = new QRAccessTokenResponse();
-            response.parseResponseString(responseString);
+            ObjectMapper mapper = new ObjectMapper();
+            QRAccessTokenResponse response = mapper.readValue(responseString, QRAccessTokenResponse.class);
 
             if (!response.isValid()) {
                 throw new InvalidTokenException("Failed to get valid access token");
@@ -100,14 +90,14 @@ class VietQRGatewayFacade implements IQRPaymentGateway {
 
             // Create request with bank info from config
             QRGenerateRequest request = new QRGenerateRequest(
-                    bankCode, accountNo, accountName,
+                    props.getBankCode(), props.getAccountNo(), props.getAccountName(),
                     content, totalAmount, orderId);
             String requestString = request.buildRequestString();
 
             String response = boundary.generateQRCode(token, requestString);
 
-            QRCode qrCode = new QRCode();
-            qrCode.parseQRCodeResponse(response);
+            ObjectMapper mapper = new ObjectMapper();
+            QRCode qrCode = mapper.readValue(response, QRCode.class);
 
             return qrCode;
         } catch (Exception e) {
@@ -133,12 +123,12 @@ class VietQRGatewayFacade implements IQRPaymentGateway {
 
             // Create status check request
             QRTestCallbackRequest request = new QRTestCallbackRequest(
-                    accountNo, content, totalAmount, bankCode
+                    props.getAccountNo(), content, totalAmount, props.getBankCode()
             );
             String requestString = request.buildRequestString();
             String response = boundary.checkPaymentStatus(token, requestString);
-            QRCodePaymentStatus status = new QRCodePaymentStatus();
-            status.parseResponseString(response);
+            ObjectMapper mapper = new ObjectMapper();
+            QRCodePaymentStatus status = mapper.readValue(response, QRCodePaymentStatus.class);
             return status;
         } catch (Exception e) {
             throw new UnknownPaymentException("Failed to check payment status: " + e.getMessage(), e);

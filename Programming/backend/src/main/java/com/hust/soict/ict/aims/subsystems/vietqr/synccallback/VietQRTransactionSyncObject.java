@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.dto.response.payment.vietqr.synccallback;
+package com.hust.soict.ict.aims.subsystems.vietqr.synccallback;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -12,3 +12,4 @@ public class VietQRTransactionSyncObject {
     @JsonProperty("reftransactionid")
     private String refTransactionId;
 }
+

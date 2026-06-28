@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.dto.response.payment.vietqr.synccallback;
+package com.hust.soict.ict.aims.subsystems.vietqr.synccallback;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VietQRTransactionSyncResponse {
-
     @JsonProperty("error")
     private boolean error;
 
@@ -22,3 +21,4 @@ public class VietQRTransactionSyncResponse {
     @JsonProperty("object")
     private VietQRTransactionSyncObject object;
 }
+
