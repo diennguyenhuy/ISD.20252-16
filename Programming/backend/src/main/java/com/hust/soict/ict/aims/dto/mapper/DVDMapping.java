@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class DVDMapping implements ProductMapping<DVD, DVDDetail> {
+class DVDMapping implements ProductMapping<DVD, DVDDetail> {
     @Override
     public Class<DVD> getProductClass() {
         return DVD.class;

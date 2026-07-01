@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class CDMapping implements ProductMapping<CD, CDDetail> {
+class CDMapping implements ProductMapping<CD, CDDetail> {
     @Override
     public Class<CD> getProductClass() {
         return CD.class;

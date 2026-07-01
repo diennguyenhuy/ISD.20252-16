@@ -9,10 +9,7 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class NewspaperDetail extends ProductDetail {
-    private String publisher;
-    private LocalDate publicationDate;
-    private String language;
+public class NewspaperDetail extends PrintableProductDetail {
     private String editorInChief;
     private String issueNumber;
     private String publicationFrequency;

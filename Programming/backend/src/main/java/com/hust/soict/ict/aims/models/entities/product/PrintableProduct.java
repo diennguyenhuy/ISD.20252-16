@@ -45,7 +45,7 @@ public abstract class PrintableProduct extends Product {
             super();
         }
 
-        protected Builder(PrintableProduct updatingProduct) {
+        protected Builder(P updatingProduct) {
             super(updatingProduct);
         }
 

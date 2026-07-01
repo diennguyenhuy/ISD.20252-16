@@ -6,7 +6,7 @@ import com.hust.soict.ict.aims.models.entities.product.Product;
 
 import java.util.List;
 
-public interface ProductMapping<P extends Product, D extends ProductDetail> {
+interface ProductMapping<P extends Product, D extends ProductDetail> {
     Class<P> getProductClass();
     D map(P product);
     List<String> mapCreators(P product);

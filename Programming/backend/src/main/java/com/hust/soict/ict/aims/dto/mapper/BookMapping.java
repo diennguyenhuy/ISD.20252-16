@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class BookMapping implements ProductMapping<Book, BookDetail> {
+class BookMapping implements PrintableProductMapping<Book, BookDetail> {
     @Override
     public Class<Book> getProductClass() {
         return Book.class;
@@ -21,9 +21,6 @@ public class BookMapping implements ProductMapping<Book, BookDetail> {
 
         BookDetail detail = new BookDetail();
         mapCommonFields(detail, product);
-        detail.setPublisher(product.getPublisher());
-        detail.setPublicationDate(product.getPublicationDate());
-        detail.setLanguage(product.getLanguage());
         detail.setAuthors(product.getAuthors());
         detail.setCoverType(product.getCoverType().name());
         detail.setNumberOfPages(product.getNumberOfPages());

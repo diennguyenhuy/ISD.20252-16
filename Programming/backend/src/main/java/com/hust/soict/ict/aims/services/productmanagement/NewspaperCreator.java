@@ -5,7 +5,7 @@ import com.hust.soict.ict.aims.models.entities.product.Newspaper;
 import org.springframework.stereotype.Component;
 
 @Component
-class NewspaperCreator implements ProductCreator<Newspaper, CreateNewspaperRequest> {
+class NewspaperCreator implements PrintableProductCreator<Newspaper, CreateNewspaperRequest> {
     @Override
     public Class<CreateNewspaperRequest> createRequestType() {
         return CreateNewspaperRequest.class;
@@ -14,9 +14,6 @@ class NewspaperCreator implements ProductCreator<Newspaper, CreateNewspaperReque
     @Override
     public Newspaper createFrom(CreateNewspaperRequest createRequest) {
         return buildCommonFields(new Newspaper.Builder(), createRequest)
-                .publisher(createRequest.getPublisher())
-                .publicationDate(createRequest.getPublicationDate())
-                .language(createRequest.getLanguage())
                 .editorInChief(createRequest.getEditorInChief())
                 .issueNumber(createRequest.getIssueNumber())
                 .publicationFrequency(createRequest.getPublicationFrequency())

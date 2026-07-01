@@ -5,7 +5,7 @@ import com.hust.soict.ict.aims.models.entities.product.Book;
 import org.springframework.stereotype.Component;
 
 @Component
-class BookUpdater implements ProductUpdater<Book, UpdateBookRequest> {
+class BookUpdater implements PrintableProductUpdater<Book, UpdateBookRequest> {
 
     @Override
     public Class<UpdateBookRequest> updateRequestType() {
@@ -15,8 +15,6 @@ class BookUpdater implements ProductUpdater<Book, UpdateBookRequest> {
     @Override
     public Book updateFrom(Book existingProduct, UpdateBookRequest updateRequest) {
         return buildCommonFields(existingProduct.toBuilder(), updateRequest)
-                .publisher(updateRequest.getPublisher())
-                .language(updateRequest.getLanguage())
                 .authors(updateRequest.getAuthors())
                 .numberOfPages(updateRequest.getNumberOfPages())
                 .genre(updateRequest.getGenre())

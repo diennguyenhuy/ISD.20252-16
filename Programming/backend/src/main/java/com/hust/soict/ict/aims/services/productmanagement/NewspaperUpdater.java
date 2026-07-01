@@ -5,7 +5,7 @@ import com.hust.soict.ict.aims.models.entities.product.Newspaper;
 import org.springframework.stereotype.Component;
 
 @Component
-class NewspaperUpdater implements ProductUpdater<Newspaper, UpdateNewspaperRequest> {
+class NewspaperUpdater implements PrintableProductUpdater<Newspaper, UpdateNewspaperRequest> {
 
     @Override
     public Class<UpdateNewspaperRequest> updateRequestType() {
@@ -15,8 +15,6 @@ class NewspaperUpdater implements ProductUpdater<Newspaper, UpdateNewspaperReque
     @Override
     public Newspaper updateFrom(Newspaper existingProduct, UpdateNewspaperRequest updateRequest) {
         return buildCommonFields(existingProduct.toBuilder(), updateRequest)
-                .publisher(updateRequest.getPublisher())
-                .language(updateRequest.getLanguage())
                 .editorInChief(updateRequest.getEditorInChief())
                 .publicationFrequency(updateRequest.getPublicationFrequency())
                 .sections(updateRequest.getSections())

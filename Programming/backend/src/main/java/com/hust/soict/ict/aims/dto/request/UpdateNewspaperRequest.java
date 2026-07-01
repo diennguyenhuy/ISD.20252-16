@@ -9,11 +9,7 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class UpdateNewspaperRequest extends UpdateProductRequest {
-    @NullOrNotBlank(message = "Publisher must not be blank if provided")
-    private String publisher;
-    @NullOrNotBlank(message = "Language must not be blank if provided")
-    private String language;
+public class UpdateNewspaperRequest extends UpdatePrintableProductRequest {
     @NullOrNotBlank(message = "Editor-in-chief must not be blank if provided")
     private String editorInChief;
     @NullOrNotBlank(message = "Publication frequency must not be blank if provided")

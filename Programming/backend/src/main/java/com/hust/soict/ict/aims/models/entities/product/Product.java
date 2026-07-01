@@ -178,9 +178,8 @@ public abstract class Product extends VersionedEntity {
             this.updatingProduct = null;
         }
 
-        @SuppressWarnings("unchecked")
-        protected Builder(Product updatingProduct) {
-            this.updatingProduct = (P) updatingProduct;
+        protected Builder(P updatingProduct) {
+            this.updatingProduct = updatingProduct;
         }
 
         protected abstract B self();

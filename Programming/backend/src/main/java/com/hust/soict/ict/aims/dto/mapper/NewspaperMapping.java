@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class NewspaperMapping implements ProductMapping<Newspaper, NewspaperDetail> {
+class NewspaperMapping implements PrintableProductMapping<Newspaper, NewspaperDetail> {
 
     @Override
     public Class<Newspaper> getProductClass() {
@@ -22,9 +22,6 @@ public class NewspaperMapping implements ProductMapping<Newspaper, NewspaperDeta
 
         NewspaperDetail detail = new NewspaperDetail();
         mapCommonFields(detail, product);
-        detail.setPublisher(product.getPublisher());
-        detail.setPublicationDate(product.getPublicationDate());
-        detail.setLanguage(product.getLanguage());
         detail.setEditorInChief(product.getEditorInChief());
         detail.setIssueNumber(product.getIssueNumber());
         detail.setPublicationFrequency(product.getPublicationFrequency());
