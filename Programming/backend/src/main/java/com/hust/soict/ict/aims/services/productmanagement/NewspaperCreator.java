@@ -5,7 +5,7 @@ import com.hust.soict.ict.aims.models.entities.product.Newspaper;
 import org.springframework.stereotype.Component;
 
 @Component
-class NewspaperCreator implements PrintableProductCreator<Newspaper, CreateNewspaperRequest> {
+class NewspaperCreator implements ProductCreator<Newspaper, CreateNewspaperRequest>, ProductCommonCreator<CreateNewspaperRequest, Newspaper.Builder> {
     @Override
     public Class<CreateNewspaperRequest> createRequestType() {
         return CreateNewspaperRequest.class;

@@ -5,7 +5,7 @@ import com.hust.soict.ict.aims.models.entities.product.DVD;
 import org.springframework.stereotype.Component;
 
 @Component
-class DVDCreator implements ProductCreator<DVD, CreateDVDRequest> {
+class DVDCreator implements ProductCreator<DVD, CreateDVDRequest>, ProductCommonCreator<CreateDVDRequest, DVD.Builder> {
     @Override
     public Class<CreateDVDRequest> createRequestType() {
         return CreateDVDRequest.class;

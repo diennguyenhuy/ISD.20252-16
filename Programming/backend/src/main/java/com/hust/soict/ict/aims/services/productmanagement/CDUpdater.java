@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-class CDUpdater implements ProductUpdater<CD, UpdateCDRequest> {
+class CDUpdater implements ProductUpdater<CD, UpdateCDRequest>, ProductCommonUpdater<UpdateCDRequest, CD.Builder> {
     @Override
     public Class<UpdateCDRequest> updateRequestType() {
         return UpdateCDRequest.class;

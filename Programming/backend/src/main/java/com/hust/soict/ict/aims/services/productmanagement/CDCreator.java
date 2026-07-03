@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-class CDCreator implements ProductCreator<CD, CreateCDRequest> {
+class CDCreator implements ProductCreator<CD, CreateCDRequest>, ProductCommonCreator<CreateCDRequest, CD.Builder> {
     @Override
     public Class<CreateCDRequest> createRequestType() {
         return CreateCDRequest.class;
