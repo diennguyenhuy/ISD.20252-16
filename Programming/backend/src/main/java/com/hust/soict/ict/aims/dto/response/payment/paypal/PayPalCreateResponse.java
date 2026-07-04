@@ -9,5 +9,6 @@ package com.hust.soict.ict.aims.dto.response.payment.paypal;
  *                        this to the return URL, so the frontend usually reads it
  *                        from the redirect — it is returned here for completeness.
  */
+@Deprecated
 public record PayPalCreateResponse(String approvalUrl, String providerOrderId) {
 }

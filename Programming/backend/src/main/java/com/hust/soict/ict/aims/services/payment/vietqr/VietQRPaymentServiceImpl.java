@@ -1,6 +1,7 @@
 package com.hust.soict.ict.aims.services.payment.vietqr;
 
 import com.hust.soict.ict.aims.dto.response.payment.vietqr.QRPaymentStatusResponse;
+import com.hust.soict.ict.aims.services.payment.PaymentInitiation;
 import com.hust.soict.ict.aims.services.payment.PaymentMethod;
 import com.hust.soict.ict.aims.services.payment.PaymentService;
 import com.hust.soict.ict.aims.services.payment.contract.IQRPaymentGateway;
@@ -43,6 +44,11 @@ class VietQRPaymentServiceImpl extends PaymentService implements VietQRPaymentSe
     }
 
     @Override
+    protected PaymentInitiation startPayment() throws PaymentException {
+        return qrPaymentGateway.generateQRCode(currentOrder().getId().toString(), currentOrder().getTotalAmount());
+    }
+
+    @Override @Deprecated
     public QRCodeResponse generatePaymentQR() throws PaymentException {
         var code = qrPaymentGateway.generateQRCode(currentOrder().getId().toString(), currentOrder().getTotalAmount());
 

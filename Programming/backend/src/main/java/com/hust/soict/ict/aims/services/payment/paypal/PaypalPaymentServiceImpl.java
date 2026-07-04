@@ -9,13 +9,14 @@ import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 import com.hust.soict.ict.aims.services.order.OrderFinalization;
 import com.hust.soict.ict.aims.services.order.PlaceOrderService;
+import com.hust.soict.ict.aims.services.payment.PaymentInitiation;
 import com.hust.soict.ict.aims.services.payment.PaymentMethod;
 import com.hust.soict.ict.aims.services.payment.PaymentService;
 import com.hust.soict.ict.aims.services.payment.contract.IRedirectPaymentGateway;
 import com.hust.soict.ict.aims.services.payment.IRefundCapability;
 import com.hust.soict.ict.aims.services.payment.contract.IRefundGateway;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PaymentCapture;
-import com.hust.soict.ict.aims.subsystems.paypal.model.PaymentInitiation;
+import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalPaymentInitiation;
 import com.hust.soict.ict.aims.subsystems.paypal.model.RefundResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -63,9 +64,21 @@ class PaypalPaymentServiceImpl extends PaymentService implements PaypalPaymentSe
      * approval URL the frontend must open.
      */
     @Override
+    protected PaymentInitiation startPayment() throws PaymentException {
+        Order order = currentOrder();
+        PayPalPaymentInitiation initiation = paymentProvider.createPayment(order.getId().toString(), order.getTotalAmount());
+
+        log.info("[PaypalPaymentService] PayPal order {} created for AIMS order {}",
+                initiation.providerOrderId(), order.getId());
+
+        return initiation;
+    }
+
+
+    @Override @Deprecated
     public PayPalCreateResponse createPayment() throws PaymentException {
         Order order = currentOrder();
-        PaymentInitiation initiation = paymentProvider.createPayment(order.getId().toString(), order.getTotalAmount());
+        PayPalPaymentInitiation initiation = paymentProvider.createPayment(order.getId().toString(), order.getTotalAmount());
 
         log.info("[PaypalPaymentService] PayPal order {} created for AIMS order {}",
                 initiation.providerOrderId(), order.getId());

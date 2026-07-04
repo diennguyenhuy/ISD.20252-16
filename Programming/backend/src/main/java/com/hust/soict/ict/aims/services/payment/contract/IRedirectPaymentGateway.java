@@ -2,7 +2,7 @@ package com.hust.soict.ict.aims.services.payment.contract;
 
 import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PaymentCapture;
-import com.hust.soict.ict.aims.subsystems.paypal.model.PaymentInitiation;
+import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalPaymentInitiation;
 
 /*
  * [SOLID DIP: ownership/packaging improvement, not a hard violation][cite: 1]
@@ -17,6 +17,6 @@ import com.hust.soict.ict.aims.subsystems.paypal.model.PaymentInitiation;
  *      a core-owned package (e.g. .payment.port). PayPal then depends inward on[cite: 1]
  */
 public interface IRedirectPaymentGateway {
-    PaymentInitiation createPayment(String orderId, long totalAmount) throws PaymentException;
+    PayPalPaymentInitiation createPayment(String orderId, long totalAmount) throws PaymentException;
     PaymentCapture capturePayment(String providerOrderId) throws PaymentException;
 }

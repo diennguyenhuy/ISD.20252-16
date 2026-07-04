@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.dto.response.payment.vietqr;
 
+@Deprecated
 public record QRCodeResponse(
         String qrCode,
         String qrLink,

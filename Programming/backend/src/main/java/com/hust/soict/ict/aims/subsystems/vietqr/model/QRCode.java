@@ -2,6 +2,7 @@ package com.hust.soict.ict.aims.subsystems.vietqr.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.hust.soict.ict.aims.services.payment.PaymentInitiation;
 import lombok.Getter;
 
 /*
@@ -12,7 +13,7 @@ import lombok.Getter;
  */
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class QRCode {
+public class QRCode implements PaymentInitiation {
     @JsonProperty("qrCode")
     private String qrCode;
     @JsonProperty("qrLink")

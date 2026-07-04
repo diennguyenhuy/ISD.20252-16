@@ -2,6 +2,7 @@ package com.hust.soict.ict.aims.services.payment;
 
 import com.hust.soict.ict.aims.context.OrderDraftContext;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
+import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 import com.hust.soict.ict.aims.services.order.OrderFinalization;
@@ -18,6 +19,8 @@ public abstract class PaymentService {
     }
 
     public abstract PaymentMethod method();
+
+    protected abstract PaymentInitiation startPayment() throws PaymentException;
 
     private PaymentTransaction generatePaymentTransaction(String transactionContent) {
         return PaymentTransaction.of(

@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.subsystems.paypal.model;
 
+import com.hust.soict.ict.aims.services.payment.PaymentInitiation;
 import com.hust.soict.ict.aims.services.payment.contract.IRedirectPaymentGateway;
 
 /**
@@ -12,5 +13,5 @@ import com.hust.soict.ict.aims.services.payment.contract.IRedirectPaymentGateway
  *                        (PayPal "order id" / token). Needed later for capture.
  * @param approvalUrl     URL the customer must visit to approve the payment.
  */
-public record PaymentInitiation(String providerOrderId, String approvalUrl) {
+public record PayPalPaymentInitiation(String providerOrderId, String approvalUrl) implements PaymentInitiation {
 }

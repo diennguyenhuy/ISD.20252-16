@@ -7,7 +7,7 @@ const PAY_ORDER_URL = '/order/payment/vietqr';
 const PayOrderService = {
 
     generateQRCode: async (): Promise<QRCodeResponse> => {
-        const response = await apiClient.post<QRCodeResponse>(`${PAY_ORDER_URL}/qr`);
+        const response = await apiClient.post<QRCodeResponse>(`${PAY_ORDER_URL}`);
         return response.data;
     },
 
