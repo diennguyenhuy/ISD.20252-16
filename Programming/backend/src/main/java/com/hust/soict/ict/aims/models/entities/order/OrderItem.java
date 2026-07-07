@@ -65,17 +65,13 @@ public class OrderItem {
         return unitWeight.multiply(BigDecimal.valueOf(quantity));
     }
 
-    public static OrderItem from(CartItem cartItem, Order order) {
-        OrderItem item = new OrderItem();
+    OrderItem(CartItem cartItem, Order order) {
+        this.order = order;
+        this.product = cartItem.getProduct();
 
-        item.order = order;
-        item.product = cartItem.getProduct();
-
-        item.productName = cartItem.getProduct().getTitle();
-        item.unitPrice = cartItem.getProduct().getCurrentPrice();
-        item.unitWeight = cartItem.getProduct().getWeight();
-        item.quantity = cartItem.getQuantity();
-
-        return item;
+        this.productName = cartItem.getProduct().getTitle();
+        this.unitPrice = cartItem.getProduct().getCurrentPrice();
+        this.unitWeight = cartItem.getProduct().getWeight();
+        this.quantity = cartItem.getQuantity();
     }
 }

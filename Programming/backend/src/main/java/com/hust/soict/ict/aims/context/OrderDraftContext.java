@@ -13,7 +13,7 @@ import com.hust.soict.ict.aims.models.entities.order.Order;
  *   aggregates are exchanged through the context.
  */
 public interface OrderDraftContext {
-    Order getDraftOrder() throws OrderNotPlacedException;
-    void saveDraftOrder(Order order);
+    Order.Draft getDraftOrder() throws OrderNotPlacedException;
+    void saveDraftOrder(Order.Draft order);
     void clearDraftOrder();
 }

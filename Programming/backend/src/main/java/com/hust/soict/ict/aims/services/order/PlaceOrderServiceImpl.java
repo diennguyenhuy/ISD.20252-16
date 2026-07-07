@@ -64,11 +64,11 @@ class PlaceOrderServiceImpl implements PlaceOrderService {
     public OrderDraftResponse placeOrder() throws EmptyCartException, NotEnoughStockException, ProductNotFoundException {
         log.debug("Placing order...");
         log.debug("Checking stock availability...");
-        Order draftOrder = Order.from(stockValidator.checkStockAvailability(cartContext.getOrCreateCart()));
+        Order.Draft draftOrder = new Order.Draft(stockValidator.checkStockAvailability(cartContext.getOrCreateCart()));
         log.debug("Stock availability check done and satisfied.");
 
         try {
-            Order oldDraft = orderDraftContext.getDraftOrder();
+            Order.Draft oldDraft = orderDraftContext.getDraftOrder();
             draftOrder.provideDeliveryInformation(oldDraft.getDeliveryInformation(), oldDraft.getDeliveryFee());
         } catch (OrderNotPlacedException ignored) {}
 
@@ -79,7 +79,7 @@ class PlaceOrderServiceImpl implements PlaceOrderService {
 
     public DeliveryResponse submitDeliveryInformation(DeliveryRequest deliveryRequest) {
         log.debug("Submitting delivery request...");
-        Order draftOrder = orderDraftContext.getDraftOrder();
+        Order.Draft draftOrder = orderDraftContext.getDraftOrder();
 
         var di = draftOrder.provideDeliveryInformation(
                 deliveryRequest.getCustomerName(),
@@ -102,7 +102,7 @@ class PlaceOrderServiceImpl implements PlaceOrderService {
 
     public InvoiceResponse getInvoice() {
         log.debug("Creating invoice...");
-        Order draftOrder = orderDraftContext.getDraftOrder();
+        Order.Draft draftOrder = orderDraftContext.getDraftOrder();
         Invoice invoice = draftOrder.getInvoice();
         if (invoice == null) {
             throw new OrderNotCompleteException("Order invoice is not yet generated due to internal logical error or missing delivery info.");

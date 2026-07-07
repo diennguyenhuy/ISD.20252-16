@@ -15,7 +15,7 @@ public interface OrderMapper {
 
     OrderResponse toOrderResponse(Order order);
 
-    OrderDraftResponse toOrderDraftResponse(Order order);
+    OrderDraftResponse toOrderDraftResponse(Order.Draft order);
 
     @Mapping(target = "productImage", expression = "java(orderItem.getProduct() == null ? null : orderItem.getProduct().getImageURL())")
     @Mapping(target = "productId", expression = "java(orderItem.getProduct() == null ? null : orderItem.getProduct().getId().toString())")

@@ -38,14 +38,14 @@ public class PaymentTransaction {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
+    @Setter(AccessLevel.PACKAGE)
     private Order order;
 
     public static PaymentTransaction of(
             String transactionContent,
             Instant transactionTimestamp,
             String transactionMethod,
-            Long amountPaid,
-            @NonNull Order order
+            Long amountPaid
     ) {
         PaymentTransaction pt = new PaymentTransaction();
 
@@ -53,8 +53,6 @@ public class PaymentTransaction {
         pt.transactionTimestamp = transactionTimestamp;
         pt.transactionMethod = transactionMethod;
         pt.amountPaid = amountPaid;
-        pt.order = order;
-        order.setPaymentTransaction(pt);
 
         return pt;
     }

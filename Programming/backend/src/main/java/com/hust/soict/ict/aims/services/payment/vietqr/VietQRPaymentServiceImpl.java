@@ -45,32 +45,25 @@ class VietQRPaymentServiceImpl extends PaymentService implements VietQRPaymentSe
 
     @Override
     protected PaymentInitiation startPayment() throws PaymentException {
-        return qrPaymentGateway.generateQRCode(currentOrder().getId().toString(), currentOrder().getTotalAmount());
-    }
-
-    @Override @Deprecated
-    public QRCodeResponse generatePaymentQR() throws PaymentException {
-        var code = qrPaymentGateway.generateQRCode(currentOrder().getId().toString(), currentOrder().getTotalAmount());
-
-        return new QRCodeResponse(code.getQrCode(), code.getQrLink(), code.getBankName(), code.getBankAccount(), code.getUserBankName(), code.getContent(), code.getAmount());
+        return qrPaymentGateway.generateQRCode(currentOrder().getCheckoutId().toString(), currentOrder().getTotalAmount());
     }
 
     @Override
     public QRPaymentStatusResponse checkPaymentStatus() throws PaymentException {
-        var status = qrPaymentGateway.checkPaymentStatus(currentOrder().getId().toString(), currentOrder().getTotalAmount());
+        var status = qrPaymentGateway.checkPaymentStatus(currentOrder().getCheckoutId().toString(), currentOrder().getTotalAmount());
 
         return new QRPaymentStatusResponse(status.getStatus(), status.getMessage());
     }
 
     @Override
     public OrderResponse confirmPayment() throws PaymentException {
-        Order order = currentOrder();
+        Order.Draft order = currentOrder();
 
-        QRCodePaymentStatus paymentStatus = qrPaymentGateway.checkPaymentStatus(order.getId().toString(), order.getTotalAmount());
+        QRCodePaymentStatus paymentStatus = qrPaymentGateway.checkPaymentStatus(order.getCheckoutId().toString(), order.getTotalAmount());
         if (!paymentStatus.isCompleted()) {
             throw new PaymentException("Payment verification failed. VietQR status: " + paymentStatus.getStatus());
         }
         log.info("[PayOrderService] VietQR confirmed COMPLETED — creating PaymentTransaction");
-        return finalizePayment("ORD" + order.getId());
+        return finalizePayment("ORD" + order.getCheckoutId());
     }
 }

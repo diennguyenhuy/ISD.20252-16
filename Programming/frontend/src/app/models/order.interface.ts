@@ -11,7 +11,7 @@ export interface Order {
     readonly updatedAt: string;
 }
 
-export type OrderDraft = Pick<Order, 'items'> & Partial<Pick<Order, 'deliveryInformation' | 'invoice'>>;
+export type OrderDraft = Pick<Order, 'items'> & Partial<Pick<Order, 'deliveryInformation' | 'invoice'>> & { checkoutId: string };
 
 export interface OrderItem {
     readonly productId?: string;

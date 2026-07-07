@@ -31,13 +31,6 @@ public class PaypalPaymentController {
 
     private final PaypalPaymentService paypalPaymentService;
 
-//    @Deprecated
-//    @PostMapping("/create")
-//    @ResponseStatus(HttpStatus.OK)
-//    public @ResponseBody PayPalCreateResponse createPayment() throws PaymentException {
-//        return paypalPaymentService.createPayment();
-//    }
-
     @PostMapping("/capture")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody OrderResponse capturePayment(

@@ -23,13 +23,6 @@ import org.springframework.web.bind.annotation.*;
 public class VietQRPaymentController {
     private final VietQRPaymentService vietQRPaymentService;
 
-//    @Deprecated
-//    @PostMapping("/qr")
-//    @ResponseStatus(HttpStatus.OK)
-//    public @ResponseBody QRCodeResponse generateQRCode() throws PaymentException {
-//        return vietQRPaymentService.generatePaymentQR();
-//    }
-
     @GetMapping("/status")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody QRPaymentStatusResponse checkPaymentStatus() throws PaymentException {

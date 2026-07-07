@@ -27,16 +27,15 @@ public abstract class PaymentService {
                 transactionContent,
                 Instant.now(),
                 method().name(),
-                currentOrder().getTotalAmount(),
-                currentOrder()
+                currentOrder().getTotalAmount()
         );
     }
 
-    protected final Order currentOrder() {
+    protected final Order.Draft currentOrder() {
         return orderDraftContext.getDraftOrder();
     }
 
     protected final OrderResponse finalizePayment(String transactionContent) {
-        return orderFinalization.finalizeOrder(generatePaymentTransaction(transactionContent).getOrder());
+        return orderFinalization.finalizeOrder(currentOrder(), generatePaymentTransaction(transactionContent));
     }
 }

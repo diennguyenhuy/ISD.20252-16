@@ -33,7 +33,7 @@ public class StandardDeliveryFeeStrategy implements DeliveryFeeCalculationStrate
     }
 
     @Override
-    public long calculateDeliveryFee(Order order) {
+    public long calculateDeliveryFee(Order.Draft order) {
         BigDecimal totalWeight = order.getTotalWeight();
         String province = order.getDeliveryInformation().getProvince();
         long totalPrice = order.getTotalPriceWithoutVAT();

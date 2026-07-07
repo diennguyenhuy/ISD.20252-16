@@ -17,7 +17,7 @@ public class DeliveryFeeCalculator {
         strategies.forEach(strategy -> strategyMap.put(strategy.method(), strategy));
     }
 
-    public long calculate(DeliveryFeeCalculationMethod method, Order draftOrder) {
+    public long calculate(DeliveryFeeCalculationMethod method, Order.Draft draftOrder) {
         return Optional.ofNullable(strategyMap.get(method))
                 .orElseThrow(() -> new UnsupportedDeliveryFeeStrategyException("Delivery fee calculation strategy not yet supported"))
                 .calculateDeliveryFee(draftOrder);

@@ -5,8 +5,6 @@ import com.hust.soict.ict.aims.dto.response.payment.paypal.PayPalCreateResponse;
 import com.hust.soict.ict.aims.exceptions.PaymentException;
 
 public interface PaypalPaymentService {
-    @Deprecated
-    PayPalCreateResponse createPayment() throws PaymentException;
     OrderResponse capturePayment(String providerOrderId) throws PaymentException;
     void cancelPayment();
 }

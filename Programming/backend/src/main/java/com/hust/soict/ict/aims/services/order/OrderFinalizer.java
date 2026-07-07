@@ -4,6 +4,7 @@ import com.hust.soict.ict.aims.dto.mapper.OrderMapper;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.exceptions.OrderNotCompleteException;
 import com.hust.soict.ict.aims.models.entities.order.Order;
+import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 import com.hust.soict.ict.aims.repositories.OrderRepository;
 import com.hust.soict.ict.aims.services.order.event.OrderSuccessEvent;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +23,11 @@ class OrderFinalizer implements OrderFinalization {
 
     @Override
     @Transactional
-    public OrderResponse finalizeOrder(Order draftOrder) throws OrderNotCompleteException {
+    public OrderResponse finalizeOrder(Order.Draft draftOrder, PaymentTransaction paymentTransaction) throws OrderNotCompleteException {
         log.debug("Finalizing order...");
 
-        draftOrder.complete();
-        Order order = orderRepository.save(draftOrder);
+        Order order = draftOrder.complete(paymentTransaction);
+        order = orderRepository.save(order);
 
         applicationEventPublisher.publishEvent(new OrderSuccessEvent(order));
 

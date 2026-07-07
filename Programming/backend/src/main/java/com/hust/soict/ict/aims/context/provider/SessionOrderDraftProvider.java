@@ -27,10 +27,10 @@ class SessionOrderDraftProvider implements OrderDraftContext {
     private static final String DRAFT_ORDER_SESSION_KEY = "DRAFT_ORDER_SESSION_KEY";
 
     @Override
-    public Order getDraftOrder() throws OrderNotPlacedException {
+    public Order.Draft getDraftOrder() throws OrderNotPlacedException {
         log.debug("getDraftOrder: sessionId={}", session.getId());
 
-        Order order = (Order) session.getAttribute(DRAFT_ORDER_SESSION_KEY);
+        Order.Draft order = (Order.Draft) session.getAttribute(DRAFT_ORDER_SESSION_KEY);
 
         if (order == null) {
             throw new OrderNotPlacedException("Order not placed");
@@ -40,7 +40,7 @@ class SessionOrderDraftProvider implements OrderDraftContext {
     }
 
     @Override
-    public void saveDraftOrder(Order order) {
+    public void saveDraftOrder(Order.Draft order) {
         log.debug("saveDraftOrder: sessionId={}", session.getId());
         session.setAttribute(DRAFT_ORDER_SESSION_KEY, order);
     }

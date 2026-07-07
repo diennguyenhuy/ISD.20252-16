@@ -4,5 +4,5 @@ import com.hust.soict.ict.aims.models.entities.order.Order;
 
 public interface DeliveryFeeCalculationStrategy {
     DeliveryFeeCalculationMethod method();
-    long calculateDeliveryFee(Order order);
+    long calculateDeliveryFee(Order.Draft order);
 }

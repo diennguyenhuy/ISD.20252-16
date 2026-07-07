@@ -65,25 +65,13 @@ class PaypalPaymentServiceImpl extends PaymentService implements PaypalPaymentSe
      */
     @Override
     protected PaymentInitiation startPayment() throws PaymentException {
-        Order order = currentOrder();
-        PayPalPaymentInitiation initiation = paymentProvider.createPayment(order.getId().toString(), order.getTotalAmount());
+        Order.Draft order = currentOrder();
+        PayPalPaymentInitiation initiation = paymentProvider.createPayment(order.getCheckoutId().toString(), order.getTotalAmount());
 
         log.info("[PaypalPaymentService] PayPal order {} created for AIMS order {}",
-                initiation.providerOrderId(), order.getId());
+                initiation.providerOrderId(), order.getCheckoutId());
 
         return initiation;
-    }
-
-
-    @Override @Deprecated
-    public PayPalCreateResponse createPayment() throws PaymentException {
-        Order order = currentOrder();
-        PayPalPaymentInitiation initiation = paymentProvider.createPayment(order.getId().toString(), order.getTotalAmount());
-
-        log.info("[PaypalPaymentService] PayPal order {} created for AIMS order {}",
-                initiation.providerOrderId(), order.getId());
-
-        return new PayPalCreateResponse(initiation.approvalUrl(), initiation.providerOrderId());
     }
 
     /**
@@ -94,7 +82,7 @@ class PaypalPaymentServiceImpl extends PaymentService implements PaypalPaymentSe
      */
     @Override
     public OrderResponse capturePayment(String providerOrderId) throws PaymentException {
-        Order order = currentOrder();
+        Order.Draft order = currentOrder();
 
         PaymentCapture capture = paymentProvider.capturePayment(providerOrderId);
 
@@ -104,12 +92,12 @@ class PaypalPaymentServiceImpl extends PaymentService implements PaypalPaymentSe
 
         // Defence in depth: the captured order must reference THIS draft order, so a
         // forged/leaked token cannot be used to finalize someone else's order.
-        if (!order.getId().toString().equals(capture.referenceId())) {
+        if (!order.getCheckoutId().toString().equals(capture.referenceId())) {
             throw new PaymentException("Captured PayPal payment does not belong to the current order.");
         }
 
         log.info("[PaypalPaymentService] PayPal capture {} COMPLETED — finalizing order {}",
-                capture.captureId(), order.getId());
+                capture.captureId(), order.getCheckoutId());
 
         // Crucial integration rule: persist the order + send confirmation email.
         // The "PAYPAL-<captureId>" content is later parsed back in refund().
@@ -123,9 +111,9 @@ class PaypalPaymentServiceImpl extends PaymentService implements PaypalPaymentSe
     @Override
     public void cancelPayment() {
         try {
-            Order order = currentOrder();
+            Order.Draft order = currentOrder();
             log.info("[PaypalPaymentService] PayPal payment cancelled for draft order {} — draft kept for retry",
-                    order.getId());
+                    order.getCheckoutId());
         } catch (OrderNotPlacedException e) {
             log.warn("[PaypalPaymentService] Cancel received but no draft order is present in the session");
         }

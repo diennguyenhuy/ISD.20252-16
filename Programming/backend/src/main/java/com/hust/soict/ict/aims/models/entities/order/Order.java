@@ -76,8 +76,9 @@ public class Order extends VersionedEntity {
     }
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false)
-    private UUID id = UUID.randomUUID();
+    private UUID id;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<OrderItem> items = new ArrayList<>();
@@ -87,9 +88,6 @@ public class Order extends VersionedEntity {
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private DeliveryInformation deliveryInformation;
-
-    @Transient
-    private Long deliveryFee;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private Invoice invoice;
@@ -109,33 +107,6 @@ public class Order extends VersionedEntity {
         this.status = newStatus;
     }
 
-    public DeliveryInformation provideDeliveryInformation(
-            @NonNull String customerName,
-            @NonNull String customerEmail,
-            @NonNull String phoneNumber,
-            @NonNull String province,
-            @NonNull String commune,
-            @NonNull String address,
-            @NonNull String deliveryMethod
-    ) {
-        this.deliveryInformation = new DeliveryInformation(customerName, customerEmail, phoneNumber, province, commune, address, deliveryMethod, this);
-        return this.deliveryInformation;
-    }
-
-    public void provideDeliveryInformation(@NonNull DeliveryInformation existingInfo, long precalculatedDeliveryFee) {
-        this.deliveryInformation = new DeliveryInformation(
-                existingInfo.getCustomerName(),
-                existingInfo.getCustomerEmail(),
-                existingInfo.getPhoneNumber(),
-                existingInfo.getProvince(),
-                existingInfo.getCommune(),
-                existingInfo.getAddress(),
-                existingInfo.getDeliveryMethod(),
-                this
-        );
-        this.deliveryFee = precalculatedDeliveryFee;
-    }
-
     @Transient
     public Long getTotalPriceWithoutVAT() {
         return items.stream().mapToLong(OrderItem::getItemTotalPrice).sum();
@@ -153,31 +124,9 @@ public class Order extends VersionedEntity {
 
     @Transient
     public Long getTotalAmount() {
-        if (status != Status.DRAFT) {
-            return invoice.getTotalAmount();
-        }
-        return deliveryFee + getTotalPriceWithVAT();
+        return invoice.getTotalAmount();
     }
 
-    public void updateDeliveryFee(long deliveryFee) {
-        if (status != Status.DRAFT) {
-            throw new UnsupportedOperationException("Operation Update Delivery Fee is unavailable for placed non-draft order");
-        }
-        this.deliveryFee = deliveryFee;
-        this.invoice = new Invoice(this);
-    }
-
-    private boolean isComplete() {
-        return (deliveryInformation != null && deliveryFee != null && invoice != null && paymentTransaction != null)
-                || status != Status.DRAFT;
-    }
-
-    public void complete() {
-        if (!isComplete()) {
-            throw new OrderNotCompleteException("Cannot check out order when order is not completed!");
-        }
-        changeStatus(Status.PENDING);
-    }
     public void approve() {
         changeStatus(Status.APPROVED);
     }
@@ -195,12 +144,89 @@ public class Order extends VersionedEntity {
         items.add(orderItem);
         orderItem.setOrder(this);
     }
-    public static Order from(Cart cart) {
-        Order order = new Order();
-        cart.getItems().forEach(item -> order.addItem(OrderItem.from(item, order)));
 
-        order.status = Status.DRAFT;
+    private Order(Cart cart) {
+        cart.getItems().forEach(item -> this.addItem(new OrderItem(item, this)));
+        this.status = Status.DRAFT;
+    }
 
-        return order;
+    public static class Draft {
+        private final Order order;
+        @Getter
+        private final UUID checkoutId;
+        @Getter
+        private Long deliveryFee;
+
+        public Draft(Cart cart) {
+            this.order = new Order(cart);
+            this.checkoutId = UUID.randomUUID();
+        }
+
+        public DeliveryInformation provideDeliveryInformation(
+                @NonNull String customerName,
+                @NonNull String customerEmail,
+                @NonNull String phoneNumber,
+                @NonNull String province,
+                @NonNull String commune,
+                @NonNull String address,
+                @NonNull String deliveryMethod
+        ) {
+            order.deliveryInformation = new DeliveryInformation(customerName, customerEmail, phoneNumber, province, commune, address, deliveryMethod, order);
+            return order.deliveryInformation;
+        }
+
+        public void provideDeliveryInformation(DeliveryInformation existingInfo, Long precalculatedDeliveryFee) {
+            order.deliveryInformation = existingInfo != null ? new DeliveryInformation(
+                    existingInfo.getCustomerName(),
+                    existingInfo.getCustomerEmail(),
+                    existingInfo.getPhoneNumber(),
+                    existingInfo.getProvince(),
+                    existingInfo.getCommune(),
+                    existingInfo.getAddress(),
+                    existingInfo.getDeliveryMethod(),
+                    order
+            ) : null;
+            this.deliveryFee = precalculatedDeliveryFee;
+        }
+
+        public void updateDeliveryFee(long deliveryFee) {
+            this.deliveryFee = deliveryFee;
+            order.invoice = new Invoice(order, deliveryFee);
+        }
+
+        public Order complete(PaymentTransaction paymentTransaction) {
+            order.paymentTransaction = paymentTransaction;
+            paymentTransaction.setOrder(order);
+            order.changeStatus(Status.PENDING);
+            return order;
+        }
+
+        public List<OrderItem> getItems() {
+            return order.getItems();
+        }
+
+        public DeliveryInformation getDeliveryInformation() {
+            return order.deliveryInformation;
+        }
+
+        public Invoice getInvoice() {
+            return order.invoice;
+        }
+
+        public Long getTotalPriceWithoutVAT() {
+            return order.getTotalPriceWithoutVAT();
+        }
+
+        public Long getTotalPriceWithVAT() {
+            return order.getTotalPriceWithVAT();
+        }
+
+        public BigDecimal getTotalWeight() {
+            return order.getTotalWeight();
+        }
+
+        public Long getTotalAmount() {
+            return deliveryFee + getTotalPriceWithVAT();
+        }
     }
 }

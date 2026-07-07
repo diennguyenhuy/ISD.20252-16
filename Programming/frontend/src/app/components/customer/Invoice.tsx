@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router';
+import { useNavigate, useLocation, useParams } from 'react-router';
 import { ArrowLeft, Truck, ShoppingBag, User, MapPin, FileText, Loader2, AlertCircle } from 'lucide-react';
 
 import { useCart } from '../../context/CartContext';
@@ -15,6 +15,7 @@ const TYPE_LABELS: Record<ProductTypeName, string> = {
 
 export default function Invoice() {
     const navigate = useNavigate();
+    const { checkoutId } = useParams<{ checkoutId: string }>();
     const location = useLocation();
     const { cart } = useCart();
 
@@ -29,7 +30,7 @@ export default function Invoice() {
     useEffect(() => {
         // If user refreshes the page and loses state, kick them back to delivery form
         if (!deliveryInfo) {
-            navigate('/checkout/delivery');
+            navigate(`/checkout/${checkoutId}/delivery`);
             return;
         }
 
@@ -222,7 +223,7 @@ export default function Invoice() {
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-4">
                 <button
-                    onClick={() => navigate('/checkout/delivery', {
+                    onClick={() => navigate(`/checkout/${checkoutId}/delivery`, {
                         state: {
                             prefilledDeliveryInfo: deliveryInfo
                         }
@@ -240,7 +241,7 @@ export default function Invoice() {
                     Edit Cart
                 </button>
                 <button
-                    onClick={() => navigate('/checkout/payment/qr')}
+                    onClick={() => navigate(`/checkout/${checkoutId}/payment/qr`)}
                     className="flex-1 py-3.5 px-6 rounded-xl bg-primary text-primary-foreground font-bold text-base hover:bg-accent hover:text-accent-foreground transition-all shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 flex items-center justify-center gap-2"
                 >
                     Proceed to Payment →
