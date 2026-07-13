@@ -96,9 +96,7 @@ class VietQRGatewayFacade implements VietQRPaymentGateway {
             String response = boundary.generateQRCode(token, requestString);
 
             ObjectMapper mapper = new ObjectMapper();
-            VietQRCode vietQrCode = mapper.readValue(response, VietQRCode.class);
-
-            return vietQrCode;
+            return mapper.readValue(response, VietQRCode.class);
         } catch (Exception e) {
             throw new UnknownPaymentException("Failed to generate QR code: ", e);
         }
@@ -127,8 +125,7 @@ class VietQRGatewayFacade implements VietQRPaymentGateway {
             String requestString = request.buildRequestString();
             String response = boundary.checkPaymentStatus(token, requestString);
             ObjectMapper mapper = new ObjectMapper();
-            VietQRPaymentStatus status = mapper.readValue(response, VietQRPaymentStatus.class);
-            return status;
+            return mapper.readValue(response, VietQRPaymentStatus.class);
         } catch (Exception e) {
             throw new UnknownPaymentException("Failed to check payment status: " + e.getMessage(), e);
         }

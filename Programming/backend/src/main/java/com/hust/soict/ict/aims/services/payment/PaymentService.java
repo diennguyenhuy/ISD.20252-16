@@ -36,6 +36,7 @@ public abstract class PaymentService {
     }
 
     protected final OrderResponse finalizePayment(String transactionContent) {
-        return orderFinalization.finalizeOrder(currentOrder(), generatePaymentTransaction(transactionContent));
+        currentOrder().attachPaymentTransaction(generatePaymentTransaction(transactionContent));
+        return orderFinalization.finalizeOrder(currentOrder());
     }
 }

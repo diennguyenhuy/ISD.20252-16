@@ -194,9 +194,16 @@ public class Order extends VersionedEntity {
             order.invoice = new Invoice(order, deliveryFee);
         }
 
-        public Order complete(PaymentTransaction paymentTransaction) {
+        public void attachPaymentTransaction(PaymentTransaction paymentTransaction) {
             order.paymentTransaction = paymentTransaction;
             paymentTransaction.setOrder(order);
+        }
+
+        public Order complete() {
+            if (order.deliveryInformation == null || order.invoice == null || order.paymentTransaction == null) {
+                throw new OrderNotCompleteException("Order is not complete, cannot proceed to finish the order");
+            }
+
             order.changeStatus(Status.PENDING);
             return order;
         }

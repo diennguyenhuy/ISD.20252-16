@@ -23,10 +23,10 @@ class OrderFinalizer implements OrderFinalization {
 
     @Override
     @Transactional
-    public OrderResponse finalizeOrder(Order.Draft draftOrder, PaymentTransaction paymentTransaction) throws OrderNotCompleteException {
+    public OrderResponse finalizeOrder(Order.Draft draftOrder) throws OrderNotCompleteException {
         log.debug("Finalizing order...");
 
-        Order order = draftOrder.complete(paymentTransaction);
+        Order order = draftOrder.complete();
         order = orderRepository.save(order);
 
         applicationEventPublisher.publishEvent(new OrderSuccessEvent(order));
