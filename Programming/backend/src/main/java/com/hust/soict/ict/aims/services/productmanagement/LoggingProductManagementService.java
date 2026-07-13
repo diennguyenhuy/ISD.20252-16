@@ -1,8 +1,10 @@
-package com.hust.soict.ict.aims.services.audit.aspect;
+package com.hust.soict.ict.aims.services.productmanagement;
 
 import com.hust.soict.ict.aims.dto.request.AdjustStockRequest;
 import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
 import com.hust.soict.ict.aims.dto.request.UpdateProductRequest;
+import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
+import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.entities.audit.ProductAction;
 import com.hust.soict.ict.aims.models.entities.audit.ProductEditDetail;
@@ -15,49 +17,41 @@ import com.hust.soict.ict.aims.repositories.StockAdjustLogRepository;
 import com.hust.soict.ict.aims.security.AuthenticationFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.AfterReturning;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
-@Aspect
-@Component
 @RequiredArgsConstructor
 @Slf4j
-class ProductAuditLoggingAspect {
+class LoggingProductManagementService implements ProductManagementService {
+    private final ProductManagementService productManagementService;
+
     private final ProductRepository productRepository;
     private final AuthenticationFacade authenticationFacade;
     private final StockAdjustLogRepository stockAdjustLogRepository;
     private final ProductLogRepository productLogRepository;
 
-    @AfterReturning(
-            value = "@annotation(productLogging) && args(request)",
-            argNames = "productLogging,request"
-    )
-    void logProductCreation(ProductLogging productLogging, CreateProductRequest request) {
-        if (productLogging.action() != ProductAction.CREATE) {
-            return;
-        }
+    @Override
+    @Transactional
+    public ProductDetail createProduct(CreateProductRequest dto) {
+        var result = productManagementService.createProduct(dto);
 
-        Product product = productRepository.findByBarcode(request.getBarcode())
+        Product product = productRepository.findByBarcode(dto.getBarcode())
                 .orElseThrow(() -> {
                     log.error(
                             "[AUDIT FAILED] Cannot find created product with barcode: {}",
-                            request.getBarcode()
+                            dto.getBarcode()
                     );
 
-                    return new IllegalStateException("Cannot find created product with barcode: " + request.getBarcode());
+                    return new IllegalStateException("Cannot find created product with barcode: " + dto.getBarcode());
                 });
 
         ProductLog productLog = new ProductLog(
                 authenticationFacade.getCurrentUser(),
                 product,
-                productLogging.action()
+                ProductAction.CREATE
         );
         productLogRepository.save(productLog);
 
@@ -66,6 +60,8 @@ class ProductAuditLoggingAspect {
                 product.getId(),
                 product.getTitle()
         );
+
+        return result;
     }
 
     private static Map<String, Object> extractUpdatingFields(Set<String> requestedFieldNames, Object object) {
@@ -95,18 +91,12 @@ class ProductAuditLoggingAspect {
         return valueMap;
     }
 
-    @Around(
-            value = "@annotation(productLogging) && args(id, request)",
-            argNames = "joinPoint,productLogging,id,request"
-    )
-    Object logProductUpdate(ProceedingJoinPoint joinPoint, ProductLogging productLogging, UUID id, UpdateProductRequest request) throws Throwable {
-        if (productLogging.action() != ProductAction.UPDATE) {
-            return joinPoint.proceed();
-        }
-
+    @Override
+    @Transactional
+    public ProductDetail updateProduct(UUID id, UpdateProductRequest dto) {
         Set<String> requestedFieldNames = new HashSet<>();
 
-        for (Class<?> clazz = request.getClass(); clazz != Object.class; clazz = clazz.getSuperclass()) {
+        for (Class<?> clazz = dto.getClass(); clazz != Object.class; clazz = clazz.getSuperclass()) {
             for (Field field : clazz.getDeclaredFields()) {
                 if (Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) {
                     continue;
@@ -115,7 +105,7 @@ class ProductAuditLoggingAspect {
                 try {
                     field.setAccessible(true);
                     String fieldName = field.getName();
-                    Object value = field.get(request);
+                    Object value = field.get(dto);
                     if (value != null) {
                         requestedFieldNames.add(fieldName);
                     }
@@ -134,7 +124,7 @@ class ProductAuditLoggingAspect {
 
         Map<String, Object> oldValueMap = extractUpdatingFields(requestedFieldNames, product);
 
-        Object result = joinPoint.proceed();
+        var result = productManagementService.updateProduct(id, dto);
 
         Map<String, Object> newValueMap = extractUpdatingFields(requestedFieldNames, result);
 
@@ -163,124 +153,12 @@ class ProductAuditLoggingAspect {
         return result;
     }
 
-    @Around(
-            value = "@annotation(stockAdjustLogging) && args(id, adjustStockRequest)",
-            argNames = "joinPoint,stockAdjustLogging,id,adjustStockRequest"
-    )
-    Object logStockAdjustment(ProceedingJoinPoint joinPoint, StockAdjustLogging stockAdjustLogging, UUID id, AdjustStockRequest adjustStockRequest) throws Throwable {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.error("[AUDIT FAILED] Product not found for stock adjustment. ID: {}", id);
-                    return new ProductNotFoundException(id);
-                });
+    @Override
+    @Transactional
+    public List<ProductSummary> deleteProducts(List<UUID> productIds) {
+        var result = productManagementService.deleteProducts(productIds);
 
-        int oldStock = product.getStockQuantity();
-
-        Object result = joinPoint.proceed();
-
-        int newStock = oldStock + adjustStockRequest.getDelta();
-
-        StockAdjustLog stockAdjustLog = new StockAdjustLog(
-                authenticationFacade.getCurrentUser(),
-                product,
-                oldStock,
-                newStock,
-                adjustStockRequest.getReason()
-        );
-        stockAdjustLogRepository.save(stockAdjustLog);
-
-        log.info(
-                "[AUDIT SUCCESS] Stock adjustment logged. Product ID: {}, Old Stock: {}, New Stock: {}, Delta: {}",
-                id,
-                oldStock,
-                newStock,
-                adjustStockRequest.getDelta()
-        );
-
-        return result;
-    }
-
-    @AfterReturning(
-            value = "@annotation(productLogging) && args(id)",
-            argNames = "productLogging,id"
-    )
-    void logProductActivation(ProductLogging productLogging, UUID id) {
-        if (productLogging.action() != ProductAction.ACTIVATE) {
-            return;
-        }
-
-        Product product = productRepository.findById(id).orElseThrow(() -> {
-            log.error("[AUDIT FAILED] Product not found for activation. ID: {}", id);
-            return new ProductNotFoundException(id);
-        });
-
-        ProductLog productLog = new ProductLog(
-                authenticationFacade.getCurrentUser(),
-                product,
-                productLogging.action()
-        );
-        productLogRepository.save(productLog);
-
-        log.info(
-                "[AUDIT] Product activated. ID: {}, Title: {}",
-                product.getId(),
-                product.getTitle()
-        );
-    }
-
-    @AfterReturning(
-            value = "@annotation(productLogging) && args(id)",
-            argNames = "productLogging,id"
-    )
-    void logProductDeletion(ProductLogging productLogging, UUID id) {
-        if (productLogging.action() != ProductAction.DELETE) {
-            return;
-        }
-
-        Product product = productRepository.findById(id).orElseThrow(() -> {
-            log.error("[AUDIT FAILED] Product not found for (soft-)deletion. ID: {}", id);
-            return new ProductNotFoundException(id);
-        });
-
-        ProductAction actualAction;
-        switch (product.getStatus()) {
-            case DELETED -> actualAction = ProductAction.DELETE;
-            case DEACTIVATED -> actualAction = ProductAction.DEACTIVATE;
-            default -> {
-                log.warn(
-                        "[AUDIT SKIPPED] Product deletion action produced unexpected status. ID: {}, Status: {}",
-                        id,
-                        product.getStatus()
-                );
-                return;
-            }
-        };
-
-        ProductLog productLog = new ProductLog(
-                authenticationFacade.getCurrentUser(),
-                product,
-                actualAction
-        );
-        productLogRepository.save(productLog);
-
-        log.info(
-                "[AUDIT] Product {}d. ID: {}, Title: {}",
-                actualAction.name().toLowerCase(),
-                product.getId(),
-                product.getTitle()
-        );
-    }
-
-    @AfterReturning(
-            value = "@annotation(productLogging) && args(ids)",
-            argNames = "productLogging,ids"
-    )
-    void logProductDeletions(ProductLogging productLogging, List<UUID> ids) {
-        if (productLogging.action() != ProductAction.DELETE) {
-            return;
-        }
-
-        List<Product> products = productRepository.findAllById(ids);
+        List<Product> products = productRepository.findAllById(productIds);
 
         List<ProductLog> productLogs = new ArrayList<>();
 
@@ -313,5 +191,106 @@ class ProductAuditLoggingAspect {
             );
         });
         productLogRepository.saveAll(productLogs);
+
+        return result;
+    }
+
+    @Override
+    @Transactional
+    public void adjustStock(UUID id, AdjustStockRequest adjustStockRequest) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("[AUDIT FAILED] Product not found for stock adjustment. ID: {}", id);
+                    return new ProductNotFoundException(id);
+                });
+
+        int oldStock = product.getStockQuantity();
+
+        productManagementService.adjustStock(id, adjustStockRequest);
+
+        int newStock = oldStock + adjustStockRequest.getDelta();
+
+        StockAdjustLog stockAdjustLog = new StockAdjustLog(
+                authenticationFacade.getCurrentUser(),
+                product,
+                oldStock,
+                newStock,
+                adjustStockRequest.getReason()
+        );
+        stockAdjustLogRepository.save(stockAdjustLog);
+
+        log.info(
+                "[AUDIT SUCCESS] Stock adjustment logged. Product ID: {}, Old Stock: {}, New Stock: {}, Delta: {}",
+                id,
+                oldStock,
+                newStock,
+                adjustStockRequest.getDelta()
+        );
+    }
+
+    @Override
+    @Transactional
+    public ProductDetail activateProduct(UUID id) {
+        var result = productManagementService.activateProduct(id);
+
+        Product product = productRepository.findById(id).orElseThrow(() -> {
+            log.error("[AUDIT FAILED] Product not found for activation. ID: {}", id);
+            return new ProductNotFoundException(id);
+        });
+
+        ProductLog productLog = new ProductLog(
+                authenticationFacade.getCurrentUser(),
+                product,
+                ProductAction.ACTIVATE
+        );
+        productLogRepository.save(productLog);
+
+        log.info(
+                "[AUDIT] Product activated. ID: {}, Title: {}",
+                product.getId(),
+                product.getTitle()
+        );
+
+        return result;
+    }
+
+    @Override
+    @Transactional
+    public ProductDetail deleteProduct(UUID id) {
+        var result = productManagementService.deleteProduct(id);
+        Product product = productRepository.findById(id).orElseThrow(() -> {
+            log.error("[AUDIT FAILED] Product not found for (soft-)deletion. ID: {}", id);
+            return new ProductNotFoundException(id);
+        });
+
+        ProductAction actualAction;
+        switch (product.getStatus()) {
+            case DELETED -> actualAction = ProductAction.DELETE;
+            case DEACTIVATED -> actualAction = ProductAction.DEACTIVATE;
+            default -> {
+                log.warn(
+                        "[AUDIT SKIPPED] Product deletion action produced unexpected status. ID: {}, Status: {}",
+                        id,
+                        product.getStatus()
+                );
+                return result;
+            }
+        };
+
+        ProductLog productLog = new ProductLog(
+                authenticationFacade.getCurrentUser(),
+                product,
+                actualAction
+        );
+        productLogRepository.save(productLog);
+
+        log.info(
+                "[AUDIT] Product {}d. ID: {}, Title: {}",
+                actualAction.name().toLowerCase(),
+                product.getId(),
+                product.getTitle()
+        );
+
+        return result;
     }
 }

@@ -1,9 +1,6 @@
 package com.hust.soict.ict.aims.constraints;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.Setter;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
@@ -15,14 +12,6 @@ import java.util.stream.Collectors;
 
 @Component
 class LocationProvider {
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    private static class LocationData {
-        private String name;
-        private List<String> wards;
-    }
-
     private final Map<String, Set<String>> locations;
 
     LocationProvider(ObjectMapper objectMapper) throws IOException {
@@ -32,11 +21,13 @@ class LocationProvider {
             throw new IOException("Resource not found");
         }
 
+        record LocationData(String name, List<String> wards) {}
+
         List<LocationData> data = objectMapper.readValue(is, new TypeReference<>() {});
 
         locations = data.stream().collect(Collectors.toMap(
-                LocationData::getName,
-                locationData -> new HashSet<>(locationData.getWards())
+                LocationData::name,
+                l -> new HashSet<>(l.wards())
         ));
     }
 

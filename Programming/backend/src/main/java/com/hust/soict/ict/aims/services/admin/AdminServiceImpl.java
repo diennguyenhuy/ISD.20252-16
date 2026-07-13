@@ -3,13 +3,11 @@ package com.hust.soict.ict.aims.services.admin;
 import com.hust.soict.ict.aims.dto.request.CreateUserRequest;
 import com.hust.soict.ict.aims.dto.response.UserResponse;
 import com.hust.soict.ict.aims.exceptions.AccountAlreadyExistedException;
-import com.hust.soict.ict.aims.models.entities.audit.UserAction;
 import com.hust.soict.ict.aims.models.entities.user.User;
 import com.hust.soict.ict.aims.repositories.UserRepository;
 import com.hust.soict.ict.aims.services.admin.event.AccountCreatedEvent;
 import com.hust.soict.ict.aims.services.admin.event.EmailUpdateEvent;
 import com.hust.soict.ict.aims.services.admin.event.PasswordResetEvent;
-import com.hust.soict.ict.aims.services.audit.aspect.AdminLogging;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -71,7 +69,6 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     // ───── Account Lifecycle ─────
 
     @Override
-    @AdminLogging(action = UserAction.CREATE)
     @Transactional
     public UserResponse createUser(CreateUserRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -104,7 +101,6 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     }
 
     @Override
-    @AdminLogging(action = UserAction.DEACTIVATE)
     @Transactional
     public void deactivateUser(UUID userId) {
         User user = findUserOrThrow(userId);
@@ -114,7 +110,6 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     }
 
     @Override
-    @AdminLogging(action = UserAction.ACTIVATE)
     @Transactional
     public void activateUser(UUID userId) {
         User user = findUserOrThrow(userId);
@@ -124,7 +119,6 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     }
 
     @Override
-    @AdminLogging(action = UserAction.BLOCK)
     @Transactional
     public void blockUser(UUID userId) {
         User user = findUserOrThrow(userId);
@@ -134,7 +128,6 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     }
 
     @Override
-    @AdminLogging(action = UserAction.UNBLOCK)
     @Transactional
     public void unblockUser(UUID userId) {
         User user = findUserOrThrow(userId);
@@ -146,7 +139,6 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     // ───── Roles ─────
 
     @Override
-    @AdminLogging(action = UserAction.MODIFY_ROLE)
     @Transactional
     public UserResponse assignRoles(UUID userId, Set<User.Role> newRoles) {
         User user = findUserOrThrow(userId);
@@ -176,7 +168,6 @@ class AdminServiceImpl implements AdminService, UserQueryService {
      * on their next login (enforced by the JWT filter).
      */
     @Override
-    @AdminLogging(action = UserAction.RESET_PASSWORD)
     @Transactional
     public void resetPassword(UUID userId) {
         User user = findUserOrThrow(userId);
@@ -192,7 +183,6 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     }
 
     @Override
-    @AdminLogging(action = UserAction.UPDATE_EMAIL)
     @Transactional
     public void updateEmail(UUID userId, String newEmail) {
         if (userRepository.existsByEmail(newEmail)) {

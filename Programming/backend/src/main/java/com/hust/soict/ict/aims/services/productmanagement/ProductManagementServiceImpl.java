@@ -9,11 +9,8 @@ import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.dto.mapper.ProductMapper;
 import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
 import com.hust.soict.ict.aims.dto.request.UpdateProductRequest;
-import com.hust.soict.ict.aims.models.entities.audit.ProductAction;
 import com.hust.soict.ict.aims.models.entities.product.*;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
-import com.hust.soict.ict.aims.services.audit.aspect.ProductLogging;
-import com.hust.soict.ict.aims.services.audit.aspect.StockAdjustLogging;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -79,7 +76,6 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
     }
     
     @Override
-    @ProductLogging(action = ProductAction.CREATE)
     @Transactional
     public ProductDetail createProduct(CreateProductRequest dto) {
         log.info("[CREATE] Received request to create new product. Barcode: {}", dto.getBarcode());
@@ -97,7 +93,6 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
     }
 
     @Override
-    @ProductLogging(action = ProductAction.UPDATE)
     @Transactional
     public ProductDetail updateProduct(UUID id, UpdateProductRequest dto) {
         log.info("[UPDATE] Received request to update product. ID: {}", id);
@@ -119,7 +114,6 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
     }
 
     @Override
-    @ProductLogging(action = ProductAction.DELETE)
     @Transactional
     public List<ProductSummary> deleteProducts(List<UUID> productIds) {
         log.info("[DELETE BATCH] Received request to delete {} products.", productIds.size());
@@ -148,7 +142,6 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
     }
 
     @Override
-    @StockAdjustLogging
     @Transactional
     public void adjustStock(UUID id, AdjustStockRequest adjustStockRequest) {
         log.info("[ADJUST STOCK] Received request for Product ID: {}. Delta: {}, Reason: '{}'", id, adjustStockRequest.getDelta(), adjustStockRequest.getReason());
@@ -168,7 +161,6 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
     }
 
     @Override
-    @ProductLogging(action = ProductAction.ACTIVATE)
     @Transactional
     public ProductDetail activateProduct(UUID id) {
         log.info("[ACTIVATE] Received request to reactivate product. ID: {}", id);
@@ -188,7 +180,6 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
     }
 
     @Override
-    @ProductLogging(action = ProductAction.DELETE)
     @Transactional
     public ProductDetail deleteProduct(UUID id) {
         log.info("[DELETE] Received request to delete product. ID: {}", id);
