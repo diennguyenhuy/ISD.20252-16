@@ -1,12 +1,12 @@
-package com.hust.soict.ict.aims.services.payment.contract;
+package com.hust.soict.ict.aims.subsystems.paypal;
 
 import com.hust.soict.ict.aims.exceptions.PaymentException;
-import com.hust.soict.ict.aims.subsystems.paypal.model.RefundResult;
+import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalRefundResult;
 
 /**
  * Provider-agnostic <b>refund port</b> for redirect-style gateways.
  *
- * <p>Kept separate from {@link IRedirectPaymentGateway} on purpose
+ * <p>Kept separate from {@link PayPalRedirectGateway} on purpose
  * (Interface Segregation): paying and refunding are distinct capabilities, and a
  * future provider may support one without the other. The single subsystem
  * {@code Facade} happens to implement both, but the core depends on each
@@ -19,12 +19,12 @@ import com.hust.soict.ict.aims.subsystems.paypal.model.RefundResult;
  * their internal failures into {@link PaymentException} — no provider exception
  * may leak.
  *
- * <p>Mirrors the established convention of {@link IRedirectPaymentGateway},
+ * <p>Mirrors the established convention of {@link PayPalRedirectGateway},
  * which already returns the subsystem's {@code model} records
  * ({@code PaymentInitiation} / {@code PaymentCapture}); this port returns
- * {@link RefundResult} in the same spirit.
+ * {@link PayPalRefundResult} in the same spirit.
  */
-public interface IRefundGateway {
+public interface PayPalRefundGateway {
 
     /**
      * Refund a previously captured payment.
@@ -33,8 +33,8 @@ public interface IRefundGateway {
      *                  AIMS-side transaction-content prefix by the caller)
      * @param vndAmount the amount to refund, in VND; the subsystem converts it to
      *                  the gateway currency before calling the provider
-     * @return a provider-agnostic {@link RefundResult} describing the outcome
+     * @return a provider-agnostic {@link PayPalRefundResult} describing the outcome
      * @throws PaymentException if the refund could not be requested/processed
      */
-    RefundResult refund(String captureId, long vndAmount) throws PaymentException;
+    PayPalRefundResult refund(String captureId, long vndAmount) throws PaymentException;
 }

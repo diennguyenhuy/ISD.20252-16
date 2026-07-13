@@ -1,10 +1,9 @@
-package com.hust.soict.ict.aims.services.payment.paypal;
+package com.hust.soict.ict.aims.subsystems.paypal.service;
 
 import com.hust.soict.ict.aims.context.OrderDraftContext;
 import com.hust.soict.ict.aims.exceptions.OrderNotPlacedException;
 import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
-import com.hust.soict.ict.aims.dto.response.payment.paypal.PayPalCreateResponse;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 import com.hust.soict.ict.aims.services.order.OrderFinalization;
@@ -12,12 +11,12 @@ import com.hust.soict.ict.aims.services.order.PlaceOrderService;
 import com.hust.soict.ict.aims.services.payment.PaymentInitiation;
 import com.hust.soict.ict.aims.services.payment.PaymentMethod;
 import com.hust.soict.ict.aims.services.payment.PaymentService;
-import com.hust.soict.ict.aims.services.payment.contract.IRedirectPaymentGateway;
-import com.hust.soict.ict.aims.services.payment.IRefundCapability;
-import com.hust.soict.ict.aims.services.payment.contract.IRefundGateway;
-import com.hust.soict.ict.aims.subsystems.paypal.model.PaymentCapture;
+import com.hust.soict.ict.aims.subsystems.paypal.PayPalRedirectGateway;
+import com.hust.soict.ict.aims.services.payment.Refundable;
+import com.hust.soict.ict.aims.subsystems.paypal.PayPalRefundGateway;
+import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalPaymentCapture;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalPaymentInitiation;
-import com.hust.soict.ict.aims.subsystems.paypal.model.RefundResult;
+import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalRefundResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +32,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
-class PaypalPaymentServiceImpl extends PaymentService implements PaypalPaymentService, IRefundCapability {
+class PayPalPaymentServiceImpl extends PaymentService implements PayPalPaymentService, Refundable {
 
     /**
      * Prefix stamped onto {@code PaymentTransaction.transactionContent} at capture
@@ -42,13 +41,13 @@ class PaypalPaymentServiceImpl extends PaymentService implements PaypalPaymentSe
      */
     private static final String TRANSACTION_CONTENT_PREFIX = "PAYPAL-";
 
-    private final IRedirectPaymentGateway paymentProvider;
-    private final IRefundGateway refundGateway;
+    private final PayPalRedirectGateway paymentProvider;
+    private final PayPalRefundGateway refundGateway;
 
-    public PaypalPaymentServiceImpl(IRedirectPaymentGateway paymentProvider,
-                                IRefundGateway refundGateway,
-                                OrderDraftContext orderDraftContext,
-                                OrderFinalization orderFinalization) {
+    public PayPalPaymentServiceImpl(PayPalRedirectGateway paymentProvider,
+                                    PayPalRefundGateway refundGateway,
+                                    OrderDraftContext orderDraftContext,
+                                    OrderFinalization orderFinalization) {
         super(orderDraftContext, orderFinalization);
         this.paymentProvider = paymentProvider;
         this.refundGateway = refundGateway;
@@ -84,7 +83,7 @@ class PaypalPaymentServiceImpl extends PaymentService implements PaypalPaymentSe
     public OrderResponse capturePayment(String providerOrderId) throws PaymentException {
         Order.Draft order = currentOrder();
 
-        PaymentCapture capture = paymentProvider.capturePayment(providerOrderId);
+        PayPalPaymentCapture capture = paymentProvider.capturePayment(providerOrderId);
 
         if (!capture.completed()) {
             throw new PaymentException("PayPal payment was not completed. Status: " + capture.status());
@@ -132,12 +131,12 @@ class PaypalPaymentServiceImpl extends PaymentService implements PaypalPaymentSe
      *   <li>the amount actually paid (VND), used for the refund body.</li>
      * </ul>
      *
-     * <p><b>Contract:</b> {@link IRefundCapability#refund} is {@code void} on
+     * <p><b>Contract:</b> {@link Refundable#refund} is {@code void} on
      * purpose — the handlers only need a success/failure signal. We return
      * normally on a {@code COMPLETED} refund (the handler then moves the order to
      * REFUNDED); on any problem we throw {@link PaymentException}, which the
      * handler catches to leave the order in its prior CANCELLED / REJECTED state.
-     * The richer {@link RefundResult} is consumed here for validation rather than
+     * The richer {@link PayPalRefundResult} is consumed here for validation rather than
      * surfaced to the domain, keeping the capability interface minimal.
      */
     @Override
@@ -148,7 +147,7 @@ class PaypalPaymentServiceImpl extends PaymentService implements PaypalPaymentSe
         log.info("[PaypalPaymentService] Refunding PayPal capture {} for {} VND (order {})",
                 captureId, vndAmount, transaction.getOrder().getId());
 
-        RefundResult result = refundGateway.refund(captureId, vndAmount);
+        PayPalRefundResult result = refundGateway.refund(captureId, vndAmount);
 
         if (!result.completed()) {
             throw new PaymentException(

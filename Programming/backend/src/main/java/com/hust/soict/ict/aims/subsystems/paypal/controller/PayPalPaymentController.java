@@ -1,10 +1,8 @@
-package com.hust.soict.ict.aims.controllers.customer;
+package com.hust.soict.ict.aims.subsystems.paypal.controller;
 
 import com.hust.soict.ict.aims.exceptions.PaymentException;
-import com.hust.soict.ict.aims.dto.request.payment.paypal.PayPalCaptureRequest;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
-import com.hust.soict.ict.aims.dto.response.payment.paypal.PayPalCreateResponse;
-import com.hust.soict.ict.aims.services.payment.paypal.PaypalPaymentService;
+import com.hust.soict.ict.aims.subsystems.paypal.service.PayPalPaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
  * HTTP entry point for the PayPal (credit-card) payment use case.
  *
  * <p>Mirrors {@code PayOrderController} (VietQR): a thin layer that delegates the
- * whole lifecycle to {@link PaypalPaymentService}. It exchanges only DTOs with
+ * whole lifecycle to {@link PayPalPaymentService}. It exchanges only DTOs with
  * the service (DATA coupling) and holds no business logic.
  *
  * <p>Endpoints (base {@code /order/payment/paypal}):
@@ -27,9 +25,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/order/payment/paypal")
 @RequiredArgsConstructor
-public class PaypalPaymentController {
+public class PayPalPaymentController {
 
-    private final PaypalPaymentService paypalPaymentService;
+    private final PayPalPaymentService paypalPaymentService;
 
     @PostMapping("/capture")
     @ResponseStatus(HttpStatus.OK)

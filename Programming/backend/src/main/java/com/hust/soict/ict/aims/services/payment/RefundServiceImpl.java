@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
 
 @Component
 class RefundServiceImpl implements RefundService {
-    private final Map<PaymentMethod, IRefundCapability> refundServices;
+    private final Map<PaymentMethod, Refundable> refundServices;
 
-    public RefundServiceImpl(List<IRefundCapability> refundServices) {
+    public RefundServiceImpl(List<Refundable> refundServices) {
         this.refundServices = refundServices.stream()
                 .collect(Collectors.toMap(
-                        IRefundCapability::method,
+                        Refundable::method,
                         Function.identity()
                 ));
     }
@@ -41,7 +41,7 @@ class RefundServiceImpl implements RefundService {
     @Override
     public void refund(PaymentTransaction paymentTransaction) throws PaymentException {
         PaymentMethod method = PaymentMethod.valueOf(paymentTransaction.getTransactionMethod());
-        IRefundCapability refundCapability = Optional.ofNullable(refundServices.get(method))
+        Refundable refundCapability = Optional.ofNullable(refundServices.get(method))
                 .orElseThrow(() -> new UnsupportedPaymentMethodException("Method " + paymentTransaction.getTransactionMethod() + " does not support refund"));
         refundCapability.refund(paymentTransaction);
     }

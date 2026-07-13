@@ -1,7 +1,7 @@
-package com.hust.soict.ict.aims.services.payment.contract;
+package com.hust.soict.ict.aims.subsystems.paypal;
 
 import com.hust.soict.ict.aims.exceptions.PaymentException;
-import com.hust.soict.ict.aims.subsystems.paypal.model.PaymentCapture;
+import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalPaymentCapture;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalPaymentInitiation;
 
 /*
@@ -16,7 +16,7 @@ import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalPaymentInitiation;
  * Proposed Solution: Move IPaymentProvider + PaymentInitiation + PaymentCapture ir[cite: 1]
  *      a core-owned package (e.g. .payment.port). PayPal then depends inward on[cite: 1]
  */
-public interface IRedirectPaymentGateway {
+public interface PayPalRedirectGateway {
     PayPalPaymentInitiation createPayment(String orderId, long totalAmount) throws PaymentException;
-    PaymentCapture capturePayment(String providerOrderId) throws PaymentException;
+    PayPalPaymentCapture capturePayment(String providerOrderId) throws PaymentException;
 }

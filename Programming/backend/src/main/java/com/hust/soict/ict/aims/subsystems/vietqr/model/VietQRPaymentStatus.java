@@ -13,16 +13,16 @@ import lombok.Setter;
  */
 @Getter @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class QRCodePaymentStatus {
+public class VietQRPaymentStatus {
     @JsonProperty("status")
     private String status;
     
     @JsonProperty("message")
     private String message;
     
-    public QRCodePaymentStatus() {}
+    public VietQRPaymentStatus() {}
     
-    public QRCodePaymentStatus(String status, String message) {
+    public VietQRPaymentStatus(String status, String message) {
         this.status = status;
         this.message = message;
     }

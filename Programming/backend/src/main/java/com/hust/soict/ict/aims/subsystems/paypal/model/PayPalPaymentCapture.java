@@ -1,9 +1,9 @@
 package com.hust.soict.ict.aims.subsystems.paypal.model;
 
-import com.hust.soict.ict.aims.services.payment.contract.IRedirectPaymentGateway;
+import com.hust.soict.ict.aims.subsystems.paypal.PayPalRedirectGateway;
 
 /**
- * Provider-agnostic result of {@link IRedirectPaymentGateway#capturePayment}.
+ * Provider-agnostic result of {@link PayPalRedirectGateway#capturePayment}.
  *
  * @param completed   {@code true} only when the provider reports a fully settled payment
  * @param captureId   provider id of the settled capture (used as our transaction content)
@@ -12,5 +12,5 @@ import com.hust.soict.ict.aims.services.payment.contract.IRedirectPaymentGateway
  *                    belongs to a different order
  * @param status      raw provider status (COMPLETED / PENDING / VOIDED ...), kept for logging/errors
  */
-public record PaymentCapture(boolean completed, String captureId, String referenceId, String status) {
+public record PayPalPaymentCapture(boolean completed, String captureId, String referenceId, String status) {
 }

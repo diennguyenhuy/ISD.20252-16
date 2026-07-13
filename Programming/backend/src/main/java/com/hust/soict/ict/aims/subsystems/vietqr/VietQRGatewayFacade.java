@@ -1,9 +1,8 @@
 package com.hust.soict.ict.aims.subsystems.vietqr;
 
 import com.hust.soict.ict.aims.exceptions.*;
-import com.hust.soict.ict.aims.services.payment.contract.IQRPaymentGateway;
-import com.hust.soict.ict.aims.subsystems.vietqr.model.QRCode;
-import com.hust.soict.ict.aims.subsystems.vietqr.model.QRCodePaymentStatus;
+import com.hust.soict.ict.aims.subsystems.vietqr.model.VietQRCode;
+import com.hust.soict.ict.aims.subsystems.vietqr.model.VietQRPaymentStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,7 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-class VietQRGatewayFacade implements IQRPaymentGateway {
+class VietQRGatewayFacade implements VietQRPaymentGateway {
     private final VietQRBoundary boundary;
     private final VietQRProperties props;
     
@@ -79,7 +78,7 @@ class VietQRGatewayFacade implements IQRPaymentGateway {
      * @throws PaymentException if generation fails
      */
     @Override
-    public QRCode generateQRCode(String orderId, long totalAmount) throws PaymentException {
+    public VietQRCode generateQRCode(String orderId, long totalAmount) throws PaymentException {
         try {
             // Get valid access token
             String token = getValidAccessToken();
@@ -97,9 +96,9 @@ class VietQRGatewayFacade implements IQRPaymentGateway {
             String response = boundary.generateQRCode(token, requestString);
 
             ObjectMapper mapper = new ObjectMapper();
-            QRCode qrCode = mapper.readValue(response, QRCode.class);
+            VietQRCode vietQrCode = mapper.readValue(response, VietQRCode.class);
 
-            return qrCode;
+            return vietQrCode;
         } catch (Exception e) {
             throw new UnknownPaymentException("Failed to generate QR code: ", e);
         }
@@ -114,7 +113,7 @@ class VietQRGatewayFacade implements IQRPaymentGateway {
      * @throws PaymentException if check fails
      */
     @Override
-    public QRCodePaymentStatus checkPaymentStatus(String orderId, long totalAmount) throws PaymentException {
+    public VietQRPaymentStatus checkPaymentStatus(String orderId, long totalAmount) throws PaymentException {
         try {
             String token = getValidAccessToken();
 
@@ -128,7 +127,7 @@ class VietQRGatewayFacade implements IQRPaymentGateway {
             String requestString = request.buildRequestString();
             String response = boundary.checkPaymentStatus(token, requestString);
             ObjectMapper mapper = new ObjectMapper();
-            QRCodePaymentStatus status = mapper.readValue(response, QRCodePaymentStatus.class);
+            VietQRPaymentStatus status = mapper.readValue(response, VietQRPaymentStatus.class);
             return status;
         } catch (Exception e) {
             throw new UnknownPaymentException("Failed to check payment status: " + e.getMessage(), e);

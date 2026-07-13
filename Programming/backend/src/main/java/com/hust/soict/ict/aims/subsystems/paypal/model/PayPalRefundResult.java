@@ -1,9 +1,9 @@
 package com.hust.soict.ict.aims.subsystems.paypal.model;
 
-import com.hust.soict.ict.aims.services.payment.contract.IRefundGateway;
+import com.hust.soict.ict.aims.subsystems.paypal.PayPalRefundGateway;
 
 /**
- * Provider-agnostic result of {@link IRefundGateway#refund}.
+ * Provider-agnostic result of {@link PayPalRefundGateway#refund}.
  *
  * <p>Immutable carrier (Java 21 record). Like {@code PaymentInitiation} /
  * {@code PaymentCapture}, it carries <b>no</b> PayPal vocabulary so the AIMS core
@@ -15,5 +15,5 @@ import com.hust.soict.ict.aims.services.payment.contract.IRefundGateway;
  * @param refundId  provider id of the refund (PayPal refund id), kept for audit/logging
  * @param status    raw provider status (COMPLETED / PENDING / FAILED ...), kept for logging/errors
  */
-public record RefundResult(boolean completed, String refundId, String status) {
+public record PayPalRefundResult(boolean completed, String refundId, String status) {
 }

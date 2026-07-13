@@ -2,11 +2,9 @@ package com.hust.soict.ict.aims.subsystems.paypal;
 
 import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.exceptions.UserCancelledException;
-import com.hust.soict.ict.aims.services.payment.contract.IRedirectPaymentGateway;
-import com.hust.soict.ict.aims.services.payment.contract.IRefundGateway;
-import com.hust.soict.ict.aims.subsystems.paypal.model.PaymentCapture;
+import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalPaymentCapture;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalPaymentInitiation;
-import com.hust.soict.ict.aims.subsystems.paypal.model.RefundResult;
+import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalRefundResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,13 +18,13 @@ import java.util.Objects;
  * <p>Hides four collaborators ({@link PayPalOrdersClient}, {@link PayPalPaymentsClient},
  * {@link PayPalAuthClient} via the clients, and {@link PayPalAmountConverter}) plus
  * all PayPal JSON and link-parsing behind two simple contracts:
- * {@link IRedirectPaymentGateway} (pay) and {@link IRefundGateway} (refund).
+ * {@link PayPalRedirectGateway} (pay) and {@link PayPalRefundGateway} (refund).
  *
  * <ul>
  *   <li><b>Cohesion:</b> Functional — orchestrates exactly the PayPal
  *       create / capture / refund lifecycle.</li>
  *   <li><b>Coupling outward:</b> DATA — returns only {@link PayPalPaymentInitiation} /
- *       {@link PaymentCapture} / {@link RefundResult}; maps the internal
+ *       {@link PayPalPaymentCapture} / {@link PayPalRefundResult}; maps the internal
  *       {@link PayPalApiException} to the AIMS-level {@link PaymentException} so no
  *       PayPal type ever escapes.</li>
  * </ul>
@@ -34,7 +32,7 @@ import java.util.Objects;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-class PayPalGatewayFacade implements IRedirectPaymentGateway, IRefundGateway {
+class PayPalGatewayFacade implements PayPalRedirectGateway, PayPalRefundGateway {
 
     private final PayPalOrdersClient ordersClient;
     private final PayPalPaymentsClient paymentsClient;
@@ -70,7 +68,7 @@ class PayPalGatewayFacade implements IRedirectPaymentGateway, IRefundGateway {
     }
 
     @Override
-    public PaymentCapture capturePayment(String providerOrderId) throws PaymentException {
+    public PayPalPaymentCapture capturePayment(String providerOrderId) throws PaymentException {
         try {
             PayPalApiModel.OrderResponse resp = ordersClient.captureOrder(providerOrderId);
             String status = resp.status() == null ? "UNKNOWN" : resp.status();
@@ -89,7 +87,7 @@ class PayPalGatewayFacade implements IRedirectPaymentGateway, IRefundGateway {
             log.info("[PayPalFacade] Capture of order {} → status {} (captureId {})",
                     providerOrderId, status, captureId);
 
-            return new PaymentCapture(completed, captureId, referenceId, status);
+            return new PayPalPaymentCapture(completed, captureId, referenceId, status);
         } catch (PayPalApiException e) {
             log.error("[PayPalFacade] capturePayment failed for {}: {}", providerOrderId, e.getMessage());
             throw new PaymentException("Could not capture PayPal payment: " + e.getMessage());
@@ -102,7 +100,7 @@ class PayPalGatewayFacade implements IRedirectPaymentGateway, IRefundGateway {
      * subsystem failure into {@link PaymentException}. No PayPal type escapes.
      */
     @Override
-    public RefundResult refund(String captureId, long vndAmount) throws PaymentException {
+    public PayPalRefundResult refund(String captureId, long vndAmount) throws PaymentException {
         if (captureId == null || captureId.isBlank()) {
             throw new PaymentException("Cannot refund: missing PayPal capture id");
         }
@@ -125,7 +123,7 @@ class PayPalGatewayFacade implements IRedirectPaymentGateway, IRefundGateway {
             log.info("[PayPalFacade] Refund of capture {} → status {} (refundId {})",
                     captureId, status, refundId);
 
-            return new RefundResult(completed, refundId, status);
+            return new PayPalRefundResult(completed, refundId, status);
         } catch (PayPalApiException e) {
             log.error("[PayPalFacade] refund failed for capture {}: {}", captureId, e.getMessage());
             throw new PaymentException("Could not refund PayPal payment: " + e.getMessage());

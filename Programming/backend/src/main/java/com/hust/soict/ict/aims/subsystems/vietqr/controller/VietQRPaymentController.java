@@ -1,10 +1,9 @@
-package com.hust.soict.ict.aims.controllers.customer;
+package com.hust.soict.ict.aims.subsystems.vietqr.controller;
 
 import com.hust.soict.ict.aims.exceptions.PaymentException;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
-import com.hust.soict.ict.aims.dto.response.payment.vietqr.QRPaymentStatusResponse;
-import com.hust.soict.ict.aims.dto.response.payment.vietqr.QRCodeResponse;
-import com.hust.soict.ict.aims.services.payment.vietqr.VietQRPaymentService;
+import com.hust.soict.ict.aims.subsystems.vietqr.model.VietQRPaymentStatus;
+import com.hust.soict.ict.aims.subsystems.vietqr.service.VietQRPaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +24,7 @@ public class VietQRPaymentController {
 
     @GetMapping("/status")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody QRPaymentStatusResponse checkPaymentStatus() throws PaymentException {
+    public @ResponseBody VietQRPaymentStatus checkPaymentStatus() throws PaymentException {
         return vietQRPaymentService.checkPaymentStatus();
     }
 

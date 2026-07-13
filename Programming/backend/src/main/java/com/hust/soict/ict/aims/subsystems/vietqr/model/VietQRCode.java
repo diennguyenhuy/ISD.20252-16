@@ -13,7 +13,7 @@ import lombok.Getter;
  */
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class QRCode implements PaymentInitiation {
+public class VietQRCode implements PaymentInitiation {
     @JsonProperty("qrCode")
     private String qrCode;
     @JsonProperty("qrLink")
@@ -31,9 +31,9 @@ public class QRCode implements PaymentInitiation {
     @JsonProperty("amount")
     private Long amount; // amount in VND (parsed from VietQR's string field)
 
-    public QRCode() {}
+    public VietQRCode() {}
 
-    public QRCode(String qrCode, String qrLink, String bankCode, String bankName, String bankAccount, String userBankName, String content) {
+    public VietQRCode(String qrCode, String qrLink, String bankCode, String bankName, String bankAccount, String userBankName, String content) {
         this.qrCode = qrCode;
         this.qrLink = qrLink;
         this.bankCode = bankCode;

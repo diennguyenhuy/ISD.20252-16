@@ -1,10 +1,10 @@
 package com.hust.soict.ict.aims.subsystems.paypal.model;
 
 import com.hust.soict.ict.aims.services.payment.PaymentInitiation;
-import com.hust.soict.ict.aims.services.payment.contract.IRedirectPaymentGateway;
+import com.hust.soict.ict.aims.subsystems.paypal.PayPalRedirectGateway;
 
 /**
- * Provider-agnostic result of {@link IRedirectPaymentGateway#createPayment}.
+ * Provider-agnostic result of {@link PayPalRedirectGateway#createPayment}.
  *
  * <p>Immutable carrier (Java 21 record). Deliberately contains <b>no</b> PayPal
  * vocabulary so the AIMS core stays decoupled from the gateway.

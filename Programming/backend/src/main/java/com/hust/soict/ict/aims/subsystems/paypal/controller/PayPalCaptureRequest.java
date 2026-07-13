@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.dto.request.payment.paypal;
+package com.hust.soict.ict.aims.subsystems.paypal.controller;
 
 import jakarta.validation.constraints.NotBlank;
 
