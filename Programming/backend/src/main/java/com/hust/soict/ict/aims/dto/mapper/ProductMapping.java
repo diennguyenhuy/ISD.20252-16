@@ -8,10 +8,16 @@ import java.util.List;
 
 interface ProductMapping<P extends Product, D extends ProductDetail> {
     Class<P> getProductClass();
-    D map(P product);
     List<String> mapCreators(P product);
+    D newProductDetail();
+    void map(D productDetail, P product);
 
-    default void mapCommonFields(D productDetail, P product) {
+    default D map(P product) {
+        if (product == null) {
+            return null;
+        }
+
+        D productDetail = newProductDetail();
         productDetail.setId(product.getId());
         productDetail.setTitle(product.getTitle());
         productDetail.setCategory(product.getCategory());
@@ -29,6 +35,8 @@ interface ProductMapping<P extends Product, D extends ProductDetail> {
         productDetail.setCreatedAt(product.getCreatedAt());
         productDetail.setUpdatedAt(product.getUpdatedAt());
         productDetail.setProductType(getProductClass().getSimpleName());
+        map(productDetail, product);
+        return productDetail;
     }
 
     default ProductSummary mapSummary(P product) {

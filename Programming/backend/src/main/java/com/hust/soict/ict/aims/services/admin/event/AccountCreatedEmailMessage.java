@@ -1,17 +1,20 @@
 package com.hust.soict.ict.aims.services.admin.event;
 
 import com.hust.soict.ict.aims.services.notification.email.EmailMessage;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 class AccountCreatedEmailMessage implements EmailMessage<AccountCreatedEvent> {
-
     private final String targetEmail;
     private final String username;
     private final String temporaryPassword;
     private final String frontendUrl;
+
+    private AccountCreatedEmailMessage(String targetEmail, String username, String temporaryPassword, String frontendUrl) {
+        this.targetEmail = targetEmail;
+        this.username = username;
+        this.temporaryPassword = temporaryPassword;
+        this.frontendUrl = frontendUrl;
+    }
 
     @Override
     public String recipient() {

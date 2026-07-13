@@ -1,15 +1,18 @@
 package com.hust.soict.ict.aims.services.admin.event;
 
 import com.hust.soict.ict.aims.services.notification.email.EmailMessage;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 class EmailUpdateAlertEmailMessage implements EmailMessage<EmailUpdateEvent> {
     private final String oldEmail;
     private final String username;
     private final String frontendUrl;
+
+    private EmailUpdateAlertEmailMessage(String oldEmail, String username, String frontendUrl) {
+        this.oldEmail = oldEmail;
+        this.username = username;
+        this.frontendUrl = frontendUrl;
+    }
 
     @Override
     public String recipient() {

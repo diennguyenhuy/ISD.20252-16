@@ -15,22 +15,6 @@ class CDMapping implements ProductMapping<CD, CDDetail> {
         return CD.class;
     }
 
-    @Override
-    public CDDetail map(CD product) {
-        if (product == null) {
-            return null;
-        }
-        CDDetail detail = new CDDetail();
-        mapCommonFields(detail, product);
-        detail.setReleaseDate(product.getReleaseDate());
-        detail.setGenre(product.getGenre());
-        detail.setArtists(product.getArtists());
-        detail.setRecordLabel(product.getRecordLabel());
-        detail.setTracks(product.getTracks().stream().map(this::map).toList());
-
-        return detail;
-    }
-
     public TrackDetail map(Track track) {
         if (track == null) {
             return null;
@@ -46,5 +30,19 @@ class CDMapping implements ProductMapping<CD, CDDetail> {
     @Override
     public List<String> mapCreators(CD product) {
         return product.getArtists();
+    }
+
+    @Override
+    public CDDetail newProductDetail() {
+        return new CDDetail();
+    }
+
+    @Override
+    public void map(CDDetail productDetail, CD product) {
+        productDetail.setReleaseDate(product.getReleaseDate());
+        productDetail.setGenre(product.getGenre());
+        productDetail.setArtists(product.getArtists());
+        productDetail.setRecordLabel(product.getRecordLabel());
+        productDetail.setTracks(product.getTracks().stream().map(this::map).toList());
     }
 }

@@ -1,6 +1,6 @@
 package com.hust.soict.ict.aims.subsystems.paypal.model;
 
-import com.hust.soict.ict.aims.services.payment.PaymentInitiation;
+import com.hust.soict.ict.aims.subsystems.PaymentInitiation;
 import com.hust.soict.ict.aims.subsystems.paypal.PayPalRedirectGateway;
 
 /**

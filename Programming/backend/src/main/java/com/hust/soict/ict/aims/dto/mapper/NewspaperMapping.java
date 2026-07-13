@@ -15,24 +15,21 @@ class NewspaperMapping implements PrintableProductMapping<Newspaper, NewspaperDe
     }
 
     @Override
-    public NewspaperDetail map(Newspaper product) {
-        if (product == null) {
-            return null;
-        }
-
-        NewspaperDetail detail = new NewspaperDetail();
-        mapCommonFields(detail, product);
-        detail.setEditorInChief(product.getEditorInChief());
-        detail.setIssueNumber(product.getIssueNumber());
-        detail.setPublicationFrequency(product.getPublicationFrequency());
-        detail.setISSN(product.getISSN());
-        detail.setSections(product.getSections());
-
-        return detail;
+    public void map(NewspaperDetail productDetail, Newspaper product) {
+        productDetail.setEditorInChief(product.getEditorInChief());
+        productDetail.setIssueNumber(product.getIssueNumber());
+        productDetail.setPublicationFrequency(product.getPublicationFrequency());
+        productDetail.setISSN(product.getISSN());
+        productDetail.setSections(product.getSections());
     }
 
     @Override
     public List<String> mapCreators(Newspaper product) {
         return List.of(product.getPublisher());
+    }
+
+    @Override
+    public NewspaperDetail newProductDetail() {
+        return new NewspaperDetail();
     }
 }

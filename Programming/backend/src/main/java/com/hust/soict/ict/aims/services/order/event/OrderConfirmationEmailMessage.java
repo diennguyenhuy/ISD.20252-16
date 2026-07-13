@@ -3,17 +3,19 @@ package com.hust.soict.ict.aims.services.order.event;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 import com.hust.soict.ict.aims.services.notification.email.EmailMessage;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 class OrderConfirmationEmailMessage implements EmailMessage<OrderSuccessEvent> {
     private final Order order;
     private final String frontendUrl;
+
+    private OrderConfirmationEmailMessage(Order order, String frontendUrl) {
+        this.order = order;
+        this.frontendUrl = frontendUrl;
+    }
 
     @Override
     public String subject() {

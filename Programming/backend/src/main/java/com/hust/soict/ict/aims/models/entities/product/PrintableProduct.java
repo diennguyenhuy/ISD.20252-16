@@ -64,4 +64,9 @@ public abstract class PrintableProduct extends Product {
             return self();
         }
     }
+
+    static {
+        registerUpdateCommand(PrintableProductUpdateCommand.Publisher.class, PrintableProduct.class, (p, c) -> p.publisher = c.newValue());
+        registerUpdateCommand(PrintableProductUpdateCommand.Language.class, PrintableProduct.class, (p, c) -> p.language = c.newValue());
+    }
 }

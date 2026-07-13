@@ -1,6 +1,6 @@
-package com.hust.soict.ict.aims.services.payment;
+package com.hust.soict.ict.aims.subsystems;
 
-import com.hust.soict.ict.aims.exceptions.PaymentException;
+import com.hust.soict.ict.aims.subsystems.exception.PaymentException;
 import com.hust.soict.ict.aims.exceptions.UnsupportedPaymentMethodException;
 import org.springframework.stereotype.Component;
 

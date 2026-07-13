@@ -275,7 +275,7 @@ class LoggingProductManagementService implements ProductManagementService {
                 );
                 return result;
             }
-        };
+        }
 
         ProductLog productLog = new ProductLog(
                 authenticationFacade.getCurrentUser(),

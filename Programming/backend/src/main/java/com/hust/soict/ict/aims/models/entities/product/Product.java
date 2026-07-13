@@ -2,6 +2,7 @@ package com.hust.soict.ict.aims.models.entities.product;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.BiConsumer;
 
 import com.hust.soict.ict.aims.models.entities.VersionedEntity;
 import jakarta.persistence.*;
@@ -245,5 +246,37 @@ public abstract class Product extends VersionedEntity {
             this.imageURL = imageURL;
             return self();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public final void update(ProductUpdateCommand<?> command) {
+        ((BiConsumer<Product, ProductUpdateCommand<?>>) updateCommands.get(command.getClass())).accept(this, command);
+    }
+
+    private static final Map<
+            Class<? extends ProductUpdateCommand<?>>,
+            BiConsumer<
+                    ? extends Product,
+                    ? extends ProductUpdateCommand<?>
+                    >
+            > updateCommands = new HashMap<>();
+    protected static <C extends ProductUpdateCommand<?>, P extends Product>
+    void registerUpdateCommand(
+            Class<C> commandType,
+            Class<P> productType,
+            BiConsumer<P, C> consumer
+    ) {
+        updateCommands.put(commandType, (p, c) -> consumer.accept(productType.cast(p), commandType.cast(c)));
+    }
+    static {
+        registerUpdateCommand(ProductUpdateCommand.Title.class, Product.class, (p, c) -> p.title = c.newValue());
+        registerUpdateCommand(ProductUpdateCommand.Category.class, Product.class, (p, c) -> p.category = c.newValue());
+        registerUpdateCommand(ProductUpdateCommand.Description.class, Product.class, (p, c) -> p.description = c.newValue());
+        registerUpdateCommand(ProductUpdateCommand.Height.class, Product.class, (p, c) -> p.height = c.newValue());
+        registerUpdateCommand(ProductUpdateCommand.Width.class, Product.class, (p, c) -> p.width = c.newValue());
+        registerUpdateCommand(ProductUpdateCommand.Length.class, Product.class, (p, c) -> p.length = c.newValue());
+        registerUpdateCommand(ProductUpdateCommand.Weight.class, Product.class, (p, c) -> p.weight = c.newValue());
+        registerUpdateCommand(ProductUpdateCommand.CurrentPrice.class, Product.class, (p, c) -> p.updatePrice(c.newValue()));
+        registerUpdateCommand(ProductUpdateCommand.ImageUrl.class, Product.class, (p, c) -> p.imageURL = c.newValue());
     }
 }

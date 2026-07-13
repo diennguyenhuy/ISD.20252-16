@@ -10,18 +10,6 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Cohesion: Functional Cohesion
- * Reason:
- * Represents invoice data and invoice creation logic
- * for an Order.
- * Coupling:
- * - Stamp coupling with Order because invoice data
- *   is derived from the Order aggregate.
- * Design Strength:
- * Captures financial values as snapshots, reducing
- * dependency on future Order state changes.
- */
 @Entity
 @Table(name = "invoice")
 @Getter

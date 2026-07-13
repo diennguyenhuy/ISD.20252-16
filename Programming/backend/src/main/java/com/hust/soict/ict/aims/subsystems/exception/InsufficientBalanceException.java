@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.exceptions;
+package com.hust.soict.ict.aims.subsystems.exception;
 
 /**
  * Exception thrown when payment account has insufficient balance

@@ -1,7 +1,7 @@
 package com.hust.soict.ict.aims.subsystems.paypal;
 
-import com.hust.soict.ict.aims.exceptions.PaymentException;
-import com.hust.soict.ict.aims.exceptions.UserCancelledException;
+import com.hust.soict.ict.aims.subsystems.exception.PaymentException;
+import com.hust.soict.ict.aims.subsystems.exception.UserCancelledException;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalPaymentCapture;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalPaymentInitiation;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalRefundResult;

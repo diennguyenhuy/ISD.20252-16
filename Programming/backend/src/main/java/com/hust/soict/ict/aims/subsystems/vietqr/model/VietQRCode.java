@@ -2,7 +2,7 @@ package com.hust.soict.ict.aims.subsystems.vietqr.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.hust.soict.ict.aims.services.payment.PaymentInitiation;
+import com.hust.soict.ict.aims.subsystems.PaymentInitiation;
 import lombok.Getter;
 
 /*

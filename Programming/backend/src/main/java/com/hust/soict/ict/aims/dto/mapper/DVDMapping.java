@@ -14,27 +14,24 @@ class DVDMapping implements ProductMapping<DVD, DVDDetail> {
     }
 
     @Override
-    public DVDDetail map(DVD product) {
-        if (product == null) {
-            return null;
-        }
-
-        DVDDetail detail = new DVDDetail();
-        mapCommonFields(detail, product);
-        detail.setReleaseDate(product.getReleaseDate());
-        detail.setGenre(product.getGenre());
-        detail.setDiscType(product.getDiscType().name());
-        detail.setDirector(product.getDirector());
-        detail.setRuntime(product.getRuntime());
-        detail.setStudio(product.getStudio());
-        detail.setLanguage(product.getLanguage());
-        detail.setSubtitles(product.getSubtitles());
-
-        return detail;
+    public List<String> mapCreators(DVD product) {
+        return List.of(product.getStudio());
     }
 
     @Override
-    public List<String> mapCreators(DVD product) {
-        return List.of(product.getStudio());
+    public DVDDetail newProductDetail() {
+        return new DVDDetail();
+    }
+
+    @Override
+    public void map(DVDDetail productDetail, DVD product) {
+        productDetail.setReleaseDate(product.getReleaseDate());
+        productDetail.setGenre(product.getGenre());
+        productDetail.setDiscType(product.getDiscType().name());
+        productDetail.setDirector(product.getDirector());
+        productDetail.setRuntime(product.getRuntime());
+        productDetail.setStudio(product.getStudio());
+        productDetail.setLanguage(product.getLanguage());
+        productDetail.setSubtitles(product.getSubtitles());
     }
 }

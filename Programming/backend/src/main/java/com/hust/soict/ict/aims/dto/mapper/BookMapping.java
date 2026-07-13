@@ -14,24 +14,20 @@ class BookMapping implements PrintableProductMapping<Book, BookDetail> {
     }
 
     @Override
-    public BookDetail map(Book product) {
-        if (product == null) {
-            return null;
-        }
-
-        BookDetail detail = new BookDetail();
-        mapCommonFields(detail, product);
-        detail.setAuthors(product.getAuthors());
-        detail.setCoverType(product.getCoverType().name());
-        detail.setNumberOfPages(product.getNumberOfPages());
-        detail.setGenre(product.getGenre());
-
-        return detail;
-    }
-
-    @Override
     public List<String> mapCreators(Book product) {
         return product.getAuthors();
     }
 
+    @Override
+    public BookDetail newProductDetail() {
+        return new BookDetail();
+    }
+
+    @Override
+    public void map(BookDetail productDetail, Book product) {
+        productDetail.setAuthors(product.getAuthors());
+        productDetail.setCoverType(product.getCoverType().name());
+        productDetail.setNumberOfPages(product.getNumberOfPages());
+        productDetail.setGenre(product.getGenre());
+    }
 }

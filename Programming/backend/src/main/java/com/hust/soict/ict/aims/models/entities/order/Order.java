@@ -10,18 +10,6 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.util.*;
 
-/**
- * Cohesion: Communicational Cohesion
- * Reason:
- * Fields and methods operate on the same Order aggregate
- * and related business state.
- * Coupling:
- * - Stamp coupling with OrderItem, DeliveryInformation,
- *   Invoice, PaymentTransaction, and Cart through
- *   aggregate relationships.
- * - Data coupling with OrderStatus through enum-based
- *   state transition logic.
- */
 @Entity
 @Table(name = "\"order\"")
 @NamedEntityGraphs({

@@ -115,4 +115,10 @@ public class Book extends PrintableProduct {
             return this;
         }
     }
+
+    static {
+        registerUpdateCommand(BookUpdateCommand.Authors.class, Book.class, (p, c) -> p.authors = new ArrayList<>(c.newValue()));
+        registerUpdateCommand(BookUpdateCommand.NumberOfPages.class, Book.class, (p, c) -> p.numberOfPages = c.newValue());
+        registerUpdateCommand(BookUpdateCommand.Genre.class, Book.class, (p, c) -> p.genre = c.newValue());
+    }
 }

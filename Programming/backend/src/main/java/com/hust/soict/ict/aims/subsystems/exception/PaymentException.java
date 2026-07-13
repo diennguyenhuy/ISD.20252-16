@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.exceptions;
+package com.hust.soict.ict.aims.subsystems.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

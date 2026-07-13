@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -131,5 +130,12 @@ public class CD extends Product {
             this.tracks = tracks == null ? null : List.of(tracks);
             return this;
         }
+    }
+
+    static {
+        registerUpdateCommand(CDUpdateCommand.Genre.class, CD.class, (p, c) -> p.genre = c.newValue());
+        registerUpdateCommand(CDUpdateCommand.Artists.class, CD.class, (p, c) -> p.artists = new ArrayList<>(c.newValue()));
+        registerUpdateCommand(CDUpdateCommand.RecordLabel.class, CD.class, (p, c) -> p.recordLabel = c.newValue());
+        registerUpdateCommand(CDUpdateCommand.Tracks.class, CD.class, (p, c) -> p.tracks = new ArrayList<>(c.newValue()));
     }
 }

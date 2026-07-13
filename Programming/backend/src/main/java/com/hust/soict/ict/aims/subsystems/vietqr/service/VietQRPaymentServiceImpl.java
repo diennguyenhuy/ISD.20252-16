@@ -1,10 +1,10 @@
 package com.hust.soict.ict.aims.subsystems.vietqr.service;
 
-import com.hust.soict.ict.aims.services.payment.PaymentInitiation;
-import com.hust.soict.ict.aims.services.payment.PaymentMethod;
-import com.hust.soict.ict.aims.services.payment.PaymentService;
+import com.hust.soict.ict.aims.subsystems.PaymentInitiation;
+import com.hust.soict.ict.aims.subsystems.PaymentMethod;
+import com.hust.soict.ict.aims.subsystems.PaymentService;
 import com.hust.soict.ict.aims.context.OrderDraftContext;
-import com.hust.soict.ict.aims.exceptions.PaymentException;
+import com.hust.soict.ict.aims.subsystems.exception.PaymentException;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.services.order.OrderFinalization;

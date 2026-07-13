@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.services.payment;
+package com.hust.soict.ict.aims.subsystems;
 
 public enum PaymentMethod {
     VIETQR,

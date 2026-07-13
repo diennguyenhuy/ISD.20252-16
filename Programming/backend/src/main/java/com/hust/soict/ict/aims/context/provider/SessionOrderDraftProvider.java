@@ -8,16 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-/**
- * Cohesion: Functional Cohesion
- * Reason:
- * All methods contribute solely to storing, retrieving,
- * and clearing draft Order data from HTTP session storage.
- * Coupling:
- * - Data coupling with HttpSession through session API calls.
- * - Stamp coupling with Order because complete Order
- *   aggregates are stored in session state.
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j

@@ -11,15 +11,6 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-/**
- * Cohesion: Functional Cohesion
- * Reason:
- * Represents a purchased item within an Order and
- * related pricing/weight calculations.
- * Coupling:
- * - Stamp coupling with Order, Product, and CartItem
- *   through aggregate relationships and factory methods.
- */
 @Entity
 @Table(
         name = "order_item",

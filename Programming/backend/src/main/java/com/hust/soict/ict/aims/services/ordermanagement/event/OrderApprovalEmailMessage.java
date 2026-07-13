@@ -2,14 +2,16 @@ package com.hust.soict.ict.aims.services.ordermanagement.event;
 
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.services.notification.email.EmailMessage;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 class OrderApprovalEmailMessage implements EmailMessage<OrderApprovalEvent> {
     private final Order order;
     private final String frontendUrl;
+
+    private OrderApprovalEmailMessage(Order order, String frontendUrl) {
+        this.order = order;
+        this.frontendUrl = frontendUrl;
+    }
 
     @Override
     public String subject() {

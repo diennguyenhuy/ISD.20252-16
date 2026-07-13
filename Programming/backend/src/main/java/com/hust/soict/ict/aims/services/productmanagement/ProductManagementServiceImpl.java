@@ -19,32 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Cohesion: Communicational Cohesion<br>
- * Reason: Coordinates the product management workflow (create, update, delete) where all operations execute on the same core domain data (Product).<br>
- * Coupling:
- * - Data coupling with ProductRepository and ProductFactory through simple method calls and passing primitive identifiers (UUID).
- * - Stamp coupling with CreateProductRequest, UpdateProductRequest, and ProductMapper because composite data transfer objects are passed between modules.
- * Design Strength:
- * Acts as a clean delegator, decoupling business orchestration from physical object creation (Factory) and persistence operations (Repository), ensuring high testability.
- */
-
-/**
- * [SOLID VIOLATION - SRP]: The class is handling too many responsibilities:
- * 1. Coordinating CUD business logic (Write).
- * 2. Handling data retrieval logic (Read).
- * 3. Directly containing the low-level utility function "restoreEntityIdentityWithReflection" to handle Java Reflection.
- * [IMPROVEMENT]:
- * 1. Segregate the interface into ProductCommandService (for CUD) and ProductQueryService (for data retrieval).
- * 2. Separate the "restoreEntityIdentityWithReflection" method into a distinct utility class.
- */
-
-/**
- * // [SOLID VIOLATION - DIP]: The Service depends directly on a concrete class (ProductFactory).
- * // [IMPROVEMENT]: Create an IProductFactory interface and inject it instead of the concrete class.
- */
-
-
 @Service
 @RequiredArgsConstructor
 @Slf4j

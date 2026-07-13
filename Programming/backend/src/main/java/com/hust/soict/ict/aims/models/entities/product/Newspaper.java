@@ -118,4 +118,10 @@ public class Newspaper extends PrintableProduct {
             return this;
         }
     }
+
+    static {
+        registerUpdateCommand(NewspaperUpdateCommand.EditorInChief.class, Newspaper.class, (p, c) -> p.editorInChief = c.newValue());
+        registerUpdateCommand(NewspaperUpdateCommand.PublicationFrequency.class, Newspaper.class, (p, c) -> p.publicationFrequency = c.newValue());
+        registerUpdateCommand(NewspaperUpdateCommand.Sections.class, Newspaper.class, (p, c) -> p.sections = c.newValue() == null ? new ArrayList<>() : new ArrayList<>(c.newValue()));
+    }
 }

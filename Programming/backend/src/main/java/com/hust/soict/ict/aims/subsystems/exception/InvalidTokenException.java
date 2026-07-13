@@ -1,4 +1,4 @@
-package com.hust.soict.ict.aims.exceptions;
+package com.hust.soict.ict.aims.subsystems.exception;
 
 public class InvalidTokenException extends PaymentException {
 	

@@ -8,8 +8,9 @@ import com.hust.soict.ict.aims.dto.response.order.OrderDraftResponse;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.services.order.OrderService;
 import com.hust.soict.ict.aims.services.order.PlaceOrderService;
-import com.hust.soict.ict.aims.services.payment.PaymentInitiation;
-import com.hust.soict.ict.aims.services.payment.PaymentInitiator;
+import com.hust.soict.ict.aims.subsystems.PaymentInitiation;
+import com.hust.soict.ict.aims.subsystems.PaymentInitiator;
+import com.hust.soict.ict.aims.subsystems.exception.PaymentException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,28 +20,6 @@ import java.util.UUID;
 
 /**
  * Provide API endpoints for customer delivery screen and invoice screen<br>
- * Cohesion: Procedural Cohesion<br>
- * - Reason:
- * Coordinates sequential order placement workflow through REST endpoints.
- * Methods participate in the same order processing procedure:
- * placing order, submitting delivery info, retrieving invoice,
- * retrieving order details, and canceling order. (not concerning payment)<br>
- * Coupling: Data coupling with PlaceOrderService and DeliveryService
- * through method parameters and return values.<br>
- * - Reason: Method sends data structures that the 2 service classes use wholly or
- * sends only necessary data to the service classes.
- * SOLID Review
- * Potential Violation:
- * - Dependency Inversion Principle (DIP)
- * Reason:
- * OrderController depends directly on concrete service
- * implementations (PlaceOrderService and DeliveryService).
- * This makes the controller coupled to specific application
- * service classes rather than abstractions.
- * Improvement Direction:
- * Introduce use-case interfaces such as PlaceOrderUseCase
- * and DeliveryUseCase, and inject those abstractions instead
- * of concrete service implementations.
  */
 @RestController
 @RequestMapping("/order")

@@ -158,4 +158,13 @@ public class DVD extends Product {
             return this;
         }
     }
+
+    static {
+        registerUpdateCommand(DVDUpdateCommand.Genre.class, DVD.class, (p, c) -> p.genre = c.newValue());
+        registerUpdateCommand(DVDUpdateCommand.Director.class, DVD.class, (p, c) -> p.director = c.newValue());
+        registerUpdateCommand(DVDUpdateCommand.Runtime.class, DVD.class, (p, c) -> p.runtime = c.newValue());
+        registerUpdateCommand(DVDUpdateCommand.Studio.class, DVD.class, (p, c) -> p.studio = c.newValue());
+        registerUpdateCommand(DVDUpdateCommand.Language.class, DVD.class, (p, c) -> p.language = c.newValue());
+        registerUpdateCommand(DVDUpdateCommand.Subtitles.class, DVD.class, (p, c) -> p.subtitles = new ArrayList<>(c.newValue()));
+    }
 }
