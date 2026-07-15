@@ -5,12 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-/*
- * + Cohesion level: FUNCTIONAL
- * + Coupling level with VietQRController: DATA
- * + Reason: VietQRController only reads status and message via getters or
- *   isCompleted(); no control flags or internal parsing logic is shared.
- */
 @Getter @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VietQRPaymentStatus {

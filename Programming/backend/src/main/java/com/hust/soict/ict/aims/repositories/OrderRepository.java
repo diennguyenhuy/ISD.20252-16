@@ -17,6 +17,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     @EntityGraph(value = "Order-aggregate")
     Optional<Order> findById(@NonNull UUID uuid);
 
+    Optional<Order> findByIdAndStatus(@NonNull UUID uuid, Order.Status status);
+
     @Override
     @EntityGraph(value = "Order-summary")
     Page<Order> findAll(Pageable pageable);

@@ -36,18 +36,18 @@ class PlaceOrderServiceImpl implements PlaceOrderService {
         try {
             Order.Draft oldDraft = orderDraftContext.getDraftOrder();
             draftOrder.provideDeliveryInformation(oldDraft.getDeliveryInformation(), oldDraft.getDeliveryFee());
-        } catch (OrderNotPlacedException ignored) {}
+        } catch (OrderNotPlacedException _) {}
 
         orderDraftContext.saveDraftOrder(draftOrder);
         log.debug("Order placed successfully! New draft order has been created!");
         return orderMapper.toOrderDraftResponse(draftOrder);
     }
 
-    public DeliveryResponse submitDeliveryInformation(DeliveryRequest deliveryRequest) {
+    public OrderDraftResponse submitDeliveryInformation(DeliveryRequest deliveryRequest) {
         log.debug("Submitting delivery request...");
         Order.Draft draftOrder = orderDraftContext.getDraftOrder();
 
-        var di = draftOrder.provideDeliveryInformation(
+        draftOrder.provideDeliveryInformation(
                 deliveryRequest.getCustomerName(),
                 deliveryRequest.getCustomerEmail(),
                 deliveryRequest.getPhoneNumber(),
@@ -63,17 +63,17 @@ class PlaceOrderServiceImpl implements PlaceOrderService {
 
         orderDraftContext.saveDraftOrder(draftOrder);
         log.debug("Delivery information successfully saved!");
-        return orderMapper.toDeliveryResponse(di);
+        return orderMapper.toOrderDraftResponse(draftOrder);
     }
 
-    public InvoiceResponse getInvoice() {
+    public OrderDraftResponse getInvoice() {
         log.debug("Creating invoice...");
         Order.Draft draftOrder = orderDraftContext.getDraftOrder();
         Invoice invoice = draftOrder.getInvoice();
         if (invoice == null) {
             throw new OrderNotCompleteException("Order invoice is not yet generated due to internal logical error or missing delivery info.");
         }
-        return orderMapper.toInvoiceResponse(invoice);
+        return orderMapper.toOrderDraftResponse(draftOrder);
     }
 
     public void cancelOrder() {

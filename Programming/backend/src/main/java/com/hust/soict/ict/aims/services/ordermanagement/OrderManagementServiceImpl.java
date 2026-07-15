@@ -3,6 +3,7 @@ package com.hust.soict.ict.aims.services.ordermanagement;
 import com.hust.soict.ict.aims.dto.mapper.OrderMapper;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.exceptions.OrderApprovalException;
+import com.hust.soict.ict.aims.exceptions.OrderCorruptionException;
 import com.hust.soict.ict.aims.exceptions.OrderNotFoundException;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.product.Product;
@@ -42,8 +43,9 @@ class OrderManagementServiceImpl implements OrderQueryService, OrderManagementSe
     }
 
     @Transactional
-    public OrderResponse approveOrder(UUID id) throws OrderApprovalException {
-        Order order = orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
+    public OrderResponse approveOrder(UUID id) throws OrderApprovalException, OrderCorruptionException {
+        Order order = orderRepository.findByIdAndStatus(id, Order.Status.PENDING)
+                .orElseThrow(() -> new OrderNotFoundException(id, Order.Status.PENDING.name()));
 
         validateOrder(order);
 
@@ -74,11 +76,16 @@ class OrderManagementServiceImpl implements OrderQueryService, OrderManagementSe
         if (!insufficientQuantity.isEmpty() || !missingProducts.isEmpty()) {
             throw new OrderApprovalException(insufficientQuantity, missingProducts);
         }
+
+        if (order.isCorrupted()) {
+            throw new OrderCorruptionException("Cannot approve order because some items have been hard-removed or corrupted");
+        }
     }
 
     @Transactional
     public OrderResponse rejectOrder(UUID id) {
-        Order order = orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
+        Order order = orderRepository.findByIdAndStatus(id, Order.Status.PENDING)
+                .orElseThrow(() -> new OrderNotFoundException(id, Order.Status.PENDING.name()));
 
         order.reject();
 

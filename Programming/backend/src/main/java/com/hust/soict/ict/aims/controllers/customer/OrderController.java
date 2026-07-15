@@ -2,8 +2,6 @@ package com.hust.soict.ict.aims.controllers.customer;
 
 import com.hust.soict.ict.aims.exceptions.*;
 import com.hust.soict.ict.aims.dto.request.DeliveryRequest;
-import com.hust.soict.ict.aims.dto.response.order.DeliveryResponse;
-import com.hust.soict.ict.aims.dto.response.order.InvoiceResponse;
 import com.hust.soict.ict.aims.dto.response.order.OrderDraftResponse;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.services.order.OrderService;
@@ -48,19 +46,19 @@ public class OrderController {
      */
     @PostMapping("/delivery")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public DeliveryResponse submitDeliveryInformation(
+    public OrderDraftResponse submitDeliveryInformation(
             @Valid @RequestBody DeliveryRequest deliveryRequest
     ) {
         return placeOrderService.submitDeliveryInformation(deliveryRequest);
     }
 
     /**
-     * GET /order/invoice endpoint for getting invoice info. Return status 200
+     * POST /order/invoice endpoint for getting invoice info. Return status 200
      * @return response of invoice
      */
-    @GetMapping("/invoice")
+    @PostMapping("/invoice")
     @ResponseStatus(HttpStatus.OK)
-    public InvoiceResponse getInvoice() {
+    public OrderDraftResponse getInvoice() {
         return placeOrderService.getInvoice();
     }
 

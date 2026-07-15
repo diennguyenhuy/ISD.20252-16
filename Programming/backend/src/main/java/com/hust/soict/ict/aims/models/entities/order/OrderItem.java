@@ -12,26 +12,21 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
-@Table(
-        name = "order_item",
-        uniqueConstraints = @UniqueConstraint(
-                columnNames = {"order_id", "product_id"}
-        )
-)
+@Table(name = "order_item")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderItem {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(updatable = false)
-    private UUID id;
+    @EmbeddedId
+    private OrderItemKey id = new OrderItemKey();
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("orderId")
     @JoinColumn(name = "order_id", nullable = false)
     @Setter(AccessLevel.PACKAGE)
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("productId")
     @JoinColumn(name = "product_id")
     private Product product;
 

@@ -10,14 +10,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-/*
- * SOLID Principles: No violations.
- *
- * + Cohesion level: FUNCTIONAL
- * + Coupling level with VietQRController: DATA
- * + Reason: Only primitive Strings (authorizationHeader, accessToken, requestString)
- *   are exchanged — no composite objects or control flags are involved.
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j

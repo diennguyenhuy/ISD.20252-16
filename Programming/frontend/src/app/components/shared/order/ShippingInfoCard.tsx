@@ -1,4 +1,4 @@
-import { MapPin, Phone, Truck, User } from 'lucide-react';
+import { MapPin, Phone, Truck, User, LucideMail } from 'lucide-react';
 import type { DeliveryInformation } from '../../../models/order.interface';
 
 interface ShippingInfoCardProps {
@@ -25,6 +25,9 @@ export function ShippingInfoCard({ delivery }: ShippingInfoCardProps) {
 
                 {/* Phone */}
                 <InfoTile icon={Phone} label="Phone Number" value={delivery.phoneNumber} />
+
+                {/* Email */}
+                <InfoTile icon={LucideMail} label={"Email"} value={delivery.customerEmail} />
 
                 {/* Address */}
                 <InfoTile

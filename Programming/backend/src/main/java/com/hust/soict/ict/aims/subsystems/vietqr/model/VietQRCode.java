@@ -5,12 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hust.soict.ict.aims.subsystems.PaymentInitiation;
 import lombok.Getter;
 
-/*
- * + Cohesion level: FUNCTIONAL
- * + Coupling level with VietQRController: DATA
- * + Reason: VietQRController only reads QR data fields via getters after
- *   calling parseQRCodeResponse(). No control flags or internal logic shared.
- */
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VietQRCode implements PaymentInitiation {

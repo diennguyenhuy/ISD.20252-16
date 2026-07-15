@@ -3,14 +3,7 @@ package com.hust.soict.ict.aims.subsystems.vietqr;
 import lombok.Getter;
 
 import java.util.Base64;
-/*
- * SOLID Principles: No violations.
- *
- * + Cohesion level: FUNCTIONAL
- * + Coupling level with VietQRController: DATA
- * + Reason: Only two primitive Strings (username, password) are passed in;
- *   buildAuthorizationHeader() returns a plain String.
- */
+
 @Getter
 class QRAccessTokenRequest {
     private String username;

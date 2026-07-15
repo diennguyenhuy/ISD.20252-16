@@ -61,15 +61,15 @@ export default function DeliveryForm() {
 
         try {
             // Send the strict data payload to the backend
-            await OrderService.submitDeliveryForm(form);
+            const orderDraft = await OrderService.submitDeliveryForm(form);
             navigate(`/checkout/${checkoutId}/invoice`, {
                 state: {
-                    deliveryInformation: form,
+                    orderDraft: orderDraft,
                 }
             });
         } catch (error) {
             console.error("Failed to submit delivery info", error);
-            alert("Something went wrong saving your delivery details. Please try again.");
+            alert(`Something went wrong saving your delivery details: ${error}`);
             setIsSubmitting(false);
         }
     };

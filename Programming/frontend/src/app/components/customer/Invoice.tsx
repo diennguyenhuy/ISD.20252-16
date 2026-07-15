@@ -6,7 +6,7 @@ import { useCart } from '../../context/CartContext';
 import OrderService from '../../api/OrderService';
 import { formatVND } from '../../data/formatter';
 
-import type { DeliveryInformation, Invoice as InvoiceType } from '../../models/order.interface';
+import type {DeliveryInformation, Invoice as InvoiceType, OrderDraft} from '../../models/order.interface';
 import type { ProductTypeName } from '../../models/product.interface';
 
 const TYPE_LABELS: Record<ProductTypeName, string> = {
@@ -19,8 +19,7 @@ export default function Invoice() {
     const location = useLocation();
     const { cart } = useCart();
 
-    // Extract deliveryInfo passed from DeliveryForm.tsx
-    const deliveryInfo = location.state?.deliveryInformation as DeliveryInformation | undefined;
+    const orderDraft = location.state?.orderDraft as OrderDraft | undefined;
 
     // Local State for Invoice API
     const [invoice, setInvoice] = useState<InvoiceType | null>(null);
@@ -28,23 +27,26 @@ export default function Invoice() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        // If user refreshes the page and loses state, kick them back to delivery form
-        if (!deliveryInfo) {
-            navigate(`/checkout/${checkoutId}/delivery`);
+        if (orderDraft) {
+            if (!orderDraft.invoice) {
+                navigate(`/checkout/${checkoutId}/delivery`);
+            }
+            setInvoice(orderDraft.invoice!);
+            setLoading(false);
             return;
         }
 
         OrderService.getInvoice()
             .then(data => {
-                setInvoice(data);
+                setInvoice(data.invoice!);
                 setLoading(false);
             })
             .catch(err => {
                 console.error("Failed to fetch invoice:", err);
-                setError("Could not generate invoice. Please try again.");
+                setError(`Could not generate invoice. ${err}`);
                 setLoading(false);
             });
-    }, [deliveryInfo, navigate]);
+    }, [orderDraft, navigate]);
 
     if (loading || !cart) {
         return (
@@ -55,19 +57,19 @@ export default function Invoice() {
         );
     }
 
-    if (error || !invoice || !deliveryInfo) {
+    if (error || !invoice || !orderDraft?.deliveryInformation) {
         return (
             <div className="max-w-3xl mx-auto px-4 py-20 text-center animate-in fade-in">
                 <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
                 <p className="text-lg font-medium mb-4">{error || "Missing invoice data."}</p>
-                <button onClick={() => navigate('/checkout/delivery')} className="text-primary hover:underline">
+                <button onClick={() => navigate(`/checkout/${checkoutId}/delivery`)} className="text-primary hover:underline">
                     Return to Delivery Form
                 </button>
             </div>
         );
     }
 
-    const deliveryLabel = deliveryInfo.deliveryMethod === 'rush' ? 'Rush Delivery (1-2 days)' : 'Standard Delivery (3-5 days)';
+    const deliveryLabel = orderDraft.deliveryInformation.deliveryMethod === 'rush' ? 'Rush Delivery (1-2 days)' : 'Standard Delivery (3-5 days)';
 
     return (
         <div className="max-w-3xl mx-auto px-4 py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -111,18 +113,18 @@ export default function Invoice() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm">
                         <div className="bg-card p-4 rounded-xl border border-border shadow-sm">
                             <p className="text-muted-foreground text-xs font-medium mb-1">Recipient</p>
-                            <p className="text-foreground font-bold">{deliveryInfo.customerName}</p>
+                            <p className="text-foreground font-bold">{orderDraft.deliveryInformation.customerName}</p>
                         </div>
                         <div className="bg-card p-4 rounded-xl border border-border shadow-sm">
                             <p className="text-muted-foreground text-xs font-medium mb-1">Phone Number</p>
                             {/* FIXED: Uses phoneNumber matching our strictly typed interface */}
-                            <p className="text-foreground font-bold">{deliveryInfo.phoneNumber}</p>
+                            <p className="text-foreground font-bold">{orderDraft.deliveryInformation.phoneNumber}</p>
                         </div>
                         <div className="bg-card p-4 rounded-xl border border-border shadow-sm sm:col-span-2">
                             <p className="text-muted-foreground text-xs font-medium mb-1">Delivery Address</p>
                             <p className="text-foreground font-semibold flex items-start gap-1.5">
                                 <MapPin size={16} className="text-primary shrink-0 mt-0.5" />
-                                {deliveryInfo.address}, {deliveryInfo.commune}, {deliveryInfo.province}
+                                {orderDraft.deliveryInformation.address}, {orderDraft.deliveryInformation.commune}, {orderDraft.deliveryInformation.province}
                             </p>
                         </div>
                         <div
@@ -225,7 +227,7 @@ export default function Invoice() {
                 <button
                     onClick={() => navigate(`/checkout/${checkoutId}/delivery`, {
                         state: {
-                            prefilledDeliveryInfo: deliveryInfo
+                            prefilledDeliveryInfo: orderDraft.deliveryInformation
                         }
                     })}
                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl border border-border bg-card text-foreground font-semibold hover:bg-muted transition-colors shadow-sm"

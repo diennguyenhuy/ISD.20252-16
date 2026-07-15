@@ -13,19 +13,6 @@ import com.hust.soict.ict.aims.subsystems.vietqr.model.VietQRPaymentStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-/*
- * SOLID Principles
- *
- * SRP: confirmPayment() mixes payment verification with order finalization,
- *   which belongs to a different domain.
- *   Improvement: delegate orderFinalization to a CheckoutOrchestrator.
- *
- * + Cohesion level: FUNCTIONAL
- * + Coupling level with IPaymentQRCode/VietQRController: DATA
- * + Reason: PayOrderService is the single owner of the VietQR payment lifecycle.
- *           It delegates to IPaymentQRCode for gateway calls and to
- *           OrderFinalization for order persistence, keeping both concerns loosely coupled.
- */
 @Service
 @Slf4j
 class VietQRPaymentServiceImpl extends PaymentService implements VietQRPaymentService {

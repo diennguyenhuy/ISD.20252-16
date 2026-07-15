@@ -1,10 +1,5 @@
 package com.hust.soict.ict.aims.subsystems.vietqr;
-/*
- * SOLID Principles: No violations.
- *
- * + Cohesion level: FUNCTIONAL
- * + Coupling level: NONE — depends only on standard Java types.
- */
+
 class VietQRFormatter {
     private VietQRFormatter() {}
 

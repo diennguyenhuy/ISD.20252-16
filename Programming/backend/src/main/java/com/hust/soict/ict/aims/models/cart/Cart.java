@@ -1,6 +1,7 @@
 package com.hust.soict.ict.aims.models.cart;
 
 import com.hust.soict.ict.aims.models.entities.product.Product;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
@@ -9,6 +10,8 @@ import java.util.*;
 
 @NoArgsConstructor
 public class Cart {
+    @Getter
+    private final UUID id = UUID.randomUUID();
     private final Map<UUID, CartItem> items = new LinkedHashMap<>();
 
     /**

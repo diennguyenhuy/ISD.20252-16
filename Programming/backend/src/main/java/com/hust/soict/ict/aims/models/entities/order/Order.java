@@ -74,6 +74,12 @@ public class Order extends VersionedEntity {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @Column(nullable = false)
+    private BigDecimal totalWeight;
+
+    @Column(nullable = false)
+    private int totalItemCount;
+
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private DeliveryInformation deliveryInformation;
 
@@ -96,23 +102,17 @@ public class Order extends VersionedEntity {
     }
 
     @Transient
-    public Long getTotalPriceWithoutVAT() {
-        return items.stream().mapToLong(OrderItem::getItemTotalPrice).sum();
-    }
-
+    private long totalPriceWithoutVAT;
     @Transient
-    public Long getTotalPriceWithVAT() {
-        return getTotalPriceWithoutVAT() * 110 / 100;
-    }
-
-    @Transient
-    public BigDecimal getTotalWeight() {
-        return items.stream().map(OrderItem::getItemTotalWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
+    private long totalPriceWithVAT;
 
     @Transient
     public Long getTotalAmount() {
         return invoice.getTotalAmount();
+    }
+
+    public boolean isCorrupted() {
+        return items.size() != totalItemCount;
     }
 
     public void approve() {
@@ -136,6 +136,10 @@ public class Order extends VersionedEntity {
     private Order(Cart cart) {
         cart.getItems().forEach(item -> this.addItem(new OrderItem(item, this)));
         this.status = Status.DRAFT;
+        this.totalItemCount = items.size();
+        this.totalWeight = items.stream().map(OrderItem::getItemTotalWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
+        this.totalPriceWithoutVAT = items.stream().mapToLong(OrderItem::getItemTotalPrice).sum();
+        this.totalPriceWithVAT = this.totalPriceWithoutVAT * 110 / 100;
     }
 
     public static class Draft {
@@ -147,10 +151,10 @@ public class Order extends VersionedEntity {
 
         public Draft(Cart cart) {
             this.order = new Order(cart);
-            this.checkoutId = UUID.randomUUID();
+            this.checkoutId = cart.getId();
         }
 
-        public DeliveryInformation provideDeliveryInformation(
+        public void provideDeliveryInformation(
                 @NonNull String customerName,
                 @NonNull String customerEmail,
                 @NonNull String phoneNumber,
@@ -160,7 +164,6 @@ public class Order extends VersionedEntity {
                 @NonNull String deliveryMethod
         ) {
             order.deliveryInformation = new DeliveryInformation(customerName, customerEmail, phoneNumber, province, commune, address, deliveryMethod, order);
-            return order.deliveryInformation;
         }
 
         public void provideDeliveryInformation(DeliveryInformation existingInfo, Long precalculatedDeliveryFee) {
@@ -175,6 +178,9 @@ public class Order extends VersionedEntity {
                     order
             ) : null;
             this.deliveryFee = precalculatedDeliveryFee;
+            if (precalculatedDeliveryFee != null) {
+                order.invoice = new Invoice(order, precalculatedDeliveryFee);
+            }
         }
 
         public void updateDeliveryFee(long deliveryFee) {

@@ -4,6 +4,8 @@ export interface Order {
     readonly id: string;
     items: OrderItem[];
     status: OrderStatus;
+    totalWeight: number;
+    totalItemCount: number;
     deliveryInformation: DeliveryInformation;
     invoice: Invoice;
     paymentTransaction: PaymentTransaction;

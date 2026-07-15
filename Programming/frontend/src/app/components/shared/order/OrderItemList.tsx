@@ -8,13 +8,11 @@ interface OrderItemListProps {
     items: OrderItem[];
     invoice: Invoice;
     isManagerScreen: boolean;
+    hasMissingProducts: boolean;
 }
 
-export function OrderItemList({ items, invoice, isManagerScreen }: OrderItemListProps) {
+export function OrderItemList({ items, invoice, isManagerScreen, hasMissingProducts }: OrderItemListProps) {
     const navigate = useNavigate();
-
-    // Check if any product in this order has been deleted from the database
-    const hasMissingProducts = items.some(item => !item.productId);
 
     return (
         <div className="bg-card rounded-3xl border border-border shadow-lg overflow-hidden mb-6">
@@ -29,10 +27,18 @@ export function OrderItemList({ items, invoice, isManagerScreen }: OrderItemList
                 </div>
                 {/* Aggregate Warning Badge */}
                 {hasMissingProducts && (
+                    <>
                     <div className="flex items-center gap-1.5 text-xs text-destructive bg-destructive/10 px-3 py-1 rounded-full font-bold border border-destructive/20 animate-in fade-in">
                         <AlertTriangle size={14} />
-                        <span>Contains unresolved products</span>
+                        <span>Contains unresolved products that might have been permanently removed.<br/>
+                            {isManagerScreen ? (
+                                <span>If this order is in Pending state, reject it immediately.</span>
+                            ) : (
+                                <span>If your order has not been approved, please cancel your order to receive a refund.</span>
+                            )}
+                        </span>
                     </div>
+                    </>
                 )}
             </div>
 

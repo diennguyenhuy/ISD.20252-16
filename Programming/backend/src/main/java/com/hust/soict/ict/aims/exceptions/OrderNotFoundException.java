@@ -10,4 +10,8 @@ public class OrderNotFoundException extends RuntimeException {
     public OrderNotFoundException(UUID orderId) {
         super("Order with id " + orderId + " is not found");
     }
+
+    public OrderNotFoundException(UUID orderId, String status) {
+        super("Order with id " + orderId + " and status " + status + " is not found");
+    }
 }

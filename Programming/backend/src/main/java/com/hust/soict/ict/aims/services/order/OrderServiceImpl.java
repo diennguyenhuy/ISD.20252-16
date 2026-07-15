@@ -33,7 +33,8 @@ class OrderServiceImpl implements OrderService {
     @Transactional
     public void cancelOrder(UUID orderId) throws OrderStateTransitionException, OrderNotFoundException {
         log.debug("Canceling order #{}...", orderId);
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
+        Order order = orderRepository.findByIdAndStatus(orderId, Order.Status.PENDING)
+                .orElseThrow(() -> new OrderNotFoundException(orderId, Order.Status.PENDING.name()));
         order.cancel();
 
         log.debug("Order #{} successfully canceled!", orderId);

@@ -12,14 +12,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-/*
- * SOLID Principles: No violations.
- *
- * + Cohesion level: FUNCTIONAL
- * + Coupling level with VietQRBoundary: DATA
- * + Coupling level with Order: STAMP — only order.getId() and order.getTotalAmount()
- *   are used, but the full Order object is passed.
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j

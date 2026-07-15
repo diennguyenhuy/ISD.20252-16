@@ -8,14 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-/*
- * SOLID Principles: No violations.
- *
- * + Cohesion level: FUNCTIONAL
- * + Coupling level with PayOrderService: DATA
- * + Reason: Exchanges only response DTOs (QRCodeResponse, PaymentStatusResponse,
- *   OrderResponse) — no control flags or internal service state is exposed.
- */
 @RestController
 @RequestMapping("/order/payment/vietqr")
 @RequiredArgsConstructor

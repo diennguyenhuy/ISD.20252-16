@@ -10,6 +10,7 @@ import com.hust.soict.ict.aims.dto.mapper.CartMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -31,6 +32,7 @@ class CartServiceImpl implements CartService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CartResponse addItem(UUID productId, int quantity) throws ProductNotFoundException, IllegalArgumentException {
         log.debug("Adding item to cart with quantity {} for product #{}...", quantity, productId);
         Product product = productRepository.findByIdAndStatus(productId, Product.Status.ACTIVE)

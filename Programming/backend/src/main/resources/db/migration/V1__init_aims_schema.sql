@@ -97,20 +97,21 @@ CREATE TABLE IF NOT EXISTS dvd_subtitles(
 CREATE TABLE IF NOT EXISTS "order"(
     id				UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     status			VARCHAR(10) NOT NULL,
+    total_item_count    INT NOT NULL,
+    total_weight    NUMERIC(10, 3) NOT NULL,
     version         BIGINT NOT NULL DEFAULT 0,
     created_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS order_item(
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     order_id		UUID REFERENCES "order"(id) ON DELETE CASCADE,
-    product_id		UUID REFERENCES product(id) ON DELETE SET NULL,
+    product_id		UUID REFERENCES product(id) ON DELETE CASCADE,
     product_name	VARCHAR(255) NOT NULL,
     quantity		INT NOT NULL,
     unit_price		BIGINT NOT NULL,
     unit_weight		NUMERIC(10, 3) NOT NULL,
-    UNIQUE (order_id, product_id)
+    PRIMARY KEY (order_id, product_id)
 );
 
 CREATE TABLE IF NOT EXISTS delivery_information(
@@ -149,6 +150,7 @@ CREATE TABLE IF NOT EXISTS "user"(
     hashed_password	TEXT NOT NULL,
     active          BOOLEAN NOT NULL,
     blocked         BOOLEAN NOT NULL,
+    must_change_password BOOLEAN NOT NULL DEFAULT FALSE,
     version         BIGINT NOT NULL DEFAULT 0,
     created_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
