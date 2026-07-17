@@ -111,10 +111,6 @@ public class Order extends VersionedEntity {
         return invoice.getTotalAmount();
     }
 
-    public boolean isCorrupted() {
-        return items.size() != totalItemCount;
-    }
-
     public void approve() {
         changeStatus(Status.APPROVED);
     }

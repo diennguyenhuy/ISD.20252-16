@@ -1,6 +1,6 @@
 package com.hust.soict.ict.aims.services.audit;
 
-import com.hust.soict.ict.aims.dto.mapper.ProductAuditLogMapper;
+import com.hust.soict.ict.aims.dto.mapper.Mapper;
 import com.hust.soict.ict.aims.dto.response.audit.ProductAuditLogResponse;
 import com.hust.soict.ict.aims.models.entities.audit.ProductAuditLog;
 import com.hust.soict.ict.aims.models.entities.audit.ProductLog;
@@ -21,7 +21,7 @@ class ProductAuditLogServiceImpl implements ProductAuditLogService {
     private final ProductLogRepository productLogRepository;
     private final StockAdjustLogRepository stockAdjustLogRepository;
 
-    private final ProductAuditLogMapper productAuditLogMapper;
+    private final Mapper mapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -36,7 +36,11 @@ class ProductAuditLogServiceImpl implements ProductAuditLogService {
         return logs.stream()
                 .sorted(Comparator.comparing(ProductAuditLog::getTimestamp).reversed())
                 .limit(100)
-                .map(productAuditLogMapper::toProductAuditLogResponse)
+                .map(this::map)
                 .toList();
+    }
+
+    private ProductAuditLogResponse map(ProductAuditLog productAuditLog) {
+        return mapper.map(productAuditLog, ProductAuditLogResponse.class);
     }
 }

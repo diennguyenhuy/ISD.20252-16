@@ -55,7 +55,7 @@ public class ProductManagementController {
     @DeleteMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
     public List<ProductSummary> deleteProducts(
-            @RequestBody
+            @Valid @RequestBody
             @Size(
                     min = 1,
                     max = 10,

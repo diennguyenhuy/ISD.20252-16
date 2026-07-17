@@ -1,12 +1,12 @@
 package com.hust.soict.ict.aims.services.productmanagement;
 
+import com.hust.soict.ict.aims.dto.mapper.Mapper;
 import com.hust.soict.ict.aims.dto.request.AdjustStockRequest;
 import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
 import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.exceptions.ExceededDeletionQuotaException;
 import com.hust.soict.ict.aims.exceptions.ProductAlreadyExistedException;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
-import com.hust.soict.ict.aims.dto.mapper.ProductMapper;
 import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
 import com.hust.soict.ict.aims.dto.request.UpdateProductRequest;
 import com.hust.soict.ict.aims.models.entities.product.*;
@@ -25,7 +25,7 @@ import java.util.UUID;
 class ProductManagementServiceImpl implements ProductManagementService, ProductQueryService {
 
     private final ProductRepository productRepo;
-    private final ProductMapper productMapper;
+    private final Mapper productMapper;
     private final ProductFactory productFactory;
 
     @Override
@@ -33,7 +33,7 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
     public List<ProductSummary> getAllProductsForManager() {
         log.info("[FETCH] Fetching all products for manager dashboard.");
         return productRepo.findAll().stream()
-                .map(productMapper::toProductSummary)
+                .map(this::mapSummary)
                 .toList();
     }
 
@@ -46,7 +46,7 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
                     log.warn("[FETCH FAILED] Product not found. ID: {}", id);
                     return new ProductNotFoundException(id);
                 });
-        return productMapper.toProductDetail(product);
+        return map(product);
     }
     
     @Override
@@ -63,7 +63,7 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
         Product savedProduct = productRepo.save(product);
 
         log.info("[CREATE SUCCESS] Successfully saved new product. ID: {}", savedProduct.getId());
-        return productMapper.toProductDetail(savedProduct);
+        return map(savedProduct);
     }
 
     @Override
@@ -84,7 +84,7 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
         Product savedProduct = productRepo.save(updatedProduct);
         log.info("[UPDATE SUCCESS] Successfully updated product. ID: {}, Current Price: {}", savedProduct.getId(), savedProduct.getCurrentPrice());
 
-        return productMapper.toProductDetail(savedProduct);
+        return map(savedProduct);
     }
 
     @Override
@@ -112,7 +112,7 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
 
         log.info("[DELETE BATCH SUCCESS] Successfully processed {} products.", products.size());
 
-        return products.stream().map(productMapper::toProductSummary).toList();
+        return products.stream().map(this::mapSummary).toList();
     }
 
     @Override
@@ -150,7 +150,7 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
 
         log.info("[ACTIVATE SUCCESS] Successfully reactivated product. ID: {}", id);
 
-        return productMapper.toProductDetail(product);
+        return map(product);
     }
 
     @Override
@@ -171,6 +171,15 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
 
         log.info("[DELETE SUCCESS] Successfully {} product. ID: {}", actualStatus.name().toLowerCase(), id);
 
-        return productMapper.toProductDetail(product);
+        return map(product);
     }
+
+    private ProductDetail map(Product product) {
+        return productMapper.map(product, ProductDetail.class);
+    }
+
+    private ProductSummary mapSummary(Product product) {
+        return productMapper.map(product, ProductSummary.class);
+    }
+
 }

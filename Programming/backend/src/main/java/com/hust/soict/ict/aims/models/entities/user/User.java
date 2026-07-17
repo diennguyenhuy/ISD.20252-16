@@ -29,7 +29,6 @@ public class User extends VersionedEntity {
     private String email;
 
     @Column(nullable = false)
-    @Getter
     private String hashedPassword;
 
     private boolean active = true;

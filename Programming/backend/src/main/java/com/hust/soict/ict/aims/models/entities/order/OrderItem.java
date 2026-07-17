@@ -12,12 +12,15 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
-@Table(name = "order_item")
+@Table(
+        name = "order_item",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"order_id", "product_id"})
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderItem {
     @EmbeddedId
-    private OrderItemKey id = new OrderItemKey();
+    private OrderItemKey id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("orderId")
@@ -26,7 +29,6 @@ public class OrderItem {
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("productId")
     @JoinColumn(name = "product_id")
     private Product product;
 
@@ -54,6 +56,7 @@ public class OrderItem {
     OrderItem(CartItem cartItem, Order order) {
         this.order = order;
         this.product = cartItem.getProduct();
+        this.id = new OrderItemKey(cartItem.getProduct().getId());
 
         this.productName = cartItem.getProduct().getTitle();
         this.unitPrice = cartItem.getProduct().getCurrentPrice();

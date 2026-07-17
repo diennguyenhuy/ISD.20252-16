@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.services.admin;
 
+import com.hust.soict.ict.aims.dto.mapper.Mapper;
 import com.hust.soict.ict.aims.dto.request.CreateUserRequest;
 import com.hust.soict.ict.aims.dto.response.UserResponse;
 import com.hust.soict.ict.aims.exceptions.AccountAlreadyExistedException;
@@ -46,6 +47,7 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final Mapper mapper;
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private static final String PASSWORD_CHARS =
@@ -57,13 +59,13 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     @Override
     @Transactional(readOnly = true)
     public Page<UserResponse> getUsers(Pageable pageable) {
-        return userRepository.findAll(pageable).map(UserResponse::from);
+        return userRepository.findAll(pageable).map(this::map);
     }
 
     @Override
     @Transactional(readOnly = true)
     public UserResponse getUser(UUID userId) {
-        return UserResponse.from(findUserOrThrow(userId));
+        return map(findUserOrThrow(userId));
     }
 
     // ───── Account Lifecycle ─────
@@ -97,7 +99,7 @@ class AdminServiceImpl implements AdminService, UserQueryService {
         applicationEventPublisher.publishEvent(new AccountCreatedEvent(user, tempPassword));
 
         log.info("Admin created new user: {} ({})", user.getUsername(), user.getEmail());
-        return UserResponse.from(user);
+        return map(user);
     }
 
     @Override
@@ -155,7 +157,7 @@ class AdminServiceImpl implements AdminService, UserQueryService {
 
         userRepository.save(user);
         log.info("Admin updated roles for user {} to {}", user.getUsername(), newRoles);
-        return UserResponse.from(user);
+        return map(user);
     }
 
     // ───── Password Reset ─────
@@ -202,6 +204,10 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     }
 
     // ───── Helpers ─────
+
+    private UserResponse map(User user) {
+        return mapper.map(user, UserResponse.class);
+    }
 
     private User findUserOrThrow(UUID userId) {
         return userRepository.findById(userId)

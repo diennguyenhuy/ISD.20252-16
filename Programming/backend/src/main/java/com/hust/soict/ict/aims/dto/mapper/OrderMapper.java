@@ -1,30 +1,50 @@
 package com.hust.soict.ict.aims.dto.mapper;
 
-import com.hust.soict.ict.aims.dto.response.order.*;
-import com.hust.soict.ict.aims.models.entities.order.*;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.ReportingPolicy;
+import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
+import com.hust.soict.ict.aims.models.entities.order.Order;
+import org.springframework.stereotype.Component;
 
-@Mapper(
-        componentModel = MappingConstants.ComponentModel.SPRING,
-        unmappedTargetPolicy = ReportingPolicy.ERROR
-)
-public interface OrderMapper {
+@Component
+class OrderMapper extends AbstractMapper<Order, OrderResponse> {
+    private final OrderItemMapper orderItemMapper;
+    private final DeliveryInformationMapper deliveryInformationMapper;
+    private final InvoiceMapper invoiceMapper;
+    private final PaymentTransactionMapper paymentTransactionMapper;
 
-    OrderResponse toOrderResponse(Order order);
+    OrderMapper(
+            OrderItemMapper orderItemMapper,
+            DeliveryInformationMapper deliveryInformationMapper,
+            InvoiceMapper invoiceMapper,
+            PaymentTransactionMapper paymentTransactionMapper
+    ) {
+        super(OrderResponse::new);
+        this.orderItemMapper = orderItemMapper;
+        this.deliveryInformationMapper = deliveryInformationMapper;
+        this.invoiceMapper = invoiceMapper;
+        this.paymentTransactionMapper = paymentTransactionMapper;
+    }
 
-    OrderDraftResponse toOrderDraftResponse(Order.Draft order);
+    @Override
+    public void map(Order source, OrderResponse target) {
+        target.setId(source.getId());
+        target.setItems(source.getItems().stream().map(orderItemMapper::map).toList());
+        target.setStatus(source.getStatus().name());
+        target.setTotalWeight(source.getTotalWeight());
+        target.setTotalItemCount(source.getTotalItemCount());
+        target.setDeliveryInformation(deliveryInformationMapper.map(source.getDeliveryInformation()));
+        target.setInvoice(invoiceMapper.map(source.getInvoice()));
+        target.setPaymentTransaction(paymentTransactionMapper.map(source.getPaymentTransaction()));
+        target.setCreatedAt(source.getCreatedAt());
+        target.setUpdatedAt(source.getUpdatedAt());
+    }
 
-    @Mapping(target = "productImage", expression = "java(orderItem.getProduct() == null ? null : orderItem.getProduct().getImageURL())")
-    @Mapping(target = "productId", expression = "java(orderItem.getProduct() == null ? null : orderItem.getProduct().getId().toString())")
-    OrderItemResponse toOrderItemResponse(OrderItem orderItem);
+    @Override
+    public Class<Order> getSourceClass() {
+        return Order.class;
+    }
 
-    DeliveryResponse toDeliveryResponse(DeliveryInformation deliveryInformation);
-
-    InvoiceResponse toInvoiceResponse(Invoice invoice);
-
-    PaymentTransactionResponse toPaymentTransactionResponse(PaymentTransaction paymentTransaction);
-
+    @Override
+    public Class<OrderResponse> getTargetClass() {
+        return OrderResponse.class;
+    }
 }

@@ -17,6 +17,7 @@ export type OrderDraft = Pick<Order, 'items'> & Partial<Pick<Order, 'deliveryInf
 
 export interface OrderItem {
     readonly productId?: string;
+    readonly productReferenceId: string;
     productName: string;
     productImage?: string;
     quantity: number;

@@ -25,10 +25,10 @@ public class ProductLog extends ProductAuditLog {
     private List<ProductEditDetail> details = new ArrayList<>();
 
     public ProductLog(User manager, Product product, ProductAction action) {
-        super(manager, product);
         if (action == ProductAction.UPDATE) {
             throw new IllegalArgumentException("Edit product log action must come with a list of edit details. Use the other constructor");
         }
+        super(manager, product);
         this.action = action;
     }
 

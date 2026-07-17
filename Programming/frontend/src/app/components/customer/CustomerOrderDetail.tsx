@@ -131,7 +131,7 @@ export default function CustomerOrderDetail() {
             )}
 
             {/* ── Shared display cards ── */}
-            <OrderItemList items={order.items} invoice={order.invoice} isManagerScreen={false} hasMissingProducts={order.items.length != order.totalItemCount} />
+            <OrderItemList items={order.items} invoice={order.invoice} isManagerScreen={false} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <ShippingInfoCard delivery={order.deliveryInformation} />

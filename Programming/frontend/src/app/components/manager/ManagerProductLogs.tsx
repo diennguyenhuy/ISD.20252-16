@@ -95,6 +95,10 @@ export default function ManagerProductLogs() {
                     const cfg = ACTION_CONFIG[actionType as keyof typeof ACTION_CONFIG] || ACTION_CONFIG.UPDATE;
                     const ActionIcon = cfg.icon;
 
+                    // NEW: Determine if we actually have fields to display
+                    const hasDetails = !isStockAdjust && (log as any).details && (log as any).details.length > 0;
+                    const showBody = isStockAdjust || hasDetails;
+
                     return (
                         <div key={log.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
 
@@ -117,7 +121,8 @@ export default function ManagerProductLogs() {
                                 </div>
 
                                 {/* Actor & Target */}
-                                <div className="mb-4">
+                                {/* dynamically remove bottom margin if body is hidden */}
+                                <div className={showBody ? "mb-4" : ""}>
                                     <p className="text-sm font-medium text-muted-foreground mb-1">
                                         Manager <span className="font-bold text-foreground">@{log.managerUsername}</span> modified:
                                     </p>
@@ -145,29 +150,25 @@ export default function ManagerProductLogs() {
                                     </div>
                                 </div>
 
-                                {/* Card Body: Delta Changes */}
-                                <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
-
-                                    {isStockAdjust ? (
-                                        // Render StockAdjustLog Details
-                                        <div>
-                                            <div className="flex items-center gap-3 mb-2 text-sm">
-                                                <span className="text-muted-foreground line-through font-mono">{(log as any).oldStock} qty</span>
-                                                <ArrowRight size={14} className="text-muted-foreground" />
-                                                <span className="font-bold text-foreground font-mono">{(log as any).newStock} qty</span>
+                                {/* Card Body: Delta Changes (Conditionally Rendered) */}
+                                {showBody && (
+                                    <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
+                                        {isStockAdjust ? (
+                                            // Render StockAdjustLog Details
+                                            <div>
+                                                <div className="flex items-center gap-3 mb-2 text-sm">
+                                                    <span className="text-muted-foreground line-through font-mono">{(log as any).oldStock} qty</span>
+                                                    <ArrowRight size={14} className="text-muted-foreground" />
+                                                    <span className="font-bold text-foreground font-mono">{(log as any).newStock} qty</span>
+                                                </div>
+                                                <p className="text-xs text-muted-foreground font-medium italic border-t border-border/50 pt-2 mt-2">
+                                                    Reason: "{(log as any).reason}"
+                                                </p>
                                             </div>
-                                            <p className="text-xs text-muted-foreground font-medium italic border-t border-border/50 pt-2 mt-2">
-                                                Reason: "{(log as any).reason}"
-                                            </p>
-                                        </div>
-                                    ) : (
-
-                                        // Render Standard ProductLog Details
-                                        <div className="space-y-2">
-                                            {!log.details || log.details.length === 0 ? (
-                                                <p className="text-xs text-muted-foreground italic">No specific field deltas recorded.</p>
-                                            ) : (
-                                                log.details.map((detail: any, idx: number) => (
+                                        ) : (
+                                            // Render Standard ProductLog Details (Only when details exist)
+                                            <div className="space-y-2">
+                                                {(log as any).details.map((detail: any, idx: number) => (
                                                     <div key={idx} className="text-sm flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
                                                         <span className="font-semibold text-foreground min-w-[100px] truncate">
                                                             {detail.fieldName}:
@@ -182,12 +183,12 @@ export default function ManagerProductLogs() {
                                                             </span>
                                                         </div>
                                                     </div>
-                                                ))
-                                            )}
-                                        </div>
-                                    )}
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
 
-                                </div>
                             </div>
                         </div>
                     );

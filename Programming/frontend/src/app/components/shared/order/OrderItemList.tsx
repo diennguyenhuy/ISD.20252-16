@@ -8,11 +8,11 @@ interface OrderItemListProps {
     items: OrderItem[];
     invoice: Invoice;
     isManagerScreen: boolean;
-    hasMissingProducts: boolean;
 }
 
-export function OrderItemList({ items, invoice, isManagerScreen, hasMissingProducts }: OrderItemListProps) {
+export function OrderItemList({ items, invoice, isManagerScreen }: OrderItemListProps) {
     const navigate = useNavigate();
+    const hasMissingProducts = items.some(i => !i.productId);
 
     return (
         <div className="bg-card rounded-3xl border border-border shadow-lg overflow-hidden mb-6">
@@ -27,18 +27,10 @@ export function OrderItemList({ items, invoice, isManagerScreen, hasMissingProdu
                 </div>
                 {/* Aggregate Warning Badge */}
                 {hasMissingProducts && (
-                    <>
                     <div className="flex items-center gap-1.5 text-xs text-destructive bg-destructive/10 px-3 py-1 rounded-full font-bold border border-destructive/20 animate-in fade-in">
                         <AlertTriangle size={14} />
-                        <span>Contains unresolved products that might have been permanently removed.<br/>
-                            {isManagerScreen ? (
-                                <span>If this order is in Pending state, reject it immediately.</span>
-                            ) : (
-                                <span>If your order has not been approved, please cancel your order to receive a refund.</span>
-                            )}
-                        </span>
+                        <span>Contains unresolved products that might have been permanently removed.</span>
                     </div>
-                    </>
                 )}
             </div>
 
@@ -77,11 +69,23 @@ export function OrderItemList({ items, invoice, isManagerScreen, hasMissingProdu
                                     )}
                                 </div>
 
-                                <div className="min-w-0">
-                                    <p className={`text-base font-bold line-clamp-2 mb-1 ${isMissing ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
-                                        {item.productName}
-                                    </p>
-                                    <div className="flex flex-wrap items-center gap-2">
+                                <div className="min-w-0 flex-1">
+                                    {/* Title and Reference ID Badge */}
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span
+                                            title={`Reference ID: ${item.productReferenceId}`}
+                                            className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-bold tracking-wider shrink-0 ${
+                                                isMissing ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'
+                                            }`}
+                                        >
+                                            #{item.productReferenceId.substring(0, 8)}
+                                        </span>
+                                        <p className={`text-base font-bold line-clamp-1 ${isMissing ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
+                                            {item.productName}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex flex-wrap items-center gap-2 mt-1.5">
                                         <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
                                             {item.unitWeight} kg
                                         </span>
@@ -91,10 +95,14 @@ export function OrderItemList({ items, invoice, isManagerScreen, hasMissingProdu
 
                                         {/* Missing Product Warning Label */}
                                         {isMissing && (
-                                            <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-destructive font-extrabold mt-1 sm:mt-0">
-                                                <AlertTriangle size={12} />
-                                                This product can no longer be resolved in {isManagerScreen ? 'the' : 'our'} system.
-                                                {isManagerScreen ? 'As a result, you cannot approve this order.' : 'You may consider cancelling this order.'}
+                                            <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-destructive font-extrabold mt-1 sm:mt-0 w-full xl:w-auto">
+                                                <AlertTriangle size={12} className="shrink-0" />
+                                                <span>
+                                                    This product can no longer be resolved in {isManagerScreen ? 'the' : 'our'} system.
+                                                    {isManagerScreen ?
+                                                        ' As a result, you cannot approve this order. Consider rejecting the order to refund this order.'
+                                                        : ' You should consider cancelling this order to receive a refund.'}
+                                                </span>
                                             </span>
                                         )}
                                     </div>

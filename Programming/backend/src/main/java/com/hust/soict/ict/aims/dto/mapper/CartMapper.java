@@ -1,21 +1,33 @@
 package com.hust.soict.ict.aims.dto.mapper;
 
-import com.hust.soict.ict.aims.models.cart.Cart;
-import com.hust.soict.ict.aims.models.cart.CartItem;
-import com.hust.soict.ict.aims.dto.response.CartItemResponse;
 import com.hust.soict.ict.aims.dto.response.CartResponse;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.ReportingPolicy;
+import com.hust.soict.ict.aims.models.cart.Cart;
+import org.springframework.stereotype.Component;
 
-@Mapper(
-        componentModel = MappingConstants.ComponentModel.SPRING,
-        unmappedTargetPolicy = ReportingPolicy.ERROR,
-        uses = ProductMapper.class
-)
-public interface CartMapper {
+@Component
+class CartMapper extends AbstractMapper<Cart, CartResponse> {
+    private final CartItemMapper cartItemMapper;
 
-    CartResponse toCartResponse(Cart cart);
+    CartMapper(CartItemMapper cartItemMapper) {
+        super(CartResponse::new);
+        this.cartItemMapper = cartItemMapper;
+    }
 
-    CartItemResponse toCartItemResponse(CartItem cartItem);
+    @Override
+    public void map(Cart source, CartResponse target) {
+        target.setItems(source.getItems().stream().map(cartItemMapper::map).toList());
+        target.setTotalPrice(source.getTotalPrice());
+        target.setTotalQuantity(source.getTotalQuantity());
+    }
+
+    @Override
+    public Class<Cart> getSourceClass() {
+        return Cart.class;
+    }
+
+    @Override
+    public Class<CartResponse> getTargetClass() {
+        return CartResponse.class;
+    }
+
 }

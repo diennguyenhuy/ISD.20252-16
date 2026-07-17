@@ -7,7 +7,7 @@ import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.services.order.OrderService;
 import com.hust.soict.ict.aims.services.order.PlaceOrderService;
 import com.hust.soict.ict.aims.subsystems.PaymentInitiation;
-import com.hust.soict.ict.aims.subsystems.PaymentInitiator;
+import com.hust.soict.ict.aims.subsystems.PaymentInitiationService;
 import com.hust.soict.ict.aims.subsystems.exception.PaymentException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import java.util.UUID;
 public class OrderController {
     private final PlaceOrderService placeOrderService;
     private final OrderService orderService;
-    private final PaymentInitiator paymentInitiator;
+    private final PaymentInitiationService paymentInitiationService;
 
     /**
      * POST /order - endpoint for request to place order. Return 201 if success
@@ -65,7 +65,7 @@ public class OrderController {
     @PostMapping("/payment/{method}")
     @ResponseStatus(HttpStatus.OK)
     public PaymentInitiation initiatePayment(@PathVariable String method) throws PaymentException {
-        return paymentInitiator.initiatePayment(method);
+        return paymentInitiationService.initiatePayment(method);
     }
 
     /**

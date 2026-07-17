@@ -1,9 +1,9 @@
 package com.hust.soict.ict.aims.services.audit;
 
-import com.hust.soict.ict.aims.models.entities.audit.AdminLog;
+import com.hust.soict.ict.aims.dto.response.audit.AdminLogResponse;
 
 import java.util.List;
 
 public interface AdminAuditLogService {
-    List<AdminLog> getAdminAuditLogs();
+    List<AdminLogResponse> getAdminAuditLogs();
 }

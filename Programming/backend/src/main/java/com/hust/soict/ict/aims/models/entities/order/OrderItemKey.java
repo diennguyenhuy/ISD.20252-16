@@ -10,25 +10,28 @@ import java.util.UUID;
 
 @Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @Getter
-@Setter(AccessLevel.PROTECTED)
+@Setter(value = AccessLevel.PACKAGE)
 public class OrderItemKey implements Serializable {
     @Column(updatable = false)
     private UUID orderId;
     @Column(updatable = false)
-    private UUID productId;
+    private UUID productReferenceId;
+
+    OrderItemKey(UUID productReferenceId) {
+        this.productReferenceId = productReferenceId;
+    }
 
     @Override
     public int hashCode() {
-        return Objects.hash(orderId, productId);
+        return Objects.hash(orderId, productReferenceId);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj instanceof OrderItemKey that) {
-            return Objects.equals(orderId, that.orderId) && Objects.equals(productId, that.productId);
+            return Objects.equals(orderId, that.orderId) && Objects.equals(productReferenceId, that.productReferenceId);
         }
         return false;
     }

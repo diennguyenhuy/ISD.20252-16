@@ -4,9 +4,9 @@ interface AuditLogBase {
 }
 
 interface ProductAuditLogBase extends AuditLogBase {
-    readonly managerId?: string;
+    readonly managerId: string;
     readonly managerUsername: string;
-    readonly productId?: string;
+    readonly productId: string;
     readonly productTitle: string;
 }
 
@@ -33,9 +33,9 @@ export interface StockAdjustLog extends ProductAuditLogBase {
 
 export interface AdminLog extends AuditLogBase {
     readonly action: UserAction;
-    readonly adminId?: string;
+    readonly adminId: string;
     readonly adminUsername: string;
-    readonly affectedUserId?: string;
+    readonly affectedUserId: string;
     readonly affectedUsername: string;
 }
 

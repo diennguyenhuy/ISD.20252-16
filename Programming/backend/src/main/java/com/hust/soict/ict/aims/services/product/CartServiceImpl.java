@@ -1,12 +1,12 @@
 package com.hust.soict.ict.aims.services.product;
 
 import com.hust.soict.ict.aims.context.CartContext;
+import com.hust.soict.ict.aims.dto.mapper.Mapper;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.cart.Cart;
 import com.hust.soict.ict.aims.dto.response.CartResponse;
 import com.hust.soict.ict.aims.models.entities.product.Product;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
-import com.hust.soict.ict.aims.dto.mapper.CartMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,11 +24,11 @@ import java.util.UUID;
 class CartServiceImpl implements CartService {
     private final ProductRepository productRepository;
     private final CartContext cartContext;
-    private final CartMapper cartMapper;
+    private final Mapper cartMapper;
 
     @Override
     public CartResponse getOrCreateCart() {
-        return cartMapper.toCartResponse(cartContext.getOrCreateCart());
+        return map(cartContext.getOrCreateCart());
     }
 
     @Override
@@ -42,7 +42,7 @@ class CartServiceImpl implements CartService {
         cart.addItem(product, quantity);
 
         log.debug("Item added successfully!");
-        return cartMapper.toCartResponse(cart);
+        return map(cart);
     }
 
     @Override
@@ -51,7 +51,7 @@ class CartServiceImpl implements CartService {
         Cart cart = cartContext.getOrCreateCart();
         cart.updateItem(productId, quantity);
         log.debug("Item updated successfully!");
-        return cartMapper.toCartResponse(cart);
+        return map(cart);
     }
 
     @Override
@@ -60,7 +60,7 @@ class CartServiceImpl implements CartService {
         Cart cart = cartContext.getOrCreateCart();
         cart.removeItem(productId);
         log.debug("Item removed successfully!");
-        return cartMapper.toCartResponse(cart);
+        return map(cart);
     }
 
     @Override
@@ -69,6 +69,10 @@ class CartServiceImpl implements CartService {
         Cart cart = cartContext.getOrCreateCart();
         cart.clear();
         log.debug("Cart cleared successfully!");
-        return cartMapper.toCartResponse(cart);
+        return map(cart);
+    }
+
+    private CartResponse map(Cart cart) {
+        return cartMapper.map(cart, CartResponse.class);
     }
 }

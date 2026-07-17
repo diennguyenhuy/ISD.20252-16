@@ -18,17 +18,17 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Immutable
 public abstract class ProductAuditLog extends AuditLog {
-    @Column(updatable = false)
-    protected UUID managerId;
+    @Column(updatable = false, nullable = false)
+    private UUID managerId;
 
     @Column(updatable = false, nullable = false)
-    protected String managerUsername;
-
-    @Column(updatable = false)
-    protected UUID productId;
+    private String managerUsername;
 
     @Column(updatable = false, nullable = false)
-    protected String productTitle;
+    private UUID productId;
+
+    @Column(updatable = false, nullable = false)
+    private String productTitle;
 
     protected ProductAuditLog(User manager, Product product) {
         super();

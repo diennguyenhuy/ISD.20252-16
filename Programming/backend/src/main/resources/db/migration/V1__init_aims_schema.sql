@@ -106,12 +106,14 @@ CREATE TABLE IF NOT EXISTS "order"(
 
 CREATE TABLE IF NOT EXISTS order_item(
     order_id		UUID REFERENCES "order"(id) ON DELETE CASCADE,
-    product_id		UUID REFERENCES product(id) ON DELETE CASCADE,
+    product_reference_id UUID,
+    product_id		UUID REFERENCES product(id) ON DELETE SET NULL,
     product_name	VARCHAR(255) NOT NULL,
     quantity		INT NOT NULL,
     unit_price		BIGINT NOT NULL,
     unit_weight		NUMERIC(10, 3) NOT NULL,
-    PRIMARY KEY (order_id, product_id)
+    PRIMARY KEY (order_id, product_reference_id),
+    UNIQUE (order_id, product_id)
 );
 
 CREATE TABLE IF NOT EXISTS delivery_information(
@@ -165,9 +167,9 @@ CREATE TABLE IF NOT EXISTS user_roles(
 CREATE TABLE IF NOT EXISTS product_log(
     id			        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     action		        VARCHAR(20) NOT NULL,
-    manager_id	        UUID REFERENCES "user"(id) ON DELETE SET NULL,
+    manager_id	        UUID NOT NULL,
     manager_username    VARCHAR(255) NOT NULL,
-    product_id	        UUID REFERENCES product(id) ON DELETE SET NULL,
+    product_id	        UUID NOT NULL,
     product_title       VARCHAR(255) NOT NULL,
     timestamp	        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -186,9 +188,9 @@ CREATE TABLE IF NOT EXISTS stock_adjust_log(
     old_stock	        INT NOT NULL,
     new_stock	        INT NOT NULL,
     reason		        TEXT NOT NULL,
-    manager_id	        UUID REFERENCES "user"(id) ON DELETE SET NULL,
+    manager_id	        UUID NOT NULL,
     manager_username    VARCHAR(255) NOT NULL,
-    product_id	        UUID REFERENCES product(id) ON DELETE SET NULL,
+    product_id	        UUID NOT NULL,
     product_title       VARCHAR(255) NOT NULL,
     timestamp	        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -196,9 +198,9 @@ CREATE TABLE IF NOT EXISTS stock_adjust_log(
 CREATE TABLE IF NOT EXISTS admin_log(
     id					UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     action				VARCHAR(20) NOT NULL,
-    admin_id			UUID REFERENCES "user"(id) ON DELETE SET NULL,
+    admin_id			UUID NOT NULL,
     admin_username      VARCHAR(255) NOT NULL,
-    affected_user_id	UUID REFERENCES "user"(id) ON DELETE SET NULL,
+    affected_user_id	UUID NOT NULL,
     affected_username   VARCHAR(255) NOT NULL,
     timestamp			TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

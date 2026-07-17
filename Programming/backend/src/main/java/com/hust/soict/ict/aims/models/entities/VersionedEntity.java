@@ -14,13 +14,13 @@ import java.time.Instant;
 @NoArgsConstructor
 public abstract class VersionedEntity {
     @Version
-    protected Long version;
+    private Long version;
 
     @CreationTimestamp @Immutable
     @Column(updatable = false, nullable = false)
-    protected Instant createdAt;
+    private Instant createdAt;
 
     @UpdateTimestamp
     @Column(nullable = false)
-    protected Instant updatedAt;
+    private Instant updatedAt;
 }

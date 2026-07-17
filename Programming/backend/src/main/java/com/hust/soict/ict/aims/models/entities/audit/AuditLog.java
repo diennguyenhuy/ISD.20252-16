@@ -18,9 +18,9 @@ public abstract class AuditLog {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false)
-    protected UUID id;
+    private UUID id;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
-    protected Instant timestamp;
+    private Instant timestamp;
 }

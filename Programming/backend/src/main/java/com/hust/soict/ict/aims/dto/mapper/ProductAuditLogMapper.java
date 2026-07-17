@@ -1,29 +1,31 @@
 package com.hust.soict.ict.aims.dto.mapper;
 
 import com.hust.soict.ict.aims.dto.response.audit.ProductAuditLogResponse;
-import com.hust.soict.ict.aims.dto.response.audit.ProductEditDetailResponse;
-import com.hust.soict.ict.aims.dto.response.audit.ProductLogResponse;
-import com.hust.soict.ict.aims.dto.response.audit.StockAdjustLogResponse;
 import com.hust.soict.ict.aims.models.entities.audit.ProductAuditLog;
-import com.hust.soict.ict.aims.models.entities.audit.ProductEditDetail;
-import com.hust.soict.ict.aims.models.entities.audit.ProductLog;
-import com.hust.soict.ict.aims.models.entities.audit.StockAdjustLog;
-import org.mapstruct.*;
 
-@Mapper(
-        componentModel = MappingConstants.ComponentModel.SPRING,
-        unmappedTargetPolicy = ReportingPolicy.ERROR,
-        subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION
-)
-public interface ProductAuditLogMapper {
+import java.util.function.Supplier;
 
-    @SubclassMapping(source = ProductLog.class, target = ProductLogResponse.class)
-    @SubclassMapping(source = StockAdjustLog.class, target = StockAdjustLogResponse.class)
-    ProductAuditLogResponse toProductAuditLogResponse(ProductAuditLog productAuditLog);
+abstract class ProductAuditLogMapper<L extends ProductAuditLog, R extends ProductAuditLogResponse> extends AuditLogMapper<L, R> {
 
-    ProductLogResponse toProductLogResponse(ProductLog productAuditLog);
+    protected ProductAuditLogMapper(Supplier<R> responseSupplier) {
+        super(responseSupplier);
+    }
 
-    StockAdjustLogResponse toStockAdjustLogResponse(StockAdjustLog stockAdjustLog);
+    @Override
+    public R map(L source) {
+        R response = super.map(source);
 
-    ProductEditDetailResponse toProductEditDetailResponse(ProductEditDetail productEditDetail);
+        response.setManagerId(source.getManagerId());
+        response.setManagerUsername(source.getManagerUsername());
+        response.setProductId(source.getProductId());
+        response.setProductTitle(source.getProductTitle());
+
+        return response;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Class<R> getTargetClass() {
+        return (Class<R>) ProductAuditLogResponse.class;
+    }
 }

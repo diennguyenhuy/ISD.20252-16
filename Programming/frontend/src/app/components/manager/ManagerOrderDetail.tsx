@@ -58,8 +58,6 @@ export default function ManagerOrderDetail() {
     const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
     const [isUpdating, setIsUpdating] = useState(false);
 
-    const hasMissingProducts = order?.items.length != order?.totalItemCount;
-
     // ── Data fetching ────────────────────────────────────────────────────────
     useEffect(() => {
         if (!id) return;
@@ -155,7 +153,7 @@ export default function ManagerOrderDetail() {
             </div>
 
             {/* ── Shared display cards ── */}
-            <OrderItemList items={order.items} invoice={order.invoice} isManagerScreen={true} hasMissingProducts={hasMissingProducts}/>
+            <OrderItemList items={order.items} invoice={order.invoice} isManagerScreen={true} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <ShippingInfoCard delivery={order.deliveryInformation} />
@@ -196,7 +194,7 @@ export default function ManagerOrderDetail() {
                         </button>
                         <button
                             onClick={() => setConfirmAction('APPROVED')}
-                            disabled={hasMissingProducts}
+                            disabled={order.items.some(i => !i.productId)}
                             className="flex-1 py-3.5 px-6 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-emerald-600"
                         >
                             <CheckCircle2 size={18} /> Approve Order
