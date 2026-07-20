@@ -55,20 +55,7 @@ public class CD extends Product {
         this.tracks = new ArrayList<>(Objects.requireNonNull(builder.tracks, "List of tracks cannot be null"));
     }
 
-    @Override
-    public Builder toBuilder() {
-        return new Builder(this);
-    }
-
-    private void apply(Builder builder) {
-        super.apply(builder);
-        Optional.ofNullable(builder.genre).ifPresent(v -> this.genre = v);
-        Optional.ofNullable(builder.artists).ifPresent(v -> this.artists = new ArrayList<>(v));
-        Optional.ofNullable(builder.recordLabel).ifPresent(v -> this.recordLabel = v);
-        Optional.ofNullable(builder.tracks).ifPresent(v -> this.tracks = new ArrayList<>(v));
-    }
-
-    public static class Builder extends Product.Builder<CD, Builder> {
+    public static class Builder extends Product.Builder<Builder> {
         private LocalDate releaseDate;
         private String genre;
         private List<String> artists;
@@ -79,10 +66,6 @@ public class CD extends Product {
             super();
         }
 
-        private Builder(CD updatingCD) {
-            super(updatingCD);
-        }
-
         @Override
         protected Builder self() {
             return this;
@@ -90,10 +73,7 @@ public class CD extends Product {
 
         @Override
         public CD build() {
-            if (updatingProduct != null) {
-                updatingProduct.apply(this);
-                return updatingProduct;
-            } else return new CD(this);
+            return new CD(this);
         }
 
         public Builder releaseDate(LocalDate releaseDate) {
@@ -133,9 +113,16 @@ public class CD extends Product {
     }
 
     static {
-        registerUpdateCommand(CDUpdateCommand.Genre.class, CD.class, (p, c) -> p.genre = c.newValue());
-        registerUpdateCommand(CDUpdateCommand.Artists.class, CD.class, (p, c) -> p.artists = new ArrayList<>(c.newValue()));
-        registerUpdateCommand(CDUpdateCommand.RecordLabel.class, CD.class, (p, c) -> p.recordLabel = c.newValue());
-        registerUpdateCommand(CDUpdateCommand.Tracks.class, CD.class, (p, c) -> p.tracks = new ArrayList<>(c.newValue()));
+        registerUpdateCommand(UpdateCommand.Genre.class, CD.class, (p, c) -> p.genre = c.newValue());
+        registerUpdateCommand(UpdateCommand.Artists.class, CD.class, (p, c) -> p.artists = new ArrayList<>(c.newValue()));
+        registerUpdateCommand(UpdateCommand.RecordLabel.class, CD.class, (p, c) -> p.recordLabel = c.newValue());
+        registerUpdateCommand(UpdateCommand.Tracks.class, CD.class, (p, c) -> p.tracks = new ArrayList<>(c.newValue()));
+    }
+
+    public interface UpdateCommand<T> extends Product.UpdateCommand<T> {
+        record Genre(String newValue) implements UpdateCommand<String> {}
+        record Artists(List<String> newValue) implements UpdateCommand<List<String>> {}
+        record RecordLabel(String newValue) implements UpdateCommand<String> {}
+        record Tracks(List<Track> newValue) implements UpdateCommand<List<Track>> {}
     }
 }

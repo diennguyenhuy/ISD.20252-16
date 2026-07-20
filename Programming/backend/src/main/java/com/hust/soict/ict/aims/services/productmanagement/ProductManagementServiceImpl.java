@@ -76,9 +76,7 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
             return new ProductNotFoundException(id);
         });
 
-        if (dto.getCurrentPrice() != null) {
-            product.updatePrice(dto.getCurrentPrice()); // Validate price 30% - 150%
-        }
+        dto.getCurrentPrice().ifDefined(product::updatePrice);
 
         Product updatedProduct = productFactory.updateProduct(product, dto);
         Product savedProduct = productRepo.save(updatedProduct);

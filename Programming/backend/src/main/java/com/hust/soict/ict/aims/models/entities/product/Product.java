@@ -131,7 +131,7 @@ public abstract class Product extends VersionedEntity {
         status = Status.ACTIVE;
     }
 
-    protected Product(Builder<?, ?> builder) {
+    protected Product(Builder<?> builder) {
         this.title = Objects.requireNonNull(builder.title, "Product title cannot be null");
         this.category = Objects.requireNonNull(builder.category, "Product category cannot be null");
         this.description = builder.description;
@@ -147,21 +147,7 @@ public abstract class Product extends VersionedEntity {
         this.imageURL = builder.imageURL;
     }
 
-    public abstract Builder<?, ?> toBuilder();
-
-    protected final void apply(Builder<?, ?> builder) {
-        Optional.ofNullable(builder.title).ifPresent(v -> this.title = v);
-        Optional.ofNullable(builder.category).ifPresent(v -> this.category = v);
-        Optional.ofNullable(builder.description).ifPresent(v -> this.description = v);
-        Optional.ofNullable(builder.height).ifPresent(v -> this.height = v);
-        Optional.ofNullable(builder.width).ifPresent(v -> this.width = v);
-        Optional.ofNullable(builder.length).ifPresent(v -> this.length = v);
-        Optional.ofNullable(builder.weight).ifPresent(v -> this.weight = v);
-        Optional.ofNullable(builder.imageURL).ifPresent(v -> this.imageURL = v);
-    }
-
-    public static abstract class Builder<P extends Product, B extends Builder<P, B>> {
-        protected final P updatingProduct;
+    public static abstract class Builder<B extends Builder<B>> {
         private String title;
         private String category;
         private String description;
@@ -175,17 +161,11 @@ public abstract class Product extends VersionedEntity {
         private Integer stockQuantity;
         private String imageURL;
 
-        protected Builder() {
-            this.updatingProduct = null;
-        }
-
-        protected Builder(P updatingProduct) {
-            this.updatingProduct = updatingProduct;
-        }
+        protected Builder() {}
 
         protected abstract B self();
 
-        public abstract P build();
+        public abstract Product build();
 
         public B title(String title) {
             this.title = title;
@@ -248,19 +228,15 @@ public abstract class Product extends VersionedEntity {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public final void update(ProductUpdateCommand<?> command) {
-        ((BiConsumer<Product, ProductUpdateCommand<?>>) updateCommands.get(command.getClass())).accept(this, command);
+    public final void update(UpdateCommand<?> command) {
+        updateCommands.get(command.getClass()).accept(this, command);
     }
 
     private static final Map<
-            Class<? extends ProductUpdateCommand<?>>,
-            BiConsumer<
-                    ? extends Product,
-                    ? extends ProductUpdateCommand<?>
-                    >
+            Class<? extends UpdateCommand<?>>,
+            BiConsumer<Product, UpdateCommand<?>>
             > updateCommands = new HashMap<>();
-    protected static <C extends ProductUpdateCommand<?>, P extends Product>
+    protected static <C extends UpdateCommand<?>, P extends Product>
     void registerUpdateCommand(
             Class<C> commandType,
             Class<P> productType,
@@ -269,14 +245,26 @@ public abstract class Product extends VersionedEntity {
         updateCommands.put(commandType, (p, c) -> consumer.accept(productType.cast(p), commandType.cast(c)));
     }
     static {
-        registerUpdateCommand(ProductUpdateCommand.Title.class, Product.class, (p, c) -> p.title = c.newValue());
-        registerUpdateCommand(ProductUpdateCommand.Category.class, Product.class, (p, c) -> p.category = c.newValue());
-        registerUpdateCommand(ProductUpdateCommand.Description.class, Product.class, (p, c) -> p.description = c.newValue());
-        registerUpdateCommand(ProductUpdateCommand.Height.class, Product.class, (p, c) -> p.height = c.newValue());
-        registerUpdateCommand(ProductUpdateCommand.Width.class, Product.class, (p, c) -> p.width = c.newValue());
-        registerUpdateCommand(ProductUpdateCommand.Length.class, Product.class, (p, c) -> p.length = c.newValue());
-        registerUpdateCommand(ProductUpdateCommand.Weight.class, Product.class, (p, c) -> p.weight = c.newValue());
-        registerUpdateCommand(ProductUpdateCommand.CurrentPrice.class, Product.class, (p, c) -> p.updatePrice(c.newValue()));
-        registerUpdateCommand(ProductUpdateCommand.ImageUrl.class, Product.class, (p, c) -> p.imageURL = c.newValue());
+        registerUpdateCommand(UpdateCommand.Title.class, Product.class, (p, c) -> p.title = c.newValue());
+        registerUpdateCommand(UpdateCommand.Category.class, Product.class, (p, c) -> p.category = c.newValue());
+        registerUpdateCommand(UpdateCommand.Description.class, Product.class, (p, c) -> p.description = c.newValue());
+        registerUpdateCommand(UpdateCommand.Height.class, Product.class, (p, c) -> p.height = c.newValue());
+        registerUpdateCommand(UpdateCommand.Width.class, Product.class, (p, c) -> p.width = c.newValue());
+        registerUpdateCommand(UpdateCommand.Length.class, Product.class, (p, c) -> p.length = c.newValue());
+        registerUpdateCommand(UpdateCommand.Weight.class, Product.class, (p, c) -> p.weight = c.newValue());
+        registerUpdateCommand(UpdateCommand.ImageUrl.class, Product.class, (p, c) -> p.imageURL = c.newValue());
+    }
+
+    public interface UpdateCommand<T> {
+        T newValue();
+
+        record Title(String newValue) implements UpdateCommand<String> {}
+        record Category(String newValue) implements UpdateCommand<String> {}
+        record Description(String newValue) implements UpdateCommand<String> {}
+        record Height(BigDecimal newValue) implements UpdateCommand<BigDecimal> {}
+        record Width(BigDecimal newValue) implements UpdateCommand<BigDecimal> {}
+        record Length(BigDecimal newValue) implements UpdateCommand<BigDecimal> {}
+        record Weight(BigDecimal newValue) implements UpdateCommand<BigDecimal> {}
+        record ImageUrl(String newValue) implements UpdateCommand<String> {}
     }
 }

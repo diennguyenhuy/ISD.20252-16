@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-record MapperKey<S, T>(Class<S> sourceType, T targetType) {}
+record MapperKey<S, T>(Class<S> sourceType, Class<T> targetType) {}
 
 @Component
 public class Mapper {

@@ -1,8 +1,6 @@
 package com.hust.soict.ict.aims.services.productmanagement;
 
-import com.hust.soict.ict.aims.dto.request.AdjustStockRequest;
-import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
-import com.hust.soict.ict.aims.dto.request.UpdateProductRequest;
+import com.hust.soict.ict.aims.dto.request.*;
 import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
 import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
@@ -105,8 +103,9 @@ class LoggingProductManagementService implements ProductManagementService {
                 try {
                     field.setAccessible(true);
                     String fieldName = field.getName();
-                    Object value = field.get(dto);
-                    if (value != null) {
+                    // All Update DTOs have UpdateFieldRequest for each field so down-casting is safe
+                    UpdateFieldRequest<?> value = (UpdateFieldRequest<?>) field.get(dto);
+                    if (value.isDefined()) {
                         requestedFieldNames.add(fieldName);
                     }
                 } catch (IllegalAccessException e) {

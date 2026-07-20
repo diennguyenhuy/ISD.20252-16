@@ -46,19 +46,7 @@ public class Book extends PrintableProduct {
         this.genre = builder.genre;
     }
 
-    @Override
-    public Builder toBuilder() {
-        return new Builder(this);
-    }
-
-    private void apply(Builder builder) {
-        super.apply(builder);
-        Optional.ofNullable(builder.authors).ifPresent(v -> this.authors = new ArrayList<>(v));
-        Optional.ofNullable(builder.numberOfPages).ifPresent(v -> this.numberOfPages = v);
-        Optional.ofNullable(builder.genre).ifPresent(v -> this.genre = v);
-    }
-
-    public static class Builder extends PrintableProduct.Builder<Book, Builder> {
+    public static class Builder extends PrintableProduct.Builder<Builder> {
         private List<String> authors;
         private CoverType coverType;
         private Integer numberOfPages;
@@ -68,10 +56,6 @@ public class Book extends PrintableProduct {
             super();
         }
 
-        private Builder(Book updatingBook) {
-            super(updatingBook);
-        }
-
         @Override
         protected Builder self() {
             return this;
@@ -79,10 +63,7 @@ public class Book extends PrintableProduct {
 
         @Override
         public Book build() {
-            if (updatingProduct != null) {
-                updatingProduct.apply(this);
-                return updatingProduct;
-            } else return new Book(this);
+            return new Book(this);
         }
 
         public Builder authors(Collection<String> authors) {
@@ -117,8 +98,14 @@ public class Book extends PrintableProduct {
     }
 
     static {
-        registerUpdateCommand(BookUpdateCommand.Authors.class, Book.class, (p, c) -> p.authors = new ArrayList<>(c.newValue()));
-        registerUpdateCommand(BookUpdateCommand.NumberOfPages.class, Book.class, (p, c) -> p.numberOfPages = c.newValue());
-        registerUpdateCommand(BookUpdateCommand.Genre.class, Book.class, (p, c) -> p.genre = c.newValue());
+        registerUpdateCommand(UpdateCommand.Authors.class, Book.class, (p, c) -> p.authors = new ArrayList<>(c.newValue()));
+        registerUpdateCommand(UpdateCommand.NumberOfPages.class, Book.class, (p, c) -> p.numberOfPages = c.newValue());
+        registerUpdateCommand(UpdateCommand.Genre.class, Book.class, (p, c) -> p.genre = c.newValue());
+    }
+
+    public interface UpdateCommand<T> extends PrintableProduct.UpdateCommand<T> {
+        record Authors(List<String> newValue) implements UpdateCommand<List<String>> {}
+        record NumberOfPages(Integer newValue) implements UpdateCommand<Integer> {}
+        record Genre(String newValue) implements UpdateCommand<String> {}
     }
 }

@@ -1,7 +1,5 @@
 package com.hust.soict.ict.aims.dto.mapper;
 
-import lombok.Getter;
-
 import java.util.function.Supplier;
 
 public abstract class AbstractMapper<S, T> {
