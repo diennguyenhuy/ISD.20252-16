@@ -1,5 +1,6 @@
 import { apiClient } from "./client";
 import type { ProductSummary, Product } from "../models/product.interface";
+import type { Page } from "./Page";
 
 export interface ProductFilterParams {
     title: string | undefined;
@@ -21,7 +22,7 @@ const HomepageService = {
         if (category) requestURL += `&category=${category}`;
         if (minPrice) requestURL += `&minPrice=${minPrice}`;
         if (maxPrice) requestURL += `&maxPrice=${maxPrice}`;
-        const response = await apiClient.get(requestURL);
+        const response = await apiClient.get<Page<ProductSummary>>(requestURL);
         return response.data.content;
     },
 

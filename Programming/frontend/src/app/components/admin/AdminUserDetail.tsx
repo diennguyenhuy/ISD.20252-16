@@ -116,7 +116,7 @@ export default function AdminUserDetail() {
     const assignRole = () => {
         if (!user) return;
         handleAction(async () => {
-            await AdminService.assignRoles(user.id, { roles: newRoles });
+            await AdminService.assignRoles(user.id, newRoles);
             setShowRoleAssign(false);
         });
     };

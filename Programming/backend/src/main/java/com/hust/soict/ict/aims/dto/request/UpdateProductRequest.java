@@ -1,6 +1,5 @@
 package com.hust.soict.ict.aims.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.hust.soict.ict.aims.constraints.NullOrNotBlank;
 import jakarta.validation.constraints.NotBlank;
@@ -11,12 +10,6 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "productType")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = UpdateBookRequest.class, name = "Book"),
-        @JsonSubTypes.Type(value = UpdateCDRequest.class, name = "CD"),
-        @JsonSubTypes.Type(value = UpdateDVDRequest.class, name = "DVD"),
-        @JsonSubTypes.Type(value = UpdateNewspaperRequest.class, name = "Newspaper")
-})
 @Data
 public abstract class UpdateProductRequest {
     private UpdateFieldRequest<@NotBlank(message = "Title must not be blank if provided") String>

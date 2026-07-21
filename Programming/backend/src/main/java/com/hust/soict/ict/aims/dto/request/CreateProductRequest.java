@@ -1,6 +1,5 @@
 package com.hust.soict.ict.aims.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.hust.soict.ict.aims.constraints.NullOrNotBlank;
 import com.hust.soict.ict.aims.constraints.ValidPriceRange;
@@ -11,12 +10,6 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "productType")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = CreateBookRequest.class, name = "Book"),
-        @JsonSubTypes.Type(value = CreateCDRequest.class, name = "CD"),
-        @JsonSubTypes.Type(value = CreateDVDRequest.class, name = "DVD"),
-        @JsonSubTypes.Type(value = CreateNewspaperRequest.class, name = "Newspaper")
-})
 @Data
 @ValidPriceRange(
         message = "Current price must be within "

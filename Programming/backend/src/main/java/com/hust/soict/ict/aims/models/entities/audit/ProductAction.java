@@ -5,5 +5,6 @@ public enum ProductAction {
     UPDATE,
     DELETE,
     DEACTIVATE,
-    ACTIVATE
+    ACTIVATE,
+    STOCK_ADJUST
 }

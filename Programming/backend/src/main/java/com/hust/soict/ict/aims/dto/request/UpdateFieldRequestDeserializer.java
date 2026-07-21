@@ -1,31 +1,23 @@
 package com.hust.soict.ict.aims.dto.request;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.*;
+import tools.jackson.databind.module.SimpleModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.IOException;
-
-class UpdateFieldRequestDeserializer extends JsonDeserializer<UpdateFieldRequest<?>> implements ContextualDeserializer {
-    private final JsonDeserializer<?> valueDeserializer;
+class UpdateFieldRequestDeserializer extends ValueDeserializer<UpdateFieldRequest<?>> {
+    private final ValueDeserializer<?> valueDeserializer;
 
     UpdateFieldRequestDeserializer() {
         this.valueDeserializer = null;
     }
 
-    private UpdateFieldRequestDeserializer(JsonDeserializer<?> valueDeserializer) {
-        this.valueDeserializer = valueDeserializer;
-    }
-
     @Override
-    public UpdateFieldRequest<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
-        if (p.getCurrentToken() == JsonToken.VALUE_NULL) {
+    public UpdateFieldRequest<?> deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
+        if (p.currentToken() == JsonToken.VALUE_NULL) {
             return UpdateFieldRequest.defined(null);
         }
 
@@ -34,21 +26,25 @@ class UpdateFieldRequestDeserializer extends JsonDeserializer<UpdateFieldRequest
         return UpdateFieldRequest.defined(value);
     }
 
+    private UpdateFieldRequestDeserializer(ValueDeserializer<?> valueDeserializer) {
+        this.valueDeserializer = valueDeserializer;
+    }
+
     @Override
-    public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) throws JsonMappingException {
+    public ValueDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) {
         JavaType wrapperType = property != null ? property.getType() : ctxt.getContextualType();
 
         JavaType containedType = wrapperType.containedType(0);
 
         if (containedType == null) {
-            throw JsonMappingException.from(
-                    ctxt,
+            return ctxt.reportBadDefinition(
+                    wrapperType,
                     "UpdateFieldRequest deserializer cannot find contained type. " +
                             "If you write UpdateFieldRequest, must specified its concrete generic type, e.g. UpdateFieldRequest<String>, not UpdateFieldRequest."
             );
         }
 
-        JsonDeserializer<?> delegate = ctxt.findContextualValueDeserializer(containedType, property);
+        ValueDeserializer<?> delegate = ctxt.findContextualValueDeserializer(containedType, property);
 
         return new UpdateFieldRequestDeserializer(delegate);
     }
@@ -57,7 +53,7 @@ class UpdateFieldRequestDeserializer extends JsonDeserializer<UpdateFieldRequest
 @Configuration
 class UpdateFieldRequestDeserializerConfiguration {
     @Bean
-    Module fieldUpdateRequestModule() {
+    JacksonModule fieldUpdateRequestModule() {
         SimpleModule module = new SimpleModule();
 
         module.addDeserializer(UpdateFieldRequest.class, new UpdateFieldRequestDeserializer());
