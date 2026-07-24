@@ -2,7 +2,8 @@ package com.hust.soict.ict.aims.controllers.productmanager;
 
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.models.entities.order.Order;
-import com.hust.soict.ict.aims.services.ordermanagement.OrderManagementService;
+import com.hust.soict.ict.aims.services.ordermanagement.OrderApprovalService;
+import com.hust.soict.ict.aims.services.ordermanagement.OrderRejectionService;
 import com.hust.soict.ict.aims.services.ordermanagement.OrderQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,7 +19,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderManagementController {
     private final OrderQueryService orderQueryService;
-    private final OrderManagementService orderManagementService;
+    private final OrderApprovalService orderApprovalService;
+    private final OrderRejectionService orderRejectionService;
 
     @GetMapping("/pending")
     public Page<OrderResponse> getPendingOrders(
@@ -48,11 +50,11 @@ public class OrderManagementController {
 
     @PostMapping("/{orderId}/approve")
     public OrderResponse approveOrder(@PathVariable UUID orderId) {
-        return orderManagementService.approveOrder(orderId);
+        return orderApprovalService.approveOrder(orderId);
     }
 
     @PostMapping("/{orderId}/reject")
     public OrderResponse rejectOrder(@PathVariable UUID orderId) {
-        return orderManagementService.rejectOrder(orderId);
+        return orderRejectionService.rejectOrder(orderId);
     }
 }

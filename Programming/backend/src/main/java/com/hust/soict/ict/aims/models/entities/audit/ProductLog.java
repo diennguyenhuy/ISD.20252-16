@@ -8,33 +8,36 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
 
-import java.util.*;
+import java.util.UUID;
 
 @Immutable @Entity
 @Table(name = "product_log")
+@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ProductLog extends ProductAuditLog {
+public class ProductLog extends AuditLog {
     @Column(nullable = false, updatable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private ProductAction action;
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "product_update_log", joinColumns = @JoinColumn(name = "log_id"))
-    @OrderColumn(name = "field_number")
-    private List<ProductEditDetail> details = new ArrayList<>();
+    @Column(updatable = false, nullable = false)
+    private UUID managerId;
 
-    public ProductLog(User manager, Product product, ProductAction action) {
-        if (action == ProductAction.UPDATE) {
-            throw new IllegalArgumentException("Edit product log action must come with a list of edit details. Use the other constructor");
-        }
-        super(manager, product);
+    @Column(updatable = false, nullable = false)
+    private String managerUsername;
+
+    @Column(updatable = false, nullable = false)
+    private UUID productId;
+
+    @Column(updatable = false, nullable = false)
+    private String productTitle;
+
+    protected ProductLog(User manager, Product product, ProductAction action) {
+        super();
+        this.managerId = manager.getId();
+        this.managerUsername = manager.getUsername();
+        this.productId = product.getId();
+        this.productTitle = product.getTitle();
         this.action = action;
-    }
-
-    public ProductLog(User manager, Product product, List<ProductEditDetail> details) {
-        super(manager, product);
-        this.action = ProductAction.UPDATE;
-        this.details = new ArrayList<>(details);
     }
 }

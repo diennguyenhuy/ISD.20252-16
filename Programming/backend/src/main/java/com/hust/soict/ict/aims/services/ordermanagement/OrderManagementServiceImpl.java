@@ -3,7 +3,6 @@ package com.hust.soict.ict.aims.services.ordermanagement;
 import com.hust.soict.ict.aims.dto.mapper.Mapper;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.exceptions.OrderApprovalException;
-import com.hust.soict.ict.aims.exceptions.OrderCorruptionException;
 import com.hust.soict.ict.aims.exceptions.OrderNotFoundException;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.product.Product;
@@ -21,7 +20,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-class OrderManagementServiceImpl implements OrderQueryService, OrderManagementService {
+class OrderManagementServiceImpl implements OrderQueryService, OrderRejectionService, OrderApprovalService {
     private final OrderRepository orderRepository;
     private final Mapper orderMapper;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -50,7 +49,7 @@ class OrderManagementServiceImpl implements OrderQueryService, OrderManagementSe
 
     @Override
     @Transactional
-    public OrderResponse approveOrder(UUID id) throws OrderApprovalException, OrderCorruptionException {
+    public OrderResponse approveOrder(UUID id) throws OrderApprovalException {
         Order order = orderRepository.findByIdAndStatus(id, Order.Status.PENDING)
                 .orElseThrow(() -> new OrderNotFoundException(id, Order.Status.PENDING.name()));
 

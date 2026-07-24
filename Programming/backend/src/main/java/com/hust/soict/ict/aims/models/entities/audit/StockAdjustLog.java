@@ -6,13 +6,12 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Immutable;
 
-@Immutable @Entity
+@Entity
 @Table(name = "stock_adjust_log")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class StockAdjustLog extends ProductAuditLog {
+public class StockAdjustLog extends ProductLog {
     @Column(nullable = false, updatable = false)
     private Integer oldStock;
     @Column(nullable = false, updatable = false)
@@ -21,8 +20,13 @@ public class StockAdjustLog extends ProductAuditLog {
     @Column(columnDefinition = "TEXT", nullable = false, updatable = false)
     private String reason;
 
+    @Override
+    public ProductAction getAction() {
+        return ProductAction.STOCK_ADJUST;
+    }
+
     public StockAdjustLog(User manager, Product product, int oldStock, int newStock, String reason) {
-        super(manager, product);
+        super(manager, product, ProductAction.STOCK_ADJUST);
         this.oldStock = oldStock;
         this.newStock = newStock;
         this.reason = reason;

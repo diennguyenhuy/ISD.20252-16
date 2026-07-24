@@ -14,7 +14,7 @@ abstract class ProductSummaryMapper<P extends Product> extends AbstractMapper<P,
     protected abstract List<String> mapCreators(P product);
 
     @Override
-    public Class<ProductSummary> getTargetClass() {
+    public final Class<ProductSummary> getTargetClass() {
         return ProductSummary.class;
     }
 

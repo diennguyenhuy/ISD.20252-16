@@ -14,6 +14,10 @@ abstract class AuditLogMapper<L extends AuditLog, R extends AuditLogResponse> ex
     @Override
     public R map(L source) {
         R response = super.map(source);
+        if (response == null) {
+            return null;
+        }
+
         response.setId(source.getId());
         response.setTimestamp(source.getTimestamp());
         return response;

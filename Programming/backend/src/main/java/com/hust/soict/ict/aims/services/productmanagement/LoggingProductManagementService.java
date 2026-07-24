@@ -4,14 +4,10 @@ import com.hust.soict.ict.aims.dto.request.*;
 import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
 import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
-import com.hust.soict.ict.aims.models.entities.audit.ProductAction;
-import com.hust.soict.ict.aims.models.entities.audit.ProductEditDetail;
-import com.hust.soict.ict.aims.models.entities.audit.ProductLog;
-import com.hust.soict.ict.aims.models.entities.audit.StockAdjustLog;
+import com.hust.soict.ict.aims.models.entities.audit.*;
 import com.hust.soict.ict.aims.models.entities.product.Product;
 import com.hust.soict.ict.aims.repositories.ProductLogRepository;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
-import com.hust.soict.ict.aims.repositories.StockAdjustLogRepository;
 import com.hust.soict.ict.aims.security.AuthenticationFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +24,6 @@ class LoggingProductManagementService implements ProductManagementService {
 
     private final ProductRepository productRepository;
     private final AuthenticationFacade authenticationFacade;
-    private final StockAdjustLogRepository stockAdjustLogRepository;
     private final ProductLogRepository productLogRepository;
 
     @Override
@@ -46,11 +41,7 @@ class LoggingProductManagementService implements ProductManagementService {
                     return new IllegalStateException("Cannot find created product with barcode: " + dto.getBarcode());
                 });
 
-        ProductLog productLog = new ProductLog(
-                authenticationFacade.getCurrentUser(),
-                product,
-                ProductAction.CREATE
-        );
+        ProductLog productLog = ProductAction.CREATE.log(authenticationFacade.getCurrentUser(), product);
         productLogRepository.save(productLog);
 
         log.info(
@@ -62,7 +53,7 @@ class LoggingProductManagementService implements ProductManagementService {
         return result;
     }
 
-    private static Map<String, Object> extractUpdatingFields(Set<String> requestedFieldNames, Object object) {
+    private static Map<String, ?> extractUpdatingFields(Set<String> requestedFieldNames, Object object) {
         Map<String, Object> valueMap = new HashMap<>();
 
         for (Class<?> clazz = object.getClass(); clazz != Object.class; clazz = clazz.getSuperclass()) {
@@ -121,27 +112,18 @@ class LoggingProductManagementService implements ProductManagementService {
                     return new ProductNotFoundException(id);
                 });
 
-        Map<String, Object> oldValueMap = extractUpdatingFields(requestedFieldNames, product);
+        Map<String, ?> oldValueMap = extractUpdatingFields(requestedFieldNames, product);
 
         var result = productManagementService.updateProduct(id, dto);
 
-        Map<String, Object> newValueMap = extractUpdatingFields(requestedFieldNames, result);
+        Map<String, ?> newValueMap = extractUpdatingFields(requestedFieldNames, result);
 
-        List<ProductEditDetail> details = new ArrayList<>();
-
-        for (String fieldName : requestedFieldNames) {
-            Object oldValue = oldValueMap.get(fieldName);
-            Object newValue = newValueMap.get(fieldName);
-
-            if (!Objects.equals(oldValue, newValue)) {
-                details.add(new ProductEditDetail(fieldName, Objects.toString(oldValue), Objects.toString(newValue)));
-            }
-        }
-
-        ProductLog productLog = new ProductLog(
+        ProductUpdateLog productLog = new ProductUpdateLog(
                 authenticationFacade.getCurrentUser(),
                 product,
-                details
+                requestedFieldNames,
+                oldValueMap,
+                newValueMap
         );
         productLogRepository.save(productLog);
 
@@ -176,11 +158,7 @@ class LoggingProductManagementService implements ProductManagementService {
                 }
             }
 
-            productLogs.add(new ProductLog(
-                    authenticationFacade.getCurrentUser(),
-                    product,
-                    actualAction
-            ));
+            productLogs.add(actualAction.log(authenticationFacade.getCurrentUser(), product));
 
             log.info(
                     "[AUDIT] Product {}d. ID: {}, Title: {}",
@@ -216,7 +194,7 @@ class LoggingProductManagementService implements ProductManagementService {
                 newStock,
                 adjustStockRequest.getReason()
         );
-        stockAdjustLogRepository.save(stockAdjustLog);
+        productLogRepository.save(stockAdjustLog);
 
         log.info(
                 "[AUDIT SUCCESS] Stock adjustment logged. Product ID: {}, Old Stock: {}, New Stock: {}, Delta: {}",
@@ -237,11 +215,7 @@ class LoggingProductManagementService implements ProductManagementService {
             return new ProductNotFoundException(id);
         });
 
-        ProductLog productLog = new ProductLog(
-                authenticationFacade.getCurrentUser(),
-                product,
-                ProductAction.ACTIVATE
-        );
+        ProductLog productLog = ProductAction.ACTIVATE.log(authenticationFacade.getCurrentUser(), product);
         productLogRepository.save(productLog);
 
         log.info(
@@ -276,11 +250,7 @@ class LoggingProductManagementService implements ProductManagementService {
             }
         }
 
-        ProductLog productLog = new ProductLog(
-                authenticationFacade.getCurrentUser(),
-                product,
-                actualAction
-        );
+        ProductLog productLog = actualAction.log(authenticationFacade.getCurrentUser(), product);
         productLogRepository.save(productLog);
 
         log.info(

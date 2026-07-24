@@ -175,7 +175,11 @@ CREATE TABLE IF NOT EXISTS product_log(
 );
 
 CREATE TABLE IF NOT EXISTS product_update_log(
-    log_id          UUID REFERENCES product_log(id) ON DELETE CASCADE,
+    id      UUID PRIMARY KEY REFERENCES product_log(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS product_update_detail(
+    log_id          UUID REFERENCES product_update_log(id) ON DELETE CASCADE,
     field_number    INT,
     field_name      VARCHAR(255),
     old_value       TEXT,
@@ -184,15 +188,10 @@ CREATE TABLE IF NOT EXISTS product_update_log(
 );
 
 CREATE TABLE IF NOT EXISTS stock_adjust_log(
-    id			        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id			        UUID PRIMARY KEY REFERENCES product_log(id) ON DELETE CASCADE,
     old_stock	        INT NOT NULL,
     new_stock	        INT NOT NULL,
-    reason		        TEXT NOT NULL,
-    manager_id	        UUID NOT NULL,
-    manager_username    VARCHAR(255) NOT NULL,
-    product_id	        UUID NOT NULL,
-    product_title       VARCHAR(255) NOT NULL,
-    timestamp	        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    reason		        TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS admin_log(

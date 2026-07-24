@@ -14,6 +14,9 @@ abstract class PrintableProductMapper<P extends PrintableProduct, D extends Prin
     @Override
     public D map(P source) {
         D productDetail = super.map(source);
+        if (productDetail == null) {
+            return null;
+        }
 
         productDetail.setPublisher(source.getPublisher());
         productDetail.setPublicationDate(source.getPublicationDate());

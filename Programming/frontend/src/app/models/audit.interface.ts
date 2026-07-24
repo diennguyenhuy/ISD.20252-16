@@ -3,18 +3,18 @@ interface AuditLogBase {
     readonly timestamp: string;
 }
 
-interface ProductAuditLogBase extends AuditLogBase {
+interface ProductLogBase extends AuditLogBase {
     readonly managerId: string;
     readonly managerUsername: string;
     readonly productId: string;
     readonly productTitle: string;
+    readonly action: ProductAction;
 }
 
-export type ProductAuditLog = ProductLog | StockAdjustLog;
+export type ProductLog = ProductLogBase | ProductUpdateLog | StockAdjustLog;
 
-export interface ProductLog extends ProductAuditLogBase {
-    readonly action: ProductAction;
-    readonly details?: ProductEditDetail[];
+export interface ProductUpdateLog extends ProductLogBase {
+    readonly details: ProductEditDetail[];
 }
 
 export interface ProductEditDetail {
@@ -23,9 +23,9 @@ export interface ProductEditDetail {
     readonly newValue: string;
 }
 
-export type ProductAction = "CREATE" | "UPDATE" | "DELETE" | "DEACTIVATE" | "ACTIVATE";
+export type ProductAction = "CREATE" | "UPDATE" | "DELETE" | "DEACTIVATE" | "ACTIVATE" | "STOCK_ADJUST";
 
-export interface StockAdjustLog extends ProductAuditLogBase {
+export interface StockAdjustLog extends ProductLogBase {
     readonly oldStock: number;
     readonly newStock: number;
     readonly reason: string;

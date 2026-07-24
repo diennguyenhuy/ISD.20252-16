@@ -31,7 +31,7 @@ public class AdminLog extends AuditLog {
     @Column(nullable = false, updatable = false)
     private String affectedUsername;
 
-    public AdminLog(User admin, User affectedUser, UserAction action) {
+    AdminLog(User admin, User affectedUser, UserAction action) {
         super();
         this.adminId = admin.getId();
         this.adminUsername = admin.getUsername();

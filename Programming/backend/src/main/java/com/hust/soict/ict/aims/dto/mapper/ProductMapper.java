@@ -14,6 +14,9 @@ abstract class ProductMapper<P extends Product, D extends ProductDetail> extends
     @Override
     public D map(P source) {
         D productDetail = super.map(source);
+        if (productDetail == null) {
+            return null;
+        }
 
         productDetail.setId(source.getId());
         productDetail.setTitle(source.getTitle());
@@ -38,7 +41,7 @@ abstract class ProductMapper<P extends Product, D extends ProductDetail> extends
 
     @Override
     @SuppressWarnings("unchecked")
-    public Class<D> getTargetClass() {
+    public final Class<D> getTargetClass() {
         return (Class<D>) ProductDetail.class;
     }
 }

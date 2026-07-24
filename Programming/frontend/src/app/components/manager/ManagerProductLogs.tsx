@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { Activity, Search, Loader2, ArrowRight, PackagePlus, Edit3, Trash2, ShieldAlert, ArchiveRestore, Layers, ExternalLink } from 'lucide-react';
 import { formatDateTime } from '../../data/formatter'; // Adjust path
 import AuditLogService from '../../api/AuditLogService'; // Adjust path
-import type { ProductAuditLog, ProductAction } from '../../models/audit.interface'; // Adjust path
+import type { ProductLog, ProductAction } from '../../models/audit.interface'; // Adjust path
 
 // Visual configuration for different action types
 const ACTION_CONFIG: Record<ProductAction | 'STOCK_ADJUST', { color: string, icon: any, label: string }> = {
@@ -17,7 +17,7 @@ const ACTION_CONFIG: Record<ProductAction | 'STOCK_ADJUST', { color: string, ico
 
 export default function ManagerProductLogs() {
     const navigate = useNavigate();
-    const [logs, setLogs] = useState<ProductAuditLog[]>([]);
+    const [logs, setLogs] = useState<ProductLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
 

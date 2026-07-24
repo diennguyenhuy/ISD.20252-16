@@ -31,11 +31,7 @@ class LoggingAdminService implements AdminService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AccountNotFoundException("User with email " + request.getEmail() + " not found"));
 
-        AdminLog adminLog = new AdminLog(
-                authenticationFacade.getCurrentUser(),
-                user,
-                UserAction.CREATE
-        );
+        AdminLog adminLog = UserAction.CREATE.log(authenticationFacade.getCurrentUser(), user);
         adminLogRepository.save(adminLog);
 
         return result;
@@ -49,11 +45,7 @@ class LoggingAdminService implements AdminService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AccountNotFoundException("User with id " + userId + " not found"));
 
-        AdminLog adminLog = new AdminLog(
-                authenticationFacade.getCurrentUser(),
-                user,
-                UserAction.DEACTIVATE
-        );
+        AdminLog adminLog = UserAction.DEACTIVATE.log(authenticationFacade.getCurrentUser(), user);
         adminLogRepository.save(adminLog);
     }
 
@@ -65,11 +57,7 @@ class LoggingAdminService implements AdminService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AccountNotFoundException("User with id " + userId + " not found"));
 
-        AdminLog adminLog = new AdminLog(
-                authenticationFacade.getCurrentUser(),
-                user,
-                UserAction.ACTIVATE
-        );
+        AdminLog adminLog = UserAction.ACTIVATE.log(authenticationFacade.getCurrentUser(), user);
         adminLogRepository.save(adminLog);
     }
 
@@ -81,11 +69,7 @@ class LoggingAdminService implements AdminService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AccountNotFoundException("User with id " + userId + " not found"));
 
-        AdminLog adminLog = new AdminLog(
-                authenticationFacade.getCurrentUser(),
-                user,
-                UserAction.BLOCK
-        );
+        AdminLog adminLog = UserAction.BLOCK.log(authenticationFacade.getCurrentUser(), user);
         adminLogRepository.save(adminLog);
     }
 
@@ -97,11 +81,7 @@ class LoggingAdminService implements AdminService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AccountNotFoundException("User with id " + userId + " not found"));
 
-        AdminLog adminLog = new AdminLog(
-                authenticationFacade.getCurrentUser(),
-                user,
-                UserAction.UNBLOCK
-        );
+        AdminLog adminLog = UserAction.UNBLOCK.log(authenticationFacade.getCurrentUser(), user);
         adminLogRepository.save(adminLog);
     }
 
@@ -113,11 +93,7 @@ class LoggingAdminService implements AdminService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AccountNotFoundException("User with id " + userId + " not found"));
 
-        AdminLog adminLog = new AdminLog(
-                authenticationFacade.getCurrentUser(),
-                user,
-                UserAction.MODIFY_ROLE
-        );
+        AdminLog adminLog = UserAction.MODIFY_ROLE.log(authenticationFacade.getCurrentUser(), user);
         adminLogRepository.save(adminLog);
 
         return result;
@@ -131,11 +107,7 @@ class LoggingAdminService implements AdminService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AccountNotFoundException("User with id " + userId + " not found"));
 
-        AdminLog adminLog = new AdminLog(
-                authenticationFacade.getCurrentUser(),
-                user,
-                UserAction.RESET_PASSWORD
-        );
+        AdminLog adminLog = UserAction.RESET_PASSWORD.log(authenticationFacade.getCurrentUser(), user);
         adminLogRepository.save(adminLog);
     }
 
@@ -147,11 +119,7 @@ class LoggingAdminService implements AdminService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AccountNotFoundException("User with id " + userId + " not found"));
 
-        AdminLog adminLog = new AdminLog(
-                authenticationFacade.getCurrentUser(),
-                user,
-                UserAction.UPDATE_EMAIL
-        );
+        AdminLog adminLog = UserAction.UPDATE_EMAIL.log(authenticationFacade.getCurrentUser(), user);
         adminLogRepository.save(adminLog);
     }
 }

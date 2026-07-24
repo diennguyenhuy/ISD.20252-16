@@ -5,18 +5,15 @@ import com.hust.soict.ict.aims.models.entities.audit.ProductLog;
 import org.springframework.stereotype.Component;
 
 @Component
-class ProductLogMapper extends ProductAuditLogMapper<ProductLog, ProductLogResponse> {
-    private final ProductEditDetailMapper productEditDetailMapper;
+class ProductLogMapper extends AbstractProductLogMapper<ProductLog, ProductLogResponse> {
 
-    ProductLogMapper(ProductEditDetailMapper productEditDetailMapper) {
+    ProductLogMapper() {
         super(ProductLogResponse::new);
-        this.productEditDetailMapper = productEditDetailMapper;
     }
 
     @Override
-    public void map(ProductLog entity, ProductLogResponse target) {
-        target.setAction(entity.getAction().name());
-        target.setDetails(entity.getDetails().stream().map(productEditDetailMapper::map).toList());
+    public void map(ProductLog source, ProductLogResponse target) {
+        //do nothing, already mapped in super class
     }
 
     @Override

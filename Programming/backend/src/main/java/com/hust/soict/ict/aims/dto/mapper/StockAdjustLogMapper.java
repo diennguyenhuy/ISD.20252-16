@@ -5,7 +5,7 @@ import com.hust.soict.ict.aims.models.entities.audit.StockAdjustLog;
 import org.springframework.stereotype.Component;
 
 @Component
-class StockAdjustLogMapper extends ProductAuditLogMapper<StockAdjustLog, StockAdjustLogResponse> {
+class StockAdjustLogMapper extends AbstractProductLogMapper<StockAdjustLog, StockAdjustLogResponse> {
 
     StockAdjustLogMapper() {
         super(StockAdjustLogResponse::new);
