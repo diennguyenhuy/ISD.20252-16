@@ -9,17 +9,12 @@ class ProductUpdateLogMapper extends AbstractProductLogMapper<ProductUpdateLog, 
     private final ProductEditDetailMapper productEditDetailMapper;
 
     ProductUpdateLogMapper(ProductEditDetailMapper productEditDetailMapper) {
-        super(ProductUpdateLogResponse::new);
+        super(ProductUpdateLog.class, ProductUpdateLogResponse::new);
         this.productEditDetailMapper = productEditDetailMapper;
     }
 
     @Override
-    public void map(ProductUpdateLog entity, ProductUpdateLogResponse target) {
-        target.setDetails(entity.getDetails().stream().map(productEditDetailMapper::map).toList());
-    }
-
-    @Override
-    public Class<ProductUpdateLog> getSourceClass() {
-        return ProductUpdateLog.class;
+    protected void mapProductLog(ProductUpdateLog source, ProductUpdateLogResponse target) {
+        target.setDetails(source.getDetails().stream().map(productEditDetailMapper::map).toList());
     }
 }

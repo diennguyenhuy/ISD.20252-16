@@ -8,26 +8,15 @@ import org.springframework.stereotype.Component;
 class AdminLogMapper extends AuditLogMapper<AdminLog, AdminLogResponse> {
 
     AdminLogMapper() {
-        super(AdminLogResponse::new);
+        super(AdminLog.class, AdminLogResponse.class, AdminLogResponse::new);
     }
 
     @Override
-    public void map(AdminLog entity, AdminLogResponse target) {
-        target.setAction(entity.getAction().name());
-        target.setAdminId(entity.getAdminId());
-        target.setAdminUsername(entity.getAdminUsername());
-        target.setAffectedUserId(entity.getAffectedUserId());
-        target.setAffectedUsername(entity.getAffectedUsername());
+    protected void mapAuditLog(AdminLog source, AdminLogResponse target) {
+        target.setAction(source.getAction().name());
+        target.setAdminId(source.getAdminId());
+        target.setAdminUsername(source.getAdminUsername());
+        target.setAffectedUserId(source.getAffectedUserId());
+        target.setAffectedUsername(source.getAffectedUsername());
     }
-
-    @Override
-    public Class<AdminLog> getSourceClass() {
-        return AdminLog.class;
-    }
-
-    @Override
-    public Class<AdminLogResponse> getTargetClass() {
-        return AdminLogResponse.class;
-    }
-
 }

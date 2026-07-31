@@ -8,12 +8,7 @@ import org.springframework.stereotype.Component;
 class DVDCreator extends ProductCreator<DVD, CreateDVDRequest, DVD.Builder> {
 
     DVDCreator() {
-        super(DVD.Builder::new);
-    }
-
-    @Override
-    public Class<CreateDVDRequest> createRequestType() {
-        return CreateDVDRequest.class;
+        super(CreateDVDRequest.class, DVD.Builder::new);
     }
 
     @Override

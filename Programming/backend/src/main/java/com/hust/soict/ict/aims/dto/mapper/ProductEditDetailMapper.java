@@ -7,24 +7,13 @@ import org.springframework.stereotype.Component;
 @Component
 class ProductEditDetailMapper extends AbstractMapper<ProductEditDetail, ProductEditDetailResponse> {
     ProductEditDetailMapper() {
-        super(ProductEditDetailResponse::new);
+        super(ProductEditDetail.class, ProductEditDetailResponse.class, ProductEditDetailResponse::new);
     }
 
     @Override
-    public void map(ProductEditDetail source, ProductEditDetailResponse target) {
+    protected void map(ProductEditDetail source, ProductEditDetailResponse target) {
         target.setFieldName(source.getFieldName());
         target.setOldValue(source.getOldValue());
         target.setNewValue(source.getNewValue());
     }
-
-    @Override
-    public Class<ProductEditDetail> getSourceClass() {
-        return ProductEditDetail.class;
-    }
-
-    @Override
-    public Class<ProductEditDetailResponse> getTargetClass() {
-        return ProductEditDetailResponse.class;
-    }
-
 }

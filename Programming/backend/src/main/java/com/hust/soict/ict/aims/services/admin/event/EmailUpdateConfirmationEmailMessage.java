@@ -79,10 +79,8 @@ class EmailUpdateConfirmationEmailMessage implements EmailMessage<EmailUpdateEve
 
     @Component
     static class Factory extends EmailMessage.Factory<EmailUpdateConfirmationEmailMessage, EmailUpdateEvent> {
-
-        @Override
-        public Class<EmailUpdateConfirmationEmailMessage> messageType() {
-            return EmailUpdateConfirmationEmailMessage.class;
+        Factory() {
+            super(EmailUpdateConfirmationEmailMessage.class);
         }
 
         @Override

@@ -7,11 +7,9 @@ import java.math.BigDecimal;
 
 @Component
 class StandardDeliveryFeeStrategy extends BaseStandardDeliveryFeeStrategy {
-    @Override
-    public DeliveryFeeCalculationMethod method() {
-        return DeliveryFeeCalculationMethod.STANDARD;
+    StandardDeliveryFeeStrategy() {
+        super(DeliveryFeeCalculationMethod.STANDARD);
     }
-
 
     @Override
     protected BigDecimal calculateChargeableWeight(Order.Draft order) {

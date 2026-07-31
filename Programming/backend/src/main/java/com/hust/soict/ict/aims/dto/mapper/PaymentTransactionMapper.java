@@ -8,25 +8,15 @@ import org.springframework.stereotype.Component;
 class PaymentTransactionMapper extends AbstractMapper<PaymentTransaction, PaymentTransactionResponse> {
 
     PaymentTransactionMapper() {
-        super(PaymentTransactionResponse::new);
+        super(PaymentTransaction.class, PaymentTransactionResponse.class, PaymentTransactionResponse::new);
     }
 
     @Override
-    public void map(PaymentTransaction source, PaymentTransactionResponse target) {
+    protected void map(PaymentTransaction source, PaymentTransactionResponse target) {
         target.setId(source.getId());
         target.setTransactionContent(source.getTransactionContent());
         target.setTransactionTimestamp(source.getTransactionTimestamp());
         target.setTransactionMethod(source.getTransactionMethod());
         target.setAmountPaid(source.getAmountPaid());
-    }
-
-    @Override
-    public Class<PaymentTransaction> getSourceClass() {
-        return PaymentTransaction.class;
-    }
-
-    @Override
-    public Class<PaymentTransactionResponse> getTargetClass() {
-        return PaymentTransactionResponse.class;
     }
 }

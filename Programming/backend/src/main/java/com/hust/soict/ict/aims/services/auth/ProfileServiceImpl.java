@@ -47,22 +47,22 @@ class ProfileServiceImpl implements ProfileService {
                 .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + userId));
 
         // 1. Verify current password
-        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getHashedPassword())) {
+        if (!passwordEncoder.matches(request.currentPassword(), user.getHashedPassword())) {
             throw new IllegalArgumentException("Current password is incorrect.");
         }
 
         // 2. Verify new password and confirmation match
-        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+        if (!request.newPassword().equals(request.confirmPassword())) {
             throw new IllegalArgumentException("New password and confirmation do not match.");
         }
 
         // 3. Verify new password differs from current
-        if (passwordEncoder.matches(request.getNewPassword(), user.getHashedPassword())) {
+        if (passwordEncoder.matches(request.newPassword(), user.getHashedPassword())) {
             throw new IllegalArgumentException("New password must be different from the current password.");
         }
 
         // 4. Hash and persist — updatePassword() also clears mustChangePassword
-        String hashedNewPassword = passwordEncoder.encode(request.getNewPassword());
+        String hashedNewPassword = passwordEncoder.encode(request.newPassword());
         user.updatePassword(hashedNewPassword);
         userRepository.save(user);
 

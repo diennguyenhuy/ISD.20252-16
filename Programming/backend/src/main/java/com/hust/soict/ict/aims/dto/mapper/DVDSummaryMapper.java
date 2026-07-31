@@ -7,13 +7,12 @@ import java.util.List;
 
 @Component
 class DVDSummaryMapper extends ProductSummaryMapper<DVD> {
-    @Override
-    protected List<String> mapCreators(DVD product) {
-        return List.of(product.getStudio());
+    DVDSummaryMapper() {
+        super(DVD.class);
     }
 
     @Override
-    public Class<DVD> getSourceClass() {
-        return DVD.class;
+    protected List<String> mapCreators(DVD product) {
+        return List.of(product.getStudio());
     }
 }

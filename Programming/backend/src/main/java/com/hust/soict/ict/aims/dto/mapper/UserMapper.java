@@ -10,11 +10,11 @@ import java.util.stream.Collectors;
 class UserMapper extends AbstractMapper<User, UserResponse> {
 
     UserMapper() {
-        super(UserResponse::new);
+        super(User.class, UserResponse.class, UserResponse::new);
     }
 
     @Override
-    public void map(User source, UserResponse target) {
+    protected void map(User source, UserResponse target) {
         target.setId(source.getId());
         target.setUsername(source.getUsername());
         target.setEmail(source.getEmail());
@@ -24,15 +24,5 @@ class UserMapper extends AbstractMapper<User, UserResponse> {
         target.setRoles(source.getRoles().stream().map(User.Role::name).collect(Collectors.toSet()));
         target.setCreatedAt(source.getCreatedAt());
         target.setUpdatedAt(source.getUpdatedAt());
-    }
-
-    @Override
-    public Class<User> getSourceClass() {
-        return User.class;
-    }
-
-    @Override
-    public Class<UserResponse> getTargetClass() {
-        return UserResponse.class;
     }
 }

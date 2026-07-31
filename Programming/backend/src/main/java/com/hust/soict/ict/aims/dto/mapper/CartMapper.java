@@ -9,25 +9,14 @@ class CartMapper extends AbstractMapper<Cart, CartResponse> {
     private final CartItemMapper cartItemMapper;
 
     CartMapper(CartItemMapper cartItemMapper) {
-        super(CartResponse::new);
+        super(Cart.class, CartResponse.class, CartResponse::new);
         this.cartItemMapper = cartItemMapper;
     }
 
     @Override
-    public void map(Cart source, CartResponse target) {
+    protected void map(Cart source, CartResponse target) {
         target.setItems(source.getItems().stream().map(cartItemMapper::map).toList());
         target.setTotalPrice(source.getTotalPrice());
         target.setTotalQuantity(source.getTotalQuantity());
     }
-
-    @Override
-    public Class<Cart> getSourceClass() {
-        return Cart.class;
-    }
-
-    @Override
-    public Class<CartResponse> getTargetClass() {
-        return CartResponse.class;
-    }
-
 }

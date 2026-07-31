@@ -7,13 +7,12 @@ import java.util.List;
 
 @Component
 class BookSummaryMapper extends ProductSummaryMapper<Book> {
-    @Override
-    protected List<String> mapCreators(Book product) {
-        return product.getAuthors();
+    BookSummaryMapper() {
+        super(Book.class);
     }
 
     @Override
-    public Class<Book> getSourceClass() {
-        return Book.class;
+    protected List<String> mapCreators(Book product) {
+        return product.getAuthors();
     }
 }

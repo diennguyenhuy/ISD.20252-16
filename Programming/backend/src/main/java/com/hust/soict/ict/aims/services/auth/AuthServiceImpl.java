@@ -48,7 +48,7 @@ class AuthServiceImpl implements AuthService {
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+                    new UsernamePasswordAuthenticationToken(request.email(), request.password()));
         } catch (DisabledException ex) {
             // Spring Security throws DisabledException when isEnabled() returns false (deactivated account).
             // We re-wrap it into our own typed exception so the GlobalExceptionHandler returns HTTP 403

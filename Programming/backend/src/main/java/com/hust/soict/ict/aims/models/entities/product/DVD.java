@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Immutable;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -18,6 +19,7 @@ public class DVD extends Product {
         HD_DVD,
     }
 
+    @Immutable
     @Column(updatable = false)
     private LocalDate releaseDate;
 
@@ -25,6 +27,7 @@ public class DVD extends Product {
     private String genre;
 
     @Enumerated(EnumType.STRING)
+    @Immutable
     @Column(nullable = false, updatable = false, length = 7)
     private DiscType discType;
 

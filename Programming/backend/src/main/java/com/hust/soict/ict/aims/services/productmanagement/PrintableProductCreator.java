@@ -11,8 +11,8 @@ abstract class PrintableProductCreator<
         B extends PrintableProduct.Builder<B>
         > extends ProductCreator<P, C, B> {
 
-    protected PrintableProductCreator(Supplier<B> builderSupplier) {
-        super(builderSupplier);
+    protected PrintableProductCreator(Class<C> createRequestType, Supplier<B> builderSupplier) {
+        super(createRequestType, builderSupplier);
     }
 
     @Override

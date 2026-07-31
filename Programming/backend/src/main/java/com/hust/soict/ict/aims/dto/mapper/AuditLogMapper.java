@@ -7,19 +7,20 @@ import java.util.function.Supplier;
 
 abstract class AuditLogMapper<L extends AuditLog, R extends AuditLogResponse> extends AbstractMapper<L, R> {
 
-    protected AuditLogMapper(Supplier<R> responseSupplier) {
-        super(responseSupplier);
+    protected AuditLogMapper(
+            Class<L> sourceClass,
+            Class<R> targetClass,
+            Supplier<R> targetSupplier
+    ) {
+        super(sourceClass, targetClass, targetSupplier);
     }
 
     @Override
-    public R map(L source) {
-        R response = super.map(source);
-        if (response == null) {
-            return null;
-        }
-
-        response.setId(source.getId());
-        response.setTimestamp(source.getTimestamp());
-        return response;
+    protected final void map(L source, R target) {
+        target.setId(source.getId());
+        target.setTimestamp(source.getTimestamp());
+        mapAuditLog(source, target);
     }
+
+    protected abstract void mapAuditLog(L source, R target);
 }

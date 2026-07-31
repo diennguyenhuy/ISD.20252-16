@@ -10,13 +10,13 @@ import java.util.List;
 
 @Component
 class CDUpdater extends ProductUpdater<CD, UpdateCDRequest, CD.UpdateCommand<?>> {
-    @Override
-    protected Class<UpdateCDRequest> updateRequestType() {
-        return UpdateCDRequest.class;
+
+    CDUpdater() {
+        super(UpdateCDRequest.class);
     }
 
     @Override
-    protected List<CD.UpdateCommand<?>> update(UpdateCDRequest request) {
+    protected List<CD.UpdateCommand<?>> productCommands(UpdateCDRequest request) {
         List<CD.UpdateCommand<?>> commands = new ArrayList<>();
 
         request.getGenre().ifDefined(genre -> commands.add(new CD.UpdateCommand.Genre(genre)));
@@ -24,7 +24,7 @@ class CDUpdater extends ProductUpdater<CD, UpdateCDRequest, CD.UpdateCommand<?>>
         request.getRecordLabel().ifDefined(record -> commands.add(new CD.UpdateCommand.RecordLabel(record)));
         request.getTracks()
                 .map(ts -> ts.stream()
-                        .map(t -> new Track(t.getTitle(), t.getLength()))
+                        .map(t -> new Track(t.title(), t.length()))
                         .toList()
                 ).ifDefined(tracks -> commands.add(new CD.UpdateCommand.Tracks(tracks)));
 

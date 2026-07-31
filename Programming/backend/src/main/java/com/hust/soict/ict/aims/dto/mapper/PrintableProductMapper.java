@@ -7,21 +7,17 @@ import java.util.function.Supplier;
 
 abstract class PrintableProductMapper<P extends PrintableProduct, D extends PrintableProductDetail> extends ProductMapper<P, D> {
 
-    protected PrintableProductMapper(Supplier<D> responseSupplier) {
-        super(responseSupplier);
+    protected PrintableProductMapper(Class<P> sourceClass, Supplier<D> responseSupplier) {
+        super(sourceClass, responseSupplier);
     }
 
     @Override
-    public D map(P source) {
-        D productDetail = super.map(source);
-        if (productDetail == null) {
-            return null;
-        }
-
+    protected final void mapProduct(P source, D productDetail) {
         productDetail.setPublisher(source.getPublisher());
         productDetail.setPublicationDate(source.getPublicationDate());
         productDetail.setLanguage(source.getLanguage());
-
-        return productDetail;
+        mapPrintableProduct(source, productDetail);
     }
+
+    protected abstract void mapPrintableProduct(P source, D productDetail);
 }

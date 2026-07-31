@@ -10,13 +10,12 @@ import java.util.List;
 @Component
 class BookUpdater extends PrintableProductUpdater<Book, UpdateBookRequest, Book.UpdateCommand<?>> {
 
-    @Override
-    protected Class<UpdateBookRequest> updateRequestType() {
-        return UpdateBookRequest.class;
+    BookUpdater() {
+        super(UpdateBookRequest.class);
     }
 
     @Override
-    protected List<Book.UpdateCommand<?>> update(UpdateBookRequest request) {
+    protected List<Book.UpdateCommand<?>> printableProductCommands(UpdateBookRequest request) {
         List<Book.UpdateCommand<?>> commands = new ArrayList<>();
 
         request.getAuthors().ifDefined(authors -> commands.add(new Book.UpdateCommand.Authors(authors)));

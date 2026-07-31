@@ -9,13 +9,13 @@ import java.util.List;
 
 @Component
 class DVDUpdater extends ProductUpdater<DVD, UpdateDVDRequest, DVD.UpdateCommand<?>> {
-    @Override
-    protected Class<UpdateDVDRequest> updateRequestType() {
-        return UpdateDVDRequest.class;
+
+    DVDUpdater() {
+        super(UpdateDVDRequest.class);
     }
 
     @Override
-    protected List<DVD.UpdateCommand<?>> update(UpdateDVDRequest request) {
+    protected List<DVD.UpdateCommand<?>> productCommands(UpdateDVDRequest request) {
         List<DVD.UpdateCommand<?>> commands = new ArrayList<>();
 
         request.getGenre().ifDefined(genre -> commands.add(new DVD.UpdateCommand.Genre(genre)));

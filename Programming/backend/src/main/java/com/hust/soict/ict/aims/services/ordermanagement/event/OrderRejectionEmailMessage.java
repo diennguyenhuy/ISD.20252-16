@@ -103,9 +103,8 @@ class OrderRejectionEmailMessage implements EmailMessage<OrderRejectionEvent> {
 
     @Component
     static class Factory extends EmailMessage.Factory<OrderRejectionEmailMessage, OrderRejectionEvent> {
-        @Override
-        public Class<OrderRejectionEmailMessage> messageType() {
-            return OrderRejectionEmailMessage.class;
+        Factory() {
+            super(OrderRejectionEmailMessage.class);
         }
 
         @Override

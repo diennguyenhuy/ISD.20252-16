@@ -83,9 +83,8 @@ class OrderApprovalEmailMessage implements EmailMessage<OrderApprovalEvent> {
 
     @Component
     static class Factory extends EmailMessage.Factory<OrderApprovalEmailMessage, OrderApprovalEvent> {
-        @Override
-        public Class<OrderApprovalEmailMessage> messageType() {
-            return OrderApprovalEmailMessage.class;
+        Factory() {
+            super(OrderApprovalEmailMessage.class);
         }
 
         @Override

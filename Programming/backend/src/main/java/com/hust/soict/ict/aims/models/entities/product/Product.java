@@ -21,11 +21,6 @@ public abstract class Product extends VersionedEntity {
         DELETED
     }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(updatable = false)
-    private UUID id;
-
     @Column(nullable = false)
     private String title;
 

@@ -7,13 +7,12 @@ import java.util.List;
 
 @Component
 class NewspaperSummaryMapper extends ProductSummaryMapper<Newspaper> {
-    @Override
-    protected List<String> mapCreators(Newspaper product) {
-        return List.of(product.getPublisher());
+    NewspaperSummaryMapper() {
+        super(Newspaper.class);
     }
 
     @Override
-    public Class<Newspaper> getSourceClass() {
-        return Newspaper.class;
+    protected List<String> mapCreators(Newspaper product) {
+        return List.of(product.getPublisher());
     }
 }

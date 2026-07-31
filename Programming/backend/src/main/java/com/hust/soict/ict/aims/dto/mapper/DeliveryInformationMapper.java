@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 class DeliveryInformationMapper extends AbstractMapper<DeliveryInformation, DeliveryResponse> {
 
     DeliveryInformationMapper() {
-        super(DeliveryResponse::new);
+        super(DeliveryInformation.class, DeliveryResponse.class, DeliveryResponse::new);
     }
 
     @Override
-    public void map(DeliveryInformation source, DeliveryResponse target) {
+    protected void map(DeliveryInformation source, DeliveryResponse target) {
         target.setCustomerName(source.getCustomerName());
         target.setCustomerEmail(source.getCustomerEmail());
         target.setPhoneNumber(source.getPhoneNumber());
@@ -20,15 +20,5 @@ class DeliveryInformationMapper extends AbstractMapper<DeliveryInformation, Deli
         target.setCommune(source.getCommune());
         target.setAddress(source.getAddress());
         target.setDeliveryMethod(source.getDeliveryMethod());
-    }
-
-    @Override
-    public Class<DeliveryInformation> getSourceClass() {
-        return DeliveryInformation.class;
-    }
-
-    @Override
-    public Class<DeliveryResponse> getTargetClass() {
-        return DeliveryResponse.class;
     }
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Immutable;
 
 import java.util.*;
 
@@ -26,6 +27,7 @@ public class Book extends PrintableProduct {
     private List<String> authors = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
+    @Immutable
     @Column(nullable = false, updatable = false, length = 9)
     private CoverType coverType;
 

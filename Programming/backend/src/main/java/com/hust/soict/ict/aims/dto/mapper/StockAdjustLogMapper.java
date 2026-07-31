@@ -8,19 +8,13 @@ import org.springframework.stereotype.Component;
 class StockAdjustLogMapper extends AbstractProductLogMapper<StockAdjustLog, StockAdjustLogResponse> {
 
     StockAdjustLogMapper() {
-        super(StockAdjustLogResponse::new);
+        super(StockAdjustLog.class, StockAdjustLogResponse::new);
     }
 
     @Override
-    public void map(StockAdjustLog entity, StockAdjustLogResponse target) {
-        target.setOldStock(entity.getOldStock());
-        target.setNewStock(entity.getNewStock());
-        target.setReason(entity.getReason());
+    protected void mapProductLog(StockAdjustLog source, StockAdjustLogResponse target) {
+        target.setOldStock(source.getOldStock());
+        target.setNewStock(source.getNewStock());
+        target.setReason(source.getReason());
     }
-
-    @Override
-    public Class<StockAdjustLog> getSourceClass() {
-        return StockAdjustLog.class;
-    }
-
 }

@@ -185,14 +185,14 @@ class LoggingProductManagementService implements ProductManagementService {
 
         productManagementService.adjustStock(id, adjustStockRequest);
 
-        int newStock = oldStock + adjustStockRequest.getDelta();
+        int newStock = oldStock + adjustStockRequest.delta();
 
         StockAdjustLog stockAdjustLog = new StockAdjustLog(
                 authenticationFacade.getCurrentUser(),
                 product,
                 oldStock,
                 newStock,
-                adjustStockRequest.getReason()
+                adjustStockRequest.reason()
         );
         productLogRepository.save(stockAdjustLog);
 
@@ -201,7 +201,7 @@ class LoggingProductManagementService implements ProductManagementService {
                 id,
                 oldStock,
                 newStock,
-                adjustStockRequest.getDelta()
+                adjustStockRequest.delta()
         );
     }
 

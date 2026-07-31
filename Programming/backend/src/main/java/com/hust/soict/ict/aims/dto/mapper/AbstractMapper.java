@@ -3,23 +3,35 @@ package com.hust.soict.ict.aims.dto.mapper;
 import java.util.function.Supplier;
 
 public abstract class AbstractMapper<S, T> {
-    private final Supplier<T> responseSupplier;
+    private final Supplier<T> targetSupplier;
+    private final Class<S> sourceClass;
+    private final Class<T> targetClass;
 
-    protected AbstractMapper(Supplier<T> responseSupplier) {
-        this.responseSupplier = responseSupplier;
+    protected AbstractMapper(
+            Class<S> sourceClass,
+            Class<T> targetClass,
+            Supplier<T> targetSupplier
+    ) {
+        this.sourceClass = sourceClass;
+        this.targetClass = targetClass;
+        this.targetSupplier = targetSupplier;
     }
 
-    public abstract void map(S source, T target);
-    public abstract Class<S> getSourceClass();
-    public abstract Class<T> getTargetClass();
+    protected abstract void map(S source, T target);
+    public final Class<S> getSourceClass() {
+        return sourceClass;
+    }
+    public final Class<T> getTargetClass() {
+        return targetClass;
+    }
 
-    public T map(S source) {
+    public final T map(S source) {
         if (source == null) {
             return null;
         }
 
-        T response = responseSupplier.get();
-        map(source, response);
-        return response;
+        T target = targetSupplier.get();
+        map(source, target);
+        return target;
     }
 }

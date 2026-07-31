@@ -83,9 +83,8 @@ class PasswordResetEmailMessage implements EmailMessage<PasswordResetEvent> {
 
     @Component
     static class Factory extends EmailMessage.Factory<PasswordResetEmailMessage, PasswordResetEvent> {
-        @Override
-        public Class<PasswordResetEmailMessage> messageType() {
-            return PasswordResetEmailMessage.class;
+        Factory() {
+            super(PasswordResetEmailMessage.class);
         }
 
         @Override

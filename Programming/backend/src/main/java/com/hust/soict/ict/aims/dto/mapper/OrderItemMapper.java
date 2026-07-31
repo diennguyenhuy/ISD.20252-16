@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 class OrderItemMapper extends AbstractMapper<OrderItem, OrderItemResponse> {
 
     OrderItemMapper() {
-        super(OrderItemResponse::new);
+        super(OrderItem.class, OrderItemResponse.class, OrderItemResponse::new);
     }
 
     @Override
-    public void map(OrderItem source, OrderItemResponse target) {
+    protected void map(OrderItem source, OrderItemResponse target) {
         if (source.getProduct() != null) {
             target.setProductId(source.getProduct().getId());
             target.setProductImage(source.getProduct().getImageURL());
@@ -23,15 +23,4 @@ class OrderItemMapper extends AbstractMapper<OrderItem, OrderItemResponse> {
         target.setUnitPrice(source.getUnitPrice());
         target.setItemTotalPrice(source.getItemTotalPrice());
     }
-
-    @Override
-    public Class<OrderItem> getSourceClass() {
-        return OrderItem.class;
-    }
-
-    @Override
-    public Class<OrderItemResponse> getTargetClass() {
-        return OrderItemResponse.class;
-    }
-
 }

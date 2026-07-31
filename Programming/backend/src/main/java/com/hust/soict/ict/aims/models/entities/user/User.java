@@ -16,11 +16,6 @@ public class User extends VersionedEntity {
         ADMINISTRATOR,
     }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(updatable = false)
-    private UUID id;
-
     @Column(nullable = false)
     private String username;
 

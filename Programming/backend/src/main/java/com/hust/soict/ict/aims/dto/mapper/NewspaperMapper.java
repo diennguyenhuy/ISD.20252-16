@@ -8,20 +8,15 @@ import org.springframework.stereotype.Component;
 class NewspaperMapper extends PrintableProductMapper<Newspaper, NewspaperDetail> {
 
     NewspaperMapper() {
-        super(NewspaperDetail::new);
+        super(Newspaper.class, NewspaperDetail::new);
     }
 
     @Override
-    public void map(Newspaper source, NewspaperDetail target) {
-        target.setEditorInChief(source.getEditorInChief());
-        target.setIssueNumber(source.getIssueNumber());
-        target.setPublicationFrequency(source.getPublicationFrequency());
-        target.setISSN(source.getISSN());
-        target.setSections(source.getSections());
-    }
-
-    @Override
-    public Class<Newspaper> getSourceClass() {
-        return Newspaper.class;
+    protected void mapPrintableProduct(Newspaper source, NewspaperDetail productDetail) {
+        productDetail.setEditorInChief(source.getEditorInChief());
+        productDetail.setIssueNumber(source.getIssueNumber());
+        productDetail.setPublicationFrequency(source.getPublicationFrequency());
+        productDetail.setISSN(source.getISSN());
+        productDetail.setSections(source.getSections());
     }
 }

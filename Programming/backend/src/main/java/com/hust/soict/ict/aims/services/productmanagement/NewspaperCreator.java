@@ -8,12 +8,7 @@ import org.springframework.stereotype.Component;
 class NewspaperCreator extends PrintableProductCreator<Newspaper, CreateNewspaperRequest, Newspaper.Builder> {
 
     NewspaperCreator() {
-        super(Newspaper.Builder::new);
-    }
-
-    @Override
-    public Class<CreateNewspaperRequest> createRequestType() {
-        return CreateNewspaperRequest.class;
+        super(CreateNewspaperRequest.class, Newspaper.Builder::new);
     }
 
     @Override

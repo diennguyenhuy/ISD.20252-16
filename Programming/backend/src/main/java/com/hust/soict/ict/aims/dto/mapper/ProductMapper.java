@@ -6,18 +6,13 @@ import com.hust.soict.ict.aims.models.entities.product.Product;
 import java.util.function.Supplier;
 
 abstract class ProductMapper<P extends Product, D extends ProductDetail> extends AbstractMapper<P, D> {
-
-    protected ProductMapper(Supplier<D> responseSupplier) {
-        super(responseSupplier);
+    @SuppressWarnings("unchecked")
+    protected ProductMapper(Class<P> sourceClass, Supplier<D> responseSupplier) {
+        super(sourceClass, (Class<D>) ProductDetail.class, responseSupplier);
     }
 
     @Override
-    public D map(P source) {
-        D productDetail = super.map(source);
-        if (productDetail == null) {
-            return null;
-        }
-
+    protected final void map(P source, D productDetail) {
         productDetail.setId(source.getId());
         productDetail.setTitle(source.getTitle());
         productDetail.setCategory(source.getCategory());
@@ -35,13 +30,8 @@ abstract class ProductMapper<P extends Product, D extends ProductDetail> extends
         productDetail.setCreatedAt(source.getCreatedAt());
         productDetail.setUpdatedAt(source.getUpdatedAt());
         productDetail.setProductType(getSourceClass().getSimpleName());
-
-        return productDetail;
+        mapProduct(source, productDetail);
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public final Class<D> getTargetClass() {
-        return (Class<D>) ProductDetail.class;
-    }
+    protected abstract void mapProduct(P source, D productDetail);
 }

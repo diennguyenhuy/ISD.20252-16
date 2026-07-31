@@ -8,25 +8,15 @@ import org.springframework.stereotype.Component;
 class InvoiceMapper extends AbstractMapper<Invoice, InvoiceResponse> {
 
     InvoiceMapper() {
-        super(InvoiceResponse::new);
+        super(Invoice.class, InvoiceResponse.class, InvoiceResponse::new);
     }
 
     @Override
-    public void map(Invoice source, InvoiceResponse target) {
+    protected void map(Invoice source, InvoiceResponse target) {
         target.setIssuedAt(source.getIssuedAt());
         target.setTotalPriceWithoutVAT(source.getTotalPriceWithoutVAT());
         target.setTotalPriceWithVAT(source.getTotalPriceWithVAT());
         target.setDeliveryFee(source.getDeliveryFee());
         target.setTotalAmount(source.getTotalAmount());
-    }
-
-    @Override
-    public Class<Invoice> getSourceClass() {
-        return Invoice.class;
-    }
-
-    @Override
-    public Class<InvoiceResponse> getTargetClass() {
-        return InvoiceResponse.class;
     }
 }

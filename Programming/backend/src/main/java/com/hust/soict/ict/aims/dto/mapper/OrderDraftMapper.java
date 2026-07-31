@@ -15,27 +15,17 @@ class OrderDraftMapper extends AbstractMapper<Order.Draft, OrderDraftResponse> {
             DeliveryInformationMapper deliveryInformationMapper,
             InvoiceMapper invoiceMapper
     ) {
-        super(OrderDraftResponse::new);
+        super(Order.Draft.class, OrderDraftResponse.class, OrderDraftResponse::new);
         this.orderItemMapper = orderItemMapper;
         this.deliveryInformationMapper = deliveryInformationMapper;
         this.invoiceMapper = invoiceMapper;
     }
 
     @Override
-    public void map(Order.Draft source, OrderDraftResponse target) {
+    protected void map(Order.Draft source, OrderDraftResponse target) {
         target.setCheckoutId(source.getCheckoutId());
         target.setItems(source.getItems().stream().map(orderItemMapper::map).toList());
         target.setDeliveryInformation(deliveryInformationMapper.map(source.getDeliveryInformation()));
         target.setInvoice(invoiceMapper.map(source.getInvoice()));
-    }
-
-    @Override
-    public Class<Order.Draft> getSourceClass() {
-        return Order.Draft.class;
-    }
-
-    @Override
-    public Class<OrderDraftResponse> getTargetClass() {
-        return OrderDraftResponse.class;
     }
 }

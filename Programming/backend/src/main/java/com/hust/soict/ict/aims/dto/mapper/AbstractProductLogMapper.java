@@ -6,29 +6,20 @@ import com.hust.soict.ict.aims.models.entities.audit.ProductLog;
 import java.util.function.Supplier;
 
 abstract class AbstractProductLogMapper<L extends ProductLog, R extends ProductLogResponse> extends AuditLogMapper<L, R> {
-    protected AbstractProductLogMapper(Supplier<R> responseSupplier) {
-        super(responseSupplier);
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
-    public final Class<R> getTargetClass() {
-        return (Class<R>) ProductLogResponse.class;
+    protected AbstractProductLogMapper(Class<L> targetClass, Supplier<R> responseSupplier) {
+        super(targetClass, (Class<R>) ProductLogResponse.class, responseSupplier);
     }
 
     @Override
-    public R map(L source) {
-        R response = super.map(source);
-        if (response == null) {
-            return null;
-        }
-
-        response.setAction(source.getAction().name());
-        response.setManagerId(source.getManagerId());
-        response.setManagerUsername(source.getManagerUsername());
-        response.setProductId(source.getProductId());
-        response.setProductTitle(source.getProductTitle());
-
-        return response;
+    protected final void mapAuditLog(L source, R target) {
+        target.setAction(source.getAction().name());
+        target.setManagerId(source.getManagerId());
+        target.setManagerUsername(source.getManagerUsername());
+        target.setProductId(source.getProductId());
+        target.setProductTitle(source.getProductTitle());
+        mapProductLog(source, target);
     }
+
+    protected abstract void mapProductLog(L source, R target);
 }

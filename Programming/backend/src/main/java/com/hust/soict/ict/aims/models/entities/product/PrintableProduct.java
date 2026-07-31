@@ -2,13 +2,13 @@ package com.hust.soict.ict.aims.models.entities.product;
 
 import java.time.LocalDate;
 import java.util.Objects;
-import java.util.Optional;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Immutable;
 
 @MappedSuperclass
 @Getter
@@ -17,6 +17,7 @@ public abstract class PrintableProduct extends Product {
     @Column(nullable = false)
     private String publisher;
 
+    @Immutable
     @Column(nullable = false, updatable = false)
     private LocalDate publicationDate;
 

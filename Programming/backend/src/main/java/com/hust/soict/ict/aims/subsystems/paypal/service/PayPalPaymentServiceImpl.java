@@ -20,16 +20,6 @@ import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalRefundResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-/*
- * [SOLID DIP: low-severity note]
- * Principle: Dependency Inversion (D)
- * Why: This service correctly depends on the IRedirectPaymentGateway / IRefundGateway
- *      abstractions, but PlaceOrderService and OrderDraftContext are injected as
- *      CONCRETE classes, so orchestration is still bound to two concrete in-process
- *      types. Severity is low because both are stable Spring beans.
- * Proposed Solution: If finer testability is wanted, depend on narrow ports
- *      (e.g. OrderFinalizer, OrderDraftSource) and inject those instead.
- */
 @Service
 @Slf4j
 class PayPalPaymentServiceImpl extends PaymentService implements PayPalPaymentService, Refundable {
@@ -48,14 +38,9 @@ class PayPalPaymentServiceImpl extends PaymentService implements PayPalPaymentSe
                                     PayPalRefundGateway refundGateway,
                                     OrderDraftContext orderDraftContext,
                                     OrderFinalization orderFinalization) {
-        super(orderDraftContext, orderFinalization);
+        super(PaymentMethod.PAYPAL, orderDraftContext, orderFinalization);
         this.paymentProvider = paymentProvider;
         this.refundGateway = refundGateway;
-    }
-
-    @Override
-    public PaymentMethod method() {
-        return PaymentMethod.PAYPAL;
     }
 
     /**

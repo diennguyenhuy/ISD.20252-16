@@ -7,13 +7,12 @@ import java.util.List;
 
 @Component
 class CDSummaryMapper extends ProductSummaryMapper<CD> {
-    @Override
-    protected List<String> mapCreators(CD product) {
-        return product.getArtists();
+    CDSummaryMapper() {
+        super(CD.class);
     }
 
     @Override
-    public Class<CD> getSourceClass() {
-        return CD.class;
+    protected List<String> mapCreators(CD product) {
+        return product.getArtists();
     }
 }

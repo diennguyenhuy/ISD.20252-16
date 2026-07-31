@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Immutable;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -13,6 +14,7 @@ import java.util.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CD extends Product {
+    @Immutable
     @Column(updatable = false)
     private LocalDate releaseDate;
 

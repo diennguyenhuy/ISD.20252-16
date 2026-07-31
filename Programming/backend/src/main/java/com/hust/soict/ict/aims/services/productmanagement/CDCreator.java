@@ -11,19 +11,14 @@ import java.util.List;
 class CDCreator extends ProductCreator<CD, CreateCDRequest, CD.Builder> {
 
     CDCreator() {
-        super(CD.Builder::new);
-    }
-
-    @Override
-    public Class<CreateCDRequest> createRequestType() {
-        return CreateCDRequest.class;
+        super(CreateCDRequest.class, CD.Builder::new);
     }
 
     @Override
     public CD createFrom(CreateCDRequest createRequest) {
         List<Track> cdTracks = createRequest.getTracks() == null ?
                 List.of() : createRequest.getTracks().stream()
-                .map(t -> new Track(t.getTitle(), t.getLength()))
+                .map(t -> new Track(t.title(), t.length()))
                 .toList();
 
         return builder(createRequest)

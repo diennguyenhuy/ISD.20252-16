@@ -160,9 +160,8 @@ class OrderConfirmationEmailMessage implements EmailMessage<OrderSuccessEvent> {
 
     @Component
     static class Factory extends EmailMessage.Factory<OrderConfirmationEmailMessage, OrderSuccessEvent> {
-        @Override
-        public Class<OrderConfirmationEmailMessage> messageType() {
-            return OrderConfirmationEmailMessage.class;
+        Factory() {
+            super(OrderConfirmationEmailMessage.class);
         }
 
         @Override

@@ -11,10 +11,23 @@ package com.hust.soict.ict.aims.services.notification;
  */
 public interface NotificationMessage<E> {
 
-    interface Factory<M extends NotificationMessage<E>, E> {
-        NotificationMethod supportedMethod();
-        Class<M> messageType();
-        M createMessage(E payload);
-    }
+    abstract class Factory<M extends NotificationMessage<E>, E> {
+        private final Class<M> messageClass;
+        private final NotificationMethod method;
 
+        protected Factory(Class<M> messageClass, NotificationMethod method) {
+            this.messageClass = messageClass;
+            this.method = method;
+        }
+
+        final NotificationMethod supportedMethod() {
+            return method;
+        }
+
+        final Class<M> messageType() {
+            return messageClass;
+        }
+
+        public abstract M createMessage(E payload);
+    }
 }

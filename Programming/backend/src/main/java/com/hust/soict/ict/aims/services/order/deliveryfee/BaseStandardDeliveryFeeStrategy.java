@@ -5,7 +5,7 @@ import com.hust.soict.ict.aims.models.entities.order.Order;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-abstract class BaseStandardDeliveryFeeStrategy implements DeliveryFeeCalculationStrategy {
+abstract class BaseStandardDeliveryFeeStrategy extends DeliveryFeeCalculationStrategy {
     private static final long UNIT_FEE_PER_WEIGHT_DEDUCTION = 2_500;
     private static final BigDecimal UNIT_WEIGHT_DEDUCTION = BigDecimal.valueOf(0.5);
     private static final long INITIAL_FEE = 30_000;
@@ -14,6 +14,10 @@ abstract class BaseStandardDeliveryFeeStrategy implements DeliveryFeeCalculation
     private static final BigDecimal INITIAL_WEIGHT_DEDUCTION_FOR_HANOI_HCM = BigDecimal.valueOf(3);
     private static final long FREE_SHIPPING_THRESHOLD = 100_000;
     private static final long MAX_FREE_SHIPPING_SUBSIDY = 25_000;
+
+    protected BaseStandardDeliveryFeeStrategy(DeliveryFeeCalculationMethod method) {
+        super(method);
+    }
 
     protected abstract BigDecimal calculateChargeableWeight(Order.Draft order);
 

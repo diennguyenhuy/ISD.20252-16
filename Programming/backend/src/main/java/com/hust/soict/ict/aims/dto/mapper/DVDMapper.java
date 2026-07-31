@@ -8,23 +8,18 @@ import org.springframework.stereotype.Component;
 class DVDMapper extends ProductMapper<DVD, DVDDetail> {
 
     DVDMapper() {
-        super(DVDDetail::new);
+        super(DVD.class, DVDDetail::new);
     }
 
     @Override
-    public void map(DVD source, DVDDetail target) {
-        target.setReleaseDate(source.getReleaseDate());
-        target.setGenre(source.getGenre());
-        target.setDiscType(source.getDiscType().name());
-        target.setDirector(source.getDirector());
-        target.setRuntime(source.getRuntime());
-        target.setStudio(source.getStudio());
-        target.setLanguage(source.getLanguage());
-        target.setSubtitles(source.getSubtitles());
-    }
-
-    @Override
-    public Class<DVD> getSourceClass() {
-        return DVD.class;
+    protected void mapProduct(DVD source, DVDDetail productDetail) {
+        productDetail.setReleaseDate(source.getReleaseDate());
+        productDetail.setGenre(source.getGenre());
+        productDetail.setDiscType(source.getDiscType().name());
+        productDetail.setDirector(source.getDirector());
+        productDetail.setRuntime(source.getRuntime());
+        productDetail.setStudio(source.getStudio());
+        productDetail.setLanguage(source.getLanguage());
+        productDetail.setSubtitles(source.getSubtitles());
     }
 }

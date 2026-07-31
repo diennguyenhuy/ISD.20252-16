@@ -46,13 +46,13 @@ class PlaceOrderServiceImpl implements PlaceOrderService {
         Order.Draft draftOrder = orderDraftContext.getDraftOrder();
 
         draftOrder.provideDeliveryInformation(
-                deliveryRequest.getCustomerName(),
-                deliveryRequest.getCustomerEmail(),
-                deliveryRequest.getPhoneNumber(),
-                deliveryRequest.getProvince(),
-                deliveryRequest.getCommune(),
-                deliveryRequest.getAddress(),
-                deliveryRequest.getDeliveryMethod()
+                deliveryRequest.customerName(),
+                deliveryRequest.customerEmail(),
+                deliveryRequest.phoneNumber(),
+                deliveryRequest.province(),
+                deliveryRequest.commune(),
+                deliveryRequest.address(),
+                deliveryRequest.deliveryMethod()
         );
 
         long deliveryFee = deliveryFeeCalculator.calculate(DeliveryFeeCalculationMethod.STANDARD, draftOrder);

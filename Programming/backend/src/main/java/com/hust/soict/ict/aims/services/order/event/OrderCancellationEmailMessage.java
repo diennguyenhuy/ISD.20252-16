@@ -101,9 +101,8 @@ class OrderCancellationEmailMessage implements EmailMessage<OrderCancelEvent> {
 
     @Component
     static class Factory extends EmailMessage.Factory<OrderCancellationEmailMessage, OrderCancelEvent> {
-        @Override
-        public Class<OrderCancellationEmailMessage> messageType() {
-            return OrderCancellationEmailMessage.class;
+        Factory() {
+            super(OrderCancellationEmailMessage.class);
         }
 
         @Override

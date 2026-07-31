@@ -8,16 +8,11 @@ import org.springframework.stereotype.Component;
 class ProductLogMapper extends AbstractProductLogMapper<ProductLog, ProductLogResponse> {
 
     ProductLogMapper() {
-        super(ProductLogResponse::new);
+        super(ProductLog.class, ProductLogResponse::new);
     }
 
     @Override
-    public void map(ProductLog source, ProductLogResponse target) {
+    protected void mapProductLog(ProductLog source, ProductLogResponse target) {
         //do nothing, already mapped in super class
-    }
-
-    @Override
-    public Class<ProductLog> getSourceClass() {
-        return ProductLog.class;
     }
 }

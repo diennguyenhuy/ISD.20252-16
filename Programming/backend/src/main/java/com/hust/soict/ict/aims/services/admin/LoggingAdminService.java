@@ -28,8 +28,8 @@ class LoggingAdminService implements AdminService {
     public UserResponse createUser(CreateUserRequest request) {
         var result = adminService.createUser(request);
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new AccountNotFoundException("User with email " + request.getEmail() + " not found"));
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new AccountNotFoundException("User with email " + request.email() + " not found"));
 
         AdminLog adminLog = UserAction.CREATE.log(authenticationFacade.getCurrentUser(), user);
         adminLogRepository.save(adminLog);

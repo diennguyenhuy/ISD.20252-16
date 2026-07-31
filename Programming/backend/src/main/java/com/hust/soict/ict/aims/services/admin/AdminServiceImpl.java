@@ -73,11 +73,11 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     @Override
     @Transactional
     public UserResponse createUser(CreateUserRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new AccountAlreadyExistedException("Email is already in use: " + request.getEmail());
+        if (userRepository.existsByEmail(request.email())) {
+            throw new AccountAlreadyExistedException("Email is already in use: " + request.email());
         }
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new AccountAlreadyExistedException("Username is already in use: " + request.getUsername());
+        if (userRepository.existsByUsername(request.username())) {
+            throw new AccountAlreadyExistedException("Username is already in use: " + request.username());
         }
 
         // Generate a temporary password — admin never sees it
@@ -85,10 +85,11 @@ class AdminServiceImpl implements AdminService, UserQueryService {
         String hashedPassword = passwordEncoder.encode(tempPassword);
 
         User user = new User(
-                request.getUsername(),
-                request.getEmail(),
+                request.username(),
+                request.email(),
                 hashedPassword,
-                request.getRoles());
+                request.roles()
+        );
 
         // Force the user to change password on first login
         user.setTemporaryPassword(hashedPassword);

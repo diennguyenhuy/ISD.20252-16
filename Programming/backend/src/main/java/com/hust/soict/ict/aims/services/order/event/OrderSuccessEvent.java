@@ -2,13 +2,5 @@ package com.hust.soict.ict.aims.services.order.event;
 
 import com.hust.soict.ict.aims.models.entities.order.Order;
 
-/**
- * Cohesion: Functional Cohesion
- * Reason:
- * Encapsulates data related to a successful order event.
- * Coupling:
- * - Stamp coupling with Order
- * because full domain objects are carried in the event.
- */
 public record OrderSuccessEvent(Order order) {
 }

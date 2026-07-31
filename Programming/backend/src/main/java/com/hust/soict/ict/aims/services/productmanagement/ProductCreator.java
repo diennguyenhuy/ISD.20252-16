@@ -11,12 +11,16 @@ abstract class ProductCreator<
         B extends Product.Builder<B>
         > {
     private final Supplier<B> builderSupplier;
+    private final Class<C> createRequestType;
 
-    protected ProductCreator(Supplier<B> builderSupplier) {
+    protected ProductCreator(Class<C> createRequestType, Supplier<B> builderSupplier) {
+        this.createRequestType = createRequestType;
         this.builderSupplier = builderSupplier;
     }
 
-    protected abstract Class<C> createRequestType();
+    final Class<C> createRequestType() {
+        return createRequestType;
+    }
     protected abstract P createFrom(C createRequest);
 
     protected B builder(C request) {

@@ -17,7 +17,7 @@ class OrderMapper extends AbstractMapper<Order, OrderResponse> {
             InvoiceMapper invoiceMapper,
             PaymentTransactionMapper paymentTransactionMapper
     ) {
-        super(OrderResponse::new);
+        super(Order.class, OrderResponse.class, OrderResponse::new);
         this.orderItemMapper = orderItemMapper;
         this.deliveryInformationMapper = deliveryInformationMapper;
         this.invoiceMapper = invoiceMapper;
@@ -25,7 +25,7 @@ class OrderMapper extends AbstractMapper<Order, OrderResponse> {
     }
 
     @Override
-    public void map(Order source, OrderResponse target) {
+    protected void map(Order source, OrderResponse target) {
         target.setId(source.getId());
         target.setItems(source.getItems().stream().map(orderItemMapper::map).toList());
         target.setStatus(source.getStatus().name());
@@ -36,15 +36,5 @@ class OrderMapper extends AbstractMapper<Order, OrderResponse> {
         target.setPaymentTransaction(paymentTransactionMapper.map(source.getPaymentTransaction()));
         target.setCreatedAt(source.getCreatedAt());
         target.setUpdatedAt(source.getUpdatedAt());
-    }
-
-    @Override
-    public Class<Order> getSourceClass() {
-        return Order.class;
-    }
-
-    @Override
-    public Class<OrderResponse> getTargetClass() {
-        return OrderResponse.class;
     }
 }

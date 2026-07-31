@@ -8,12 +8,7 @@ import org.springframework.stereotype.Component;
 class BookCreator extends PrintableProductCreator<Book, CreateBookRequest, Book.Builder> {
 
     BookCreator() {
-        super(Book.Builder::new);
-    }
-
-    @Override
-    public Class<CreateBookRequest> createRequestType() {
-        return CreateBookRequest.class;
+        super(CreateBookRequest.class, Book.Builder::new);
     }
 
     @Override

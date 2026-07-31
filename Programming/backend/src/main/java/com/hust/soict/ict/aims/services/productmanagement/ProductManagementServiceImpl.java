@@ -116,7 +116,7 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
     @Override
     @Transactional
     public void adjustStock(UUID id, AdjustStockRequest adjustStockRequest) {
-        log.info("[ADJUST STOCK] Received request for Product ID: {}. Delta: {}, Reason: '{}'", id, adjustStockRequest.getDelta(), adjustStockRequest.getReason());
+        log.info("[ADJUST STOCK] Received request for Product ID: {}. Delta: {}, Reason: '{}'", id, adjustStockRequest.delta(), adjustStockRequest.reason());
 
         Product product = productRepo.findById(id)
                 .orElseThrow(() -> {
@@ -125,7 +125,7 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
                 });
 
 
-        int newStock = product.getStockQuantity() + adjustStockRequest.getDelta();
+        int newStock = product.getStockQuantity() + adjustStockRequest.delta();
         product.updateStock(newStock);
 
         productRepo.save(product);

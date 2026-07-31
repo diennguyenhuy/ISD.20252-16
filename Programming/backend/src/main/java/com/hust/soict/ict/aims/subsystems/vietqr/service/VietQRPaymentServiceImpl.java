@@ -19,13 +19,8 @@ class VietQRPaymentServiceImpl extends PaymentService implements VietQRPaymentSe
     private final VietQRPaymentGateway qrPaymentGateway;
 
     public VietQRPaymentServiceImpl(VietQRPaymentGateway qrPaymentGateway, OrderFinalization orderFinalization, OrderDraftContext orderDraftContext) {
-        super(orderDraftContext, orderFinalization);
+        super(PaymentMethod.VIETQR, orderDraftContext, orderFinalization);
         this.qrPaymentGateway = qrPaymentGateway;
-    }
-
-    @Override
-    public PaymentMethod method() {
-        return PaymentMethod.VIETQR;
     }
 
     @Override

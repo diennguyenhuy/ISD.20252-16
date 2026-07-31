@@ -10,13 +10,12 @@ import java.util.List;
 @Component
 class NewspaperUpdater extends PrintableProductUpdater<Newspaper, UpdateNewspaperRequest, Newspaper.UpdateCommand<?>> {
 
-    @Override
-    protected Class<UpdateNewspaperRequest> updateRequestType() {
-        return UpdateNewspaperRequest.class;
+    NewspaperUpdater() {
+        super(UpdateNewspaperRequest.class);
     }
 
     @Override
-    protected List<Newspaper.UpdateCommand<?>> update(UpdateNewspaperRequest request) {
+    protected List<Newspaper.UpdateCommand<?>> printableProductCommands(UpdateNewspaperRequest request) {
         List<Newspaper.UpdateCommand<?>> commands = new ArrayList<>();
 
         request.getEditorInChief().ifDefined(editorInChief -> commands.add(new Newspaper.UpdateCommand.EditorInChief(editorInChief)));

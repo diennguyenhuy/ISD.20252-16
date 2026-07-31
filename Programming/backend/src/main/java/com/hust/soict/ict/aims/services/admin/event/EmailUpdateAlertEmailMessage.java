@@ -79,10 +79,8 @@ class EmailUpdateAlertEmailMessage implements EmailMessage<EmailUpdateEvent> {
 
     @Component
     static class Factory extends EmailMessage.Factory<EmailUpdateAlertEmailMessage, EmailUpdateEvent> {
-
-        @Override
-        public Class<EmailUpdateAlertEmailMessage> messageType() {
-            return EmailUpdateAlertEmailMessage.class;
+        Factory() {
+            super(EmailUpdateAlertEmailMessage.class);
         }
 
         @Override

@@ -12,13 +12,17 @@ import java.time.Instant;
 public abstract class PaymentService {
     private final OrderDraftContext orderDraftContext;
     private final OrderFinalization orderFinalization;
+    private final PaymentMethod paymentMethod;
 
-    protected PaymentService(OrderDraftContext orderDraftContext, OrderFinalization orderFinalization) {
+    protected PaymentService(PaymentMethod paymentMethod, OrderDraftContext orderDraftContext, OrderFinalization orderFinalization) {
+        this.paymentMethod = paymentMethod;
         this.orderDraftContext = orderDraftContext;
         this.orderFinalization = orderFinalization;
     }
 
-    public abstract PaymentMethod method();
+    public final PaymentMethod method() {
+        return paymentMethod;
+    }
 
     protected abstract PaymentInitiation startPayment() throws PaymentException;
 
@@ -26,7 +30,7 @@ public abstract class PaymentService {
         return PaymentTransaction.of(
                 transactionContent,
                 Instant.now(),
-                method().name(),
+                paymentMethod.name(),
                 currentOrder().getTotalAmount()
         );
     }

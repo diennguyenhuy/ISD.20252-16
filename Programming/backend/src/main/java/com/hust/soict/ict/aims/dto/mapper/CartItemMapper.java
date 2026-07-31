@@ -16,7 +16,7 @@ class CartItemMapper extends AbstractMapper<CartItem, CartItemResponse> {
     private final Map<Class<? extends Product>, ProductSummaryMapper<? extends Product>> productSummaryMapper;
 
     CartItemMapper(List<ProductSummaryMapper<? extends Product>> productSummaryMapper) {
-        super(CartItemResponse::new);
+        super(CartItem.class, CartItemResponse.class, CartItemResponse::new);
         this.productSummaryMapper = productSummaryMapper.stream()
                 .collect(
                         Collectors.toMap(
@@ -33,20 +33,9 @@ class CartItemMapper extends AbstractMapper<CartItem, CartItemResponse> {
     }
 
     @Override
-    public void map(CartItem source, CartItemResponse target) {
+    protected void map(CartItem source, CartItemResponse target) {
         target.setProduct(map(source.getProduct()));
         target.setQuantity(source.getQuantity());
         target.setItemTotalPrice(source.getItemTotalPrice());
     }
-
-    @Override
-    public Class<CartItem> getSourceClass() {
-        return CartItem.class;
-    }
-
-    @Override
-    public Class<CartItemResponse> getTargetClass() {
-        return CartItemResponse.class;
-    }
-
 }

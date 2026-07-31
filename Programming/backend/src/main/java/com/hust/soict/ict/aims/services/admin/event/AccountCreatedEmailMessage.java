@@ -84,9 +84,8 @@ class AccountCreatedEmailMessage implements EmailMessage<AccountCreatedEvent> {
 
     @Component
     static class Factory extends EmailMessage.Factory<AccountCreatedEmailMessage, AccountCreatedEvent> {
-        @Override
-        public Class<AccountCreatedEmailMessage> messageType() {
-            return AccountCreatedEmailMessage.class;
+        Factory() {
+            super(AccountCreatedEmailMessage.class);
         }
 
         @Override

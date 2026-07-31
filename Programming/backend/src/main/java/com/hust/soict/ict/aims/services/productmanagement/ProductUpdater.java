@@ -7,10 +7,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 abstract class ProductUpdater<P extends Product, UR extends UpdateProductRequest, UC extends Product.UpdateCommand<?>> {
-    protected abstract Class<UR> updateRequestType();
-    protected abstract List<UC> update(UR request);
+    private final Class<UR> updateRequestType;
 
-    protected P update(P product, UR request) {
+    protected ProductUpdater(Class<UR> updateRequestType) {
+        this.updateRequestType = updateRequestType;
+    }
+
+    final Class<UR> updateRequestType() {
+        return updateRequestType;
+    }
+
+    protected abstract List<UC> productCommands(UR request);
+
+    private List<Product.UpdateCommand<?>> commands(UR request) {
         List<Product.UpdateCommand<?>> commands = new ArrayList<>();
 
         request.getTitle().ifDefined(title -> commands.add(new Product.UpdateCommand.Title(title)));
@@ -21,10 +30,13 @@ abstract class ProductUpdater<P extends Product, UR extends UpdateProductRequest
         request.getWidth().ifDefined(width -> commands.add(new Product.UpdateCommand.Width(width)));
         request.getLength().ifDefined(length -> commands.add(new Product.UpdateCommand.Length(length)));
         request.getWeight().ifDefined(weight -> commands.add(new Product.UpdateCommand.Weight(weight)));
+        commands.addAll(productCommands(request));
 
-        commands.addAll(update(request));
+        return commands;
+    }
 
-        commands.forEach(product::update);
+    protected final P update(P product, UR request) {
+        commands(request).forEach(product::update);
         return product;
     }
 }

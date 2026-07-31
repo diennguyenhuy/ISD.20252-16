@@ -9,13 +9,12 @@ public interface EmailMessage<E> extends NotificationMessage<E> {
     String body();
     String recipient();
 
-    abstract class Factory<M extends EmailMessage<E>, E> implements NotificationMessage.Factory<M, E> {
+    abstract class Factory<M extends EmailMessage<E>, E> extends NotificationMessage.Factory<M, E> {
         @Value("${app.frontend.url}")
         protected String frontendUrl;
 
-        @Override
-        public final NotificationMethod supportedMethod() {
-            return NotificationMethod.EMAIL;
+        protected Factory(Class<M> messageClass) {
+            super(messageClass, NotificationMethod.EMAIL);
         }
     }
 }
