@@ -1,6 +1,6 @@
 package com.hust.soict.ict.aims.services.product;
 
-import com.hust.soict.ict.aims.dto.response.CartResponse;
+import com.hust.soict.ict.aims.dto.response.cart.CartResponse;
 
 import java.util.NoSuchElementException;
 import java.util.UUID;

@@ -21,12 +21,12 @@ class ProductFactory {
     ) {
         this.productCreators = productCreators.stream()
                 .collect(Collectors.toMap(
-                        ProductCreator::createRequestType,
+                        p -> p.createRequestType,
                         Function.identity()
                 ));
         this.productUpdaters = productUpdaters.stream()
                 .collect(Collectors.toMap(
-                        ProductUpdater::updateRequestType,
+                        p -> p.updateRequestType,
                         Function.identity()
                 ));
     }

@@ -11,17 +11,14 @@ import java.util.List;
 class NewspaperUpdater extends PrintableProductUpdater<Newspaper, UpdateNewspaperRequest, Newspaper.UpdateCommand<?>> {
 
     NewspaperUpdater() {
-        super(UpdateNewspaperRequest.class);
-    }
+        super(UpdateNewspaperRequest.class, request -> {
+            List<Newspaper.UpdateCommand<?>> commands = new ArrayList<>();
 
-    @Override
-    protected List<Newspaper.UpdateCommand<?>> printableProductCommands(UpdateNewspaperRequest request) {
-        List<Newspaper.UpdateCommand<?>> commands = new ArrayList<>();
+            request.getEditorInChief().ifDefined(editorInChief -> commands.add(new Newspaper.UpdateCommand.EditorInChief(editorInChief)));
+            request.getPublicationFrequency().ifDefined(pf -> commands.add(new Newspaper.UpdateCommand.PublicationFrequency(pf)));
+            request.getSections().ifDefined(sections -> commands.add(new Newspaper.UpdateCommand.Sections(sections)));
 
-        request.getEditorInChief().ifDefined(editorInChief -> commands.add(new Newspaper.UpdateCommand.EditorInChief(editorInChief)));
-        request.getPublicationFrequency().ifDefined(pf -> commands.add(new Newspaper.UpdateCommand.PublicationFrequency(pf)));
-        request.getSections().ifDefined(sections -> commands.add(new Newspaper.UpdateCommand.Sections(sections)));
-
-        return commands;
+            return commands;
+        });
     }
 }

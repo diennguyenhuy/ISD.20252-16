@@ -1,7 +1,7 @@
 package com.hust.soict.ict.aims.services.order;
 
-import com.hust.soict.ict.aims.dto.mapper.Mapper;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
+import com.hust.soict.ict.aims.dto.response.order.OrderMappers;
 import com.hust.soict.ict.aims.exceptions.OrderNotCompleteException;
 import com.hust.soict.ict.aims.exceptions.OrderNotFoundException;
 import com.hust.soict.ict.aims.exceptions.OrderStateTransitionException;
@@ -22,14 +22,13 @@ import java.util.UUID;
 @Slf4j
 class OrderServiceImpl implements OrderService, OrderFinalization {
     private final OrderRepository orderRepository;
-    private final Mapper orderMapper;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     @Transactional(readOnly = true)
     public OrderResponse getOrder(UUID orderId) throws OrderNotFoundException {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
-        return map(order);
+        return OrderMappers.map(order);
     }
 
     @Override
@@ -58,10 +57,6 @@ class OrderServiceImpl implements OrderService, OrderFinalization {
 
         log.debug("Order has been successfully saved!");
 
-        return map(order);
-    }
-
-    private OrderResponse map(Order order) {
-        return orderMapper.map(order, OrderResponse.class);
+        return OrderMappers.map(order);
     }
 }

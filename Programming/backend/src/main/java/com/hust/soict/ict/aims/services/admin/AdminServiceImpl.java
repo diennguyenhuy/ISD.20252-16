@@ -1,6 +1,5 @@
 package com.hust.soict.ict.aims.services.admin;
 
-import com.hust.soict.ict.aims.dto.mapper.Mapper;
 import com.hust.soict.ict.aims.dto.request.CreateUserRequest;
 import com.hust.soict.ict.aims.dto.response.UserResponse;
 import com.hust.soict.ict.aims.exceptions.AccountAlreadyExistedException;
@@ -23,6 +22,7 @@ import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Centralized administration service.
@@ -47,7 +47,6 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final Mapper mapper;
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private static final String PASSWORD_CHARS =
@@ -59,7 +58,7 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     @Override
     @Transactional(readOnly = true)
     public Page<UserResponse> getUsers(Pageable pageable) {
-        return userRepository.findAll(pageable).map(this::map);
+        return userRepository.findAll(pageable).map(AdminServiceImpl::map);
     }
 
     @Override
@@ -206,8 +205,18 @@ class AdminServiceImpl implements AdminService, UserQueryService {
 
     // ───── Helpers ─────
 
-    private UserResponse map(User user) {
-        return mapper.map(user, UserResponse.class);
+    private static UserResponse map(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRoles().stream().map(User.Role::name).collect(Collectors.toSet()),
+                user.isActive(),
+                user.isBlocked(),
+                user.isMustChangePassword(),
+                user.getCreatedAt(),
+                user.getUpdatedAt()
+        );
     }
 
     private User findUserOrThrow(UUID userId) {
@@ -215,7 +224,7 @@ class AdminServiceImpl implements AdminService, UserQueryService {
                 .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + userId));
     }
 
-    private String generateTemporaryPassword() {
+    private static String generateTemporaryPassword() {
         StringBuilder sb = new StringBuilder(TEMP_PASSWORD_LENGTH);
         for (int i = 0; i < TEMP_PASSWORD_LENGTH; i++) {
             sb.append(PASSWORD_CHARS.charAt(SECURE_RANDOM.nextInt(PASSWORD_CHARS.length())));

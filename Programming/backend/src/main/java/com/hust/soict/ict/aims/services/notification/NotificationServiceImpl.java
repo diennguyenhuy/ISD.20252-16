@@ -17,13 +17,13 @@ class NotificationServiceImpl implements NotificationService {
     ) {
         final Map<NotificationMethod, NotificationChannel<?>> methodToChannel = new EnumMap<>(NotificationMethod.class);
         channels.forEach(c -> {
-            methodToChannel.put(c.method(), c);
-            methods.add(c.method());
+            methodToChannel.put(c.method, c);
+            methods.add(c.method);
         });
 
         factories.forEach(f -> {
-            Class<? extends NotificationMessage<?>> messageType = f.messageType();
-            NotificationMethod method = f.supportedMethod();
+            Class<? extends NotificationMessage<?>> messageType = f.messageClass;
+            NotificationMethod method = f.method;
 
             this.factories.put(messageType, f);
 

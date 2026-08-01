@@ -11,17 +11,14 @@ import java.util.List;
 class BookUpdater extends PrintableProductUpdater<Book, UpdateBookRequest, Book.UpdateCommand<?>> {
 
     BookUpdater() {
-        super(UpdateBookRequest.class);
-    }
+        super(UpdateBookRequest.class, request -> {
+            List<Book.UpdateCommand<?>> commands = new ArrayList<>();
 
-    @Override
-    protected List<Book.UpdateCommand<?>> printableProductCommands(UpdateBookRequest request) {
-        List<Book.UpdateCommand<?>> commands = new ArrayList<>();
+            request.getAuthors().ifDefined(authors -> commands.add(new Book.UpdateCommand.Authors(authors)));
+            request.getNumberOfPages().ifDefined(numbers -> commands.add(new Book.UpdateCommand.NumberOfPages(numbers)));
+            request.getGenre().ifDefined(genres -> commands.add(new Book.UpdateCommand.Genre(genres)));
 
-        request.getAuthors().ifDefined(authors -> commands.add(new Book.UpdateCommand.Authors(authors)));
-        request.getNumberOfPages().ifDefined(numbers -> commands.add(new Book.UpdateCommand.NumberOfPages(numbers)));
-        request.getGenre().ifDefined(genres -> commands.add(new Book.UpdateCommand.Genre(genres)));
-
-        return commands;
+            return commands;
+        });
     }
 }

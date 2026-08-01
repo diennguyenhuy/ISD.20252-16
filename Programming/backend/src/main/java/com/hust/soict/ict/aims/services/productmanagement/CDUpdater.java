@@ -12,22 +12,19 @@ import java.util.List;
 class CDUpdater extends ProductUpdater<CD, UpdateCDRequest, CD.UpdateCommand<?>> {
 
     CDUpdater() {
-        super(UpdateCDRequest.class);
-    }
+        super(UpdateCDRequest.class, request -> {
+            List<CD.UpdateCommand<?>> commands = new ArrayList<>();
 
-    @Override
-    protected List<CD.UpdateCommand<?>> productCommands(UpdateCDRequest request) {
-        List<CD.UpdateCommand<?>> commands = new ArrayList<>();
+            request.getGenre().ifDefined(genre -> commands.add(new CD.UpdateCommand.Genre(genre)));
+            request.getArtists().ifDefined(artists -> commands.add(new CD.UpdateCommand.Artists(artists)));
+            request.getRecordLabel().ifDefined(record -> commands.add(new CD.UpdateCommand.RecordLabel(record)));
+            request.getTracks()
+                    .map(ts -> ts.stream()
+                            .map(t -> new Track(t.title(), t.length()))
+                            .toList()
+                    ).ifDefined(tracks -> commands.add(new CD.UpdateCommand.Tracks(tracks)));
 
-        request.getGenre().ifDefined(genre -> commands.add(new CD.UpdateCommand.Genre(genre)));
-        request.getArtists().ifDefined(artists -> commands.add(new CD.UpdateCommand.Artists(artists)));
-        request.getRecordLabel().ifDefined(record -> commands.add(new CD.UpdateCommand.RecordLabel(record)));
-        request.getTracks()
-                .map(ts -> ts.stream()
-                        .map(t -> new Track(t.title(), t.length()))
-                        .toList()
-                ).ifDefined(tracks -> commands.add(new CD.UpdateCommand.Tracks(tracks)));
-
-        return commands;
+            return commands;
+        });
     }
 }

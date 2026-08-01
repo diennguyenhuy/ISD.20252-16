@@ -13,8 +13,8 @@ class DeliveryFeeCalculatorImpl implements DeliveryFeeCalculator {
 
     DeliveryFeeCalculatorImpl(List<DeliveryFeeCalculationStrategy> strategies) {
         strategies.forEach(strategy -> {
-            strategyMap.put(strategy.method(), strategy);
-            methods.add(strategy.method());
+            strategyMap.put(strategy.method, strategy);
+            methods.add(strategy.method);
         });
     }
 

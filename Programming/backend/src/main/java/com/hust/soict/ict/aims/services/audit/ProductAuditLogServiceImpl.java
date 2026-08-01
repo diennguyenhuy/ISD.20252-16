@@ -1,6 +1,6 @@
 package com.hust.soict.ict.aims.services.audit;
 
-import com.hust.soict.ict.aims.dto.mapper.Mapper;
+import com.hust.soict.ict.aims.dto.response.audit.ProductLogMappers;
 import com.hust.soict.ict.aims.dto.response.audit.ProductLogResponse;
 import com.hust.soict.ict.aims.models.entities.audit.ProductLog;
 import com.hust.soict.ict.aims.repositories.ProductLogRepository;
@@ -16,7 +16,7 @@ import java.util.List;
 class ProductAuditLogServiceImpl implements ProductAuditLogService {
     private final ProductLogRepository productLogRepository;
 
-    private final Mapper mapper;
+    private final ProductLogMappers mapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -24,11 +24,7 @@ class ProductAuditLogServiceImpl implements ProductAuditLogService {
         return productLogRepository.findTop100ByOrderByTimestampDesc().stream()
                 .sorted(Comparator.comparing(ProductLog::getTimestamp).reversed())
                 .limit(100)
-                .map(this::map)
+                .map(mapper::map)
                 .toList();
-    }
-
-    private ProductLogResponse map(ProductLog productLog) {
-        return mapper.map(productLog, ProductLogResponse.class);
     }
 }

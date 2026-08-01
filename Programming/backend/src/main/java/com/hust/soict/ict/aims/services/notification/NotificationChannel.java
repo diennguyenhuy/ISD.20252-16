@@ -6,14 +6,10 @@ package com.hust.soict.ict.aims.services.notification;
  *           does not care what the message is built from and how it is built
  */
 public abstract class NotificationChannel<M extends NotificationMessage<?>> {
-    private final NotificationMethod method;
+    final NotificationMethod method;
 
     protected NotificationChannel(NotificationMethod method) {
         this.method = method;
-    }
-
-    final NotificationMethod method() {
-        return method;
     }
 
     protected abstract void send(M message);

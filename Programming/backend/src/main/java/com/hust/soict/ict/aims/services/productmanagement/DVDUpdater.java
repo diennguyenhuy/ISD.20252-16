@@ -11,20 +11,17 @@ import java.util.List;
 class DVDUpdater extends ProductUpdater<DVD, UpdateDVDRequest, DVD.UpdateCommand<?>> {
 
     DVDUpdater() {
-        super(UpdateDVDRequest.class);
-    }
+        super(UpdateDVDRequest.class, request -> {
+            List<DVD.UpdateCommand<?>> commands = new ArrayList<>();
 
-    @Override
-    protected List<DVD.UpdateCommand<?>> productCommands(UpdateDVDRequest request) {
-        List<DVD.UpdateCommand<?>> commands = new ArrayList<>();
+            request.getGenre().ifDefined(genre -> commands.add(new DVD.UpdateCommand.Genre(genre)));
+            request.getDirector().ifDefined(director -> commands.add(new DVD.UpdateCommand.Director(director)));
+            request.getRuntime().ifDefined(runtime -> commands.add(new DVD.UpdateCommand.Runtime(runtime)));
+            request.getStudio().ifDefined(studio -> commands.add(new DVD.UpdateCommand.Studio(studio)));
+            request.getLanguage().ifDefined(language -> commands.add(new DVD.UpdateCommand.Language(language)));
+            request.getSubtitles().ifDefined(subtitles -> commands.add(new DVD.UpdateCommand.Subtitles(subtitles)));
 
-        request.getGenre().ifDefined(genre -> commands.add(new DVD.UpdateCommand.Genre(genre)));
-        request.getDirector().ifDefined(director -> commands.add(new DVD.UpdateCommand.Director(director)));
-        request.getRuntime().ifDefined(runtime -> commands.add(new DVD.UpdateCommand.Runtime(runtime)));
-        request.getStudio().ifDefined(studio -> commands.add(new DVD.UpdateCommand.Studio(studio)));
-        request.getLanguage().ifDefined(language -> commands.add(new DVD.UpdateCommand.Language(language)));
-        request.getSubtitles().ifDefined(subtitles -> commands.add(new DVD.UpdateCommand.Subtitles(subtitles)));
-
-        return commands;
+            return commands;
+        });
     }
 }

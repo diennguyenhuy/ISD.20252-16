@@ -1,18 +1,17 @@
 package com.hust.soict.ict.aims.dto.response.order;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.UUID;
 
-@NoArgsConstructor
-@Data
-public class OrderItemResponse {
-    private UUID productId;
-    private UUID productReferenceId;
-    private String productName;
-    private String productImage;
-    private int quantity;
-    private long unitPrice;
-    private long itemTotalPrice;
+public record OrderItemResponse(
+        UUID productId,
+        UUID productReferenceId,
+        String productName,
+        String productImage,
+        int quantity,
+        long unitPrice,
+        long itemTotalPrice
+) {
+    public OrderItemResponse(UUID productReferenceId, String productName, int quantity, long unitPrice, long itemTotalPrice) {
+        this(null, productReferenceId, productName, null, quantity, unitPrice, itemTotalPrice);
+    }
 }

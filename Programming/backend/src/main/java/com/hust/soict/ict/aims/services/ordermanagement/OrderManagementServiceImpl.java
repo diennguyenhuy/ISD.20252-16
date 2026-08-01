@@ -1,7 +1,7 @@
 package com.hust.soict.ict.aims.services.ordermanagement;
 
-import com.hust.soict.ict.aims.dto.mapper.Mapper;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
+import com.hust.soict.ict.aims.dto.response.order.OrderMappers;
 import com.hust.soict.ict.aims.exceptions.OrderApprovalException;
 import com.hust.soict.ict.aims.exceptions.OrderNotFoundException;
 import com.hust.soict.ict.aims.models.entities.order.Order;
@@ -22,29 +22,28 @@ import java.util.*;
 @RequiredArgsConstructor
 class OrderManagementServiceImpl implements OrderQueryService, OrderRejectionService, OrderApprovalService {
     private final OrderRepository orderRepository;
-    private final Mapper orderMapper;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     @Transactional(readOnly = true)
     public Page<OrderResponse> getPendingOrders(Pageable pageable) {
-        return orderRepository.findAllByStatus(Order.Status.PENDING, pageable).map(this::map);
+        return orderRepository.findAllByStatus(Order.Status.PENDING, pageable).map(OrderMappers::map);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<OrderResponse> getOrders(Order.Status status, Pageable pageable) {
         if (status == null) {
-            return orderRepository.findAll(pageable).map(this::map);
+            return orderRepository.findAll(pageable).map(OrderMappers::map);
         }
-        return orderRepository.findAllByStatus(status, pageable).map(this::map);
+        return orderRepository.findAllByStatus(status, pageable).map(OrderMappers::map);
     }
 
     @Override
     @Transactional
     public OrderResponse getOrderById(UUID id) {
         Order order = orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
-        return map(order);
+        return OrderMappers.map(order);
     }
 
     @Override
@@ -61,7 +60,7 @@ class OrderManagementServiceImpl implements OrderQueryService, OrderRejectionSer
 
         applicationEventPublisher.publishEvent(new OrderApprovalEvent(order));
 
-        return map(order);
+        return OrderMappers.map(order);
     }
 
     private void validateOrder(Order order) throws OrderApprovalException {
@@ -96,10 +95,6 @@ class OrderManagementServiceImpl implements OrderQueryService, OrderRejectionSer
 
         applicationEventPublisher.publishEvent(new OrderRejectionEvent(order));
 
-        return map(order);
-    }
-
-    private OrderResponse map(Order order) {
-        return orderMapper.map(order, OrderResponse.class);
+        return OrderMappers.map(order);
     }
 }
