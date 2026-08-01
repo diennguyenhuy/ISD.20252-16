@@ -4,22 +4,24 @@ import com.hust.soict.ict.aims.dto.request.UpdateDVDRequest;
 import com.hust.soict.ict.aims.models.entities.product.DVD;
 import org.springframework.stereotype.Component;
 
-@Component
-class DVDUpdater implements ProductUpdater<DVD, UpdateDVDRequest> {
-    @Override
-    public Class<UpdateDVDRequest> updateRequestType() {
-        return UpdateDVDRequest.class;
-    }
+import java.util.ArrayList;
+import java.util.List;
 
-    @Override
-    public DVD updateFrom(DVD existingProduct, UpdateDVDRequest updateRequest) {
-        return buildCommonFields(existingProduct.toBuilder(), updateRequest)
-                .genre(updateRequest.getGenre())
-                .director(updateRequest.getDirector())
-                .runtime(updateRequest.getRuntime())
-                .studio(updateRequest.getStudio())
-                .language(updateRequest.getLanguage())
-                .subtitles(updateRequest.getSubtitles())
-                .build();
+@Component
+class DVDUpdater extends ProductUpdater<DVD, UpdateDVDRequest, DVD.UpdateCommand<?>> {
+
+    DVDUpdater() {
+        super(UpdateDVDRequest.class, request -> {
+            List<DVD.UpdateCommand<?>> commands = new ArrayList<>();
+
+            request.getGenre().ifDefined(genre -> commands.add(new DVD.UpdateCommand.Genre(genre)));
+            request.getDirector().ifDefined(director -> commands.add(new DVD.UpdateCommand.Director(director)));
+            request.getRuntime().ifDefined(runtime -> commands.add(new DVD.UpdateCommand.Runtime(runtime)));
+            request.getStudio().ifDefined(studio -> commands.add(new DVD.UpdateCommand.Studio(studio)));
+            request.getLanguage().ifDefined(language -> commands.add(new DVD.UpdateCommand.Language(language)));
+            request.getSubtitles().ifDefined(subtitles -> commands.add(new DVD.UpdateCommand.Subtitles(subtitles)));
+
+            return commands;
+        });
     }
 }

@@ -8,11 +8,11 @@ import java.util.UUID;
 
 public class OrderApprovalException extends RuntimeException {
     @Getter
-    private final Map<UUID, Integer> insufficientQuantity;
+    private final Map<UUID, Record> insufficientQuantity;
     @Getter
-    private final List<String> missingProducts;
+    private final Map<UUID, String> missingProducts;
 
-    public OrderApprovalException(Map<UUID, Integer> insufficientQuantity, List<String> missingProducts) {
+    public OrderApprovalException(Map<UUID, Record> insufficientQuantity, Map<UUID, String> missingProducts) {
         super("Some products in the order have quantities that exceed available stock, or have been deactivated. Cannot proceed to approve order.");
         this.insufficientQuantity = insufficientQuantity;
         this.missingProducts = missingProducts;

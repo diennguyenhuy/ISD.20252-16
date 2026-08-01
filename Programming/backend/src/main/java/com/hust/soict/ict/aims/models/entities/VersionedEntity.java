@@ -8,19 +8,25 @@ import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @MappedSuperclass
 @Getter
 @NoArgsConstructor
 public abstract class VersionedEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(updatable = false)
+    private UUID id;
+
     @Version
-    protected Long version;
+    private Long version;
 
     @CreationTimestamp @Immutable
     @Column(updatable = false, nullable = false)
-    protected Instant createdAt;
+    private Instant createdAt;
 
     @UpdateTimestamp
     @Column(nullable = false)
-    protected Instant updatedAt;
+    private Instant updatedAt;
 }

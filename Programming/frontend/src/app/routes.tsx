@@ -52,11 +52,11 @@ export const router = createBrowserRouter([
             { index: true, Component: HomePage },
             { path: 'product/:id', Component: CustomerProductDetail },
             { path: 'cart', Component: CartScreen },
-            { path: 'checkout/delivery', Component: DeliveryForm },
-            { path: 'checkout/invoice', Component: Invoice },
-            { path: 'checkout/payment/qr', Component: QRPayment },
+            { path: 'checkout/:checkoutId/delivery', Component: DeliveryForm },
+            { path: 'checkout/:checkoutId/invoice', Component: Invoice },
+            { path: 'checkout/:checkoutId/payment/qr', Component: QRPayment },
 
-            { path: 'checkout/payment/paypal', Component: PayPalPayment },
+            { path: 'checkout/:checkoutId/payment/paypal', Component: PayPalPayment },
             { path: 'checkout/payment/paypal/callback', Component: PayPalCallback },
             { path: 'checkout/payment/paypal/cancel', Component: PayPalCancel },
 

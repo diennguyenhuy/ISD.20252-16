@@ -4,22 +4,21 @@ import com.hust.soict.ict.aims.dto.request.UpdateBookRequest;
 import com.hust.soict.ict.aims.models.entities.product.Book;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
-class BookUpdater implements ProductUpdater<Book, UpdateBookRequest> {
+class BookUpdater extends PrintableProductUpdater<Book, UpdateBookRequest, Book.UpdateCommand<?>> {
 
-    @Override
-    public Class<UpdateBookRequest> updateRequestType() {
-        return UpdateBookRequest.class;
-    }
+    BookUpdater() {
+        super(UpdateBookRequest.class, request -> {
+            List<Book.UpdateCommand<?>> commands = new ArrayList<>();
 
-    @Override
-    public Book updateFrom(Book existingProduct, UpdateBookRequest updateRequest) {
-        return buildCommonFields(existingProduct.toBuilder(), updateRequest)
-                .publisher(updateRequest.getPublisher())
-                .language(updateRequest.getLanguage())
-                .authors(updateRequest.getAuthors())
-                .numberOfPages(updateRequest.getNumberOfPages())
-                .genre(updateRequest.getGenre())
-                .build();
+            request.getAuthors().ifDefined(authors -> commands.add(new Book.UpdateCommand.Authors(authors)));
+            request.getNumberOfPages().ifDefined(numbers -> commands.add(new Book.UpdateCommand.NumberOfPages(numbers)));
+            request.getGenre().ifDefined(genres -> commands.add(new Book.UpdateCommand.Genre(genres)));
+
+            return commands;
+        });
     }
 }

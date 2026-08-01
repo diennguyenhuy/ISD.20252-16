@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class StockAdjustLogResponse extends ProductAuditLogResponse {
+public class StockAdjustLogResponse extends ProductLogResponse {
     private int oldStock;
     private int newStock;
     private String reason;

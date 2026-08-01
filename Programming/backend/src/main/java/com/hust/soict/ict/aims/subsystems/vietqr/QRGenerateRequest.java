@@ -2,14 +2,6 @@ package com.hust.soict.ict.aims.subsystems.vietqr;
 
 import lombok.Getter;
 
-/*
- * SOLID Principles: No violations.
- *
- * + Cohesion level: FUNCTIONAL
- * + Coupling level with VietQRController: DATA
- * + Reason: Only primitives and Strings are passed in; buildRequestString()
- *   returns a plain String. No composite objects or control flags involved.
- */
 @Getter
 class QRGenerateRequest {
     private String bankCode;

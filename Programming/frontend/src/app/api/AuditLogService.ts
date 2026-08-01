@@ -1,9 +1,9 @@
 import { apiClient } from "./client";
-import type { ProductAuditLog } from "../models/audit.interface"
+import type { ProductLog } from "../models/audit.interface"
 
 const AuditLogService = {
-    getAuditLogs: async (): Promise<ProductAuditLog[]> => {
-        const result =  await apiClient.get<ProductAuditLog[]>("manager/logs");
+    getAuditLogs: async (): Promise<ProductLog[]> => {
+        const result =  await apiClient.get<ProductLog[]>("manager/logs");
         return result.data;
     }
 }

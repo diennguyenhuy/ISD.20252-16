@@ -58,8 +58,6 @@ export default function ManagerOrderDetail() {
     const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
     const [isUpdating, setIsUpdating] = useState(false);
 
-    const hasMissingProducts = order?.items.some(i => !i.productId);
-
     // ── Data fetching ────────────────────────────────────────────────────────
     useEffect(() => {
         if (!id) return;
@@ -196,8 +194,8 @@ export default function ManagerOrderDetail() {
                         </button>
                         <button
                             onClick={() => setConfirmAction('APPROVED')}
-                            disabled={hasMissingProducts}
-                            className="flex-1 py-3.5 px-6 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 shadow-md flex items-center justify-center gap-2"
+                            disabled={order.items.some(i => !i.productId)}
+                            className="flex-1 py-3.5 px-6 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-emerald-600"
                         >
                             <CheckCircle2 size={18} /> Approve Order
                         </button>

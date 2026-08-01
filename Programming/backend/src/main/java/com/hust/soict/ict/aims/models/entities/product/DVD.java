@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Immutable;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -18,6 +19,7 @@ public class DVD extends Product {
         HD_DVD,
     }
 
+    @Immutable
     @Column(updatable = false)
     private LocalDate releaseDate;
 
@@ -25,6 +27,7 @@ public class DVD extends Product {
     private String genre;
 
     @Enumerated(EnumType.STRING)
+    @Immutable
     @Column(nullable = false, updatable = false, length = 7)
     private DiscType discType;
 
@@ -62,22 +65,7 @@ public class DVD extends Product {
         this.subtitles = new ArrayList<>(Objects.requireNonNull(builder.subtitles, "DVD Subtitles cannot be null"));
     }
 
-    @Override
-    public Builder toBuilder() {
-        return new Builder(this);
-    }
-
-    private void apply(Builder builder) {
-        super.apply(builder);
-        Optional.ofNullable(builder.genre).ifPresent(v -> this.genre = v);
-        Optional.ofNullable(builder.director).ifPresent(v -> this.director = v);
-        Optional.ofNullable(builder.runtime).ifPresent(v -> this.runtime = v);
-        Optional.ofNullable(builder.studio).ifPresent(v -> this.studio = v);
-        Optional.ofNullable(builder.language).ifPresent(v -> this.language = v);
-        Optional.ofNullable(builder.subtitles).ifPresent(v -> this.subtitles = new ArrayList<>(v));
-    }
-
-    public static class Builder extends Product.Builder<DVD, Builder> {
+    public static class Builder extends Product.Builder<Builder> {
         private LocalDate releaseDate;
         private String genre;
         private DiscType discType;
@@ -91,10 +79,6 @@ public class DVD extends Product {
             super();
         }
 
-        private Builder(DVD updatingDVD) {
-            super(updatingDVD);
-        }
-
         @Override
         protected Builder self() {
             return this;
@@ -102,10 +86,7 @@ public class DVD extends Product {
 
         @Override
         public DVD build() {
-            if (updatingProduct != null) {
-                updatingProduct.apply(this);
-                return updatingProduct;
-            } else return new DVD(this);
+            return new DVD(this);
         }
 
         public Builder releaseDate(LocalDate releaseDate) {
@@ -157,5 +138,23 @@ public class DVD extends Product {
             this.subtitles = subtitles == null ? null : List.of(subtitles);
             return this;
         }
+    }
+
+    static {
+        registerUpdateCommand(UpdateCommand.Genre.class, DVD.class, (p, c) -> p.genre = c.newValue());
+        registerUpdateCommand(UpdateCommand.Director.class, DVD.class, (p, c) -> p.director = c.newValue());
+        registerUpdateCommand(UpdateCommand.Runtime.class, DVD.class, (p, c) -> p.runtime = c.newValue());
+        registerUpdateCommand(UpdateCommand.Studio.class, DVD.class, (p, c) -> p.studio = c.newValue());
+        registerUpdateCommand(UpdateCommand.Language.class, DVD.class, (p, c) -> p.language = c.newValue());
+        registerUpdateCommand(UpdateCommand.Subtitles.class, DVD.class, (p, c) -> p.subtitles = new ArrayList<>(c.newValue()));
+    }
+
+    public interface UpdateCommand<T> extends Product.UpdateCommand<T> {
+        record Genre(String newValue) implements UpdateCommand<String> {}
+        record Director(String newValue) implements UpdateCommand<String> {}
+        record Runtime(Integer newValue) implements UpdateCommand<Integer> {}
+        record Studio(String newValue) implements UpdateCommand<String> {}
+        record Language(String newValue) implements UpdateCommand<String> {}
+        record Subtitles(List<String> newValue) implements UpdateCommand<List<String>> {}
     }
 }

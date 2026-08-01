@@ -16,11 +16,6 @@ public class User extends VersionedEntity {
         ADMINISTRATOR,
     }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(updatable = false)
-    private UUID id;
-
     @Column(nullable = false)
     private String username;
 
@@ -29,7 +24,6 @@ public class User extends VersionedEntity {
     private String email;
 
     @Column(nullable = false)
-    @Getter
     private String hashedPassword;
 
     private boolean active = true;

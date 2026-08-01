@@ -11,31 +11,19 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-/**
- * Cohesion: Functional Cohesion
- * Reason:
- * Represents a purchased item within an Order and
- * related pricing/weight calculations.
- * Coupling:
- * - Stamp coupling with Order, Product, and CartItem
- *   through aggregate relationships and factory methods.
- */
 @Entity
 @Table(
         name = "order_item",
-        uniqueConstraints = @UniqueConstraint(
-                columnNames = {"order_id", "product_id"}
-        )
+        uniqueConstraints = @UniqueConstraint(columnNames = {"order_id", "product_id"})
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderItem {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(updatable = false)
-    private UUID id;
+    @EmbeddedId
+    private OrderItemKey id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("orderId")
     @JoinColumn(name = "order_id", nullable = false)
     @Setter(AccessLevel.PACKAGE)
     private Order order;
@@ -65,17 +53,14 @@ public class OrderItem {
         return unitWeight.multiply(BigDecimal.valueOf(quantity));
     }
 
-    public static OrderItem from(CartItem cartItem, Order order) {
-        OrderItem item = new OrderItem();
+    OrderItem(CartItem cartItem, Order order) {
+        this.order = order;
+        this.product = cartItem.getProduct();
+        this.id = new OrderItemKey(cartItem.getProduct().getId());
 
-        item.order = order;
-        item.product = cartItem.getProduct();
-
-        item.productName = cartItem.getProduct().getTitle();
-        item.unitPrice = cartItem.getProduct().getCurrentPrice();
-        item.unitWeight = cartItem.getProduct().getWeight();
-        item.quantity = cartItem.getQuantity();
-
-        return item;
+        this.productName = cartItem.getProduct().getTitle();
+        this.unitPrice = cartItem.getProduct().getCurrentPrice();
+        this.unitWeight = cartItem.getProduct().getWeight();
+        this.quantity = cartItem.getQuantity();
     }
 }

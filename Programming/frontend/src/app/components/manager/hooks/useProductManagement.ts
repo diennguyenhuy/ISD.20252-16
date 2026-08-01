@@ -83,7 +83,9 @@ export function useProductManagement() {
 
     const activateProduct = async (id: string) => {
         try {
-            return await ProductManagementService.activateProduct(id);
+            const result = await ProductManagementService.activateProduct(id);
+            await fetchProducts();
+            return result;
         } catch (err: any) {
             return { success: false, error: extractErrorMessage(err) };
         }

@@ -4,6 +4,8 @@ export interface Order {
     readonly id: string;
     items: OrderItem[];
     status: OrderStatus;
+    totalWeight: number;
+    totalItemCount: number;
     deliveryInformation: DeliveryInformation;
     invoice: Invoice;
     paymentTransaction: PaymentTransaction;
@@ -11,10 +13,11 @@ export interface Order {
     readonly updatedAt: string;
 }
 
-export type OrderDraft = Pick<Order, 'items'> & Partial<Pick<Order, 'deliveryInformation' | 'invoice'>>;
+export type OrderDraft = Pick<Order, 'items'> & Partial<Pick<Order, 'deliveryInformation' | 'invoice'>> & { checkoutId: string };
 
 export interface OrderItem {
     readonly productId?: string;
+    readonly productReferenceId: string;
     productName: string;
     productImage?: string;
     quantity: number;

@@ -48,7 +48,7 @@ export default function CartScreen() {
             // Hit the POST /order endpoint to start the place-order process in the backend session
             const draftOrderResponse = await OrderService.placeOrder();
             // Only navigate if the API succeeds
-            navigate('/checkout/delivery', {
+            navigate(`/checkout/${draftOrderResponse.checkoutId}/delivery`, {
                 state: {
                     prefilledDeliveryInfo: draftOrderResponse.deliveryInformation
                 }

@@ -97,19 +97,22 @@ CREATE TABLE IF NOT EXISTS dvd_subtitles(
 CREATE TABLE IF NOT EXISTS "order"(
     id				UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     status			VARCHAR(10) NOT NULL,
+    total_item_count    INT NOT NULL,
+    total_weight    NUMERIC(10, 3) NOT NULL,
     version         BIGINT NOT NULL DEFAULT 0,
     created_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS order_item(
-    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     order_id		UUID REFERENCES "order"(id) ON DELETE CASCADE,
+    product_reference_id UUID,
     product_id		UUID REFERENCES product(id) ON DELETE SET NULL,
     product_name	VARCHAR(255) NOT NULL,
     quantity		INT NOT NULL,
     unit_price		BIGINT NOT NULL,
     unit_weight		NUMERIC(10, 3) NOT NULL,
+    PRIMARY KEY (order_id, product_reference_id),
     UNIQUE (order_id, product_id)
 );
 
@@ -149,6 +152,7 @@ CREATE TABLE IF NOT EXISTS "user"(
     hashed_password	TEXT NOT NULL,
     active          BOOLEAN NOT NULL,
     blocked         BOOLEAN NOT NULL,
+    must_change_password BOOLEAN NOT NULL DEFAULT FALSE,
     version         BIGINT NOT NULL DEFAULT 0,
     created_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -163,15 +167,19 @@ CREATE TABLE IF NOT EXISTS user_roles(
 CREATE TABLE IF NOT EXISTS product_log(
     id			        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     action		        VARCHAR(20) NOT NULL,
-    manager_id	        UUID REFERENCES "user"(id) ON DELETE SET NULL,
+    manager_id	        UUID NOT NULL,
     manager_username    VARCHAR(255) NOT NULL,
-    product_id	        UUID REFERENCES product(id) ON DELETE SET NULL,
+    product_id	        UUID NOT NULL,
     product_title       VARCHAR(255) NOT NULL,
     timestamp	        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS product_update_log(
-    log_id          UUID REFERENCES product_log(id) ON DELETE CASCADE,
+    id      UUID PRIMARY KEY REFERENCES product_log(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS product_update_detail(
+    log_id          UUID REFERENCES product_update_log(id) ON DELETE CASCADE,
     field_number    INT,
     field_name      VARCHAR(255),
     old_value       TEXT,
@@ -180,23 +188,18 @@ CREATE TABLE IF NOT EXISTS product_update_log(
 );
 
 CREATE TABLE IF NOT EXISTS stock_adjust_log(
-    id			        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id			        UUID PRIMARY KEY REFERENCES product_log(id) ON DELETE CASCADE,
     old_stock	        INT NOT NULL,
     new_stock	        INT NOT NULL,
-    reason		        TEXT NOT NULL,
-    manager_id	        UUID REFERENCES "user"(id) ON DELETE SET NULL,
-    manager_username    VARCHAR(255) NOT NULL,
-    product_id	        UUID REFERENCES product(id) ON DELETE SET NULL,
-    product_title       VARCHAR(255) NOT NULL,
-    timestamp	        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    reason		        TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS admin_log(
     id					UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     action				VARCHAR(20) NOT NULL,
-    admin_id			UUID REFERENCES "user"(id) ON DELETE SET NULL,
+    admin_id			UUID NOT NULL,
     admin_username      VARCHAR(255) NOT NULL,
-    affected_user_id	UUID REFERENCES "user"(id) ON DELETE SET NULL,
+    affected_user_id	UUID NOT NULL,
     affected_username   VARCHAR(255) NOT NULL,
     timestamp			TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

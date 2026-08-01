@@ -5,7 +5,12 @@ package com.hust.soict.ict.aims.services.notification;
  * @param <M> The type of notification message that a channel can support sending. The channel
  *           does not care what the message is built from and how it is built
  */
-public interface NotificationChannel<M extends NotificationMessage<?>> {
-    NotificationMethod method();
-    void send(M message);
+public abstract class NotificationChannel<M extends NotificationMessage<?>> {
+    final NotificationMethod method;
+
+    protected NotificationChannel(NotificationMethod method) {
+        this.method = method;
+    }
+
+    protected abstract void send(M message);
 }

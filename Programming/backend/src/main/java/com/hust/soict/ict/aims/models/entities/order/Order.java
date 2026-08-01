@@ -10,18 +10,6 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.util.*;
 
-/**
- * Cohesion: Communicational Cohesion
- * Reason:
- * Fields and methods operate on the same Order aggregate
- * and related business state.
- * Coupling:
- * - Stamp coupling with OrderItem, DeliveryInformation,
- *   Invoice, PaymentTransaction, and Cart through
- *   aggregate relationships.
- * - Data coupling with OrderStatus through enum-based
- *   state transition logic.
- */
 @Entity
 @Table(name = "\"order\"")
 @NamedEntityGraphs({
@@ -75,21 +63,20 @@ public class Order extends VersionedEntity {
         }
     }
 
-    @Id
-    @Column(updatable = false)
-    private UUID id = UUID.randomUUID();
-
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<OrderItem> items = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @Column(nullable = false)
+    private BigDecimal totalWeight;
+
+    @Column(nullable = false)
+    private int totalItemCount;
+
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private DeliveryInformation deliveryInformation;
-
-    @Transient
-    private Long deliveryFee;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private Invoice invoice;
@@ -109,75 +96,16 @@ public class Order extends VersionedEntity {
         this.status = newStatus;
     }
 
-    public DeliveryInformation provideDeliveryInformation(
-            @NonNull String customerName,
-            @NonNull String customerEmail,
-            @NonNull String phoneNumber,
-            @NonNull String province,
-            @NonNull String commune,
-            @NonNull String address,
-            @NonNull String deliveryMethod
-    ) {
-        this.deliveryInformation = new DeliveryInformation(customerName, customerEmail, phoneNumber, province, commune, address, deliveryMethod, this);
-        return this.deliveryInformation;
-    }
-
-    public void provideDeliveryInformation(@NonNull DeliveryInformation existingInfo, long precalculatedDeliveryFee) {
-        this.deliveryInformation = new DeliveryInformation(
-                existingInfo.getCustomerName(),
-                existingInfo.getCustomerEmail(),
-                existingInfo.getPhoneNumber(),
-                existingInfo.getProvince(),
-                existingInfo.getCommune(),
-                existingInfo.getAddress(),
-                existingInfo.getDeliveryMethod(),
-                this
-        );
-        this.deliveryFee = precalculatedDeliveryFee;
-    }
-
     @Transient
-    public Long getTotalPriceWithoutVAT() {
-        return items.stream().mapToLong(OrderItem::getItemTotalPrice).sum();
-    }
-
+    private long totalPriceWithoutVAT;
     @Transient
-    public Long getTotalPriceWithVAT() {
-        return getTotalPriceWithoutVAT() * 110 / 100;
-    }
-
-    @Transient
-    public BigDecimal getTotalWeight() {
-        return items.stream().map(OrderItem::getItemTotalWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
+    private long totalPriceWithVAT;
 
     @Transient
     public Long getTotalAmount() {
-        if (status != Status.DRAFT) {
-            return invoice.getTotalAmount();
-        }
-        return deliveryFee + getTotalPriceWithVAT();
+        return invoice.getTotalAmount();
     }
 
-    public void updateDeliveryFee(long deliveryFee) {
-        if (status != Status.DRAFT) {
-            throw new UnsupportedOperationException("Operation Update Delivery Fee is unavailable for placed non-draft order");
-        }
-        this.deliveryFee = deliveryFee;
-        this.invoice = new Invoice(this);
-    }
-
-    private boolean isComplete() {
-        return (deliveryInformation != null && deliveryFee != null && invoice != null && paymentTransaction != null)
-                || status != Status.DRAFT;
-    }
-
-    public void complete() {
-        if (!isComplete()) {
-            throw new OrderNotCompleteException("Cannot check out order when order is not completed!");
-        }
-        changeStatus(Status.PENDING);
-    }
     public void approve() {
         changeStatus(Status.APPROVED);
     }
@@ -195,12 +123,102 @@ public class Order extends VersionedEntity {
         items.add(orderItem);
         orderItem.setOrder(this);
     }
-    public static Order from(Cart cart) {
-        Order order = new Order();
-        cart.getItems().forEach(item -> order.addItem(OrderItem.from(item, order)));
 
-        order.status = Status.DRAFT;
+    private Order(Cart cart) {
+        cart.getItems().forEach(item -> this.addItem(new OrderItem(item, this)));
+        this.status = Status.DRAFT;
+        this.totalItemCount = items.size();
+        this.totalWeight = items.stream().map(OrderItem::getItemTotalWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
+        this.totalPriceWithoutVAT = items.stream().mapToLong(OrderItem::getItemTotalPrice).sum();
+        this.totalPriceWithVAT = this.totalPriceWithoutVAT * 110 / 100;
+    }
 
-        return order;
+    public static class Draft {
+        private final Order order;
+        @Getter
+        private final UUID checkoutId;
+        @Getter
+        private Long deliveryFee;
+
+        public Draft(Cart cart) {
+            this.order = new Order(cart);
+            this.checkoutId = cart.getId();
+        }
+
+        public void provideDeliveryInformation(
+                @NonNull String customerName,
+                @NonNull String customerEmail,
+                @NonNull String phoneNumber,
+                @NonNull String province,
+                @NonNull String commune,
+                @NonNull String address,
+                @NonNull String deliveryMethod
+        ) {
+            order.deliveryInformation = new DeliveryInformation(customerName, customerEmail, phoneNumber, province, commune, address, deliveryMethod, order);
+        }
+
+        public void provideDeliveryInformation(DeliveryInformation existingInfo, Long precalculatedDeliveryFee) {
+            order.deliveryInformation = existingInfo != null ? new DeliveryInformation(
+                    existingInfo.getCustomerName(),
+                    existingInfo.getCustomerEmail(),
+                    existingInfo.getPhoneNumber(),
+                    existingInfo.getProvince(),
+                    existingInfo.getCommune(),
+                    existingInfo.getAddress(),
+                    existingInfo.getDeliveryMethod(),
+                    order
+            ) : null;
+            this.deliveryFee = precalculatedDeliveryFee;
+            if (precalculatedDeliveryFee != null) {
+                order.invoice = new Invoice(order, precalculatedDeliveryFee);
+            }
+        }
+
+        public void updateDeliveryFee(long deliveryFee) {
+            this.deliveryFee = deliveryFee;
+            order.invoice = new Invoice(order, deliveryFee);
+        }
+
+        public void attachPaymentTransaction(PaymentTransaction paymentTransaction) {
+            order.paymentTransaction = paymentTransaction;
+            paymentTransaction.setOrder(order);
+        }
+
+        public Order complete() {
+            if (order.deliveryInformation == null || order.invoice == null || order.paymentTransaction == null) {
+                throw new OrderNotCompleteException("Order is not complete, cannot proceed to finish the order");
+            }
+
+            order.changeStatus(Status.PENDING);
+            return order;
+        }
+
+        public List<OrderItem> getItems() {
+            return order.getItems();
+        }
+
+        public DeliveryInformation getDeliveryInformation() {
+            return order.deliveryInformation;
+        }
+
+        public Invoice getInvoice() {
+            return order.invoice;
+        }
+
+        public Long getTotalPriceWithoutVAT() {
+            return order.getTotalPriceWithoutVAT();
+        }
+
+        public Long getTotalPriceWithVAT() {
+            return order.getTotalPriceWithVAT();
+        }
+
+        public BigDecimal getTotalWeight() {
+            return order.getTotalWeight();
+        }
+
+        public Long getTotalAmount() {
+            return deliveryFee + getTotalPriceWithVAT();
+        }
     }
 }

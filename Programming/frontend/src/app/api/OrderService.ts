@@ -7,13 +7,13 @@ const OrderService = {
         return response.data;
     },
 
-    submitDeliveryForm: async (deliveryForm: DeliveryInformation): Promise<DeliveryInformation> => {
-        const response = await apiClient.post<DeliveryInformation>(`order/delivery`, deliveryForm);
+    submitDeliveryForm: async (deliveryForm: DeliveryInformation): Promise<OrderDraft> => {
+        const response = await apiClient.post<OrderDraft>(`order/delivery`, deliveryForm);
         return response.data;
     },
 
-    getInvoice: async (): Promise<Invoice> => {
-        const response = await apiClient.get<Invoice>(`order/invoice`);
+    getInvoice: async (): Promise<OrderDraft> => {
+        const response = await apiClient.post<OrderDraft>(`order/invoice`);
         return response.data;
     },
 

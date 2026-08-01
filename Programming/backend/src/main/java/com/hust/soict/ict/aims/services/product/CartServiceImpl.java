@@ -1,15 +1,16 @@
 package com.hust.soict.ict.aims.services.product;
 
 import com.hust.soict.ict.aims.context.CartContext;
+import com.hust.soict.ict.aims.dto.response.cart.CartMapper;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.cart.Cart;
-import com.hust.soict.ict.aims.dto.response.CartResponse;
+import com.hust.soict.ict.aims.dto.response.cart.CartResponse;
 import com.hust.soict.ict.aims.models.entities.product.Product;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
-import com.hust.soict.ict.aims.dto.mapper.CartMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -27,10 +28,11 @@ class CartServiceImpl implements CartService {
 
     @Override
     public CartResponse getOrCreateCart() {
-        return cartMapper.toCartResponse(cartContext.getOrCreateCart());
+        return cartMapper.map(cartContext.getOrCreateCart());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CartResponse addItem(UUID productId, int quantity) throws ProductNotFoundException, IllegalArgumentException {
         log.debug("Adding item to cart with quantity {} for product #{}...", quantity, productId);
         Product product = productRepository.findByIdAndStatus(productId, Product.Status.ACTIVE)
@@ -40,7 +42,7 @@ class CartServiceImpl implements CartService {
         cart.addItem(product, quantity);
 
         log.debug("Item added successfully!");
-        return cartMapper.toCartResponse(cart);
+        return cartMapper.map(cart);
     }
 
     @Override
@@ -49,7 +51,7 @@ class CartServiceImpl implements CartService {
         Cart cart = cartContext.getOrCreateCart();
         cart.updateItem(productId, quantity);
         log.debug("Item updated successfully!");
-        return cartMapper.toCartResponse(cart);
+        return cartMapper.map(cart);
     }
 
     @Override
@@ -58,7 +60,7 @@ class CartServiceImpl implements CartService {
         Cart cart = cartContext.getOrCreateCart();
         cart.removeItem(productId);
         log.debug("Item removed successfully!");
-        return cartMapper.toCartResponse(cart);
+        return cartMapper.map(cart);
     }
 
     @Override
@@ -67,6 +69,6 @@ class CartServiceImpl implements CartService {
         Cart cart = cartContext.getOrCreateCart();
         cart.clear();
         log.debug("Cart cleared successfully!");
-        return cartMapper.toCartResponse(cart);
+        return cartMapper.map(cart);
     }
 }

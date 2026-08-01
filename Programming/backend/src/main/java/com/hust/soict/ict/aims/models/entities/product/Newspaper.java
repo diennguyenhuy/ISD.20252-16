@@ -48,19 +48,7 @@ public class Newspaper extends PrintableProduct {
         this.sections = builder.sections == null ? new ArrayList<>() : new ArrayList<>(builder.sections);
     }
 
-    @Override
-    public Builder toBuilder() {
-        return new Builder(this);
-    }
-
-    private void apply(Builder builder) {
-        super.apply(builder);
-        Optional.ofNullable(builder.editorInChief).ifPresent(v -> this.editorInChief = v);
-        Optional.ofNullable(builder.publicationFrequency).ifPresent(v -> this.publicationFrequency = v);
-        Optional.ofNullable(builder.sections).ifPresent(v -> this.sections = new ArrayList<>(v));
-    }
-
-    public static class Builder extends PrintableProduct.Builder<Newspaper, Builder> {
+    public static class Builder extends PrintableProduct.Builder<Builder> {
         private String editorInChief;
         private String issueNumber;
         private String publicationFrequency;
@@ -71,10 +59,6 @@ public class Newspaper extends PrintableProduct {
             super();
         }
 
-        public Builder(Newspaper updatingNewspaper) {
-            super(updatingNewspaper);
-        }
-
         @Override
         protected Builder self() {
             return this;
@@ -82,10 +66,7 @@ public class Newspaper extends PrintableProduct {
 
         @Override
         public Newspaper build() {
-            if (updatingProduct != null) {
-                updatingProduct.apply(this);
-                return updatingProduct;
-            } else return new Newspaper(this);
+            return new Newspaper(this);
         }
 
         public Builder editorInChief(String editorInChief) {
@@ -117,5 +98,17 @@ public class Newspaper extends PrintableProduct {
             this.sections = sections == null ? null : List.of(sections);
             return this;
         }
+    }
+
+    static {
+        registerUpdateCommand(UpdateCommand.EditorInChief.class, Newspaper.class, (p, c) -> p.editorInChief = c.newValue());
+        registerUpdateCommand(UpdateCommand.PublicationFrequency.class, Newspaper.class, (p, c) -> p.publicationFrequency = c.newValue());
+        registerUpdateCommand(UpdateCommand.Sections.class, Newspaper.class, (p, c) -> p.sections = c.newValue() == null ? new ArrayList<>() : new ArrayList<>(c.newValue()));
+    }
+
+    public interface UpdateCommand<T> extends PrintableProduct.UpdateCommand<T> {
+        record EditorInChief(String newValue) implements UpdateCommand<String> {}
+        record PublicationFrequency(String newValue) implements UpdateCommand<String> {}
+        record Sections(List<String> newValue) implements UpdateCommand<List<String>> {}
     }
 }

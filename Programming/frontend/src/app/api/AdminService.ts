@@ -1,22 +1,11 @@
 import { apiClient } from './client';
-import type { UserRole, User} from "../models/user.interface";
-
-export interface PagedResponse<T> {
-    content: T[];
-    totalElements: number;
-    totalPages: number;
-    number: number;
-    size: number;
-}
+import type { UserRole, User } from "../models/user.interface";
+import type { Page } from "./Page";
 
 export interface CreateUserPayload {
     username: string;
     email: string;
     roles: string[];
-}
-
-export interface AssignRolesPayload {
-    roles: UserRole[];
 }
 
 export interface ChangePasswordPayload {
@@ -27,7 +16,7 @@ export interface ChangePasswordPayload {
 
 export const AdminService = {
     getUsers: (page = 0, size = 100) =>
-        apiClient.get<PagedResponse<User>>(`/admin/users?page=${page}&size=${size}`),
+        apiClient.get<Page<User>>(`/admin/users?page=${page}&size=${size}`),
 
     getUser: (id: string) =>
         apiClient.get<User>(`/admin/users/${id}`),
@@ -47,8 +36,8 @@ export const AdminService = {
     unblockUser: (id: string) =>
         apiClient.patch(`/admin/users/${id}/unblock`),
 
-    assignRoles: (id: string, data: AssignRolesPayload) =>
-        apiClient.put<User>(`/admin/users/${id}/roles`, data),
+    assignRoles: (id: string, roles: UserRole[]) =>
+        apiClient.put<User>(`/admin/users/${id}/roles`, roles),
 
     resetPassword: (id: string) =>
         apiClient.post(`/admin/users/${id}/reset-password`),

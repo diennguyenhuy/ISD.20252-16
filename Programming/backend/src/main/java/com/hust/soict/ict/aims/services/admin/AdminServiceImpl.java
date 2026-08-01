@@ -3,13 +3,11 @@ package com.hust.soict.ict.aims.services.admin;
 import com.hust.soict.ict.aims.dto.request.CreateUserRequest;
 import com.hust.soict.ict.aims.dto.response.UserResponse;
 import com.hust.soict.ict.aims.exceptions.AccountAlreadyExistedException;
-import com.hust.soict.ict.aims.models.entities.audit.UserAction;
 import com.hust.soict.ict.aims.models.entities.user.User;
 import com.hust.soict.ict.aims.repositories.UserRepository;
 import com.hust.soict.ict.aims.services.admin.event.AccountCreatedEvent;
 import com.hust.soict.ict.aims.services.admin.event.EmailUpdateEvent;
 import com.hust.soict.ict.aims.services.admin.event.PasswordResetEvent;
-import com.hust.soict.ict.aims.services.audit.aspect.AdminLogging;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -24,6 +22,7 @@ import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Centralized administration service.
@@ -59,26 +58,25 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     @Override
     @Transactional(readOnly = true)
     public Page<UserResponse> getUsers(Pageable pageable) {
-        return userRepository.findAll(pageable).map(UserResponse::from);
+        return userRepository.findAll(pageable).map(AdminServiceImpl::map);
     }
 
     @Override
     @Transactional(readOnly = true)
     public UserResponse getUser(UUID userId) {
-        return UserResponse.from(findUserOrThrow(userId));
+        return map(findUserOrThrow(userId));
     }
 
     // ───── Account Lifecycle ─────
 
     @Override
-    @AdminLogging(action = UserAction.CREATE)
     @Transactional
     public UserResponse createUser(CreateUserRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new AccountAlreadyExistedException("Email is already in use: " + request.getEmail());
+        if (userRepository.existsByEmail(request.email())) {
+            throw new AccountAlreadyExistedException("Email is already in use: " + request.email());
         }
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new AccountAlreadyExistedException("Username is already in use: " + request.getUsername());
+        if (userRepository.existsByUsername(request.username())) {
+            throw new AccountAlreadyExistedException("Username is already in use: " + request.username());
         }
 
         // Generate a temporary password — admin never sees it
@@ -86,10 +84,11 @@ class AdminServiceImpl implements AdminService, UserQueryService {
         String hashedPassword = passwordEncoder.encode(tempPassword);
 
         User user = new User(
-                request.getUsername(),
-                request.getEmail(),
+                request.username(),
+                request.email(),
                 hashedPassword,
-                request.getRoles());
+                request.roles()
+        );
 
         // Force the user to change password on first login
         user.setTemporaryPassword(hashedPassword);
@@ -100,11 +99,10 @@ class AdminServiceImpl implements AdminService, UserQueryService {
         applicationEventPublisher.publishEvent(new AccountCreatedEvent(user, tempPassword));
 
         log.info("Admin created new user: {} ({})", user.getUsername(), user.getEmail());
-        return UserResponse.from(user);
+        return map(user);
     }
 
     @Override
-    @AdminLogging(action = UserAction.DEACTIVATE)
     @Transactional
     public void deactivateUser(UUID userId) {
         User user = findUserOrThrow(userId);
@@ -114,7 +112,6 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     }
 
     @Override
-    @AdminLogging(action = UserAction.ACTIVATE)
     @Transactional
     public void activateUser(UUID userId) {
         User user = findUserOrThrow(userId);
@@ -124,7 +121,6 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     }
 
     @Override
-    @AdminLogging(action = UserAction.BLOCK)
     @Transactional
     public void blockUser(UUID userId) {
         User user = findUserOrThrow(userId);
@@ -134,7 +130,6 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     }
 
     @Override
-    @AdminLogging(action = UserAction.UNBLOCK)
     @Transactional
     public void unblockUser(UUID userId) {
         User user = findUserOrThrow(userId);
@@ -146,7 +141,6 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     // ───── Roles ─────
 
     @Override
-    @AdminLogging(action = UserAction.MODIFY_ROLE)
     @Transactional
     public UserResponse assignRoles(UUID userId, Set<User.Role> newRoles) {
         User user = findUserOrThrow(userId);
@@ -163,7 +157,7 @@ class AdminServiceImpl implements AdminService, UserQueryService {
 
         userRepository.save(user);
         log.info("Admin updated roles for user {} to {}", user.getUsername(), newRoles);
-        return UserResponse.from(user);
+        return map(user);
     }
 
     // ───── Password Reset ─────
@@ -176,7 +170,6 @@ class AdminServiceImpl implements AdminService, UserQueryService {
      * on their next login (enforced by the JWT filter).
      */
     @Override
-    @AdminLogging(action = UserAction.RESET_PASSWORD)
     @Transactional
     public void resetPassword(UUID userId) {
         User user = findUserOrThrow(userId);
@@ -192,7 +185,6 @@ class AdminServiceImpl implements AdminService, UserQueryService {
     }
 
     @Override
-    @AdminLogging(action = UserAction.UPDATE_EMAIL)
     @Transactional
     public void updateEmail(UUID userId, String newEmail) {
         if (userRepository.existsByEmail(newEmail)) {
@@ -213,12 +205,26 @@ class AdminServiceImpl implements AdminService, UserQueryService {
 
     // ───── Helpers ─────
 
+    private static UserResponse map(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getRoles().stream().map(User.Role::name).collect(Collectors.toSet()),
+                user.isActive(),
+                user.isBlocked(),
+                user.isMustChangePassword(),
+                user.getCreatedAt(),
+                user.getUpdatedAt()
+        );
+    }
+
     private User findUserOrThrow(UUID userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + userId));
     }
 
-    private String generateTemporaryPassword() {
+    private static String generateTemporaryPassword() {
         StringBuilder sb = new StringBuilder(TEMP_PASSWORD_LENGTH);
         for (int i = 0; i < TEMP_PASSWORD_LENGTH; i++) {
             sb.append(PASSWORD_CHARS.charAt(SECURE_RANDOM.nextInt(PASSWORD_CHARS.length())));

@@ -2,17 +2,18 @@ package com.hust.soict.ict.aims.services.ordermanagement.event;
 
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.services.notification.email.EmailMessage;
-import com.hust.soict.ict.aims.services.payment.PaymentMethod;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 class OrderRejectionEmailMessage implements EmailMessage<OrderRejectionEvent> {
     private final Order order;
     private final String frontendUrl;
+    private final boolean isRefundable;
+
+    private OrderRejectionEmailMessage(Order order, String frontendUrl, boolean isRefundable) {
+        this.order = order;
+        this.frontendUrl = frontendUrl;
+        this.isRefundable = isRefundable;
+    }
 
     @Override
     public String subject() {
@@ -59,13 +60,17 @@ class OrderRejectionEmailMessage implements EmailMessage<OrderRejectionEvent> {
                     .append(" VND</strong> is fully protected.</p>");
 
             // Logic branch based on the Problem Statement rules
-            if (Objects.equals(order.getPaymentTransaction().getTransactionMethod(), PaymentMethod.PAYPAL.name())) {
+            if (isRefundable) {
                 sb.append("<div style='background-color: #f8fafc; border-left: 4px solid #3b82f6; padding: 15px; margin-top: 15px; font-size: 14px; color: #3f3f46;'>");
-                sb.append("An automated refund has been initiated to your PayPal account. Please allow 3-5 business days for the funds to appear in your balance.");
+                sb.append("An automated refund has been initiated to your PayPal ")
+                        .append(order.getPaymentTransaction().getTransactionMethod())
+                        .append(" account. Please allow 3-5 business days for the funds to appear in your balance.");
                 sb.append("</div>");
-            } else if (Objects.equals(order.getPaymentTransaction().getTransactionMethod(), PaymentMethod.VIETQR.name())) {
+            } else {
                 sb.append("<div style='background-color: #fefce8; border-left: 4px solid #eab308; padding: 15px; margin-top: 15px; font-size: 14px; color: #422006;'>");
-                sb.append("Because you paid via VietQR bank transfer, our management team has been notified to manually process your refund. <strong>Our support team will contact you shortly</strong> to confirm your receiving bank details.");
+                sb.append("Because you paid via ")
+                        .append(order.getPaymentTransaction().getTransactionMethod())
+                        .append(" bank transfer, our management team has been notified to manually process your refund. <strong>Our support team will contact you shortly</strong> to confirm your receiving bank details.");
                 sb.append("</div>");
             }
         } else {
@@ -98,14 +103,13 @@ class OrderRejectionEmailMessage implements EmailMessage<OrderRejectionEvent> {
 
     @Component
     static class Factory extends EmailMessage.Factory<OrderRejectionEmailMessage, OrderRejectionEvent> {
-        @Override
-        public Class<OrderRejectionEmailMessage> messageType() {
-            return OrderRejectionEmailMessage.class;
+        Factory() {
+            super(OrderRejectionEmailMessage.class);
         }
 
         @Override
         public OrderRejectionEmailMessage createMessage(OrderRejectionEvent payload) {
-            return new OrderRejectionEmailMessage(payload.order(), frontendUrl);
+            return new OrderRejectionEmailMessage(payload.getOrder(), frontendUrl, payload.isRefundable());
         }
     }
 }

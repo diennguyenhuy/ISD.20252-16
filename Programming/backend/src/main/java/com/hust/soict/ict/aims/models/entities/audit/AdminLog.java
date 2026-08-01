@@ -19,19 +19,19 @@ public class AdminLog extends AuditLog {
     @Enumerated(EnumType.STRING)
     private UserAction action;
 
-    @Column(updatable = false)
+    @Column(updatable = false, nullable = false)
     private UUID adminId;
 
     @Column(nullable = false, updatable = false)
     private String adminUsername;
 
-    @Column(updatable = false)
+    @Column(updatable = false, nullable = false)
     private UUID affectedUserId;
 
     @Column(nullable = false, updatable = false)
     private String affectedUsername;
 
-    public AdminLog(User admin, User affectedUser, UserAction action) {
+    AdminLog(User admin, User affectedUser, UserAction action) {
         super();
         this.adminId = admin.getId();
         this.adminUsername = admin.getUsername();

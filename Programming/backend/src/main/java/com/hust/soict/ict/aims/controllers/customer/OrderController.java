@@ -2,12 +2,13 @@ package com.hust.soict.ict.aims.controllers.customer;
 
 import com.hust.soict.ict.aims.exceptions.*;
 import com.hust.soict.ict.aims.dto.request.DeliveryRequest;
-import com.hust.soict.ict.aims.dto.response.order.DeliveryResponse;
-import com.hust.soict.ict.aims.dto.response.order.InvoiceResponse;
 import com.hust.soict.ict.aims.dto.response.order.OrderDraftResponse;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.services.order.OrderService;
 import com.hust.soict.ict.aims.services.order.PlaceOrderService;
+import com.hust.soict.ict.aims.subsystems.PaymentInitiation;
+import com.hust.soict.ict.aims.subsystems.PaymentInitiationService;
+import com.hust.soict.ict.aims.subsystems.exception.PaymentException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,28 +18,6 @@ import java.util.UUID;
 
 /**
  * Provide API endpoints for customer delivery screen and invoice screen<br>
- * Cohesion: Procedural Cohesion<br>
- * - Reason:
- * Coordinates sequential order placement workflow through REST endpoints.
- * Methods participate in the same order processing procedure:
- * placing order, submitting delivery info, retrieving invoice,
- * retrieving order details, and canceling order. (not concerning payment)<br>
- * Coupling: Data coupling with PlaceOrderService and DeliveryService
- * through method parameters and return values.<br>
- * - Reason: Method sends data structures that the 2 service classes use wholly or
- * sends only necessary data to the service classes.
- * SOLID Review
- * Potential Violation:
- * - Dependency Inversion Principle (DIP)
- * Reason:
- * OrderController depends directly on concrete service
- * implementations (PlaceOrderService and DeliveryService).
- * This makes the controller coupled to specific application
- * service classes rather than abstractions.
- * Improvement Direction:
- * Introduce use-case interfaces such as PlaceOrderUseCase
- * and DeliveryUseCase, and inject those abstractions instead
- * of concrete service implementations.
  */
 @RestController
 @RequestMapping("/order")
@@ -46,6 +25,7 @@ import java.util.UUID;
 public class OrderController {
     private final PlaceOrderService placeOrderService;
     private final OrderService orderService;
+    private final PaymentInitiationService paymentInitiationService;
 
     /**
      * POST /order - endpoint for request to place order. Return 201 if success
@@ -66,20 +46,26 @@ public class OrderController {
      */
     @PostMapping("/delivery")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public DeliveryResponse submitDeliveryInformation(
+    public OrderDraftResponse submitDeliveryInformation(
             @Valid @RequestBody DeliveryRequest deliveryRequest
     ) {
         return placeOrderService.submitDeliveryInformation(deliveryRequest);
     }
 
     /**
-     * GET /order/invoice endpoint for getting invoice info. Return status 200
+     * POST /order/invoice endpoint for getting invoice info. Return status 200
      * @return response of invoice
      */
-    @GetMapping("/invoice")
+    @PostMapping("/invoice")
     @ResponseStatus(HttpStatus.OK)
-    public InvoiceResponse getInvoice() {
+    public OrderDraftResponse getInvoice() {
         return placeOrderService.getInvoice();
+    }
+
+    @PostMapping("/payment/{method}")
+    @ResponseStatus(HttpStatus.OK)
+    public PaymentInitiation initiatePayment(@PathVariable String method) throws PaymentException {
+        return paymentInitiationService.initiatePayment(method);
     }
 
     /**

@@ -1,15 +1,18 @@
 package com.hust.soict.ict.aims.services.admin.event;
 
 import com.hust.soict.ict.aims.services.notification.email.EmailMessage;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 class EmailUpdateConfirmationEmailMessage implements EmailMessage<EmailUpdateEvent> {
     private final String newEmail;
     private final String username;
     private final String frontendUrl;
+
+    private EmailUpdateConfirmationEmailMessage(String newEmail, String username, String frontendUrl) {
+        this.newEmail = newEmail;
+        this.username = username;
+        this.frontendUrl = frontendUrl;
+    }
 
     @Override
     public String recipient() {
@@ -76,10 +79,8 @@ class EmailUpdateConfirmationEmailMessage implements EmailMessage<EmailUpdateEve
 
     @Component
     static class Factory extends EmailMessage.Factory<EmailUpdateConfirmationEmailMessage, EmailUpdateEvent> {
-
-        @Override
-        public Class<EmailUpdateConfirmationEmailMessage> messageType() {
-            return EmailUpdateConfirmationEmailMessage.class;
+        Factory() {
+            super(EmailUpdateConfirmationEmailMessage.class);
         }
 
         @Override

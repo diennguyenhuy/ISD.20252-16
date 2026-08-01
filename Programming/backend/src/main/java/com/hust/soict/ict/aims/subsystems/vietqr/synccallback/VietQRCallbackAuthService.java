@@ -11,14 +11,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-/*
- * SOLID Principles: No violations.
- *
- * + Cohesion level: FUNCTIONAL
- * + Coupling level with VietQRCallbackController: DATA
- * + Reason: Only primitive Strings (authorizationHeader, token) are exchanged;
- *   no composite objects or control flags are involved.
- */
 @Service
 @Slf4j
 class VietQRCallbackAuthService {

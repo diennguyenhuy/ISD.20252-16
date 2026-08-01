@@ -8,20 +8,20 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-class CDCreator implements ProductCreator<CD, CreateCDRequest> {
-    @Override
-    public Class<CreateCDRequest> createRequestType() {
-        return CreateCDRequest.class;
+class CDCreator extends ProductCreator<CD, CreateCDRequest, CD.Builder> {
+
+    CDCreator() {
+        super(CreateCDRequest.class, CD.Builder::new);
     }
 
     @Override
     public CD createFrom(CreateCDRequest createRequest) {
         List<Track> cdTracks = createRequest.getTracks() == null ?
                 List.of() : createRequest.getTracks().stream()
-                .map(t -> new Track(t.getTitle(), t.getLength()))
+                .map(t -> new Track(t.title(), t.length()))
                 .toList();
 
-        return buildCommonFields(new CD.Builder(), createRequest)
+        return builder(createRequest)
                 .releaseDate(createRequest.getReleaseDate())
                 .genre(createRequest.getGenre())
                 .artists(createRequest.getArtists())

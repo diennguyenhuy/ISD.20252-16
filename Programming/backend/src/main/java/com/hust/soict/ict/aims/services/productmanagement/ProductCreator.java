@@ -3,12 +3,25 @@ package com.hust.soict.ict.aims.services.productmanagement;
 import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
 import com.hust.soict.ict.aims.models.entities.product.Product;
 
-interface ProductCreator<P extends Product, C extends CreateProductRequest> {
-    Class<C> createRequestType();
-    P createFrom(C createRequest);
+import java.util.function.Supplier;
 
-    default <B extends Product.Builder<P, B>> B buildCommonFields(B builder, C request) {
-        return builder
+abstract class ProductCreator<
+        P extends Product,
+        C extends CreateProductRequest,
+        B extends Product.Builder<B>
+        > {
+    private final Supplier<B> builderSupplier;
+    final Class<C> createRequestType;
+
+    protected ProductCreator(Class<C> createRequestType, Supplier<B> builderSupplier) {
+        this.createRequestType = createRequestType;
+        this.builderSupplier = builderSupplier;
+    }
+
+    protected abstract P createFrom(C createRequest);
+
+    protected B builder(C request) {
+        return builderSupplier.get()
                 .title(request.getTitle())
                 .category(request.getCategory())
                 .description(request.getDescription())

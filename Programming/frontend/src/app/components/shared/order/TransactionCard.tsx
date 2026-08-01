@@ -44,7 +44,7 @@ export function TransactionCard({transaction, title = 'Transaction Receipt'}: Tr
 
                 {/* Transfer note */}
                 <TransactionRow icon={FileText} label="Transfer Note">
-                    <span className="text-sm text-foreground font-bold text-right truncate pl-4">
+                    <span className="text-sm text-foreground font-bold text-right pl-4 break-words">
                         {transaction.transactionContent}
                     </span>
                 </TransactionRow>

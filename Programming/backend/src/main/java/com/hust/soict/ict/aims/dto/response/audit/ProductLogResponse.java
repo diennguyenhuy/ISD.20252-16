@@ -3,11 +3,14 @@ package com.hust.soict.ict.aims.dto.response.audit;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.List;
+import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class ProductLogResponse extends ProductAuditLogResponse {
+public class ProductLogResponse extends AuditLogResponse {
     private String action;
-    private List<ProductEditDetailResponse> details;
+    private UUID managerId;
+    private String managerUsername;
+    private UUID productId;
+    private String productTitle;
 }

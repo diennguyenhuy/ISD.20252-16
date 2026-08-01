@@ -9,17 +9,21 @@ import java.util.*;
 class NotificationServiceImpl implements NotificationService {
     private final Map<Class<? extends NotificationMessage<?>>, NotificationChannel<?>> channels = new HashMap<>();
     private final Map<Class<? extends NotificationMessage<?>>, NotificationMessage.Factory<?, ?>> factories = new HashMap<>();
+    private final Set<NotificationMethod> methods = EnumSet.noneOf(NotificationMethod.class);
 
     public NotificationServiceImpl(
             List<NotificationChannel<?>> channels,
             List<NotificationMessage.Factory<?, ?>> factories
     ) {
         final Map<NotificationMethod, NotificationChannel<?>> methodToChannel = new EnumMap<>(NotificationMethod.class);
-        channels.forEach(c -> methodToChannel.put(c.method(), c));
+        channels.forEach(c -> {
+            methodToChannel.put(c.method, c);
+            methods.add(c.method);
+        });
 
         factories.forEach(f -> {
-            Class<? extends NotificationMessage<?>> messageType = f.messageType();
-            NotificationMethod method = f.supportedMethod();
+            Class<? extends NotificationMessage<?>> messageType = f.messageClass;
+            NotificationMethod method = f.method;
 
             this.factories.put(messageType, f);
 
@@ -53,5 +57,10 @@ class NotificationServiceImpl implements NotificationService {
 
         NotificationChannel<M> channel = getChannel(messageType);
         channel.send(message);
+    }
+
+    @Override
+    public Set<NotificationMethod> getSupportedMethods() {
+        return Collections.unmodifiableSet(methods);
     }
 }

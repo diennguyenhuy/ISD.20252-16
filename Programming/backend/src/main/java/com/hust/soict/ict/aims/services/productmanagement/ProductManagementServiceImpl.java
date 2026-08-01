@@ -2,18 +2,15 @@ package com.hust.soict.ict.aims.services.productmanagement;
 
 import com.hust.soict.ict.aims.dto.request.AdjustStockRequest;
 import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
+import com.hust.soict.ict.aims.dto.response.product.ProductMappers;
 import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.exceptions.ExceededDeletionQuotaException;
 import com.hust.soict.ict.aims.exceptions.ProductAlreadyExistedException;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
-import com.hust.soict.ict.aims.dto.mapper.ProductMapper;
 import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
 import com.hust.soict.ict.aims.dto.request.UpdateProductRequest;
-import com.hust.soict.ict.aims.models.entities.audit.ProductAction;
 import com.hust.soict.ict.aims.models.entities.product.*;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
-import com.hust.soict.ict.aims.services.audit.aspect.ProductLogging;
-import com.hust.soict.ict.aims.services.audit.aspect.StockAdjustLogging;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,39 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Cohesion: Communicational Cohesion<br>
- * Reason: Coordinates the product management workflow (create, update, delete) where all operations execute on the same core domain data (Product).<br>
- * Coupling:
- * - Data coupling with ProductRepository and ProductFactory through simple method calls and passing primitive identifiers (UUID).
- * - Stamp coupling with CreateProductRequest, UpdateProductRequest, and ProductMapper because composite data transfer objects are passed between modules.
- * Design Strength:
- * Acts as a clean delegator, decoupling business orchestration from physical object creation (Factory) and persistence operations (Repository), ensuring high testability.
- */
-
-/**
- * [SOLID VIOLATION - SRP]: The class is handling too many responsibilities:
- * 1. Coordinating CUD business logic (Write).
- * 2. Handling data retrieval logic (Read).
- * 3. Directly containing the low-level utility function "restoreEntityIdentityWithReflection" to handle Java Reflection.
- * [IMPROVEMENT]:
- * 1. Segregate the interface into ProductCommandService (for CUD) and ProductQueryService (for data retrieval).
- * 2. Separate the "restoreEntityIdentityWithReflection" method into a distinct utility class.
- */
-
-/**
- * // [SOLID VIOLATION - DIP]: The Service depends directly on a concrete class (ProductFactory).
- * // [IMPROVEMENT]: Create an IProductFactory interface and inject it instead of the concrete class.
- */
-
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
 class ProductManagementServiceImpl implements ProductManagementService, ProductQueryService {
 
     private final ProductRepository productRepo;
-    private final ProductMapper productMapper;
+    private final ProductMappers productMapper;
     private final ProductFactory productFactory;
 
     @Override
@@ -62,7 +33,7 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
     public List<ProductSummary> getAllProductsForManager() {
         log.info("[FETCH] Fetching all products for manager dashboard.");
         return productRepo.findAll().stream()
-                .map(productMapper::toProductSummary)
+                .map(productMapper::mapSummary)
                 .toList();
     }
 
@@ -75,11 +46,10 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
                     log.warn("[FETCH FAILED] Product not found. ID: {}", id);
                     return new ProductNotFoundException(id);
                 });
-        return productMapper.toProductDetail(product);
+        return productMapper.map(product);
     }
     
     @Override
-    @ProductLogging(action = ProductAction.CREATE)
     @Transactional
     public ProductDetail createProduct(CreateProductRequest dto) {
         log.info("[CREATE] Received request to create new product. Barcode: {}", dto.getBarcode());
@@ -93,11 +63,10 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
         Product savedProduct = productRepo.save(product);
 
         log.info("[CREATE SUCCESS] Successfully saved new product. ID: {}", savedProduct.getId());
-        return productMapper.toProductDetail(savedProduct);
+        return productMapper.map(savedProduct);
     }
 
     @Override
-    @ProductLogging(action = ProductAction.UPDATE)
     @Transactional
     public ProductDetail updateProduct(UUID id, UpdateProductRequest dto) {
         log.info("[UPDATE] Received request to update product. ID: {}", id);
@@ -107,19 +76,16 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
             return new ProductNotFoundException(id);
         });
 
-        if (dto.getCurrentPrice() != null) {
-            product.updatePrice(dto.getCurrentPrice()); // Validate price 30% - 150%
-        }
+        dto.getCurrentPrice().ifDefined(product::updatePrice);
 
         Product updatedProduct = productFactory.updateProduct(product, dto);
         Product savedProduct = productRepo.save(updatedProduct);
         log.info("[UPDATE SUCCESS] Successfully updated product. ID: {}, Current Price: {}", savedProduct.getId(), savedProduct.getCurrentPrice());
 
-        return productMapper.toProductDetail(savedProduct);
+        return productMapper.map(savedProduct);
     }
 
     @Override
-    @ProductLogging(action = ProductAction.DELETE)
     @Transactional
     public List<ProductSummary> deleteProducts(List<UUID> productIds) {
         log.info("[DELETE BATCH] Received request to delete {} products.", productIds.size());
@@ -144,14 +110,13 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
 
         log.info("[DELETE BATCH SUCCESS] Successfully processed {} products.", products.size());
 
-        return products.stream().map(productMapper::toProductSummary).toList();
+        return products.stream().map(productMapper::mapSummary).toList();
     }
 
     @Override
-    @StockAdjustLogging
     @Transactional
     public void adjustStock(UUID id, AdjustStockRequest adjustStockRequest) {
-        log.info("[ADJUST STOCK] Received request for Product ID: {}. Delta: {}, Reason: '{}'", id, adjustStockRequest.getDelta(), adjustStockRequest.getReason());
+        log.info("[ADJUST STOCK] Received request for Product ID: {}. Delta: {}, Reason: '{}'", id, adjustStockRequest.delta(), adjustStockRequest.reason());
 
         Product product = productRepo.findById(id)
                 .orElseThrow(() -> {
@@ -160,7 +125,7 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
                 });
 
 
-        int newStock = product.getStockQuantity() + adjustStockRequest.getDelta();
+        int newStock = product.getStockQuantity() + adjustStockRequest.delta();
         product.updateStock(newStock);
 
         productRepo.save(product);
@@ -168,7 +133,6 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
     }
 
     @Override
-    @ProductLogging(action = ProductAction.ACTIVATE)
     @Transactional
     public ProductDetail activateProduct(UUID id) {
         log.info("[ACTIVATE] Received request to reactivate product. ID: {}", id);
@@ -184,11 +148,10 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
 
         log.info("[ACTIVATE SUCCESS] Successfully reactivated product. ID: {}", id);
 
-        return productMapper.toProductDetail(product);
+        return productMapper.map(product);
     }
 
     @Override
-    @ProductLogging(action = ProductAction.DELETE)
     @Transactional
     public ProductDetail deleteProduct(UUID id) {
         log.info("[DELETE] Received request to delete product. ID: {}", id);
@@ -206,6 +169,6 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
 
         log.info("[DELETE SUCCESS] Successfully {} product. ID: {}", actualStatus.name().toLowerCase(), id);
 
-        return productMapper.toProductDetail(product);
+        return productMapper.map(product);
     }
 }

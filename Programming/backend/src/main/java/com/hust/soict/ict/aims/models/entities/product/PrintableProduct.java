@@ -2,13 +2,13 @@ package com.hust.soict.ict.aims.models.entities.product;
 
 import java.time.LocalDate;
 import java.util.Objects;
-import java.util.Optional;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Immutable;
 
 @MappedSuperclass
 @Getter
@@ -17,36 +17,27 @@ public abstract class PrintableProduct extends Product {
     @Column(nullable = false)
     private String publisher;
 
+    @Immutable
     @Column(nullable = false, updatable = false)
     private LocalDate publicationDate;
 
     @Column(length = 50)
     private String language;
 
-    protected PrintableProduct(Builder<?, ?> builder) {
+    protected PrintableProduct(Builder<?> builder) {
         super(builder);
         this.publisher = Objects.requireNonNull(builder.publisher, "Printable Product publisher cannot be null.");
         this.publicationDate = Objects.requireNonNull(builder.publicationDate, "Printable Product publication date cannot be null.");
         this.language = builder.language;
     }
 
-    protected final void apply(Builder<?, ?> builder) {
-        super.apply(builder);
-        Optional.ofNullable(builder.publisher).ifPresent(v -> this.publisher = v);
-        Optional.ofNullable(builder.publisher).ifPresent(v -> this.language = v);
-    }
-
-    public static abstract class Builder<P extends PrintableProduct, B extends Builder<P, B>> extends Product.Builder<P, B> {
+    public static abstract class Builder<B extends Builder<B>> extends Product.Builder<B> {
         private String publisher;
         private LocalDate publicationDate;
         private String language;
 
         protected Builder() {
             super();
-        }
-
-        protected Builder(PrintableProduct updatingProduct) {
-            super(updatingProduct);
         }
 
         public B publisher(String publisher) {
@@ -63,5 +54,15 @@ public abstract class PrintableProduct extends Product {
             this.language = language;
             return self();
         }
+    }
+
+    static {
+        registerUpdateCommand(UpdateCommand.Publisher.class, PrintableProduct.class, (p, c) -> p.publisher = c.newValue());
+        registerUpdateCommand(UpdateCommand.Language.class, PrintableProduct.class, (p, c) -> p.language = c.newValue());
+    }
+
+    public interface UpdateCommand<T> extends Product.UpdateCommand<T> {
+        record Publisher(String newValue) implements UpdateCommand<String> {}
+        record Language(String newValue) implements UpdateCommand<String> {}
     }
 }

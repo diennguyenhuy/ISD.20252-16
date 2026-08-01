@@ -5,15 +5,15 @@ import com.hust.soict.ict.aims.models.entities.product.DVD;
 import org.springframework.stereotype.Component;
 
 @Component
-class DVDCreator implements ProductCreator<DVD, CreateDVDRequest> {
-    @Override
-    public Class<CreateDVDRequest> createRequestType() {
-        return CreateDVDRequest.class;
+class DVDCreator extends ProductCreator<DVD, CreateDVDRequest, DVD.Builder> {
+
+    DVDCreator() {
+        super(CreateDVDRequest.class, DVD.Builder::new);
     }
 
     @Override
     public DVD createFrom(CreateDVDRequest createRequest) {
-        return buildCommonFields(new DVD.Builder(), createRequest)
+        return builder(createRequest)
                 .releaseDate(createRequest.getReleaseDate())
                 .genre(createRequest.getGenre())
                 .discType(createRequest.getDiscType())

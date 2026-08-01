@@ -1,17 +1,20 @@
 package com.hust.soict.ict.aims.services.admin.event;
 
 import com.hust.soict.ict.aims.services.notification.email.EmailMessage;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 class PasswordResetEmailMessage implements EmailMessage<PasswordResetEvent> {
-
     private final String targetEmail;
     private final String username;
     private final String temporaryPassword;
     private final String frontendUrl;
+
+    private PasswordResetEmailMessage(String targetEmail, String username, String temporaryPassword, String frontendUrl) {
+        this.targetEmail = targetEmail;
+        this.username = username;
+        this.temporaryPassword = temporaryPassword;
+        this.frontendUrl = frontendUrl;
+    }
 
     @Override
     public String recipient() {
@@ -80,9 +83,8 @@ class PasswordResetEmailMessage implements EmailMessage<PasswordResetEvent> {
 
     @Component
     static class Factory extends EmailMessage.Factory<PasswordResetEmailMessage, PasswordResetEvent> {
-        @Override
-        public Class<PasswordResetEmailMessage> messageType() {
-            return PasswordResetEmailMessage.class;
+        Factory() {
+            super(PasswordResetEmailMessage.class);
         }
 
         @Override

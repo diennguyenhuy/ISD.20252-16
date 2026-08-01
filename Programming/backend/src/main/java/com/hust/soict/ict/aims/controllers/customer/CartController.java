@@ -1,7 +1,7 @@
 package com.hust.soict.ict.aims.controllers.customer;
 
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
-import com.hust.soict.ict.aims.dto.response.CartResponse;
+import com.hust.soict.ict.aims.dto.response.cart.CartResponse;
 import com.hust.soict.ict.aims.services.product.CartService;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;

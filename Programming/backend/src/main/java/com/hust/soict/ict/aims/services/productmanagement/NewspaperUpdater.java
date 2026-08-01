@@ -4,22 +4,21 @@ import com.hust.soict.ict.aims.dto.request.UpdateNewspaperRequest;
 import com.hust.soict.ict.aims.models.entities.product.Newspaper;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
-class NewspaperUpdater implements ProductUpdater<Newspaper, UpdateNewspaperRequest> {
+class NewspaperUpdater extends PrintableProductUpdater<Newspaper, UpdateNewspaperRequest, Newspaper.UpdateCommand<?>> {
 
-    @Override
-    public Class<UpdateNewspaperRequest> updateRequestType() {
-        return UpdateNewspaperRequest.class;
-    }
+    NewspaperUpdater() {
+        super(UpdateNewspaperRequest.class, request -> {
+            List<Newspaper.UpdateCommand<?>> commands = new ArrayList<>();
 
-    @Override
-    public Newspaper updateFrom(Newspaper existingProduct, UpdateNewspaperRequest updateRequest) {
-        return buildCommonFields(existingProduct.toBuilder(), updateRequest)
-                .publisher(updateRequest.getPublisher())
-                .language(updateRequest.getLanguage())
-                .editorInChief(updateRequest.getEditorInChief())
-                .publicationFrequency(updateRequest.getPublicationFrequency())
-                .sections(updateRequest.getSections())
-                .build();
+            request.getEditorInChief().ifDefined(editorInChief -> commands.add(new Newspaper.UpdateCommand.EditorInChief(editorInChief)));
+            request.getPublicationFrequency().ifDefined(pf -> commands.add(new Newspaper.UpdateCommand.PublicationFrequency(pf)));
+            request.getSections().ifDefined(sections -> commands.add(new Newspaper.UpdateCommand.Sections(sections)));
+
+            return commands;
+        });
     }
 }

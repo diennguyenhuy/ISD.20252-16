@@ -4,7 +4,6 @@ import com.hust.soict.ict.aims.services.notification.NotificationChannel;
 import com.hust.soict.ict.aims.services.notification.NotificationMethod;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailAuthenticationException;
@@ -14,18 +13,17 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
-@RequiredArgsConstructor
 @Component
 @Slf4j
-public class EmailChannel implements NotificationChannel<EmailMessage<?>> {
+public class EmailChannel extends NotificationChannel<EmailMessage<?>> {
     private final JavaMailSender mailSender;
 
     @Value("${spring.mail.username}")
     protected String from;
 
-    @Override
-    public final NotificationMethod method() {
-        return NotificationMethod.EMAIL;
+    public EmailChannel(JavaMailSender mailSender) {
+        super(NotificationMethod.EMAIL);
+        this.mailSender = mailSender;
     }
 
     @Override

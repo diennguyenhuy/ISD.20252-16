@@ -12,14 +12,7 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class CreateNewspaperRequest extends CreateProductRequest {
-    @NotBlank(message = "Publisher must not be blank")
-    private String publisher;
-    @NotNull(message = "Publication date cannot be null")
-    @Past(message = "Publication date must be in the past compared to now")
-    private LocalDate publicationDate;
-    @NullOrNotBlank(message = "Language must not be blank if provided")
-    private String language;
+public class CreateNewspaperRequest extends CreatePrintableProductRequest {
     @NotBlank(message = "Publisher must not be blank")
     private String editorInChief;
     @NullOrNotBlank(message = "Issue number must not be blank if provided")

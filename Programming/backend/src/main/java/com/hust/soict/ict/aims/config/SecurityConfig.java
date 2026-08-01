@@ -5,6 +5,7 @@ import com.hust.soict.ict.aims.security.jwt.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -40,28 +41,48 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
-        try {
-            http.cors(Customizer.withDefaults())
-                    .csrf(AbstractHttpConfigurer::disable)
-                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                    .authorizeHttpRequests(auth ->
-                            auth.requestMatchers(HttpMethod.OPTIONS).permitAll()
-                                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                                    .requestMatchers("/product/**", "/products/**", "/cart/**", "/order/**").permitAll()
-                                    .requestMatchers("/vqr/**").permitAll()
-                                    .requestMatchers("/auth/**").permitAll()
-                                    .requestMatchers("/profile/**").authenticated()
-                                    .requestMatchers("/admin/**").hasRole(User.Role.ADMINISTRATOR.name())
-                                    .requestMatchers("/manager/**").hasRole(User.Role.PRODUCT_MANAGER.name())
-                                    .anyRequest().authenticated()
-                    );
+    @Order(1)
+    public SecurityFilterChain customerSecurity(HttpSecurity http) {
+        http.securityMatcher(
+                "/cart/**",
+                "/order/**",
+                "/product/**",
+                "/products/**",
+                "/vqr/**"
+        )
+                .cors(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 
-            http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
 
-            return http.build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    @Bean
+    @Order(2)
+    public SecurityFilterChain staffSecurity(HttpSecurity http) {
+        http
+                .securityMatcher(
+                        "/auth/**",
+                        "/profile/**",
+                        "/admin/**",
+                        "/manager/**"
+                )
+                .cors(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS).permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/profile/**").authenticated()
+                        .requestMatchers("/admin/**")
+                        .hasRole(User.Role.ADMINISTRATOR.name())
+                        .requestMatchers("/manager/**")
+                        .hasRole(User.Role.PRODUCT_MANAGER.name())
+                        .anyRequest().authenticated()
+                ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
 }

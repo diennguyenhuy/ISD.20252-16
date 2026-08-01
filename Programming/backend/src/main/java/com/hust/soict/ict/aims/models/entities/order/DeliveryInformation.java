@@ -5,15 +5,6 @@ import lombok.*;
 
 import java.util.UUID;
 
-/**
- * Cohesion: Communicational Cohesion
- * Reason:
- * Fields and methods operate on the same delivery-related
- * data associated with an Order.
- * Coupling:
- * - Stamp coupling with Order through bidirectional
- *   entity association.
- */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

@@ -13,20 +13,20 @@ class ProvinceCommuneValidator implements ConstraintValidator<ValidProvinceCommu
 
     @Override
     public boolean isValid(DeliveryRequest value, ConstraintValidatorContext context) {
-        if (value.getProvince() == null || value.getCommune() == null) {
+        if (value.province() == null || value.commune() == null) {
             return true;
         }
 
-        if (!locationProvider.isValidProvince(value.getProvince())) {
+        if (!locationProvider.isValidProvince(value.province())) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate("Province does not exist").addPropertyNode("province").addConstraintViolation();
             return false;
         }
 
-        boolean valid = locationProvider.isValid(value.getProvince(), value.getCommune());
+        boolean valid = locationProvider.isValid(value.province(), value.commune());
         if (!valid) {
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Commune does not exist in " + value.getProvince()).addPropertyNode("commune").addConstraintViolation();
+            context.buildConstraintViolationWithTemplate("Commune does not exist in " + value.province()).addPropertyNode("commune").addConstraintViolation();
         }
 
         return valid;

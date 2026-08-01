@@ -5,18 +5,15 @@ import com.hust.soict.ict.aims.models.entities.product.Book;
 import org.springframework.stereotype.Component;
 
 @Component
-class BookCreator implements ProductCreator<Book, CreateBookRequest> {
-    @Override
-    public Class<CreateBookRequest> createRequestType() {
-        return CreateBookRequest.class;
+class BookCreator extends PrintableProductCreator<Book, CreateBookRequest, Book.Builder> {
+
+    BookCreator() {
+        super(CreateBookRequest.class, Book.Builder::new);
     }
 
     @Override
     public Book createFrom(CreateBookRequest createRequest) {
-        return buildCommonFields(new Book.Builder(), createRequest)
-                .publisher(createRequest.getPublisher())
-                .publicationDate(createRequest.getPublicationDate())
-                .language(createRequest.getLanguage())
+        return builder(createRequest)
                 .authors(createRequest.getAuthors())
                 .coverType(createRequest.getCoverType())
                 .numberOfPages(createRequest.getNumberOfPages())

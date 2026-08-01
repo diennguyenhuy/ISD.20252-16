@@ -18,7 +18,7 @@ const PAYPAL_URL = '/order/payment/paypal';
  */
 const PayByCreditCardService = {
     createPayPalPayment: async (): Promise<PayPalCreateResponse> => {
-        const response = await apiClient.post<PayPalCreateResponse>(`${PAYPAL_URL}/create`);
+        const response = await apiClient.post<PayPalCreateResponse>(`${PAYPAL_URL}`);
         return response.data;
     },
 

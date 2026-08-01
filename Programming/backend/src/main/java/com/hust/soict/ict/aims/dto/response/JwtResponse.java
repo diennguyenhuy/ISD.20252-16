@@ -1,8 +1,5 @@
 package com.hust.soict.ict.aims.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -13,24 +10,17 @@ import java.util.UUID;
  * The frontend should redirect the user to the "change password" screen before
  * allowing further navigation.
  */
-@Data
-@AllArgsConstructor
-public class JwtResponse {
-    private String token;
-    private String type = "Bearer";
-    private UUID id;
-    private String username;
-    private String email;
-    private List<String> roles;
-    private boolean mustChangePassword;
-
+public record JwtResponse(
+        String token,
+        String type,
+        UUID id,
+        String username,
+        String email,
+        List<String> roles,
+        boolean mustChangePassword
+) {
     public JwtResponse(String token, UUID id, String username, String email,
                        List<String> roles, boolean mustChangePassword) {
-        this.token = token;
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.roles = roles;
-        this.mustChangePassword = mustChangePassword;
+        this(token, "Bearer", id, username, email, roles, mustChangePassword);
     }
 }
