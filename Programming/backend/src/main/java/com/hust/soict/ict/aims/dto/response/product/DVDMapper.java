@@ -25,6 +25,6 @@ class DVDMapper extends ProductMapper<DVD, DVDDetail> {
 
     @Override
     protected List<String> creators(DVD product) {
-        return List.of(product.getStudio(), product.getDirector());
+        return List.of("Studio: " + product.getStudio(), "Director: " + product.getDirector());
     }
 }

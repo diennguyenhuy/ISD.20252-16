@@ -9,6 +9,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Consumer;
 
 @Entity
 @Table(name = "\"order\"")
@@ -106,7 +107,9 @@ public class Order extends VersionedEntity {
         return invoice.getTotalAmount();
     }
 
-    public void approve() {
+    public void approve(Consumer<Order> orderValidator) {
+        orderValidator.accept(this);
+        items.forEach(i -> i.getProduct().updateStock(i.getProduct().getStockQuantity() - i.getQuantity()));
         changeStatus(Status.APPROVED);
     }
     public void reject() {
@@ -119,13 +122,8 @@ public class Order extends VersionedEntity {
         changeStatus(Status.REFUNDED);
     }
 
-    void addItem(OrderItem orderItem) {
-        items.add(orderItem);
-        orderItem.setOrder(this);
-    }
-
     private Order(Cart cart) {
-        cart.getItems().forEach(item -> this.addItem(new OrderItem(item, this)));
+        cart.getItems().forEach(item -> items.add(new OrderItem(item, this)));
         this.status = Status.DRAFT;
         this.totalItemCount = items.size();
         this.totalWeight = items.stream().map(OrderItem::getItemTotalWeight).reduce(BigDecimal.ZERO, BigDecimal::add);

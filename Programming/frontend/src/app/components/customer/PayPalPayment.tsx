@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { CreditCard, ExternalLink, Loader2, AlertCircle, ArrowLeft, ShieldCheck } from 'lucide-react';
 import PayByCreditCardService from '../../api/PayByCreditCardService';
 
@@ -25,7 +25,8 @@ type State = 'idle' | 'creating' | 'awaiting' | 'cancelled' | 'error';
 
 export default function PayPalPayment() {
     const navigate = useNavigate();
-    const { checkoutId } = useParams<{ checkoutId: string }>();
+    const [searchParams] = useSearchParams();
+    const checkoutId = searchParams.get('checkoutId');
 
     const [state, setState] = useState<State>('idle');
     const [error, setError] = useState<string | null>(null);
@@ -151,7 +152,7 @@ export default function PayPalPayment() {
 
                     <button
                         id="btn-back-qr"
-                        onClick={() => navigate(`/checkout/${checkoutId}/payment/qr`)}
+                        onClick={() => navigate(`/checkout/payment/qr?checkoutId=${checkoutId}`)}
                         disabled={isBusy}
                         className="w-full py-3.5 rounded-xl border border-border bg-card text-foreground font-semibold hover:bg-muted transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >

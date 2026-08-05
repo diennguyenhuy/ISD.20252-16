@@ -27,7 +27,7 @@ class PlaceOrderServiceImpl implements PlaceOrderService {
     public OrderDraftResponse placeOrder() throws EmptyCartException, NotEnoughStockException, ProductNotFoundException {
         log.debug("Placing order...");
         log.debug("Checking stock availability...");
-        Order.Draft draftOrder = new Order.Draft(stockValidator.checkStockAvailability(cartContext.getOrCreateCart()));
+        Order.Draft draftOrder = cartContext.getOrCreateCart().placeOrder(stockValidator::checkStockAvailability);
         log.debug("Stock availability check done and satisfied.");
 
         try {
