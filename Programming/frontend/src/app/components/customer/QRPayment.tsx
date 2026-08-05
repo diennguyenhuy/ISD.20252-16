@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { CreditCard, X, Smartphone, CheckCircle2, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import QRCode from 'qrcode';
 import PayOrderService from '../../api/PayOrderService';
@@ -14,7 +14,8 @@ type ConfirmState =
 
 export default function QRPayment() {
     const navigate = useNavigate();
-    const { checkoutId } = useParams<{ checkoutId: string }>();
+    const [searchParams] = useSearchParams();
+    const checkoutId = searchParams.get('checkoutId');
 
     // ── QR generation state ──────────────────────────────────────────────────
     const [qrData, setQrData] = useState<QRCodeResponse | null>(null);
@@ -258,7 +259,7 @@ export default function QRPayment() {
                     {/* Switch to PayPal */}
                     <button
                         id="btn-switch-paypal"
-                        onClick={() => navigate(`/checkout/${checkoutId}/payment/paypal`)}
+                        onClick={() => navigate(`/checkout/payment/paypal?checkoutId=${checkoutId}`)}
                         disabled={isLoading || isSuccess}
                         className="w-full py-3.5 rounded-xl border border-border bg-card text-foreground font-semibold hover:bg-muted transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >

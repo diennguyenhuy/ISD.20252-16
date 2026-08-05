@@ -91,6 +91,10 @@ public class User extends VersionedEntity {
      * Sets a temporary hashed password and raises the mustChangePassword flag.
      */
     public void setTemporaryPassword(@NonNull String temporaryHashedPassword) {
+        if (mustChangePassword) {
+            throw new IllegalStateException("User " + username + " password has already been reset.");
+        }
+
         this.hashedPassword = temporaryHashedPassword;
         this.mustChangePassword = true;
     }

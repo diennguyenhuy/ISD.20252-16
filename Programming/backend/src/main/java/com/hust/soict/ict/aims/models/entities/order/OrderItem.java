@@ -6,10 +6,8 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Entity
 @Table(
@@ -25,7 +23,6 @@ public class OrderItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("orderId")
     @JoinColumn(name = "order_id", nullable = false)
-    @Setter(AccessLevel.PACKAGE)
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)

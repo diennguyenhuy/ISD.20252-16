@@ -52,11 +52,7 @@ class OrderManagementServiceImpl implements OrderQueryService, OrderRejectionSer
         Order order = orderRepository.findByIdAndStatus(id, Order.Status.PENDING)
                 .orElseThrow(() -> new OrderNotFoundException(id, Order.Status.PENDING.name()));
 
-        validateOrder(order);
-
-        order.getItems().forEach(i -> i.getProduct().updateStock(i.getProduct().getStockQuantity() - i.getQuantity()));
-
-        order.approve();
+        order.approve(this::validateOrder);
 
         applicationEventPublisher.publishEvent(new OrderApprovalEvent(order));
 

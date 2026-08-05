@@ -22,6 +22,6 @@ class NewspaperMapper extends PrintableProductMapper<Newspaper, NewspaperDetail>
 
     @Override
     protected List<String> creators(Newspaper product) {
-        return List.of(product.getPublisher(), product.getEditorInChief());
+        return List.of("Publisher: " + product.getPublisher(), "Editor-In-Chief: " + product.getEditorInChief());
     }
 }

@@ -24,7 +24,7 @@ class ProductAuditLogServiceImpl implements ProductAuditLogService {
         return productLogRepository.findTop100ByOrderByTimestampDesc().stream()
                 .sorted(Comparator.comparing(ProductLog::getTimestamp).reversed())
                 .limit(100)
-                .map(mapper::map)
+                .map(mapper::<ProductLog, ProductLogResponse>map)
                 .toList();
     }
 }

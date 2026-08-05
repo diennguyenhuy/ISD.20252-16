@@ -1,6 +1,6 @@
 import { ArrowLeft, Truck, ChevronDown, AlertCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate, useLocation, useParams } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 
 import { useCart } from '../../context/CartContext';
 import OrderService from '../../api/OrderService';
@@ -15,7 +15,6 @@ type FieldError = {
 export default function DeliveryForm() {
     const navigate = useNavigate();
     const location = useLocation();
-    const { checkoutId } = useParams<{ checkoutId: string }>();
     const existingInfo = location.state?.prefilledDeliveryInfo as DeliveryInformation;
     // Bring in the global cart to satisfy the requirement: "Customers will still see products"
     const { cart } = useCart();
@@ -62,7 +61,7 @@ export default function DeliveryForm() {
         try {
             // Send the strict data payload to the backend
             const orderDraft = await OrderService.submitDeliveryForm(form);
-            navigate(`/checkout/${checkoutId}/invoice`, {
+            navigate(`/checkout/invoice?checkoutId=${orderDraft.checkoutId}`, {
                 state: {
                     orderDraft: orderDraft,
                 }

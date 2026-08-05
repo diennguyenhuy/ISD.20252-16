@@ -16,7 +16,7 @@ public class ProductLogMappers {
     }
 
     @SuppressWarnings("unchecked")
-    public <L extends ProductLog, R extends ProductLogResponse> ProductLogResponse map(L log) {
+    public <L extends ProductLog, R extends ProductLogResponse> R map(L log) {
         AbstractProductLogMapper<L, R> mapper = (AbstractProductLogMapper<L, R>) mappers.get(log.getClass());
         return mapper.map(log);
     }

@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.models.cart;
 
+import static com.hust.soict.ict.aims.models.entities.order.Order.Draft;
 import com.hust.soict.ict.aims.models.entities.product.Product;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Consumer;
 
 @NoArgsConstructor
 public class Cart {
@@ -103,5 +105,10 @@ public class Cart {
 
     public Collection<CartItem> getItems() {
         return Collections.unmodifiableCollection(items.values());
+    }
+
+    public Draft placeOrder(Consumer<Cart> stockValidator) {
+        stockValidator.accept(this);
+        return new Draft(this);
     }
 }

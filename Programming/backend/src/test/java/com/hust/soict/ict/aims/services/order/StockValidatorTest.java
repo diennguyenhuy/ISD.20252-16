@@ -62,11 +62,9 @@ class StockValidatorTest {
 
         when(productRepository.findAllByIdInAndStatus(any(), eq(Product.Status.ACTIVE))).thenReturn(List.of(product));
 
-        Cart result = stockValidator.checkStockAvailability(cart);
+        assertDoesNotThrow(() -> stockValidator.checkStockAvailability(cart));
 
-        assertNotNull(result);
-
-        assertEquals(1, result.getItems().size());
+        assertEquals(1, cart.getItems().size());
     }
 
     @Test

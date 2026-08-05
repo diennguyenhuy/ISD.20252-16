@@ -4,7 +4,6 @@ import com.hust.soict.ict.aims.exceptions.EmptyCartException;
 import com.hust.soict.ict.aims.exceptions.NotEnoughStockException;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.cart.Cart;
-import com.hust.soict.ict.aims.models.cart.CartItem;
 import com.hust.soict.ict.aims.models.entities.product.Product;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,13 +24,12 @@ class StockValidator {
     /**
      * Check for stock availability.
      * This works by syncing products in cart with the repository.
-     * @return the cart instance
      * @throws NotEnoughStockException if some products do not satisfy stock availability
      * @throws EmptyCartException if cart is empty
      * @throws ProductNotFoundException if a product "vanishes" (gets deactivated) during checkout
      */
     @Transactional(readOnly = true)
-    Cart checkStockAvailability(Cart cart) throws NotEnoughStockException, EmptyCartException {
+    void checkStockAvailability(Cart cart) throws NotEnoughStockException, EmptyCartException {
         if (cart.isEmpty()) {
             throw new EmptyCartException();
         }
@@ -48,31 +46,26 @@ class StockValidator {
         Map<UUID, Integer> insufficientQuantity = new HashMap<>();
         List<UUID> missingProducts = new ArrayList<>();
 
-        for (CartItem item : cart.getItems()) {
-            UUID productId = item.getProduct().getId();
+        cart.getItems().forEach(i -> {
+            UUID productId = i.getProduct().getId();
 
             Product managedProduct = productMap.get(productId);
 
             if (managedProduct == null) {
                 missingProducts.add(productId);
-                continue;
+                return;
             }
 
             cart.synchronizeProduct(managedProduct);
 
-            if (!item.isStockAvailable()) {
-                insufficientQuantity.put(productId, item.getProduct().getStockQuantity());
+            if (!i.isStockAvailable()) {
+                insufficientQuantity.put(productId, i.getProduct().getStockQuantity());
             }
-        }
-
-        for (UUID missing : missingProducts) {
-            cart.removeItem(missing);
-        }
+        });
 
         if (!insufficientQuantity.isEmpty() || !missingProducts.isEmpty()) {
+            missingProducts.forEach(cart::removeItem);
             throw new NotEnoughStockException(insufficientQuantity, missingProducts);
         }
-
-        return cart;
     }
 }
