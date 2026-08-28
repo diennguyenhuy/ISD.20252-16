@@ -6,7 +6,10 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "newspaper")
@@ -14,6 +17,7 @@ import org.hibernate.annotations.Immutable;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Newspaper extends PrintableProduct {
     @Column(nullable = false)
+    @Setter
     private String editorInChief;
 
     @Immutable
@@ -21,18 +25,16 @@ public class Newspaper extends PrintableProduct {
     private String issueNumber;
 
     @Column(length = 25)
+    @Setter
     private String publicationFrequency;
 
     @Immutable
     @Column(length = 9, updatable = false)
     private String ISSN;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "newspaper_sections",
-            joinColumns = @JoinColumn(name = "newspaper_id")
-    )
-    @Column(name = "section", length = 50)
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "sections")
+    @Setter
     private List<String> sections = new ArrayList<>();
 
     public List<String> getSections() {
@@ -98,17 +100,5 @@ public class Newspaper extends PrintableProduct {
             this.sections = sections == null ? null : List.of(sections);
             return this;
         }
-    }
-
-    static {
-        registerUpdateCommand(UpdateCommand.EditorInChief.class, Newspaper.class, (p, c) -> p.editorInChief = c.newValue());
-        registerUpdateCommand(UpdateCommand.PublicationFrequency.class, Newspaper.class, (p, c) -> p.publicationFrequency = c.newValue());
-        registerUpdateCommand(UpdateCommand.Sections.class, Newspaper.class, (p, c) -> p.sections = c.newValue() == null ? new ArrayList<>() : new ArrayList<>(c.newValue()));
-    }
-
-    public interface UpdateCommand<T> extends PrintableProduct.UpdateCommand<T> {
-        record EditorInChief(String newValue) implements UpdateCommand<String> {}
-        record PublicationFrequency(String newValue) implements UpdateCommand<String> {}
-        record Sections(List<String> newValue) implements UpdateCommand<List<String>> {}
     }
 }

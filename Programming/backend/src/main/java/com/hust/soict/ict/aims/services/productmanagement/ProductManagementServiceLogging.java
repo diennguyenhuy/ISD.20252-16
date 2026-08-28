@@ -1,8 +1,6 @@
 package com.hust.soict.ict.aims.services.productmanagement;
 
 import com.hust.soict.ict.aims.dto.request.*;
-import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
-import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.entities.audit.*;
 import com.hust.soict.ict.aims.models.entities.product.Product;
@@ -11,6 +9,9 @@ import com.hust.soict.ict.aims.repositories.ProductRepository;
 import com.hust.soict.ict.aims.security.AuthenticationFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
@@ -19,7 +20,7 @@ import java.util.*;
 
 @RequiredArgsConstructor
 @Slf4j
-class LoggingProductManagementService implements ProductManagementService {
+class ProductManagementServiceLogging implements ProductManagementService {
     private final ProductManagementService productManagementService;
 
     private final ProductRepository productRepository;
@@ -28,20 +29,10 @@ class LoggingProductManagementService implements ProductManagementService {
 
     @Override
     @Transactional
-    public ProductDetail createProduct(CreateProductRequest dto) {
-        var result = productManagementService.createProduct(dto);
+    public Product createProduct(CreateProductRequest dto) {
+        var product = productManagementService.createProduct(dto);
 
-        Product product = productRepository.findByBarcode(dto.getBarcode())
-                .orElseThrow(() -> {
-                    log.error(
-                            "[AUDIT FAILED] Cannot find created product with barcode: {}",
-                            dto.getBarcode()
-                    );
-
-                    return new IllegalStateException("Cannot find created product with barcode: " + dto.getBarcode());
-                });
-
-        ProductLog productLog = ProductAction.CREATE.log(authenticationFacade.getCurrentUser(), product);
+        ProductLog productLog = ProductActions.CREATE.log(authenticationFacade.getCurrentUser(), product);
         productLogRepository.save(productLog);
 
         log.info(
@@ -50,39 +41,12 @@ class LoggingProductManagementService implements ProductManagementService {
                 product.getTitle()
         );
 
-        return result;
-    }
-
-    private static Map<String, ?> extractUpdatingFields(Set<String> requestedFieldNames, Object object) {
-        Map<String, Object> valueMap = new HashMap<>();
-
-        for (Class<?> clazz = object.getClass(); clazz != Object.class; clazz = clazz.getSuperclass()) {
-            for (Field field : clazz.getDeclaredFields()) {
-                if (Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) {
-                    continue;
-                }
-
-                try {
-                    field.setAccessible(true);
-                    String fieldName = field.getName();
-                    if (!requestedFieldNames.contains(fieldName)) {
-                        continue;
-                    }
-                    Object value = field.get(object);
-                    valueMap.put(fieldName, value);
-                } catch (IllegalAccessException e) {
-                    log.error("[AUDIT FAILED] Cannot access field: {}. Reason: {}", field.getName(), e.getMessage());
-                    throw new IllegalStateException("Failed to access field: " + field.getName(), e);
-                }
-            }
-        }
-
-        return valueMap;
+        return product;
     }
 
     @Override
     @Transactional
-    public ProductDetail updateProduct(UUID id, UpdateProductRequest dto) {
+    public Product updateProduct(UUID id, UpdateProductRequest dto) {
         Set<String> requestedFieldNames = new HashSet<>();
 
         for (Class<?> clazz = dto.getClass(); clazz != Object.class; clazz = clazz.getSuperclass()) {
@@ -114,11 +78,11 @@ class LoggingProductManagementService implements ProductManagementService {
 
         Map<String, ?> oldValueMap = extractUpdatingFields(requestedFieldNames, product);
 
-        var result = productManagementService.updateProduct(id, dto);
+        product = productManagementService.updateProduct(id, dto);
 
-        Map<String, ?> newValueMap = extractUpdatingFields(requestedFieldNames, result);
+        Map<String, ?> newValueMap = extractUpdatingFields(requestedFieldNames, product);
 
-        ProductUpdateLog productLog = new ProductUpdateLog(
+        ProductUpdateLog productLog = ProductActions.UPDATE.log(
                 authenticationFacade.getCurrentUser(),
                 product,
                 requestedFieldNames,
@@ -131,50 +95,48 @@ class LoggingProductManagementService implements ProductManagementService {
         for (String fieldName : requestedFieldNames) {
             log.info("{}: {}->{}", fieldName, oldValueMap.get(fieldName).toString(), newValueMap.get(fieldName).toString());
         }
-        return result;
+        return product;
     }
 
     @Override
     @Transactional
-    public List<ProductSummary> deleteProducts(List<UUID> productIds) {
-        var result = productManagementService.deleteProducts(productIds);
-
-        List<Product> products = productRepository.findAllById(productIds);
+    public List<Product> deleteProducts(List<UUID> productIds) {
+        var products = productManagementService.deleteProducts(productIds);
 
         List<ProductLog> productLogs = new ArrayList<>();
 
         products.forEach(product -> {
-            ProductAction actualAction;
-            switch (product.getStatus()) {
-                case DELETED -> actualAction = ProductAction.DELETE;
-                case DEACTIVATED -> actualAction = ProductAction.DEACTIVATE;
+            ProductLog productLog = switch (product.getStatus()) {
+                case DELETED -> ProductActions.DELETE.log(authenticationFacade.getCurrentUser(), product);
+                case DEACTIVATED -> ProductActions.DEACTIVATE.log(authenticationFacade.getCurrentUser(), product);
                 default -> {
                     log.warn(
                             "[AUDIT SKIPPED] Product deletion action produced unexpected status. ID: {}, Status: {}",
                             product.getId(),
                             product.getStatus()
                     );
-                    return;
+                    yield null;
                 }
-            }
+            };
 
-            productLogs.add(actualAction.log(authenticationFacade.getCurrentUser(), product));
+            if (productLog != null) productLogs.add(productLog);
+            else return;
 
             log.info(
                     "[AUDIT] Product {}d. ID: {}, Title: {}",
-                    actualAction.name().toLowerCase(),
+                    productLog.getAction().name().toLowerCase(),
                     product.getId(),
                     product.getTitle()
             );
         });
         productLogRepository.saveAll(productLogs);
 
-        return result;
+        return products;
     }
 
     @Override
     @Transactional
-    public void adjustStock(UUID id, AdjustStockRequest adjustStockRequest) {
+    public Product adjustStock(UUID id, int delta, String reason) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("[AUDIT FAILED] Product not found for stock adjustment. ID: {}", id);
@@ -183,16 +145,16 @@ class LoggingProductManagementService implements ProductManagementService {
 
         int oldStock = product.getStockQuantity();
 
-        productManagementService.adjustStock(id, adjustStockRequest);
+        product = productManagementService.adjustStock(id, delta, reason);
 
-        int newStock = oldStock + adjustStockRequest.delta();
+        int newStock = oldStock + delta;
 
-        StockAdjustLog stockAdjustLog = new StockAdjustLog(
+        StockAdjustLog stockAdjustLog = ProductActions.STOCK_ADJUST.log(
                 authenticationFacade.getCurrentUser(),
                 product,
                 oldStock,
                 newStock,
-                adjustStockRequest.reason()
+                reason
         );
         productLogRepository.save(stockAdjustLog);
 
@@ -201,21 +163,17 @@ class LoggingProductManagementService implements ProductManagementService {
                 id,
                 oldStock,
                 newStock,
-                adjustStockRequest.delta()
+                delta
         );
+        return product;
     }
 
     @Override
     @Transactional
-    public ProductDetail activateProduct(UUID id) {
-        var result = productManagementService.activateProduct(id);
+    public Product activateProduct(UUID id) {
+        var product = productManagementService.activateProduct(id);
 
-        Product product = productRepository.findById(id).orElseThrow(() -> {
-            log.error("[AUDIT FAILED] Product not found for activation. ID: {}", id);
-            return new ProductNotFoundException(id);
-        });
-
-        ProductLog productLog = ProductAction.ACTIVATE.log(authenticationFacade.getCurrentUser(), product);
+        ProductLog productLog = ProductActions.ACTIVATE.log(authenticationFacade.getCurrentUser(), product);
         productLogRepository.save(productLog);
 
         log.info(
@@ -224,42 +182,82 @@ class LoggingProductManagementService implements ProductManagementService {
                 product.getTitle()
         );
 
-        return result;
+        return product;
     }
 
     @Override
     @Transactional
-    public ProductDetail deleteProduct(UUID id) {
-        var result = productManagementService.deleteProduct(id);
-        Product product = productRepository.findById(id).orElseThrow(() -> {
-            log.error("[AUDIT FAILED] Product not found for (soft-)deletion. ID: {}", id);
-            return new ProductNotFoundException(id);
-        });
+    public Product deleteProduct(UUID id) {
+        var product = productManagementService.deleteProduct(id);
 
-        ProductAction actualAction;
-        switch (product.getStatus()) {
-            case DELETED -> actualAction = ProductAction.DELETE;
-            case DEACTIVATED -> actualAction = ProductAction.DEACTIVATE;
+        ProductLog productLog = switch (product.getStatus()) {
+            case DELETED -> ProductActions.DELETE.log(authenticationFacade.getCurrentUser(), product);
+            case DEACTIVATED -> ProductActions.DEACTIVATE.log(authenticationFacade.getCurrentUser(), product);
             default -> {
                 log.warn(
                         "[AUDIT SKIPPED] Product deletion action produced unexpected status. ID: {}, Status: {}",
-                        id,
+                        product.getId(),
                         product.getStatus()
                 );
-                return result;
+                yield null;
+            }
+        };
+
+        if (productLog != null) {
+            productLogRepository.save(productLog);
+            log.info(
+                    "[AUDIT] Product {}d. ID: {}, Title: {}",
+                    productLog.getAction().name().toLowerCase(),
+                    product.getId(),
+                    product.getTitle()
+            );
+        }
+
+        return product;
+    }
+
+    private static Map<String, ?> extractUpdatingFields(Set<String> requestedFieldNames, Object object) {
+        Map<String, Object> valueMap = new HashMap<>();
+
+        for (Class<?> clazz = object.getClass(); clazz != Object.class; clazz = clazz.getSuperclass()) {
+            for (Field field : clazz.getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) {
+                    continue;
+                }
+
+                try {
+                    field.setAccessible(true);
+                    String fieldName = field.getName();
+                    if (!requestedFieldNames.contains(fieldName)) {
+                        continue;
+                    }
+                    Object value = field.get(object);
+                    valueMap.put(fieldName, value);
+                } catch (IllegalAccessException e) {
+                    log.error("[AUDIT FAILED] Cannot access field: {}. Reason: {}", field.getName(), e.getMessage());
+                    throw new IllegalStateException("Failed to access field: " + field.getName(), e);
+                }
             }
         }
 
-        ProductLog productLog = actualAction.log(authenticationFacade.getCurrentUser(), product);
-        productLogRepository.save(productLog);
+        return valueMap;
+    }
+}
 
-        log.info(
-                "[AUDIT] Product {}d. ID: {}, Title: {}",
-                actualAction.name().toLowerCase(),
-                product.getId(),
-                product.getTitle()
+@Configuration
+class ProductManagementConfiguration {
+    @Primary @Bean
+    public ProductManagementService productManagementService(
+            ProductManagementServiceImpl productManagementService,
+            ProductRepository productRepository,
+            AuthenticationFacade authenticationFacade,
+            ProductLogRepository productLogRepository
+    ) {
+        return new ProductManagementServiceLogging(
+                productManagementService,
+                productRepository,
+                authenticationFacade,
+                productLogRepository
         );
-
-        return result;
     }
 }

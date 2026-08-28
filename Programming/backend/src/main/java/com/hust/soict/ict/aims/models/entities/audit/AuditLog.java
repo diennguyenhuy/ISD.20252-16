@@ -23,4 +23,6 @@ public abstract class AuditLog {
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant timestamp;
+
+    public abstract Enum<?> getAction();
 }

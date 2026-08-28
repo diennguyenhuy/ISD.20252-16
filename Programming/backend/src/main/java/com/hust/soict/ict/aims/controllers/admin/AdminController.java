@@ -40,70 +40,64 @@ public class AdminController {
     private final AdminService adminService;
 
     @GetMapping
-    public ResponseEntity<Page<UserResponse>> getUsers(@PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(userQueryService.getUsers(pageable));
+    public Page<UserResponse> getUsers(@PageableDefault(size = 20) Pageable pageable) {
+        return userQueryService.getUsers(pageable).map(UserResponse::new);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUser(@PathVariable UUID id) {
-        return ResponseEntity.ok(userQueryService.getUser(id));
+    @GetMapping("/{userId}")
+    public UserResponse getUser(@PathVariable UUID userId) {
+        return new UserResponse(userQueryService.getUser(userId));
     }
 
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
-        UserResponse created = adminService.createUser(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserResponse createUser(@Valid @RequestBody CreateUserRequest request) {
+        return new UserResponse(adminService.createUser(request));
     }
 
-    @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<Map<String, String>> deactivateUser(@PathVariable UUID id) {
-        adminService.deactivateUser(id);
-        return ResponseEntity.ok(Map.of("message", "User has been deactivated."));
+    @PatchMapping("/{userId}/deactivate")
+    public UserResponse deactivateUser(@PathVariable UUID userId) {
+        return new UserResponse(adminService.deactivateUser(userId));
     }
 
-    @PatchMapping("/{id}/activate")
-    public ResponseEntity<Map<String, String>> activateUser(@PathVariable UUID id) {
-        adminService.activateUser(id);
-        return ResponseEntity.ok(Map.of("message", "User has been activated."));
+    @PatchMapping("/{userId}/activate")
+    public UserResponse activateUser(@PathVariable UUID userId) {
+        return new UserResponse(adminService.activateUser(userId));
     }
 
-    @PatchMapping("/{id}/block")
-    public ResponseEntity<Map<String, String>> blockUser(@PathVariable UUID id) {
-        adminService.blockUser(id);
-        return ResponseEntity.ok(Map.of("message", "User has been blocked."));
+    @PatchMapping("/{userId}/block")
+    public UserResponse blockUser(@PathVariable UUID userId) {
+        return new UserResponse(adminService.blockUser(userId));
     }
 
-    @PatchMapping("/{id}/unblock")
-    public ResponseEntity<Map<String, String>> unblockUser(@PathVariable UUID id) {
-        adminService.unblockUser(id);
-        return ResponseEntity.ok(Map.of("message", "User has been unblocked."));
+    @PatchMapping("/{userId}/unblock")
+    public UserResponse unblockUser(@PathVariable UUID userId) {
+        return new UserResponse(adminService.unblockUser(userId));
     }
 
-    @PutMapping("/{id}/roles")
-    public ResponseEntity<UserResponse> assignRoles(
-            @PathVariable UUID id,
-            @RequestBody
+    @PutMapping("/{userId}/roles")
+    public UserResponse assignRoles(
+            @PathVariable UUID userId,
+            @Valid @RequestBody
             @NotEmpty
             Set<User.@NotNull Role> newRoles
     ) {
-        return ResponseEntity.ok(adminService.assignRoles(id, newRoles));
+        return new UserResponse(adminService.assignRoles(userId, newRoles));
     }
 
-    @PostMapping("/{id}/reset-password")
-    public ResponseEntity<Map<String, String>> resetPassword(@PathVariable UUID id) {
-        adminService.resetPassword(id);
-        return ResponseEntity.ok(Map.of("message",
-                "Password has been reset. A temporary password has been sent to the user's email."));
+    @PostMapping("/{userId}/reset-password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void resetPassword(@PathVariable UUID userId) {
+        adminService.resetPassword(userId);
     }
 
-    @PutMapping("/{id}/email-update")
-    public ResponseEntity<Map<String, String>> updateEmail(
-            @PathVariable UUID id,
-            @RequestBody
+    @PutMapping("/{userId}/email-update")
+    public UserResponse updateEmail(
+            @PathVariable UUID userId,
+            @RequestParam(name = "newEmail")
             @NotBlank
             String newEmail
     ) {
-        adminService.updateEmail(id, newEmail);
-        return ResponseEntity.ok(Map.of("message", "Email has been updated."));
+        return new UserResponse(adminService.updateEmail(userId, newEmail));
     }
 }

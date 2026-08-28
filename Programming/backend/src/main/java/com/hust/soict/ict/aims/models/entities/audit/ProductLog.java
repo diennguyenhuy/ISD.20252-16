@@ -40,4 +40,9 @@ public class ProductLog extends AuditLog {
         this.productTitle = product.getTitle();
         this.action = action;
     }
+
+    @Override
+    public ProductAction getAction() {
+        return action;
+    }
 }

@@ -1,7 +1,5 @@
 package com.hust.soict.ict.aims.services.ordermanagement;
 
-import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
-import com.hust.soict.ict.aims.dto.response.order.OrderMappers;
 import com.hust.soict.ict.aims.exceptions.OrderApprovalException;
 import com.hust.soict.ict.aims.exceptions.OrderNotFoundException;
 import com.hust.soict.ict.aims.models.entities.order.Order;
@@ -20,43 +18,43 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-class OrderManagementServiceImpl implements OrderQueryService, OrderRejectionService, OrderApprovalService {
+class OrderManagementServiceImpl implements OrderQueryService, OrderManagementService {
     private final OrderRepository orderRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     @Transactional(readOnly = true)
-    public Page<OrderResponse> getPendingOrders(Pageable pageable) {
-        return orderRepository.findAllByStatus(Order.Status.PENDING, pageable).map(OrderMappers::map);
+    public Page<Order> getPendingOrders(Pageable pageable) {
+        return orderRepository.findAllByStatus(Order.Status.PENDING, pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<OrderResponse> getOrders(Order.Status status, Pageable pageable) {
+    public Page<Order> getOrders(Order.Status status, Pageable pageable) {
         if (status == null) {
-            return orderRepository.findAll(pageable).map(OrderMappers::map);
+            return orderRepository.findAll(pageable);
         }
-        return orderRepository.findAllByStatus(status, pageable).map(OrderMappers::map);
+        return orderRepository.findAllByStatus(status, pageable);
     }
 
     @Override
     @Transactional
-    public OrderResponse getOrderById(UUID id) {
-        Order order = orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
-        return OrderMappers.map(order);
+    public Order getOrderById(UUID id) {
+        return orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
     }
 
     @Override
     @Transactional
-    public OrderResponse approveOrder(UUID id) throws OrderApprovalException {
+    public Order approveOrder(UUID id) throws OrderApprovalException {
         Order order = orderRepository.findByIdAndStatus(id, Order.Status.PENDING)
                 .orElseThrow(() -> new OrderNotFoundException(id, Order.Status.PENDING.name()));
 
         order.approve(this::validateOrder);
+        order.getItems().forEach(i -> i.getProduct().updateStock(i.getProduct().getStockQuantity() - i.getQuantity()));
 
         applicationEventPublisher.publishEvent(new OrderApprovalEvent(order));
 
-        return OrderMappers.map(order);
+        return order;
     }
 
     private void validateOrder(Order order) throws OrderApprovalException {
@@ -83,7 +81,7 @@ class OrderManagementServiceImpl implements OrderQueryService, OrderRejectionSer
 
     @Override
     @Transactional
-    public OrderResponse rejectOrder(UUID id) {
+    public Order rejectOrder(UUID id) {
         Order order = orderRepository.findByIdAndStatus(id, Order.Status.PENDING)
                 .orElseThrow(() -> new OrderNotFoundException(id, Order.Status.PENDING.name()));
 
@@ -91,6 +89,13 @@ class OrderManagementServiceImpl implements OrderQueryService, OrderRejectionSer
 
         applicationEventPublisher.publishEvent(new OrderRejectionEvent(order));
 
-        return OrderMappers.map(order);
+        return order;
+    }
+
+    @Override
+    public Order refundOrder(UUID id) {
+        Order order = orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
+        order.refund();
+        return order;
     }
 }

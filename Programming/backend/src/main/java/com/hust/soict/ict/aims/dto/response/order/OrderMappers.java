@@ -30,7 +30,7 @@ public final class OrderMappers {
         }
 
         return new OrderDraftResponse(
-                draft.getCheckoutId(),
+                draft.checkoutId,
                 draft.getItems().stream().map(OrderMappers::map).toList(),
                 map(draft.getDeliveryInformation()),
                 map(draft.getInvoice())

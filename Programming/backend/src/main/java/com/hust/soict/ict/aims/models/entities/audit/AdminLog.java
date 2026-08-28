@@ -14,7 +14,6 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AdminLog extends AuditLog {
-
     @Column(nullable = false, updatable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private UserAction action;
@@ -38,5 +37,10 @@ public class AdminLog extends AuditLog {
         this.affectedUserId = affectedUser.getId();
         this.affectedUsername = affectedUser.getUsername();
         this.action = action;
+    }
+
+    @Override
+    public UserAction getAction() {
+        return action;
     }
 }

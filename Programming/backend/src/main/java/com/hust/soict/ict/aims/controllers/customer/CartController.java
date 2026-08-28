@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.controllers.customer;
 
+import com.hust.soict.ict.aims.dto.response.cart.CartMapper;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.dto.response.cart.CartResponse;
 import com.hust.soict.ict.aims.services.product.CartService;
@@ -21,6 +22,7 @@ import java.util.UUID;
 @Validated
 public class CartController {
     private final CartService cartService;
+    private final CartMapper cartMapper;
 
     /**
      * GET /cart<br>
@@ -29,7 +31,7 @@ public class CartController {
      */
     @GetMapping
     public CartResponse getOrCreateCart() {
-        return cartService.getOrCreateCart();
+        return cartMapper.map(cartService.getOrCreateCart());
     }
 
     /**
@@ -45,7 +47,7 @@ public class CartController {
             @PathVariable UUID productId,
             @RequestParam(name = "quantity") @Positive int quantity
     ) throws ProductNotFoundException, IllegalArgumentException {
-        return cartService.addItem(productId, quantity);
+        return cartMapper.map(cartService.addItem(productId, quantity));
     }
 
     /**
@@ -61,7 +63,7 @@ public class CartController {
             @PathVariable UUID productId,
             @RequestParam(name = "quantity") @PositiveOrZero int quantity
     ) throws NoSuchElementException, IllegalArgumentException {
-        return cartService.updateItem(productId, quantity);
+        return cartMapper.map(cartService.updateItem(productId, quantity));
     }
 
     /**
@@ -71,10 +73,8 @@ public class CartController {
      * @return the response of cart instance
      */
     @DeleteMapping("/items/{productId}")
-    public CartResponse deleteItem(
-            @PathVariable UUID productId
-    ) {
-        return cartService.removeItem(productId);
+    public CartResponse deleteItem(@PathVariable UUID productId) {
+        return cartMapper.map(cartService.removeItem(productId));
     }
 
     /**
@@ -84,6 +84,6 @@ public class CartController {
      */
     @DeleteMapping("/items")
     public CartResponse clearCart() {
-        return cartService.clearCart();
+        return cartMapper.map(cartService.clearCart());
     }
 }

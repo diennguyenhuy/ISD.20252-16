@@ -18,15 +18,9 @@ class PaymentInitiationServiceImpl implements PaymentInitiationService {
         });
     }
 
-    public PaymentInitiation initiatePayment(String paymentMethod) throws PaymentException {
-        PaymentMethod pm;
-        try {
-            pm = PaymentMethod.valueOf(paymentMethod.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new UnsupportedPaymentMethodException(paymentMethod, e);
-        }
-
-        return paymentServices.get(pm).startPayment();
+    @Override
+    public PaymentInitiation initiatePayment(PaymentMethod paymentMethod) throws PaymentException {
+        return paymentServices.get(paymentMethod).startPayment();
     }
 
     @Override

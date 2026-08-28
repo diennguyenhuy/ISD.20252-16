@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import static com.hust.soict.ict.aims.dto.response.order.OrderMappers.*;
+
 @RestController
 @RequestMapping("/order/payment/vietqr")
 @RequiredArgsConstructor
@@ -24,7 +26,7 @@ public class VietQRPaymentController {
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody OrderResponse confirmPayment()
             throws PaymentException, IllegalStateException {
-        return vietQRPaymentService.confirmPayment();
+        return map(vietQRPaymentService.confirmPayment());
     }
 }
 

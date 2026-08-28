@@ -21,6 +21,7 @@ public abstract class AuditLogMapper<L extends AuditLog, R extends AuditLogRespo
         R response = responseSupplier.get();
         response.setId(log.getId());
         response.setTimestamp(log.getTimestamp());
+        response.setAction(log.getAction().name());
         map(log, response);
 
         return response;

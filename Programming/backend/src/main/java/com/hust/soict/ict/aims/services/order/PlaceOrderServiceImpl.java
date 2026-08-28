@@ -2,8 +2,6 @@ package com.hust.soict.ict.aims.services.order;
 
 import com.hust.soict.ict.aims.context.CartContext;
 import com.hust.soict.ict.aims.dto.request.DeliveryRequest;
-import com.hust.soict.ict.aims.dto.response.order.OrderDraftResponse;
-import com.hust.soict.ict.aims.dto.response.order.OrderMappers;
 import com.hust.soict.ict.aims.exceptions.*;
 import com.hust.soict.ict.aims.models.entities.order.*;
 import com.hust.soict.ict.aims.context.OrderDraftContext;
@@ -24,7 +22,7 @@ class PlaceOrderServiceImpl implements PlaceOrderService {
     private final CartContext cartContext;
     private final OrderDraftContext orderDraftContext;
 
-    public OrderDraftResponse placeOrder() throws EmptyCartException, NotEnoughStockException, ProductNotFoundException {
+    public Order.Draft placeOrder() throws EmptyCartException, NotEnoughStockException, ProductNotFoundException {
         log.debug("Placing order...");
         log.debug("Checking stock availability...");
         Order.Draft draftOrder = cartContext.getOrCreateCart().placeOrder(stockValidator::checkStockAvailability);
@@ -37,10 +35,10 @@ class PlaceOrderServiceImpl implements PlaceOrderService {
 
         orderDraftContext.saveDraftOrder(draftOrder);
         log.debug("Order placed successfully! New draft order has been created!");
-        return OrderMappers.map(draftOrder);
+        return draftOrder;
     }
 
-    public OrderDraftResponse submitDeliveryInformation(DeliveryRequest deliveryRequest) {
+    public Order.Draft submitDeliveryInformation(DeliveryRequest deliveryRequest) {
         log.debug("Submitting delivery request...");
         Order.Draft draftOrder = orderDraftContext.getDraftOrder();
 
@@ -60,17 +58,17 @@ class PlaceOrderServiceImpl implements PlaceOrderService {
 
         orderDraftContext.saveDraftOrder(draftOrder);
         log.debug("Delivery information successfully saved!");
-        return OrderMappers.map(draftOrder);
+        return draftOrder;
     }
 
-    public OrderDraftResponse getInvoice() {
+    public Order.Draft getInvoice() {
         log.debug("Creating invoice...");
         Order.Draft draftOrder = orderDraftContext.getDraftOrder();
         Invoice invoice = draftOrder.getInvoice();
         if (invoice == null) {
             throw new OrderNotCompleteException("Order invoice is not yet generated due to internal logical error or missing delivery info.");
         }
-        return OrderMappers.map(draftOrder);
+        return draftOrder;
     }
 
     public void cancelOrder() {

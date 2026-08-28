@@ -1,7 +1,6 @@
 package com.hust.soict.ict.aims.services.admin;
 
 import com.hust.soict.ict.aims.dto.request.CreateUserRequest;
-import com.hust.soict.ict.aims.dto.response.UserResponse;
 import com.hust.soict.ict.aims.exceptions.AccountAlreadyExistedException;
 import com.hust.soict.ict.aims.models.entities.user.User;
 import com.hust.soict.ict.aims.repositories.UserRepository;
@@ -57,21 +56,21 @@ class AdminServiceImpl implements AdminService, UserQueryService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<UserResponse> getUsers(Pageable pageable) {
-        return userRepository.findAll(pageable).map(AdminServiceImpl::map);
+    public Page<User> getUsers(Pageable pageable) {
+        return userRepository.findAll(pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public UserResponse getUser(UUID userId) {
-        return map(findUserOrThrow(userId));
+    public User getUser(UUID userId) {
+        return findUserOrThrow(userId);
     }
 
     // ───── Account Lifecycle ─────
 
     @Override
     @Transactional
-    public UserResponse createUser(CreateUserRequest request) {
+    public User createUser(CreateUserRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new AccountAlreadyExistedException("Email is already in use: " + request.email());
         }
@@ -99,50 +98,54 @@ class AdminServiceImpl implements AdminService, UserQueryService {
         applicationEventPublisher.publishEvent(new AccountCreatedEvent(user, tempPassword));
 
         log.info("Admin created new user: {} ({})", user.getUsername(), user.getEmail());
-        return map(user);
+        return user;
     }
 
     @Override
     @Transactional
-    public void deactivateUser(UUID userId) {
+    public User deactivateUser(UUID userId) {
         User user = findUserOrThrow(userId);
         user.deactivate();
         userRepository.save(user);
         log.info("Admin deactivated user: {} ({})", user.getUsername(), user.getEmail());
+        return user;
     }
 
     @Override
     @Transactional
-    public void activateUser(UUID userId) {
+    public User activateUser(UUID userId) {
         User user = findUserOrThrow(userId);
         user.activate();
         userRepository.save(user);
         log.info("Admin activated user: {} ({})", user.getUsername(), user.getEmail());
+        return user;
     }
 
     @Override
     @Transactional
-    public void blockUser(UUID userId) {
+    public User blockUser(UUID userId) {
         User user = findUserOrThrow(userId);
         user.block();
         userRepository.save(user);
         log.info("Admin blocked user: {} ({})", user.getUsername(), user.getEmail());
+        return user;
     }
 
     @Override
     @Transactional
-    public void unblockUser(UUID userId) {
+    public User unblockUser(UUID userId) {
         User user = findUserOrThrow(userId);
         user.unblock();
         userRepository.save(user);
         log.info("Admin unblocked user: {} ({})", user.getUsername(), user.getEmail());
+        return user;
     }
 
     // ───── Roles ─────
 
     @Override
     @Transactional
-    public UserResponse assignRoles(UUID userId, Set<User.Role> newRoles) {
+    public User assignRoles(UUID userId, Set<User.Role> newRoles) {
         User user = findUserOrThrow(userId);
 
         Set<User.Role> currentRoles = user.getRoles();
@@ -157,7 +160,7 @@ class AdminServiceImpl implements AdminService, UserQueryService {
 
         userRepository.save(user);
         log.info("Admin updated roles for user {} to {}", user.getUsername(), newRoles);
-        return map(user);
+        return user;
     }
 
     // ───── Password Reset ─────
@@ -186,7 +189,7 @@ class AdminServiceImpl implements AdminService, UserQueryService {
 
     @Override
     @Transactional
-    public void updateEmail(UUID userId, String newEmail) {
+    public User updateEmail(UUID userId, String newEmail) {
         if (userRepository.existsByEmail(newEmail)) {
             throw new AccountAlreadyExistedException("Email is already in use: " + newEmail);
         }
@@ -201,23 +204,10 @@ class AdminServiceImpl implements AdminService, UserQueryService {
         applicationEventPublisher.publishEvent(new EmailUpdateEvent(user, oldEmail, newEmail));
 
         log.info("Admin updated email for user: {} ({})", user.getUsername(), user.getEmail());
+        return user;
     }
 
     // ───── Helpers ─────
-
-    private static UserResponse map(User user) {
-        return new UserResponse(
-                user.getId(),
-                user.getUsername(),
-                user.getEmail(),
-                user.getRoles().stream().map(User.Role::name).collect(Collectors.toSet()),
-                user.isActive(),
-                user.isBlocked(),
-                user.isMustChangePassword(),
-                user.getCreatedAt(),
-                user.getUpdatedAt()
-        );
-    }
 
     private User findUserOrThrow(UUID userId) {
         return userRepository.findById(userId)

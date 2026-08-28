@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.controllers.customer;
 
+import com.hust.soict.ict.aims.dto.response.product.ProductMappers;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
 import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
@@ -24,6 +25,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProductCatalogueController {
     private final ProductService productService;
+    private final ProductMappers productMapper;
 
     /**
      * GET /products/random
@@ -33,7 +35,9 @@ public class ProductCatalogueController {
     @Operation(summary = "Get 20 random products")
     @GetMapping("/random")
     public List<ProductSummary> get20RandomProducts() {
-        return productService.get20RandomProducts();
+        return productService.get20RandomProducts().stream()
+                .map(productMapper::mapSummary)
+                .toList();
     }
 
     /**
@@ -55,7 +59,8 @@ public class ProductCatalogueController {
             @RequestParam(required = false) Long maxPrice,
             @PageableDefault(size = 20) Pageable pageable
     ) {
-        return productService.getProductsBy(title, category, minPrice, maxPrice, pageable);
+        return productService.getProductsBy(title, category, minPrice, maxPrice, pageable)
+                .map(productMapper::mapSummary);
     }
 
     /**
@@ -72,6 +77,6 @@ public class ProductCatalogueController {
     })
     @GetMapping("/{id}")
     public ProductDetail getProductById(@PathVariable UUID id) throws ProductNotFoundException {
-        return productService.getProductById(id);
+        return productMapper.map(productService.getProductById(id));
     }
 }

@@ -4,7 +4,10 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -24,6 +27,7 @@ public class DVD extends Product {
     private LocalDate releaseDate;
 
     @Column(length = 50)
+    @Setter
     private String genre;
 
     @Enumerated(EnumType.STRING)
@@ -32,21 +36,25 @@ public class DVD extends Product {
     private DiscType discType;
 
     @Column(nullable = false)
+    @Setter
     private String director;
 
     /// Units: minutes min
     @Column(nullable = false)
+    @Setter
     private int runtime;
 
     @Column(nullable = false)
+    @Setter
     private String studio;
 
     @Column(nullable = false, length = 50)
+    @Setter
     private String language;
 
-    @ElementCollection
-    @CollectionTable(name = "dvd_subtitles", joinColumns = @JoinColumn(name = "dvd_id"))
-    @Column(name = "subtitle", columnDefinition = "TEXT")
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "subtitles", nullable = false)
+    @Setter
     private List<String> subtitles = new ArrayList<>();
 
     public List<String> getSubtitles() {
@@ -138,23 +146,5 @@ public class DVD extends Product {
             this.subtitles = subtitles == null ? null : List.of(subtitles);
             return this;
         }
-    }
-
-    static {
-        registerUpdateCommand(UpdateCommand.Genre.class, DVD.class, (p, c) -> p.genre = c.newValue());
-        registerUpdateCommand(UpdateCommand.Director.class, DVD.class, (p, c) -> p.director = c.newValue());
-        registerUpdateCommand(UpdateCommand.Runtime.class, DVD.class, (p, c) -> p.runtime = c.newValue());
-        registerUpdateCommand(UpdateCommand.Studio.class, DVD.class, (p, c) -> p.studio = c.newValue());
-        registerUpdateCommand(UpdateCommand.Language.class, DVD.class, (p, c) -> p.language = c.newValue());
-        registerUpdateCommand(UpdateCommand.Subtitles.class, DVD.class, (p, c) -> p.subtitles = new ArrayList<>(c.newValue()));
-    }
-
-    public interface UpdateCommand<T> extends Product.UpdateCommand<T> {
-        record Genre(String newValue) implements UpdateCommand<String> {}
-        record Director(String newValue) implements UpdateCommand<String> {}
-        record Runtime(Integer newValue) implements UpdateCommand<Integer> {}
-        record Studio(String newValue) implements UpdateCommand<String> {}
-        record Language(String newValue) implements UpdateCommand<String> {}
-        record Subtitles(List<String> newValue) implements UpdateCommand<List<String>> {}
     }
 }

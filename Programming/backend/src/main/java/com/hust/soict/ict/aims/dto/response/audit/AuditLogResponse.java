@@ -11,4 +11,5 @@ import java.util.UUID;
 public abstract class AuditLogResponse {
     private UUID id;
     private Instant timestamp;
+    private String action;
 }

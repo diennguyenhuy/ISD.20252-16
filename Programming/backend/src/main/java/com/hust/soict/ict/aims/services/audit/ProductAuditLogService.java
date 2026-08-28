@@ -1,9 +1,12 @@
 package com.hust.soict.ict.aims.services.audit;
 
-import com.hust.soict.ict.aims.dto.response.audit.ProductLogResponse;
+import com.hust.soict.ict.aims.models.entities.audit.ProductLog;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface ProductAuditLogService {
-    List<ProductLogResponse> getProductAuditLogs();
+    int MAX_LOG = 100;
+    List<ProductLog> getProductAuditLogs();
+    List<ProductLog> getProductLogsByProductId(UUID productId);
 }

@@ -3,10 +3,12 @@ package com.hust.soict.ict.aims.subsystems.paypal.controller;
 import com.hust.soict.ict.aims.subsystems.exception.PaymentException;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.subsystems.paypal.service.PayPalPaymentService;
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import static com.hust.soict.ict.aims.dto.response.order.OrderMappers.map;
 
 /**
  * HTTP entry point for the PayPal (credit-card) payment use case.
@@ -32,8 +34,10 @@ public class PayPalPaymentController {
     @PostMapping("/capture")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody OrderResponse capturePayment(
-            @Valid @RequestBody PayPalCaptureRequest request) throws PaymentException {
-        return paypalPaymentService.capturePayment(request.token());
+            @RequestParam(name = "captureRequestToken")
+            @NotBlank String captureRequestToken
+    ) throws PaymentException {
+        return map(paypalPaymentService.capturePayment(captureRequestToken));
     }
 
     @PostMapping("/cancel")

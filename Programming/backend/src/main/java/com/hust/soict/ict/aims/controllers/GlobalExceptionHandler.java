@@ -55,8 +55,8 @@ public class GlobalExceptionHandler {
         return Map.ofEntries(
                 Map.entry("message", e.getMessage()),
                 Map.entry("details", Map.of(
-                        Map.entry("insufficient", e.getInsufficientQuantity()),
-                        Map.entry("missing", e.getMissingProducts())
+                        Map.entry("insufficient", e.insufficientQuantity),
+                        Map.entry("missing", e.missingProducts)
                 ))
         );
     }
@@ -67,8 +67,8 @@ public class GlobalExceptionHandler {
         return Map.ofEntries(
                 Map.entry("message", e.getMessage()),
                 Map.entry("details", Map.of(
-                        Map.entry("insufficient", e.getInsufficientQuantity()),
-                        Map.entry("missing", e.getMissingProducts())
+                        Map.entry("insufficient", e.insufficientQuantity),
+                        Map.entry("missing", e.missingProducts)
                 ))
         );
     }

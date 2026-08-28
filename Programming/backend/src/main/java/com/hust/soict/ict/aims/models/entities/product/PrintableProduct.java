@@ -3,18 +3,21 @@ package com.hust.soict.ict.aims.models.entities.product;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Immutable;
 
-@MappedSuperclass
+@Entity
+@Table(name = "printable_product")
+@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class PrintableProduct extends Product {
     @Column(nullable = false)
+    @Setter
     private String publisher;
 
     @Immutable
@@ -22,6 +25,7 @@ public abstract class PrintableProduct extends Product {
     private LocalDate publicationDate;
 
     @Column(length = 50)
+    @Setter
     private String language;
 
     protected PrintableProduct(Builder<?> builder) {
@@ -54,15 +58,5 @@ public abstract class PrintableProduct extends Product {
             this.language = language;
             return self();
         }
-    }
-
-    static {
-        registerUpdateCommand(UpdateCommand.Publisher.class, PrintableProduct.class, (p, c) -> p.publisher = c.newValue());
-        registerUpdateCommand(UpdateCommand.Language.class, PrintableProduct.class, (p, c) -> p.language = c.newValue());
-    }
-
-    public interface UpdateCommand<T> extends Product.UpdateCommand<T> {
-        record Publisher(String newValue) implements UpdateCommand<String> {}
-        record Language(String newValue) implements UpdateCommand<String> {}
     }
 }

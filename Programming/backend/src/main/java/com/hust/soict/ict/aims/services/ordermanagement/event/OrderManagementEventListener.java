@@ -27,15 +27,15 @@ class OrderManagementEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     void handle(OrderRejectionEvent event) {
-        var transaction = event.getOrder().getPaymentTransaction();
+        var transaction = event.order.getPaymentTransaction();
         if (refundService.supports(transaction.getTransactionMethod())) {
-            event.setRefundable(true);
+            event.refundable = true;
             try {
-                refundService.refund(event.getOrder().getPaymentTransaction());
-                event.getOrder().refund();
-                orderRepository.save(event.getOrder());
+                refundService.refund(event.order.getPaymentTransaction());
+                event.order.refund();
+                orderRepository.save(event.order);
             } catch (Exception e) {
-                log.error("Unable to refund order {}, order remains REJECTED", event.getOrder().getId(), e);
+                log.error("Unable to refund order {}, order remains REJECTED", event.order.getId(), e);
             }
         }
 

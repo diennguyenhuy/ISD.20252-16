@@ -1,19 +1,19 @@
 package com.hust.soict.ict.aims.models.cart;
 
 import static com.hust.soict.ict.aims.models.entities.order.Order.Draft;
+
+import com.hust.soict.ict.aims.exceptions.EmptyCartException;
+import com.hust.soict.ict.aims.exceptions.NotEnoughStockException;
 import com.hust.soict.ict.aims.models.entities.product.Product;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Consumer;
 
 @NoArgsConstructor
-public class Cart {
-    @Getter
-    private final UUID id = UUID.randomUUID();
+public class Cart implements Iterable<CartItem> {
+    public final UUID id = UUID.randomUUID();
     private final Map<UUID, CartItem> items = new LinkedHashMap<>();
 
     /**
@@ -107,8 +107,18 @@ public class Cart {
         return Collections.unmodifiableCollection(items.values());
     }
 
-    public Draft placeOrder(Consumer<Cart> stockValidator) {
-        stockValidator.accept(this);
+    public Draft placeOrder(StockValidator stockValidator) {
+        stockValidator.validate(this);
         return new Draft(this);
+    }
+
+    @Override
+    public Iterator<CartItem> iterator() {
+        return items.values().iterator();
+    }
+
+    @FunctionalInterface
+    public interface StockValidator {
+        void validate(Cart cart) throws NotEnoughStockException, EmptyCartException;
     }
 }

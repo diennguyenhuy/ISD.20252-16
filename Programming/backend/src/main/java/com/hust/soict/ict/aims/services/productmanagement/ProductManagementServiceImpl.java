@@ -1,9 +1,5 @@
 package com.hust.soict.ict.aims.services.productmanagement;
 
-import com.hust.soict.ict.aims.dto.request.AdjustStockRequest;
-import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
-import com.hust.soict.ict.aims.dto.response.product.ProductMappers;
-import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.exceptions.ExceededDeletionQuotaException;
 import com.hust.soict.ict.aims.exceptions.ProductAlreadyExistedException;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
@@ -25,33 +21,29 @@ import java.util.UUID;
 class ProductManagementServiceImpl implements ProductManagementService, ProductQueryService {
 
     private final ProductRepository productRepo;
-    private final ProductMappers productMapper;
     private final ProductFactory productFactory;
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProductSummary> getAllProductsForManager() {
+    public List<Product> getAllProductsForManager() {
         log.info("[FETCH] Fetching all products for manager dashboard.");
-        return productRepo.findAll().stream()
-                .map(productMapper::mapSummary)
-                .toList();
+        return productRepo.findAll();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ProductDetail getProductByIdForManager(UUID id) {
+    public Product getProductByIdForManager(UUID id) {
         log.info("[FETCH] Fetching product details. ID: {}", id);
-        Product product = productRepo.findById(id)
+        return productRepo.findById(id)
                 .orElseThrow(() -> {
                     log.warn("[FETCH FAILED] Product not found. ID: {}", id);
                     return new ProductNotFoundException(id);
                 });
-        return productMapper.map(product);
     }
     
     @Override
     @Transactional
-    public ProductDetail createProduct(CreateProductRequest dto) {
+    public Product createProduct(CreateProductRequest dto) {
         log.info("[CREATE] Received request to create new product. Barcode: {}", dto.getBarcode());
 
         if (productRepo.existsByBarcode(dto.getBarcode())) {
@@ -60,15 +52,15 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
         }
 
         Product product = productFactory.createProduct(dto);
-        Product savedProduct = productRepo.save(product);
+        product = productRepo.save(product);
 
-        log.info("[CREATE SUCCESS] Successfully saved new product. ID: {}", savedProduct.getId());
-        return productMapper.map(savedProduct);
+        log.info("[CREATE SUCCESS] Successfully saved new product. ID: {}", product.getId());
+        return product;
     }
 
     @Override
     @Transactional
-    public ProductDetail updateProduct(UUID id, UpdateProductRequest dto) {
+    public Product updateProduct(UUID id, UpdateProductRequest dto) {
         log.info("[UPDATE] Received request to update product. ID: {}", id);
 
         Product product = productRepo.findById(id).orElseThrow(() -> {
@@ -78,16 +70,16 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
 
         dto.getCurrentPrice().ifDefined(product::updatePrice);
 
-        Product updatedProduct = productFactory.updateProduct(product, dto);
-        Product savedProduct = productRepo.save(updatedProduct);
-        log.info("[UPDATE SUCCESS] Successfully updated product. ID: {}, Current Price: {}", savedProduct.getId(), savedProduct.getCurrentPrice());
+        product = productFactory.updateProduct(product, dto);
+        product = productRepo.save(product);
+        log.info("[UPDATE SUCCESS] Successfully updated product. ID: {}, Current Price: {}", product.getId(), product.getCurrentPrice());
 
-        return productMapper.map(savedProduct);
+        return product;
     }
 
     @Override
     @Transactional
-    public List<ProductSummary> deleteProducts(List<UUID> productIds) {
+    public List<Product> deleteProducts(List<UUID> productIds) {
         log.info("[DELETE BATCH] Received request to delete {} products.", productIds.size());
 
         java.time.Instant startOfToday = java.time.LocalDate.now()
@@ -110,13 +102,13 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
 
         log.info("[DELETE BATCH SUCCESS] Successfully processed {} products.", products.size());
 
-        return products.stream().map(productMapper::mapSummary).toList();
+        return products;
     }
 
     @Override
     @Transactional
-    public void adjustStock(UUID id, AdjustStockRequest adjustStockRequest) {
-        log.info("[ADJUST STOCK] Received request for Product ID: {}. Delta: {}, Reason: '{}'", id, adjustStockRequest.delta(), adjustStockRequest.reason());
+    public Product adjustStock(UUID id, int delta, String reason) {
+        log.info("[ADJUST STOCK] Received request for Product ID: {}. Delta: {}, Reason: '{}'", id, delta, reason);
 
         Product product = productRepo.findById(id)
                 .orElseThrow(() -> {
@@ -125,16 +117,18 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
                 });
 
 
-        int newStock = product.getStockQuantity() + adjustStockRequest.delta();
+        int newStock = product.getStockQuantity() + delta;
         product.updateStock(newStock);
 
         productRepo.save(product);
         log.info("[ADJUST STOCK SUCCESS] Successfully updated stock. ID: {}, New Stock: {}", product.getId(), product.getStockQuantity());
+
+        return product;
     }
 
     @Override
     @Transactional
-    public ProductDetail activateProduct(UUID id) {
+    public Product activateProduct(UUID id) {
         log.info("[ACTIVATE] Received request to reactivate product. ID: {}", id);
 
         Product product = productRepo.findById(id)
@@ -148,12 +142,12 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
 
         log.info("[ACTIVATE SUCCESS] Successfully reactivated product. ID: {}", id);
 
-        return productMapper.map(product);
+        return product;
     }
 
     @Override
     @Transactional
-    public ProductDetail deleteProduct(UUID id) {
+    public Product deleteProduct(UUID id) {
         log.info("[DELETE] Received request to delete product. ID: {}", id);
 
         Product product = productRepo.findById(id)
@@ -169,6 +163,6 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
 
         log.info("[DELETE SUCCESS] Successfully {} product. ID: {}", actualStatus.name().toLowerCase(), id);
 
-        return productMapper.map(product);
+        return product;
     }
 }

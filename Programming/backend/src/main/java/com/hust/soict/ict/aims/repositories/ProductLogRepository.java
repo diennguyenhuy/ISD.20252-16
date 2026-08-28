@@ -9,5 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface ProductLogRepository extends JpaRepository<ProductLog, UUID> {
-    List<ProductLog> findTop100ByOrderByTimestampDesc();
+    List<ProductLog> findByProductId(UUID productId);
 }

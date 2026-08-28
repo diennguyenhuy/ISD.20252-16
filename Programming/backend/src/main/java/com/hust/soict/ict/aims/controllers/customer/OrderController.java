@@ -4,6 +4,7 @@ import com.hust.soict.ict.aims.exceptions.*;
 import com.hust.soict.ict.aims.dto.request.DeliveryRequest;
 import com.hust.soict.ict.aims.dto.response.order.OrderDraftResponse;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
+import static com.hust.soict.ict.aims.dto.response.order.OrderMappers.*;
 import com.hust.soict.ict.aims.services.order.OrderService;
 import com.hust.soict.ict.aims.services.order.PlaceOrderService;
 import com.hust.soict.ict.aims.subsystems.PaymentInitiation;
@@ -36,7 +37,7 @@ public class OrderController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public OrderDraftResponse placeOrder() throws NotEnoughStockException, EmptyCartException, ProductNotFoundException {
-        return placeOrderService.placeOrder();
+        return map(placeOrderService.placeOrder());
     }
 
     /**
@@ -46,10 +47,8 @@ public class OrderController {
      */
     @PostMapping("/delivery")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public OrderDraftResponse submitDeliveryInformation(
-            @Valid @RequestBody DeliveryRequest deliveryRequest
-    ) {
-        return placeOrderService.submitDeliveryInformation(deliveryRequest);
+    public OrderDraftResponse submitDeliveryInformation(@Valid @RequestBody DeliveryRequest deliveryRequest) {
+        return map(placeOrderService.submitDeliveryInformation(deliveryRequest));
     }
 
     /**
@@ -57,13 +56,12 @@ public class OrderController {
      * @return response of invoice
      */
     @PostMapping("/invoice")
-    @ResponseStatus(HttpStatus.OK)
     public OrderDraftResponse getInvoice() {
-        return placeOrderService.getInvoice();
+        return map(placeOrderService.getInvoice());
     }
 
     @PostMapping("/payment/{method}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     public PaymentInitiation initiatePayment(@PathVariable String method) throws PaymentException {
         return paymentInitiationService.initiatePayment(method);
     }
@@ -83,9 +81,8 @@ public class OrderController {
      * @return a response of the order
      */
     @GetMapping("/{orderId}")
-    @ResponseStatus(HttpStatus.OK)
     public OrderResponse getOrder(@PathVariable UUID orderId) {
-        return orderService.getOrder(orderId);
+        return map(orderService.getOrder(orderId));
     }
 
     /**
@@ -95,8 +92,7 @@ public class OrderController {
      * @throws IllegalStateException if the order status cannot be set to canceled
      */
     @PostMapping("/{orderId}/cancel")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void cancelOrder(@PathVariable UUID orderId) throws OrderNotFoundException, OrderStateTransitionException {
-        orderService.cancelOrder(orderId);
+    public OrderResponse cancelOrder(@PathVariable UUID orderId) throws OrderNotFoundException, OrderStateTransitionException {
+        return map(orderService.cancelOrder(orderId));
     }
 }

@@ -8,7 +8,6 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class ProductLogResponse extends AuditLogResponse {
-    private String action;
     private UUID managerId;
     private String managerUsername;
     private UUID productId;

@@ -1,9 +1,10 @@
 package com.hust.soict.ict.aims.controllers.productmanager;
 
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
+import com.hust.soict.ict.aims.dto.response.order.OrderMappers;
+import static com.hust.soict.ict.aims.dto.response.order.OrderMappers.*;
 import com.hust.soict.ict.aims.models.entities.order.Order;
-import com.hust.soict.ict.aims.services.ordermanagement.OrderApprovalService;
-import com.hust.soict.ict.aims.services.ordermanagement.OrderRejectionService;
+import com.hust.soict.ict.aims.services.ordermanagement.OrderManagementService;
 import com.hust.soict.ict.aims.services.ordermanagement.OrderQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,8 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderManagementController {
     private final OrderQueryService orderQueryService;
-    private final OrderApprovalService orderApprovalService;
-    private final OrderRejectionService orderRejectionService;
+    private final OrderManagementService orderManagementService;
 
     @GetMapping("/pending")
     public Page<OrderResponse> getPendingOrders(
@@ -29,32 +29,37 @@ public class OrderManagementController {
                     direction = Sort.Direction.ASC
             ) Pageable pageable
     ) {
-        return orderQueryService.getPendingOrders(pageable);
+        return orderQueryService.getPendingOrders(pageable).map(OrderMappers::map);
     }
 
     @GetMapping
     public Page<OrderResponse> getOrders(
-            @RequestParam(required = false) Order.Status status,
+            @RequestParam(name = "status", required = false) Order.Status status,
             @PageableDefault(size = 30,
                     sort = "updatedAt",
                     direction = Sort.Direction.DESC
             ) Pageable pageable
     ) {
-        return orderQueryService.getOrders(status, pageable);
+        return orderQueryService.getOrders(status, pageable).map(OrderMappers::map);
     }
 
     @GetMapping("/{orderId}")
     public OrderResponse getOrderById(@PathVariable UUID orderId) {
-        return orderQueryService.getOrderById(orderId);
+        return map(orderQueryService.getOrderById(orderId));
     }
 
     @PostMapping("/{orderId}/approve")
     public OrderResponse approveOrder(@PathVariable UUID orderId) {
-        return orderApprovalService.approveOrder(orderId);
+        return map(orderManagementService.approveOrder(orderId));
     }
 
     @PostMapping("/{orderId}/reject")
     public OrderResponse rejectOrder(@PathVariable UUID orderId) {
-        return orderRejectionService.rejectOrder(orderId);
+        return map(orderManagementService.rejectOrder(orderId));
+    }
+
+    @PostMapping("/{orderId}/refund")
+    public OrderResponse refundOrder(@PathVariable UUID orderId) {
+        return map(orderManagementService.refundOrder(orderId));
     }
 }

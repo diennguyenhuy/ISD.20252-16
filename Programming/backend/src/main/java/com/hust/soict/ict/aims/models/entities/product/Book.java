@@ -4,7 +4,10 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.*;
 
@@ -18,12 +21,9 @@ public class Book extends PrintableProduct {
         HARDCOVER,
     }
 
-    @ElementCollection
-    @CollectionTable(
-            name = "book_authors",
-            joinColumns = @JoinColumn(name = "book_id")
-    )
-    @Column(name = "author")
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "authors", nullable = false)
+    @Setter
     private List<String> authors = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
@@ -31,9 +31,11 @@ public class Book extends PrintableProduct {
     @Column(nullable = false, updatable = false, length = 9)
     private CoverType coverType;
 
+    @Setter
     private Integer numberOfPages;
 
     @Column(length = 50)
+    @Setter
     private String genre;
 
     public List<String> getAuthors() {
@@ -97,17 +99,5 @@ public class Book extends PrintableProduct {
             this.genre = genre;
             return this;
         }
-    }
-
-    static {
-        registerUpdateCommand(UpdateCommand.Authors.class, Book.class, (p, c) -> p.authors = new ArrayList<>(c.newValue()));
-        registerUpdateCommand(UpdateCommand.NumberOfPages.class, Book.class, (p, c) -> p.numberOfPages = c.newValue());
-        registerUpdateCommand(UpdateCommand.Genre.class, Book.class, (p, c) -> p.genre = c.newValue());
-    }
-
-    public interface UpdateCommand<T> extends PrintableProduct.UpdateCommand<T> {
-        record Authors(List<String> newValue) implements UpdateCommand<List<String>> {}
-        record NumberOfPages(Integer newValue) implements UpdateCommand<Integer> {}
-        record Genre(String newValue) implements UpdateCommand<String> {}
     }
 }

@@ -19,19 +19,9 @@ class RefundServiceImpl implements RefundService {
         });
     }
 
+    @Override
     public boolean supports(PaymentMethod paymentMethod) {
         return refundServices.containsKey(paymentMethod);
-    }
-
-    @Override
-    public boolean supports(String paymentMethod) {
-        PaymentMethod method;
-        try {
-            method = PaymentMethod.valueOf(paymentMethod);
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-        return refundServices.containsKey(method);
     }
 
     @Override

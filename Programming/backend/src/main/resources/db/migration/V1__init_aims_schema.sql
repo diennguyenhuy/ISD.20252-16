@@ -18,54 +18,37 @@ CREATE TABLE IF NOT EXISTS product(
 	updated_at		TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS printable_product(
+    id 				    UUID PRIMARY KEY REFERENCES product(id) ON DELETE CASCADE,
+    publisher			VARCHAR(255) NOT NULL,
+    publication_date	DATE NOT NULL,
+    language			VARCHAR(50)
+);
+
 CREATE TABLE IF NOT EXISTS book(
-	id					UUID PRIMARY KEY REFERENCES product(id) ON DELETE CASCADE,
-	publisher			VARCHAR(255) NOT NULL,
-	publication_date	DATE NOT NULL,
-	language			VARCHAR(50),
-	--authors
+	id					UUID PRIMARY KEY REFERENCES printable_product(id) ON DELETE CASCADE,
+	authors             VARCHAR(255)[] NOT NULL,
 	cover_type			VARCHAR(9) NOT NULL,
 	number_of_pages		INT,
 	genre				VARCHAR(50)
 );
 
-CREATE TABLE IF NOT EXISTS book_authors(
-	book_id		UUID REFERENCES book(id) ON DELETE CASCADE,
-	author		VARCHAR(255),
-	PRIMARY KEY (book_id, author)
-);
-
 CREATE TABLE IF NOT EXISTS newspaper(
-	id						UUID PRIMARY KEY REFERENCES product(id) ON DELETE CASCADE,
-	publisher				VARCHAR(255) NOT NULL,
-	publication_date		DATE NOT NULL,
-	language				VARCHAR(50),
+	id						UUID PRIMARY KEY REFERENCES printable_product(id) ON DELETE CASCADE,
 	editor_in_chief			VARCHAR(255) NOT NULL,
 	issue_number			VARCHAR(25),
 	publication_frequency	VARCHAR(25),
 	issn					VARCHAR(9)
-	--sections
-);
-
-CREATE TABLE IF NOT EXISTS newspaper_sections(
-	newspaper_id	UUID REFERENCES newspaper(id) ON DELETE CASCADE,
-	section			VARCHAR(50),
-	PRIMARY KEY (newspaper_id, section)
+	sections                VARCHAR(50)[]
 );
 
 CREATE TABLE IF NOT EXISTS cd(
 	id 				UUID PRIMARY KEY REFERENCES product(id) ON DELETE CASCADE,
 	release_date	DATE,
 	genre			VARCHAR(50) NOT NULL,
-	--artists
+	artists         VARCHAR(255)[] NOT NULL,
 	record_label	VARCHAR(255) NOT NULL
 	--tracks
-);
-
-CREATE TABLE IF NOT EXISTS cd_artists(
-	cd_id		UUID REFERENCES cd(id) ON DELETE CASCADE,
-	artist		VARCHAR(255),
-	PRIMARY KEY (cd_id, artist)
 );
 
 CREATE TABLE IF NOT EXISTS cd_tracks(
@@ -85,13 +68,7 @@ CREATE TABLE IF NOT EXISTS dvd(
 	runtime			INT NOT NULL, --minutes
 	studio			VARCHAR(255) NOT NULL,
 	language		VARCHAR(50) NOT NULL
-	--subtitles		
-);
-
-CREATE TABLE IF NOT EXISTS dvd_subtitles(
-	dvd_id		UUID REFERENCES dvd(id) ON DELETE CASCADE,
-	subtitle	TEXT,
-	PRIMARY KEY (dvd_id, subtitle)
+	subtitles		TEXT[] NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "order"(
@@ -202,4 +179,13 @@ CREATE TABLE IF NOT EXISTS admin_log(
     affected_user_id	UUID NOT NULL,
     affected_username   VARCHAR(255) NOT NULL,
     timestamp			TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS order_log(
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    action              VARCHAR(20) NOT NULL,
+    manager_id          UUID NOT NULL,
+    manager_username    VARCHAR(255) NOT NULL,
+    order_id            UUID NOT NULL,
+    timestamp           TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

@@ -2,8 +2,6 @@ package com.hust.soict.ict.aims.services.product;
 
 import com.hust.soict.ict.aims.dto.response.product.ProductMappers;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
-import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
-import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.models.entities.product.Product;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,30 +19,25 @@ import java.util.UUID;
 class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
-    private final ProductMappers productMapper;
-
     @Override
     @Transactional(readOnly = true)
-    public List<ProductSummary> get20RandomProducts() {
-        return productRepository.find20RandomActiveProducts(PageRequest.of(0, 20)).stream()
-                .map(productMapper::mapSummary).toList();
+    public List<Product> get20RandomProducts() {
+        return productRepository.find20RandomActiveProducts(PageRequest.of(0, 20));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ProductDetail getProductById(UUID productId) throws ProductNotFoundException {
-        Product product = productRepository.findByIdAndStatus(productId, Product.Status.ACTIVE)
+    public Product getProductById(UUID productId) throws ProductNotFoundException {
+        return productRepository.findByIdAndStatus(productId, Product.Status.ACTIVE)
                 .orElseThrow(() -> new ProductNotFoundException(productId));
-        return productMapper.map(product);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ProductSummary> getProductsBy(String title, String category, Long minPrice, Long maxPrice, Pageable pageable) {
+    public Page<Product> getProductsBy(String title, String category, Long minPrice, Long maxPrice, Pageable pageable) {
         String reqTitle = title == null ? null : "%" + title.toLowerCase() + "%";
         String reqCategory = category == null ? null : "%" + category.toLowerCase() + "%";
 
-        return productRepository.searchActiveProductsBy(reqTitle, reqCategory, minPrice, maxPrice, pageable)
-                .map(productMapper::mapSummary);
+        return productRepository.searchActiveProductsBy(reqTitle, reqCategory, minPrice, maxPrice, pageable);
     }
 }

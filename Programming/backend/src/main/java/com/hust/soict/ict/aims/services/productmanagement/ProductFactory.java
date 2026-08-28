@@ -13,11 +13,11 @@ import java.util.stream.Collectors;
 @Component
 class ProductFactory {
     private final Map<Class<? extends CreateProductRequest>, ProductCreator<?, ?, ?>> productCreators;
-    private final Map<Class<? extends UpdateProductRequest>, ProductUpdater<?, ?, ?>> productUpdaters;
+    private final Map<Class<? extends UpdateProductRequest>, ProductUpdater<?, ?>> productUpdaters;
 
     public ProductFactory(
             List<ProductCreator<?, ?, ?>> productCreators,
-            List<ProductUpdater<?, ?, ?>> productUpdaters
+            List<ProductUpdater<?, ?>> productUpdaters
     ) {
         this.productCreators = productCreators.stream()
                 .collect(Collectors.toMap(
@@ -39,9 +39,9 @@ class ProductFactory {
     }
 
     @SuppressWarnings("unchecked")
-    <P extends Product, UR extends UpdateProductRequest, UC extends Product.UpdateCommand<?>>
-    P updateProduct(P existingProduct, UR request) {
-        ProductUpdater<P, UR, UC> updater = (ProductUpdater<P, UR, UC>) this.productUpdaters.get(request.getClass());
+    <P extends Product, U extends UpdateProductRequest>
+    P updateProduct(P existingProduct, U request) {
+        ProductUpdater<P, U> updater = (ProductUpdater<P, U>) this.productUpdaters.get(request.getClass());
         return updater.update(existingProduct, request);
     }
 }

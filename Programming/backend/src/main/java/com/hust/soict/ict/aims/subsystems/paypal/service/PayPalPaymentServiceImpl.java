@@ -3,12 +3,10 @@ package com.hust.soict.ict.aims.subsystems.paypal.service;
 import com.hust.soict.ict.aims.context.OrderDraftContext;
 import com.hust.soict.ict.aims.exceptions.OrderNotPlacedException;
 import com.hust.soict.ict.aims.subsystems.exception.PaymentException;
-import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 import com.hust.soict.ict.aims.services.order.OrderFinalization;
 import com.hust.soict.ict.aims.services.order.PlaceOrderService;
-import com.hust.soict.ict.aims.subsystems.PaymentInitiation;
 import com.hust.soict.ict.aims.subsystems.PaymentMethod;
 import com.hust.soict.ict.aims.subsystems.PaymentService;
 import com.hust.soict.ict.aims.subsystems.paypal.PayPalRedirectGateway;
@@ -48,12 +46,12 @@ class PayPalPaymentServiceImpl extends PaymentService implements PayPalPaymentSe
      * approval URL the frontend must open.
      */
     @Override
-    protected PaymentInitiation startPayment() throws PaymentException {
+    protected PayPalPaymentInitiation startPayment() throws PaymentException {
         Order.Draft order = currentOrder();
-        PayPalPaymentInitiation initiation = paymentProvider.createPayment(order.getCheckoutId().toString(), order.getTotalAmount());
+        PayPalPaymentInitiation initiation = paymentProvider.createPayment(order.checkoutId.toString(), order.getTotalAmount());
 
         log.info("[PaypalPaymentService] PayPal order {} created for AIMS order {}",
-                initiation.providerOrderId(), order.getCheckoutId());
+                initiation.providerOrderId(), order.checkoutId);
 
         return initiation;
     }
@@ -65,7 +63,7 @@ class PayPalPaymentServiceImpl extends PaymentService implements PayPalPaymentSe
      * @param providerOrderId the PayPal token returned to the frontend on redirect
      */
     @Override
-    public OrderResponse capturePayment(String providerOrderId) throws PaymentException {
+    public Order capturePayment(String providerOrderId) throws PaymentException {
         Order.Draft order = currentOrder();
 
         PayPalPaymentCapture capture = paymentProvider.capturePayment(providerOrderId);
@@ -76,12 +74,12 @@ class PayPalPaymentServiceImpl extends PaymentService implements PayPalPaymentSe
 
         // Defence in depth: the captured order must reference THIS draft order, so a
         // forged/leaked token cannot be used to finalize someone else's order.
-        if (!order.getCheckoutId().toString().equals(capture.referenceId())) {
+        if (!order.checkoutId.toString().equals(capture.referenceId())) {
             throw new PaymentException("Captured PayPal payment does not belong to the current order.");
         }
 
         log.info("[PaypalPaymentService] PayPal capture {} COMPLETED — finalizing order {}",
-                capture.captureId(), order.getCheckoutId());
+                capture.captureId(), order.checkoutId);
 
         // Crucial integration rule: persist the order + send confirmation email.
         // The "PAYPAL-<captureId>" content is later parsed back in refund().
@@ -97,7 +95,7 @@ class PayPalPaymentServiceImpl extends PaymentService implements PayPalPaymentSe
         try {
             Order.Draft order = currentOrder();
             log.info("[PaypalPaymentService] PayPal payment cancelled for draft order {} — draft kept for retry",
-                    order.getCheckoutId());
+                    order.checkoutId);
         } catch (OrderNotPlacedException e) {
             log.warn("[PaypalPaymentService] Cancel received but no draft order is present in the session");
         }

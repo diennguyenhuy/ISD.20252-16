@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.models.entities.order;
 
+import com.hust.soict.ict.aims.exceptions.OrderApprovalException;
 import com.hust.soict.ict.aims.exceptions.OrderNotCompleteException;
 import com.hust.soict.ict.aims.exceptions.OrderStateTransitionException;
 import com.hust.soict.ict.aims.models.cart.Cart;
@@ -9,7 +10,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Consumer;
 
 @Entity
 @Table(name = "\"order\"")
@@ -41,7 +41,7 @@ import java.util.function.Consumer;
 })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Order extends VersionedEntity {
+public class Order extends VersionedEntity implements Iterable<OrderItem> {
     public enum Status {
         DRAFT,
         PENDING,
@@ -98,18 +98,16 @@ public class Order extends VersionedEntity {
     }
 
     @Transient
-    private long totalPriceWithoutVAT;
+    public long getTotalPriceWithoutVAT() {
+        return items.stream().mapToLong(OrderItem::getItemTotalPrice).sum();
+    }
     @Transient
-    private long totalPriceWithVAT;
-
-    @Transient
-    public Long getTotalAmount() {
-        return invoice.getTotalAmount();
+    public long getTotalPriceWithVAT() {
+        return getTotalPriceWithoutVAT() * 110 / 100;
     }
 
-    public void approve(Consumer<Order> orderValidator) {
-        orderValidator.accept(this);
-        items.forEach(i -> i.getProduct().updateStock(i.getProduct().getStockQuantity() - i.getQuantity()));
+    public void approve(ApprovalValidator orderValidator) {
+        orderValidator.validate(this);
         changeStatus(Status.APPROVED);
     }
     public void reject() {
@@ -127,20 +125,22 @@ public class Order extends VersionedEntity {
         this.status = Status.DRAFT;
         this.totalItemCount = items.size();
         this.totalWeight = items.stream().map(OrderItem::getItemTotalWeight).reduce(BigDecimal.ZERO, BigDecimal::add);
-        this.totalPriceWithoutVAT = items.stream().mapToLong(OrderItem::getItemTotalPrice).sum();
-        this.totalPriceWithVAT = this.totalPriceWithoutVAT * 110 / 100;
     }
 
-    public static class Draft {
+    @Override
+    public Iterator<OrderItem> iterator() {
+        return items.iterator();
+    }
+
+    public static class Draft implements Iterable<OrderItem> {
         private final Order order;
-        @Getter
-        private final UUID checkoutId;
+        public final UUID checkoutId;
         @Getter
         private Long deliveryFee;
 
         public Draft(Cart cart) {
             this.order = new Order(cart);
-            this.checkoutId = cart.getId();
+            this.checkoutId = cart.id;
         }
 
         public void provideDeliveryInformation(
@@ -218,5 +218,15 @@ public class Order extends VersionedEntity {
         public Long getTotalAmount() {
             return deliveryFee + getTotalPriceWithVAT();
         }
+
+        @Override
+        public Iterator<OrderItem> iterator() {
+            return getItems().iterator();
+        }
+    }
+
+    @FunctionalInterface
+    public interface ApprovalValidator {
+        void validate(Order order) throws OrderApprovalException;
     }
 }

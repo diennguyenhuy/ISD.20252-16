@@ -1,9 +1,12 @@
 package com.hust.soict.ict.aims.services.audit;
 
-import com.hust.soict.ict.aims.dto.response.audit.AdminLogResponse;
+import com.hust.soict.ict.aims.models.entities.audit.AdminLog;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface AdminAuditLogService {
-    List<AdminLogResponse> getAdminAuditLogs();
+    int MAX_LOG = 100;
+    List<AdminLog> getAdminAuditLogs();
+    List<AdminLog> getAdminLogByUser(UUID userId);
 }

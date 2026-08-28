@@ -5,13 +5,14 @@ import com.hust.soict.ict.aims.models.entities.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Immutable;
 
 import java.util.*;
 
-@Entity
+@Immutable @Entity
 @Table(name = "product_update_log")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ProductUpdateLog extends ProductLog {
+public class ProductUpdateLog extends ProductLog implements Iterable<ProductEditDetail> {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "product_update_detail", joinColumns = @JoinColumn(name = "log_id"))
     @OrderColumn(name = "field_number")
@@ -26,25 +27,17 @@ public class ProductUpdateLog extends ProductLog {
         return ProductAction.UPDATE;
     }
 
-    public ProductUpdateLog(
+    ProductUpdateLog(
             User manager,
             Product product,
-            Set<String> requestedFieldNames,
-            Map<String, ?> oldValueMap,
-            Map<String, ?> newValueMap
+            List<ProductEditDetail> details
     ) {
         super(manager, product, ProductAction.UPDATE);
-        requestedFieldNames.forEach(f -> {
-            Object oldValue = oldValueMap.get(f);
-            Object newValue = newValueMap.get(f);
+        this.details = new ArrayList<>(details);
+    }
 
-            if (!Objects.equals(oldValue, newValue)) {
-                details.add(new ProductEditDetail(
-                        f,
-                        Objects.toString(oldValue),
-                        Objects.toString(newValue)
-                ));
-            }
-        });
+    @Override
+    public Iterator<ProductEditDetail> iterator() {
+        return details.iterator();
     }
 }

@@ -4,21 +4,17 @@ import com.hust.soict.ict.aims.dto.request.UpdateNewspaperRequest;
 import com.hust.soict.ict.aims.models.entities.product.Newspaper;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Component
-class NewspaperUpdater extends PrintableProductUpdater<Newspaper, UpdateNewspaperRequest, Newspaper.UpdateCommand<?>> {
+class NewspaperUpdater extends PrintableProductUpdater<Newspaper, UpdateNewspaperRequest> {
 
     NewspaperUpdater() {
-        super(UpdateNewspaperRequest.class, request -> {
-            List<Newspaper.UpdateCommand<?>> commands = new ArrayList<>();
+        super(UpdateNewspaperRequest.class);
+    }
 
-            request.getEditorInChief().ifDefined(editorInChief -> commands.add(new Newspaper.UpdateCommand.EditorInChief(editorInChief)));
-            request.getPublicationFrequency().ifDefined(pf -> commands.add(new Newspaper.UpdateCommand.PublicationFrequency(pf)));
-            request.getSections().ifDefined(sections -> commands.add(new Newspaper.UpdateCommand.Sections(sections)));
-
-            return commands;
-        });
+    @Override
+    protected void updatePrintableProduct(Newspaper product, UpdateNewspaperRequest request) {
+        request.getEditorInChief().ifDefined(product::setEditorInChief);
+        request.getPublicationFrequency().ifDefined(product::setPublicationFrequency);
+        request.getSections().ifDefined(product::setSections);
     }
 }

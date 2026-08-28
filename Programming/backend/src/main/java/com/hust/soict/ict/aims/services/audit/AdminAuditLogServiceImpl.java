@@ -9,19 +9,26 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 class AdminAuditLogServiceImpl implements AdminAuditLogService {
     private final AdminLogRepository adminLogRepository;
-    private final AdminLogMapper mapper;
 
     @Override
-    public List<AdminLogResponse> getAdminAuditLogs() {
+    public List<AdminLog> getAdminAuditLogs() {
         return adminLogRepository.findAll().stream()
                 .sorted(Comparator.comparing(AdminLog::getTimestamp).reversed())
-                .limit(100)
-                .map(mapper::map)
+                .limit(MAX_LOG)
+                .toList();
+    }
+
+    @Override
+    public List<AdminLog> getAdminLogByUser(UUID userId) {
+        return adminLogRepository.findAllByAdminId(userId).stream()
+                .sorted(Comparator.comparing(AdminLog::getTimestamp).reversed())
+                .limit(MAX_LOG)
                 .toList();
     }
 }

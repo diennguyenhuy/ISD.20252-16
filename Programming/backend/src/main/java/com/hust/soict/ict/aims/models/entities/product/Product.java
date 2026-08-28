@@ -22,28 +22,35 @@ public abstract class Product extends VersionedEntity {
     }
 
     @Column(nullable = false)
+    @Setter
     private String title;
 
     @Column(nullable = false, length = 50)
+    @Setter
     private String category;
 
     @Column(columnDefinition = "TEXT")
+    @Setter
     private String description;
 
     /// Unit: centimeters cm
     @Column(nullable = false, precision = 10, scale = 2)
+    @Setter
     private BigDecimal height;
 
     /// Unit: centimeters cm
     @Column(nullable = false, precision = 10, scale = 2)
+    @Setter
     private BigDecimal width;
 
     /// Unit: centimeters cm
     @Column(nullable = false, precision = 10, scale = 2)
+    @Setter
     private BigDecimal length;
 
     ///Unit: kilograms kg
     @Column(nullable = false, precision = 10, scale = 3)
+    @Setter
     private BigDecimal weight;
 
     @Immutable
@@ -65,6 +72,7 @@ public abstract class Product extends VersionedEntity {
     private Status status = Status.ACTIVE;
 
     @Column(name = "image_url", length = 2048)
+    @Setter
     private String imageURL;
 
     public static final int MIN_PRICE_RELATIVE_PERCENTAGE = 30;
@@ -221,45 +229,5 @@ public abstract class Product extends VersionedEntity {
             this.imageURL = imageURL;
             return self();
         }
-    }
-
-    public final void update(UpdateCommand<?> command) {
-        updateCommands.get(command.getClass()).accept(this, command);
-    }
-
-    private static final Map<
-            Class<? extends UpdateCommand<?>>,
-            BiConsumer<Product, UpdateCommand<?>>
-            > updateCommands = new HashMap<>();
-    protected static <C extends UpdateCommand<?>, P extends Product>
-    void registerUpdateCommand(
-            Class<C> commandType,
-            Class<P> productType,
-            BiConsumer<P, C> consumer
-    ) {
-        updateCommands.put(commandType, (p, c) -> consumer.accept(productType.cast(p), commandType.cast(c)));
-    }
-    static {
-        registerUpdateCommand(UpdateCommand.Title.class, Product.class, (p, c) -> p.title = c.newValue());
-        registerUpdateCommand(UpdateCommand.Category.class, Product.class, (p, c) -> p.category = c.newValue());
-        registerUpdateCommand(UpdateCommand.Description.class, Product.class, (p, c) -> p.description = c.newValue());
-        registerUpdateCommand(UpdateCommand.Height.class, Product.class, (p, c) -> p.height = c.newValue());
-        registerUpdateCommand(UpdateCommand.Width.class, Product.class, (p, c) -> p.width = c.newValue());
-        registerUpdateCommand(UpdateCommand.Length.class, Product.class, (p, c) -> p.length = c.newValue());
-        registerUpdateCommand(UpdateCommand.Weight.class, Product.class, (p, c) -> p.weight = c.newValue());
-        registerUpdateCommand(UpdateCommand.ImageUrl.class, Product.class, (p, c) -> p.imageURL = c.newValue());
-    }
-
-    public interface UpdateCommand<T> {
-        T newValue();
-
-        record Title(String newValue) implements UpdateCommand<String> {}
-        record Category(String newValue) implements UpdateCommand<String> {}
-        record Description(String newValue) implements UpdateCommand<String> {}
-        record Height(BigDecimal newValue) implements UpdateCommand<BigDecimal> {}
-        record Width(BigDecimal newValue) implements UpdateCommand<BigDecimal> {}
-        record Length(BigDecimal newValue) implements UpdateCommand<BigDecimal> {}
-        record Weight(BigDecimal newValue) implements UpdateCommand<BigDecimal> {}
-        record ImageUrl(String newValue) implements UpdateCommand<String> {}
     }
 }

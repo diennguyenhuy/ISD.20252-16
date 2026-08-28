@@ -4,6 +4,7 @@ import com.hust.soict.ict.aims.dto.request.AdjustStockRequest;
 import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
 import com.hust.soict.ict.aims.dto.request.UpdateProductRequest;
 import com.hust.soict.ict.aims.dto.response.product.ProductDetail;
+import com.hust.soict.ict.aims.dto.response.product.ProductMappers;
 import com.hust.soict.ict.aims.dto.response.product.ProductSummary;
 import com.hust.soict.ict.aims.services.productmanagement.ProductManagementService;
 import com.hust.soict.ict.aims.services.productmanagement.ProductQueryService;
@@ -26,30 +27,33 @@ public class ProductManagementController {
 
     private final ProductManagementService productManagementService;
     private final ProductQueryService productQueryService;
+    private final ProductMappers productMapper;
 
     @GetMapping
     public List<ProductSummary> getAllProducts() {
-        return productQueryService.getAllProductsForManager();
+        return productQueryService.getAllProductsForManager().stream()
+                .map(productMapper::mapSummary)
+                .toList();
     }
 
     @GetMapping("/{id}")
     public ProductDetail getProductById(@PathVariable UUID id) {
-        return productQueryService.getProductByIdForManager(id);
+        return productMapper.map(productQueryService.getProductByIdForManager(id));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ProductDetail createProduct(@Valid @RequestBody CreateProductRequest request) {
-        return productManagementService.createProduct(request);
+        return productMapper.map(productManagementService.createProduct(request));
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public ProductDetail updateProduct(
             @PathVariable UUID id,
-            @RequestBody @Valid UpdateProductRequest request
+            @Valid @RequestBody UpdateProductRequest request
     ) {
-        return productManagementService.updateProduct(id, request);
+        return productMapper.map(productManagementService.updateProduct(id, request));
     }
 
     @DeleteMapping
@@ -63,21 +67,26 @@ public class ProductManagementController {
             )
             List<@NotNull(message = "Each ID must not be null") UUID> productIds
     ) {
-        return productManagementService.deleteProducts(productIds);
+        return productManagementService.deleteProducts(productIds).stream()
+                .map(productMapper::mapSummary)
+                .toList();
     }
 
     @PostMapping("/{id}/stock")
-    public void adjustStock(@PathVariable UUID id, @Valid @RequestBody AdjustStockRequest request) {
-        productManagementService.adjustStock(id, request);
+    public ProductDetail adjustStock(
+            @PathVariable UUID id,
+            @Valid @RequestBody AdjustStockRequest request
+    ) {
+        return productMapper.map(productManagementService.adjustStock(id, request.delta(), request.reason()));
     }
 
     @PostMapping("/{id}/activate")
     public ProductDetail activateProduct(@PathVariable UUID id) {
-        return productManagementService.activateProduct(id);
+        return productMapper.map(productManagementService.activateProduct(id));
     }
 
     @DeleteMapping("/{id}")
     public ProductDetail deleteProduct(@PathVariable UUID id) {
-        return productManagementService.deleteProduct(id);
+        return productMapper.map(productManagementService.deleteProduct(id));
     }
 }

@@ -4,7 +4,10 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -19,17 +22,16 @@ public class CD extends Product {
     private LocalDate releaseDate;
 
     @Column(nullable = false, length = 50)
+    @Setter
     private String genre;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "cd_artists",
-            joinColumns = @JoinColumn(name = "cd_id")
-    )
-    @Column(name = "artist")
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(name = "artists", nullable = false)
+    @Setter
     private List<String> artists = new ArrayList<>();
 
     @Column(nullable = false)
+    @Setter
     private String recordLabel;
 
     @ElementCollection
@@ -38,6 +40,7 @@ public class CD extends Product {
             joinColumns = @JoinColumn(name = "cd_id")
     )
     @OrderColumn(name = "track_number")
+    @Setter
     private List<Track> tracks = new ArrayList<>();
 
     public List<String> getArtists() {
@@ -112,19 +115,5 @@ public class CD extends Product {
             this.tracks = tracks == null ? null : List.of(tracks);
             return this;
         }
-    }
-
-    static {
-        registerUpdateCommand(UpdateCommand.Genre.class, CD.class, (p, c) -> p.genre = c.newValue());
-        registerUpdateCommand(UpdateCommand.Artists.class, CD.class, (p, c) -> p.artists = new ArrayList<>(c.newValue()));
-        registerUpdateCommand(UpdateCommand.RecordLabel.class, CD.class, (p, c) -> p.recordLabel = c.newValue());
-        registerUpdateCommand(UpdateCommand.Tracks.class, CD.class, (p, c) -> p.tracks = new ArrayList<>(c.newValue()));
-    }
-
-    public interface UpdateCommand<T> extends Product.UpdateCommand<T> {
-        record Genre(String newValue) implements UpdateCommand<String> {}
-        record Artists(List<String> newValue) implements UpdateCommand<List<String>> {}
-        record RecordLabel(String newValue) implements UpdateCommand<String> {}
-        record Tracks(List<Track> newValue) implements UpdateCommand<List<Track>> {}
     }
 }

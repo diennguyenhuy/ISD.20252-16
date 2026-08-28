@@ -12,7 +12,6 @@ public abstract class AbstractProductLogMapper<L extends ProductLog, R extends P
 
     @Override
     protected final void map(L log, R response) {
-        response.setAction(log.getAction().name());
         response.setManagerId(log.getManagerId());
         response.setProductId(log.getProductId());
         response.setProductTitle(log.getProductTitle());

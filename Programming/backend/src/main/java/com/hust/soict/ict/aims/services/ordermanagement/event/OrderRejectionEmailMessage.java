@@ -109,7 +109,7 @@ class OrderRejectionEmailMessage implements EmailMessage<OrderRejectionEvent> {
 
         @Override
         public OrderRejectionEmailMessage createMessage(OrderRejectionEvent payload) {
-            return new OrderRejectionEmailMessage(payload.getOrder(), frontendUrl, payload.isRefundable());
+            return new OrderRejectionEmailMessage(payload.order, frontendUrl, payload.refundable);
         }
     }
 }
