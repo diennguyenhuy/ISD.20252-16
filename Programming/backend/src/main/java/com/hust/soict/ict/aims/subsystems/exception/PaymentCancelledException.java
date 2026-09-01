@@ -3,13 +3,13 @@ package com.hust.soict.ict.aims.subsystems.exception;
 /**
  * Exception thrown when user cancels the payment
  */
-public class UserCancelledException extends PaymentException {
+public class PaymentCancelledException extends PaymentException {
     
-    public UserCancelledException(String message) {
+    public PaymentCancelledException(String message) {
         super(message);
     }
     
-    public UserCancelledException(String message, Throwable cause) {
+    public PaymentCancelledException(String message, Throwable cause) {
         super(message, cause);
     }
 }

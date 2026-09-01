@@ -7,8 +7,10 @@ import com.hust.soict.ict.aims.dto.request.CreateProductRequest;
 import com.hust.soict.ict.aims.dto.request.UpdateProductRequest;
 import com.hust.soict.ict.aims.models.entities.product.*;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
+import com.hust.soict.ict.aims.services.productmanagement.log.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,7 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
 
     private final ProductRepository productRepo;
     private final ProductFactory productFactory;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     @Transactional(readOnly = true)
@@ -55,11 +58,13 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
         product = productRepo.save(product);
 
         log.info("[CREATE SUCCESS] Successfully saved new product. ID: {}", product.getId());
+        applicationEventPublisher.publishEvent(new ProductAddedEvent(product));
         return product;
     }
 
     @Override
     @Transactional
+    @AuditUpdate
     public Product updateProduct(UUID id, UpdateProductRequest dto) {
         log.info("[UPDATE] Received request to update product. ID: {}", id);
 
@@ -101,6 +106,7 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
         products.forEach(Product::delete);
 
         log.info("[DELETE BATCH SUCCESS] Successfully processed {} products.", products.size());
+        applicationEventPublisher.publishEvent(new ProductsDeletedEvent(products));
 
         return products;
     }
@@ -116,12 +122,13 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
                     return new ProductNotFoundException(id);
                 });
 
-
-        int newStock = product.getStockQuantity() + delta;
+        int oldStock = product.getStockQuantity();
+        int newStock = oldStock + delta;
         product.updateStock(newStock);
 
         productRepo.save(product);
         log.info("[ADJUST STOCK SUCCESS] Successfully updated stock. ID: {}, New Stock: {}", product.getId(), product.getStockQuantity());
+        applicationEventPublisher.publishEvent(new ProductStockAdjustEvent(product, oldStock, newStock, reason));
 
         return product;
     }
@@ -141,6 +148,7 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
         product = productRepo.save(product);
 
         log.info("[ACTIVATE SUCCESS] Successfully reactivated product. ID: {}", id);
+        applicationEventPublisher.publishEvent(new ProductReactivatedEvent(product));
 
         return product;
     }
@@ -162,6 +170,7 @@ class ProductManagementServiceImpl implements ProductManagementService, ProductQ
         Product.Status actualStatus = product.getStatus();
 
         log.info("[DELETE SUCCESS] Successfully {} product. ID: {}", actualStatus.name().toLowerCase(), id);
+        applicationEventPublisher.publishEvent(new ProductDeletedEvent(product));
 
         return product;
     }

@@ -1,12 +1,11 @@
 package com.hust.soict.ict.aims.services.ordermanagement;
 
-import com.hust.soict.ict.aims.exceptions.OrderApprovalException;
-import com.hust.soict.ict.aims.exceptions.OrderNotFoundException;
+import com.hust.soict.ict.aims.exceptions.*;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.product.Product;
 import com.hust.soict.ict.aims.repositories.OrderRepository;
-import com.hust.soict.ict.aims.services.ordermanagement.event.OrderApprovalEvent;
-import com.hust.soict.ict.aims.services.ordermanagement.event.OrderRejectionEvent;
+import com.hust.soict.ict.aims.services.ordermanagement.event.*;
+import com.hust.soict.ict.aims.subsystems.RefundService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -20,6 +19,7 @@ import java.util.*;
 @RequiredArgsConstructor
 class OrderManagementServiceImpl implements OrderQueryService, OrderManagementService {
     private final OrderRepository orderRepository;
+    private final RefundService refundService;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
@@ -45,7 +45,7 @@ class OrderManagementServiceImpl implements OrderQueryService, OrderManagementSe
 
     @Override
     @Transactional
-    public Order approveOrder(UUID id) throws OrderApprovalException {
+    public Order approveOrder(UUID id) throws OrderApprovalException, OrderStateTransitionException {
         Order order = orderRepository.findByIdAndStatus(id, Order.Status.PENDING)
                 .orElseThrow(() -> new OrderNotFoundException(id, Order.Status.PENDING.name()));
 
@@ -81,21 +81,31 @@ class OrderManagementServiceImpl implements OrderQueryService, OrderManagementSe
 
     @Override
     @Transactional
-    public Order rejectOrder(UUID id) {
+    public Order rejectOrder(UUID id) throws OrderRejectionException {
         Order order = orderRepository.findByIdAndStatus(id, Order.Status.PENDING)
                 .orElseThrow(() -> new OrderNotFoundException(id, Order.Status.PENDING.name()));
+        boolean refundable = refundService.supports(order.getPaymentTransaction().getTransactionMethod());
+        try {
+            order.reject(refundService::refund);
+        } catch (OrderStateTransitionException e) {
+            throw new OrderRejectionException(order.getId(), e);
+        }
 
-        order.reject();
-
-        applicationEventPublisher.publishEvent(new OrderRejectionEvent(order));
+        applicationEventPublisher.publishEvent(new OrderRejectionEvent(order, refundable));
 
         return order;
     }
 
     @Override
-    public Order refundOrder(UUID id) {
+    public Order refundOrder(UUID id) throws OrderRefundException {
         Order order = orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
-        order.refund();
+        try {
+            order.refund();
+        } catch (OrderStateTransitionException e) {
+            throw new OrderRefundException(order.getId(), e);
+        }
+
+        applicationEventPublisher.publishEvent(new OrderRefundEvent(order));
         return order;
     }
 }

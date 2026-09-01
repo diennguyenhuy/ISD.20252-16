@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.services.order;
 
+import com.hust.soict.ict.aims.exceptions.OrderCancellationException;
 import com.hust.soict.ict.aims.exceptions.OrderNotCompleteException;
 import com.hust.soict.ict.aims.exceptions.OrderNotFoundException;
 import com.hust.soict.ict.aims.exceptions.OrderStateTransitionException;
@@ -32,16 +33,21 @@ class OrderServiceImpl implements OrderService, OrderFinalization {
 
     @Override
     @Transactional
-    public Order cancelOrder(UUID orderId) throws OrderStateTransitionException, OrderNotFoundException {
+    public Order cancelOrder(UUID orderId) throws OrderCancellationException, OrderNotFoundException {
         log.debug("Canceling order #{}...", orderId);
         Order order = orderRepository.findByIdAndStatus(orderId, Order.Status.PENDING)
                 .orElseThrow(() -> new OrderNotFoundException(orderId, Order.Status.PENDING.name()));
-        order.cancel();
+        boolean refundable = refundService.supports(order.getPaymentTransaction().getTransactionMethod());
+        try {
+            order.cancel(refundService::refund);
+        } catch (OrderStateTransitionException e) {
+            throw new OrderCancellationException(orderId, e);
+        }
 
         log.debug("Order #{} successfully canceled!", orderId);
         orderRepository.save(order);
 
-        applicationEventPublisher.publishEvent(new OrderCancelEvent(order));
+        applicationEventPublisher.publishEvent(new OrderCancelEvent(order, refundable));
 
         return order;
     }

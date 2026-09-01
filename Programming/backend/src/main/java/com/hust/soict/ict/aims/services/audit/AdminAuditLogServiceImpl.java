@@ -1,7 +1,5 @@
 package com.hust.soict.ict.aims.services.audit;
 
-import com.hust.soict.ict.aims.dto.response.audit.AdminLogMapper;
-import com.hust.soict.ict.aims.dto.response.audit.AdminLogResponse;
 import com.hust.soict.ict.aims.models.entities.audit.AdminLog;
 import com.hust.soict.ict.aims.repositories.AdminLogRepository;
 import lombok.RequiredArgsConstructor;

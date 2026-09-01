@@ -21,7 +21,7 @@ class DeliveryFeeCalculatorImpl implements DeliveryFeeCalculator {
     @Override
     public long calculate(DeliveryFeeCalculationMethod method, Order.Draft draftOrder) {
         return Optional.ofNullable(strategyMap.get(method))
-                .orElseThrow(() -> new UnsupportedDeliveryFeeStrategyException("Delivery fee calculation strategy not yet supported"))
+                .orElseThrow(() -> new UnsupportedDeliveryFeeStrategyException(method))
                 .calculateDeliveryFee(draftOrder);
     }
 

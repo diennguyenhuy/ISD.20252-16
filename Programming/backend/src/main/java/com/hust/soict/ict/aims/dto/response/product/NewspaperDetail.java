@@ -1,5 +1,6 @@
 package com.hust.soict.ict.aims.dto.response.product;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -12,5 +13,6 @@ public class NewspaperDetail extends PrintableProductDetail {
     private String issueNumber;
     private String publicationFrequency;
     private String ISSN;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<String> sections;
 }

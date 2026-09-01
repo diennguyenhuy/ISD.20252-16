@@ -1,7 +1,7 @@
 package com.hust.soict.ict.aims.subsystems.paypal;
 
 import com.hust.soict.ict.aims.subsystems.exception.PaymentException;
-import com.hust.soict.ict.aims.subsystems.exception.UserCancelledException;
+import com.hust.soict.ict.aims.subsystems.exception.PaymentCancelledException;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalPaymentCapture;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalPaymentInitiation;
 import com.hust.soict.ict.aims.subsystems.paypal.model.PayPalRefundResult;
@@ -75,7 +75,7 @@ class PayPalGatewayFacade implements PayPalRedirectGateway, PayPalRefundGateway 
 
             // Payer abandoned/voided the approval → domain-specific cancellation signal.
             if ("VOIDED".equalsIgnoreCase(status) || "CANCELLED".equalsIgnoreCase(status)) {
-                throw new UserCancelledException("PayPal payment was cancelled before completion.");
+                throw new PaymentCancelledException("PayPal payment was cancelled before completion.");
             }
 
             PayPalApiModel.PurchaseUnit unit = firstUnit(resp);

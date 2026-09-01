@@ -1,7 +1,6 @@
 package com.hust.soict.ict.aims.subsystems;
 
 import com.hust.soict.ict.aims.context.OrderDraftContext;
-import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.subsystems.exception.PaymentException;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;

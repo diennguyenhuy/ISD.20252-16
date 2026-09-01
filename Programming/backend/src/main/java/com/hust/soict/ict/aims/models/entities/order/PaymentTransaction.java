@@ -47,4 +47,9 @@ public class PaymentTransaction {
 
         return pt;
     }
+
+    @FunctionalInterface
+    public interface Refunder {
+        void refund(PaymentTransaction paymentTransaction) throws Exception;
+    }
 }

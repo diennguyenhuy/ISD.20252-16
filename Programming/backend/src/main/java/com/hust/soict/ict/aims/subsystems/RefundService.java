@@ -13,8 +13,8 @@ public interface RefundService {
     default boolean supports(String paymentMethod) {
         PaymentMethod method;
         try {
-            method = PaymentMethod.valueOf(paymentMethod);
-        } catch (IllegalArgumentException e) {
+            method = PaymentMethod.valueOf(paymentMethod.toUpperCase().strip());
+        } catch (IllegalArgumentException _) {
             return false;
         }
         return supports(method);

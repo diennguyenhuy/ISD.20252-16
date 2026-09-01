@@ -12,16 +12,12 @@ import org.hibernate.annotations.Immutable;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Immutable
 public class ProductEditDetail {
-    @Column(nullable = false, updatable = false)
-    private String fieldName;
-
     @Column(nullable = false, updatable = false, columnDefinition = "TEXT")
     private String oldValue;
     @Column(nullable = false, updatable = false, columnDefinition = "TEXT")
     private String newValue;
 
-    ProductEditDetail(String fieldName, String oldValue, String newValue) {
-        this.fieldName = fieldName;
+    ProductEditDetail(String oldValue, String newValue) {
         this.oldValue = oldValue;
         this.newValue = newValue;
     }

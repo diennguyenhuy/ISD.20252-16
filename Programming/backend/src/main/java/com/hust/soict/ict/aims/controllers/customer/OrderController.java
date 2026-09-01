@@ -92,7 +92,7 @@ public class OrderController {
      * @throws IllegalStateException if the order status cannot be set to canceled
      */
     @PostMapping("/{orderId}/cancel")
-    public OrderResponse cancelOrder(@PathVariable UUID orderId) throws OrderNotFoundException, OrderStateTransitionException {
+    public OrderResponse cancelOrder(@PathVariable UUID orderId) throws OrderNotFoundException, OrderCancellationException {
         return map(orderService.cancelOrder(orderId));
     }
 }

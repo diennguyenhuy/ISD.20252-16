@@ -3,6 +3,10 @@ package com.hust.soict.ict.aims.controllers.productmanager;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
 import com.hust.soict.ict.aims.dto.response.order.OrderMappers;
 import static com.hust.soict.ict.aims.dto.response.order.OrderMappers.*;
+import com.hust.soict.ict.aims.exceptions.OrderApprovalException;
+import com.hust.soict.ict.aims.exceptions.OrderRefundException;
+import com.hust.soict.ict.aims.exceptions.OrderRejectionException;
+import com.hust.soict.ict.aims.exceptions.OrderStateTransitionException;
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.services.ordermanagement.OrderManagementService;
 import com.hust.soict.ict.aims.services.ordermanagement.OrderQueryService;
@@ -49,17 +53,17 @@ public class OrderManagementController {
     }
 
     @PostMapping("/{orderId}/approve")
-    public OrderResponse approveOrder(@PathVariable UUID orderId) {
+    public OrderResponse approveOrder(@PathVariable UUID orderId) throws OrderStateTransitionException, OrderApprovalException {
         return map(orderManagementService.approveOrder(orderId));
     }
 
     @PostMapping("/{orderId}/reject")
-    public OrderResponse rejectOrder(@PathVariable UUID orderId) {
+    public OrderResponse rejectOrder(@PathVariable UUID orderId) throws OrderRejectionException {
         return map(orderManagementService.rejectOrder(orderId));
     }
 
     @PostMapping("/{orderId}/refund")
-    public OrderResponse refundOrder(@PathVariable UUID orderId) {
+    public OrderResponse refundOrder(@PathVariable UUID orderId) throws OrderRefundException {
         return map(orderManagementService.refundOrder(orderId));
     }
 }

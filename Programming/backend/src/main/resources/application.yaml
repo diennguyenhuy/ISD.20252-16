@@ -31,6 +31,8 @@ spring:
     user:
       name: aims_admin
       password: ${SECURITY_PASSWORD}
+  jackson:
+    default-property-inclusion: non_null
 
 logging:
   level:

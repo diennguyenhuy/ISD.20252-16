@@ -4,9 +4,7 @@ import com.hust.soict.ict.aims.dto.request.CreateUserRequest;
 import com.hust.soict.ict.aims.exceptions.AccountAlreadyExistedException;
 import com.hust.soict.ict.aims.models.entities.user.User;
 import com.hust.soict.ict.aims.repositories.UserRepository;
-import com.hust.soict.ict.aims.services.admin.event.AccountCreatedEvent;
-import com.hust.soict.ict.aims.services.admin.event.EmailUpdateEvent;
-import com.hust.soict.ict.aims.services.admin.event.PasswordResetEvent;
+import com.hust.soict.ict.aims.services.admin.event.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -21,7 +19,6 @@ import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Centralized administration service.
@@ -108,6 +105,7 @@ class AdminServiceImpl implements AdminService, UserQueryService {
         user.deactivate();
         userRepository.save(user);
         log.info("Admin deactivated user: {} ({})", user.getUsername(), user.getEmail());
+        applicationEventPublisher.publishEvent(new AccountActivationEvent(user, true));
         return user;
     }
 
@@ -118,6 +116,7 @@ class AdminServiceImpl implements AdminService, UserQueryService {
         user.activate();
         userRepository.save(user);
         log.info("Admin activated user: {} ({})", user.getUsername(), user.getEmail());
+        applicationEventPublisher.publishEvent(new AccountActivationEvent(user, false));
         return user;
     }
 
@@ -128,6 +127,7 @@ class AdminServiceImpl implements AdminService, UserQueryService {
         user.block();
         userRepository.save(user);
         log.info("Admin blocked user: {} ({})", user.getUsername(), user.getEmail());
+        applicationEventPublisher.publishEvent(new AccountBlockEvent(user, false));
         return user;
     }
 
@@ -138,6 +138,7 @@ class AdminServiceImpl implements AdminService, UserQueryService {
         user.unblock();
         userRepository.save(user);
         log.info("Admin unblocked user: {} ({})", user.getUsername(), user.getEmail());
+        applicationEventPublisher.publishEvent(new AccountBlockEvent(user, true));
         return user;
     }
 
@@ -160,6 +161,7 @@ class AdminServiceImpl implements AdminService, UserQueryService {
 
         userRepository.save(user);
         log.info("Admin updated roles for user {} to {}", user.getUsername(), newRoles);
+        applicationEventPublisher.publishEvent(new UserRoleAssignOrModifyEvent(user));
         return user;
     }
 

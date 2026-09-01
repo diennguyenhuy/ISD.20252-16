@@ -12,14 +12,23 @@ import java.util.*;
 @Immutable @Entity
 @Table(name = "product_update_log")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ProductUpdateLog extends ProductLog implements Iterable<ProductEditDetail> {
-    @ElementCollection(fetch = FetchType.LAZY)
+public class ProductUpdateLog extends ProductLog {
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "product_update_detail", joinColumns = @JoinColumn(name = "log_id"))
-    @OrderColumn(name = "field_number")
-    private List<ProductEditDetail> details = new ArrayList<>();
+    @MapKeyColumn(name = "field_name")
+    private Map<String, ProductEditDetail> details = new HashMap<>();
 
-    public List<ProductEditDetail> getDetails() {
-        return Collections.unmodifiableList(details);
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "product_update_array_detail", joinColumns = @JoinColumn(name = "log_id"))
+    @MapKeyColumn(name = "field_name")
+    private Map<String, ProductEditArrayDetail> arrayDetails = new HashMap<>();
+
+    public Map<String, ProductEditDetail> getDetails() {
+        return Collections.unmodifiableMap(details);
+    }
+
+    public Map<String, ProductEditArrayDetail> getArrayDetails() {
+        return Collections.unmodifiableMap(arrayDetails);
     }
 
     @Override
@@ -27,17 +36,9 @@ public class ProductUpdateLog extends ProductLog implements Iterable<ProductEdit
         return ProductAction.UPDATE;
     }
 
-    ProductUpdateLog(
-            User manager,
-            Product product,
-            List<ProductEditDetail> details
-    ) {
+    ProductUpdateLog(User manager, Product product, Map<String, ProductEditDetail> details, Map<String, ProductEditArrayDetail> arrayDetails) {
         super(manager, product, ProductAction.UPDATE);
-        this.details = new ArrayList<>(details);
-    }
-
-    @Override
-    public Iterator<ProductEditDetail> iterator() {
-        return details.iterator();
+        this.details = new HashMap<>(details);
+        this.arrayDetails = new HashMap<>(arrayDetails);
     }
 }

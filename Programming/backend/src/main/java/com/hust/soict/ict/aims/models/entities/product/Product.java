@@ -2,7 +2,6 @@ package com.hust.soict.ict.aims.models.entities.product;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.BiConsumer;
 
 import com.hust.soict.ict.aims.models.entities.VersionedEntity;
 import jakarta.persistence.*;

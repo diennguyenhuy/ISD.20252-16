@@ -13,7 +13,9 @@ public class AdminLogMapper extends AuditLogMapper<AdminLog, AdminLogResponse> {
     protected void map(AdminLog log, AdminLogResponse response) {
         response.setAdminId(log.getAdminId());
         response.setAdminUsername(log.getAdminUsername());
+        response.setAdminEmail(log.getAdminEmail());
         response.setAffectedUserId(log.getAffectedUserId());
         response.setAffectedUsername(log.getAffectedUsername());
+        response.setAffectedUserEmail(log.getAffectedUserEmail());
     }
 }

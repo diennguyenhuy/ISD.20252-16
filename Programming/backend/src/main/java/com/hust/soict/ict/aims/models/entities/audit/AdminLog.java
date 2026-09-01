@@ -24,18 +24,26 @@ public class AdminLog extends AuditLog {
     @Column(nullable = false, updatable = false)
     private String adminUsername;
 
+    @Column(nullable = false, updatable = false)
+    private String adminEmail;
+
     @Column(updatable = false, nullable = false)
     private UUID affectedUserId;
 
     @Column(nullable = false, updatable = false)
     private String affectedUsername;
 
+    @Column(nullable = false, updatable = false)
+    private String affectedUserEmail;
+
     AdminLog(User admin, User affectedUser, UserAction action) {
         super();
         this.adminId = admin.getId();
         this.adminUsername = admin.getUsername();
+        this.adminEmail = admin.getEmail();
         this.affectedUserId = affectedUser.getId();
         this.affectedUsername = affectedUser.getUsername();
+        this.affectedUserEmail = affectedUser.getEmail();
         this.action = action;
     }
 

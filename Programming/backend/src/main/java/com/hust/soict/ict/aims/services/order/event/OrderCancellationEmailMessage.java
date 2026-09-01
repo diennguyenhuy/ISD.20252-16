@@ -107,7 +107,7 @@ class OrderCancellationEmailMessage implements EmailMessage<OrderCancelEvent> {
 
         @Override
         public OrderCancellationEmailMessage createMessage(OrderCancelEvent payload) {
-            return new OrderCancellationEmailMessage(payload.order, frontendUrl, payload.refundable);
+            return new OrderCancellationEmailMessage(payload.order(), frontendUrl, payload.refundable());
         }
     }
 }

@@ -14,6 +14,7 @@ interface ProductLogBase extends AuditLogBase {
 export type ProductLog = ProductLogBase | ProductUpdateLog | StockAdjustLog;
 
 export interface ProductUpdateLog extends ProductLogBase {
+    readonly action: "UPDATE";
     readonly details: ProductEditDetail[];
 }
 
@@ -26,6 +27,7 @@ export interface ProductEditDetail {
 export type ProductAction = "CREATE" | "UPDATE" | "DELETE" | "DEACTIVATE" | "ACTIVATE" | "STOCK_ADJUST";
 
 export interface StockAdjustLog extends ProductLogBase {
+    readonly action: "STOCK_ADJUST";
     readonly oldStock: number;
     readonly newStock: number;
     readonly reason: string;

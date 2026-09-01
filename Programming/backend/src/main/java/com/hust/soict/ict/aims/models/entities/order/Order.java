@@ -106,17 +106,36 @@ public class Order extends VersionedEntity implements Iterable<OrderItem> {
         return getTotalPriceWithoutVAT() * 110 / 100;
     }
 
-    public void approve(ApprovalValidator orderValidator) {
+    public void approve(ApprovalStockValidator orderValidator) throws OrderApprovalException, OrderStateTransitionException {
         orderValidator.validate(this);
         changeStatus(Status.APPROVED);
     }
-    public void reject() {
+
+    public void reject(PaymentTransaction.Refunder refunder) throws OrderStateTransitionException {
         changeStatus(Status.REJECTED);
+        // Attempts refund
+        try {
+            refunder.refund(paymentTransaction);
+        } catch (Exception _) {
+            // If refund fails, it must not undo the rejection. Order remains rejected and can be refunded later.
+            return;
+        }
+        refund();
     }
-    public void cancel() {
+
+    public void cancel(PaymentTransaction.Refunder refunder) throws OrderStateTransitionException {
         changeStatus(Status.CANCELLED);
+        // Attempts refund
+        try {
+            refunder.refund(paymentTransaction);
+        } catch (Exception _) {
+            // If refund fails, it must not undo the cancellation. Order remains cancelled and can be refunded later.
+            return;
+        }
+        refund();
     }
-    public void refund() {
+
+    public void refund() throws OrderStateTransitionException {
         changeStatus(Status.REFUNDED);
     }
 
@@ -187,7 +206,11 @@ public class Order extends VersionedEntity implements Iterable<OrderItem> {
                 throw new OrderNotCompleteException("Order is not complete, cannot proceed to finish the order");
             }
 
-            order.changeStatus(Status.PENDING);
+            try {
+                order.changeStatus(Status.PENDING);
+            } catch (OrderStateTransitionException e) {
+                throw new RuntimeException("[UNREACHABLE ERROR] Draft order cannot transition to PENDING.", e);
+            }
             return order;
         }
 
@@ -226,7 +249,7 @@ public class Order extends VersionedEntity implements Iterable<OrderItem> {
     }
 
     @FunctionalInterface
-    public interface ApprovalValidator {
+    public interface ApprovalStockValidator {
         void validate(Order order) throws OrderApprovalException;
     }
 }

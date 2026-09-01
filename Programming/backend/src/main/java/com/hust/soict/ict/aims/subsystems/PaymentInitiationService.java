@@ -1,6 +1,6 @@
 package com.hust.soict.ict.aims.subsystems;
 
-import com.hust.soict.ict.aims.exceptions.UnsupportedPaymentMethodException;
+import com.hust.soict.ict.aims.subsystems.exception.UnsupportedPaymentMethodException;
 import com.hust.soict.ict.aims.subsystems.exception.PaymentException;
 
 import java.util.Set;

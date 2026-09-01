@@ -10,6 +10,8 @@ import java.util.UUID;
 public class AdminLogResponse extends AuditLogResponse {
     private UUID adminId;
     private String adminUsername;
+    private String adminEmail;
     private UUID affectedUserId;
     private String affectedUsername;
+    private String affectedUserEmail;
 }

@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS newspaper(
 	editor_in_chief			VARCHAR(255) NOT NULL,
 	issue_number			VARCHAR(25),
 	publication_frequency	VARCHAR(25),
-	issn					VARCHAR(9)
+	issn					VARCHAR(9),
 	sections                VARCHAR(50)[]
 );
 
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS dvd(
 	director		VARCHAR(255) NOT NULL,
 	runtime			INT NOT NULL, --minutes
 	studio			VARCHAR(255) NOT NULL,
-	language		VARCHAR(50) NOT NULL
+	language		VARCHAR(50) NOT NULL,
 	subtitles		TEXT[] NOT NULL
 );
 
@@ -157,11 +157,18 @@ CREATE TABLE IF NOT EXISTS product_update_log(
 
 CREATE TABLE IF NOT EXISTS product_update_detail(
     log_id          UUID REFERENCES product_update_log(id) ON DELETE CASCADE,
-    field_number    INT,
     field_name      VARCHAR(255),
     old_value       TEXT,
     new_value       TEXT,
-    PRIMARY KEY (log_id, field_number)
+    PRIMARY KEY (log_id, field_name)
+);
+
+CREATE TABLE IF NOT EXISTS product_update_array_detail(
+    log_id          UUID REFERENCES product_update_log(id) ON DELETE CASCADE,
+    field_name      VARCHAR(255),
+    removed_values  TEXT[],
+    added_values    TEXT[],
+    PRIMARY KEY (log_id, field_name)
 );
 
 CREATE TABLE IF NOT EXISTS stock_adjust_log(
@@ -176,8 +183,10 @@ CREATE TABLE IF NOT EXISTS admin_log(
     action				VARCHAR(20) NOT NULL,
     admin_id			UUID NOT NULL,
     admin_username      VARCHAR(255) NOT NULL,
+    admin_email         VARCHAR(255) NOT NULL,
     affected_user_id	UUID NOT NULL,
     affected_username   VARCHAR(255) NOT NULL,
+    affected_user_email VARCHAR(255) NOT NULL,
     timestamp			TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

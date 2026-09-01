@@ -95,7 +95,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DisabledException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public Map<String, String> handle(DisabledException e) {
-        return Map.of("message", "This account has been deactivated. Please contact an administrator.");
+        return Map.of("message", "This account has been deactivated. Please contact an administrator. Detail: " + e.getMessage());
     }
 
     /** Deactivated account — thrown explicitly by AuthService for a clear typed exception. */

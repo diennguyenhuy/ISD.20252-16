@@ -7,9 +7,12 @@ import com.hust.soict.ict.aims.models.entities.order.*;
 import com.hust.soict.ict.aims.context.OrderDraftContext;
 import com.hust.soict.ict.aims.services.order.deliveryfee.DeliveryFeeCalculationMethod;
 import com.hust.soict.ict.aims.services.order.deliveryfee.DeliveryFeeCalculator;
+import com.hust.soict.ict.aims.services.order.event.OrderSuccessEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Service
 @RequiredArgsConstructor
@@ -75,5 +78,11 @@ class PlaceOrderServiceImpl implements PlaceOrderService {
         log.debug("Canceling order...");
         orderDraftContext.clearDraftOrder();
         log.debug("Order successfully canceled!");
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    void clearContext(OrderSuccessEvent __) {
+        cartContext.getOrCreateCart().clear();
+        orderDraftContext.clearDraftOrder();
     }
 }
