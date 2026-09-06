@@ -2,10 +2,10 @@ import { useParams, useNavigate } from 'react-router';
 import {
     ArrowLeft, UserCheck, UserX, Shield, ShieldOff, Key, Mail, Calendar, CheckCircle2, Loader2, AlertTriangle, Info
 } from 'lucide-react';
-import { AdminService } from '../../api/AdminService';
+import AdminService from '../../api/AdminService';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import type { UserRole, User } from "../../models/user.interface";
+import type { UserRole, User } from "../../models";
 import { formatDateTime } from '../../data/formatter';
 
 const ROLE_LABELS: Record<UserRole | 'customer', string> = {

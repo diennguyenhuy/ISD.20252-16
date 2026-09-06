@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { ShieldAlert, AlertCircle, Loader2, KeyRound } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { ProfileService } from '../../api/AdminService';
+import ProfileService from '../../api/ProfileService';
 
 export default function ChangePasswordScreen() {
     const navigate = useNavigate();

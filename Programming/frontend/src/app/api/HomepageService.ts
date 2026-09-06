@@ -1,8 +1,8 @@
 import { apiClient } from "./client";
-import type { ProductSummary, Product } from "../models/product.interface";
+import type { ProductSummary, Product } from "../models";
 import type { Page } from "./Page";
 
-export interface ProductFilterParams {
+interface ProductFilterParams {
     title: string | undefined;
     category: string | undefined;
     minPrice: number | undefined;

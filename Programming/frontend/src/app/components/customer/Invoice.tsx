@@ -6,12 +6,7 @@ import { useCart } from '../../context/CartContext';
 import OrderService from '../../api/OrderService';
 import { formatVND } from '../../data/formatter';
 
-import type {DeliveryInformation, Invoice as InvoiceType, OrderDraft} from '../../models/order.interface';
-import type { ProductTypeName } from '../../models/product.interface';
-
-const TYPE_LABELS: Record<ProductTypeName, string> = {
-    Book: 'Book', CD: 'CD', DVD: 'DVD', Newspaper: 'Newspaper'
-};
+import type {Invoice as InvoiceType, OrderDraft} from '../../models/order.interface';
 
 export default function Invoice() {
     const navigate = useNavigate();
@@ -160,7 +155,7 @@ export default function Invoice() {
                             </thead>
                             <tbody>
                                 {cart.items.map(item => (
-                                    <tr key={item.product.id}
+                                    <tr key={item.productId}
                                         className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                                         <td className="py-4">
                                             <div className="flex items-center gap-4">
@@ -168,22 +163,22 @@ export default function Invoice() {
                                                     className="w-12 h-12 rounded-xl overflow-hidden bg-muted shrink-0 border border-border">
                                                     {/* FIXED: Uses imageURL */}
                                                     <img
-                                                        src={item.product.imageURL}
-                                                        alt={item.product.title}
+                                                        src={item.productImage}
+                                                        alt={item.productTitle}
                                                         className="w-full h-full object-cover"
                                                     />
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="text-foreground line-clamp-2 font-bold leading-tight mb-1">{item.product.title}</p>
+                                                    <p className="text-foreground line-clamp-2 font-bold leading-tight mb-1">{item.productTitle}</p>
                                                     <span
                                                         className="text-xs font-semibold px-2 py-0.5 rounded-md bg-muted text-muted-foreground capitalize">
-                                                        {TYPE_LABELS[item.product.productType]}
+                                                        {item.productType}
                                                     </span>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="text-center py-4 text-foreground font-semibold">{item.quantity}</td>
-                                        <td className="text-right py-4 text-muted-foreground font-medium">{formatVND(item.product.currentPrice)}</td>
+                                        <td className="text-right py-4 text-muted-foreground font-medium">{formatVND(item.unitPrice)}</td>
                                         <td className="text-right py-4 text-foreground font-bold">{formatVND(item.itemTotalPrice)}</td>
                                     </tr>
                                 ))}

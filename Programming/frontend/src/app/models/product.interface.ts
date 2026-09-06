@@ -1,5 +1,3 @@
-import type {ProductFormSection} from "../components/manager/forms/ProductFormSection";
-
 export type ProductTypeName = 'Book' | 'Newspaper' | 'CD' | 'DVD';
 
 export const PRODUCT_TYPES: ProductTypeName[] = ['Book', 'CD', 'DVD', 'Newspaper'] as const;
@@ -14,7 +12,7 @@ interface BaseProduct {
     readonly id: string;
     title: string;
     category: string;
-    description: string;
+    description?: string;
     height: number;
     width: number;
     length: number;
@@ -24,13 +22,13 @@ interface BaseProduct {
     currentPrice: number;
     stockQuantity: number;
     status: ProductStatus;
-    imageURL: string;
-    readonly createdAt?: string;
-    readonly updatedAt?: string;
-    productType: ProductTypeName;
+    imageURL?: string;
+    readonly createdAt: string;
+    readonly updatedAt: string;
+    readonly productType: ProductTypeName;
 }
 
-export interface PrintableProduct extends BaseProduct {
+interface BasePrintableProduct extends BaseProduct {
     publisher: string;
     publicationDate: string;
     language?: string;
@@ -38,7 +36,7 @@ export interface PrintableProduct extends BaseProduct {
 
 export type CoverType = 'HARDCOVER' | 'PAPERBACK';
 
-export interface Book extends PrintableProduct {
+export interface Book extends BasePrintableProduct {
     readonly productType: 'Book';
     authors: string[];
     coverType: CoverType;
@@ -46,7 +44,7 @@ export interface Book extends PrintableProduct {
     genre?: string;
 }
 
-export interface Newspaper extends PrintableProduct {
+export interface Newspaper extends BasePrintableProduct {
     readonly productType: 'Newspaper';
     editorInChief: string;
     issueNumber?: string;

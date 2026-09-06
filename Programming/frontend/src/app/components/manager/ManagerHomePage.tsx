@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { Plus, Search, Pencil, Trash2, Package, AlertTriangle, ChevronDown, Loader2, CheckCircle } from 'lucide-react';
 import { useProductManagement } from './hooks/useProductManagement';
-import type {ProductStatus, ProductSummary, ProductTypeName} from '../../models/product.interface';
+import type {ProductStatus, ProductSummary, ProductTypeName} from '../../models';
 import { formatVND } from '../../data/formatter';
 import AdjustStockModal from './AdjustStockModal';
-import { PRODUCT_TYPES } from "../../models/product.interface";
-import { PRODUCT_TYPE_META } from "../shared/product/productTypeMetadata";
+import { PRODUCT_TYPES } from "../../models";
+import { PRODUCT_TYPE_META } from "../shared/product";
 
 export default function ManagerHomePage() {
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import ProductManagementService from '../../../api/ProductManagementService';
 import type { CreateProductPayload, UpdateProductPayload } from '../../../api/ProductManagementService';
-import type { ProductSummary, Product } from '../../../models/product.interface';
+import type { ProductSummary, Product } from '../../../models';
 
 export function useProductManagement() {
     const [products, setProducts] = useState<ProductSummary[]>([]);

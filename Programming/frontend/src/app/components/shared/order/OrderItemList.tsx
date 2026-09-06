@@ -1,6 +1,6 @@
 import { Package, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router';
-import type { OrderItem, Invoice } from '../../../models/order.interface';
+import type { OrderItem, Invoice } from '../../../models';
 import { formatVND } from '../../../data/formatter';
 import { InvoiceSummary } from './InvoiceSummary';
 
@@ -56,7 +56,7 @@ export function OrderItemList({ items, invoice, isManagerScreen }: OrderItemList
                                     {item.productImage ? (
                                         <img
                                             src={item.productImage}
-                                            alt={item.productName}
+                                            alt={item.productTitle}
                                             className={`w-full h-full object-cover ${isMissing ? 'grayscale opacity-50' : ''}`}
                                             onError={(e) => {
                                                 // Fallback if image URL is broken
@@ -81,7 +81,7 @@ export function OrderItemList({ items, invoice, isManagerScreen }: OrderItemList
                                             #{item.productReferenceId.substring(0, 8)}
                                         </span>
                                         <p className={`text-base font-bold line-clamp-1 ${isMissing ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
-                                            {item.productName}
+                                            {item.productTitle}
                                         </p>
                                     </div>
 

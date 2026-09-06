@@ -1,24 +1,24 @@
 import { useParams, useNavigate } from 'react-router';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     ArrowLeft, FileText, Loader2,
     CheckCircle2, XCircle, CreditCard, Info,
 } from 'lucide-react';
-
 import OrderManagementService from '../../api/OrderManagementService';
 import { formatDateTime } from '../../data/formatter';
-import type { Order } from '../../models/order.interface';
-
+import type { Order, TransactionMethod } from '../../models';
+import { supportRefund } from '../../api/payment';
 import {
     OrderStatusBadge,
     OrderItemList,
     ShippingInfoCard,
     TransactionCard,
 } from '../shared/order';
+import OrderAuditTrail from "../shared/order/OrderAuditTrail";
 
 type ConfirmAction = 'APPROVED' | 'REJECTED' | 'REFUND';
 
-function buildConfirmConfig(isVietQR: boolean): Record<ConfirmAction, {
+function buildConfirmConfig(refundable: boolean, paymentMethod: TransactionMethod): Record<ConfirmAction, {
     title: string;
     body: string;
     btnClass: string;
@@ -33,9 +33,9 @@ function buildConfirmConfig(isVietQR: boolean): Record<ConfirmAction, {
         },
         REJECTED: {
             title: 'Reject Order',
-            body: isVietQR
-                ? 'The order will be rejected. Because this order was paid via VietQR, you will need to process the refund manually.'
-                : 'The order will be rejected and a refund will be initiated automatically via PayPal.',
+            body: refundable
+                ? `The order will be rejected and a refund will be initiated automatically via ${paymentMethod}.`
+                : `The order will be rejected. Because this order was paid via ${paymentMethod}, you will need to process the refund manually.`,
             btnClass: 'bg-destructive hover:bg-destructive/90 text-destructive-foreground',
             icon: <XCircle size={24} className="text-destructive" />,
         },
@@ -57,12 +57,16 @@ export default function ManagerOrderDetail() {
     const [error, setError] = useState(false);
     const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [refundable, setRefundable] = useState(false);
 
     // ── Data fetching ────────────────────────────────────────────────────────
     useEffect(() => {
         if (!id) return;
         OrderManagementService.getOrder(id)
-            .then(setOrder)
+            .then(async (order) => {
+                setOrder(order);
+                setRefundable(await supportRefund(order.paymentTransaction.transactionMethod));
+            })
             .catch(() => setError(true))
             .finally(() => setLoading(false));
     }, [id]);
@@ -78,8 +82,7 @@ export default function ManagerOrderDetail() {
             } else if (confirmAction === 'REJECTED') {
                 updated = await OrderManagementService.rejectOrder(order.id);
             } else {
-                // REFUND: backend endpoint TBD — optimistic update as placeholder
-                updated = { ...order, status: 'REFUNDED' };
+                updated = await OrderManagementService.refundOrder(order.id);
             }
             setOrder(updated);
             setConfirmAction(null);
@@ -117,17 +120,11 @@ export default function ManagerOrderDetail() {
             </div>
         );
     }
-
-    // ── Derived values ────────────────────────────────────────────────────────
-    const isVietQR = order.paymentTransaction?.transactionMethod === 'VIETQR';
-
-    // VietQR orders that are rejected or cancelled need a manual refund —
-    // show the CTA only when the refund hasn't already been recorded.
     const showRefundButton =
-        isVietQR &&
+        !refundable &&
         (order.status === 'REJECTED' || order.status === 'CANCELLED');
 
-    const confirmConfig = buildConfirmConfig(isVietQR);
+    const confirmConfig = buildConfirmConfig(refundable, order.paymentTransaction.transactionMethod);
 
     return (
         <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -162,13 +159,11 @@ export default function ManagerOrderDetail() {
                     title="Transaction Details"
                 />
             </div>
-
-            {/* ── VietQR manual refund notice ── */}
             {showRefundButton && (
                 <div className="flex items-start gap-3 p-4 rounded-2xl bg-blue-500/10 border border-blue-300/40 mb-6 text-sm text-blue-700">
                     <Info size={16} className="shrink-0 mt-0.5" />
                     <span>
-                        This order was paid via <strong>VietQR</strong> and requires a{' '}
+                        This order was paid via <strong>{order.paymentTransaction.transactionMethod}</strong> and requires a{' '}
                         <strong>manual bank transfer refund</strong>. Once you have completed
                         the transfer, mark it as refunded below.
                     </span>
@@ -253,6 +248,7 @@ export default function ManagerOrderDetail() {
                     </div>
                 );
             })()}
+            <OrderAuditTrail orderId={order.id} isManagerScreen={true} />
         </div>
     );
 }

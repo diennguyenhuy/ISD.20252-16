@@ -4,7 +4,7 @@ import { ArrowLeft, AlertCircle, Package, Loader2, X } from 'lucide-react';
 
 import OrderService from '../../api/OrderService';
 import { formatDateTime } from '../../data/formatter';
-import type { Order } from '../../models/order.interface';
+import type { Order } from '../../models';
 
 import {
     OrderStatusBadge,
@@ -12,6 +12,7 @@ import {
     ShippingInfoCard,
     TransactionCard,
 } from '../shared/order';
+import OrderAuditTrail from "../shared/order/OrderAuditTrail";
 
 export default function CustomerOrderDetail() {
     const { id } = useParams<{ id: string }>();
@@ -47,9 +48,8 @@ export default function CustomerOrderDetail() {
         if (!order) return;
         setIsCanceling(true);
         try {
-            await OrderService.cancelOrder(order.id);
-            // Optimistic update — avoids a round-trip fetch for a status change
-            setOrder({ ...order, status: 'CANCELLED' });
+            const res = await OrderService.cancelOrder(order.id);
+            setOrder(res);
             setConfirmCancel(false);
         } catch (e: any) {
             alert(`Could not cancel the order: ${e}`);
@@ -186,6 +186,7 @@ export default function CustomerOrderDetail() {
                     )
                 )}
             </div>
+            <OrderAuditTrail orderId={order.id} />
         </div>
     );
 }

@@ -1,5 +1,5 @@
 import {ProductFieldRenderer} from "./ProductFieldRenderer";
-import type {Book} from "../../../models/product.interface";
+import type {Book} from "../../../models";
 import {formatDate} from "../../../data/formatter";
 import {InfoRow} from "./InfoRow";
 

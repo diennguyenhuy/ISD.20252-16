@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import type { Order, OrderStatus } from "../models/order.interface";
+import type { Order, OrderStatus } from "../models";
 import type { Page } from "./Page";
 
 const OrderManagementService = {
@@ -27,6 +27,11 @@ const OrderManagementService = {
 
     rejectOrder: async (id: string): Promise<Order> => {
         const response = await apiClient.post<Order>(`manager/orders/${id}/reject`);
+        return response.data;
+    },
+
+    refundOrder: async (id: string): Promise<Order> => {
+        const response = await apiClient.post<Order>(`manager/orders/${id}/refund`);
         return response.data;
     }
 }

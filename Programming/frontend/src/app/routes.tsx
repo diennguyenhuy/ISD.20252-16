@@ -38,6 +38,7 @@ import ManagerProductLogs from "./components/manager/ManagerProductLogs";
 import AdminUserList from "./components/admin/AdminUserList";
 import AdminUserCreation from "./components/admin/AdminUserCreation";
 import AdminUserDetail from "./components/admin/AdminUserDetail";
+import AdminUserLog from "./components/admin/AdminUserLog";
 
 export const router = createBrowserRouter([
     { path: '/login', Component: Login },
@@ -88,6 +89,7 @@ export const router = createBrowserRouter([
                     { index: true, Component: AdminUserList },
                     { path: 'users/create', Component: AdminUserCreation },
                     { path: 'users/:id', Component: AdminUserDetail },
+                    { path: 'logs', Component: AdminUserLog }
                 ],
             }
         ]

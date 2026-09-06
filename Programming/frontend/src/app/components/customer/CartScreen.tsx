@@ -1,13 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Trash2, ShoppingCart, ArrowLeft, AlertTriangle, ShoppingBag, Loader2 } from 'lucide-react';
 import { formatVND } from '../../data/formatter';
-import { PRODUCT_TYPE_META } from '../shared/product/productTypeMetadata';
+import { PRODUCT_TYPE_META } from '../shared/product';
 
 // Import Services and Interfaces
 import { useCart } from "../../context/CartContext";
 import OrderService from '../../api/OrderService';
-import type { ProductTypeName } from '../../models/product.interface';
 
 export default function CartScreen() {
     const navigate = useNavigate();
@@ -91,7 +90,7 @@ export default function CartScreen() {
     }
 
     // Dynamically calculate if any item exceeds available stock
-    const hasInsufficient = cart.items.some(item => item.quantity > (item.product.stockQuantity ?? 0));
+    const hasInsufficient = cart.items.some(item => item.quantity > (item.stockQuantity ?? 0));
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-6 animate-in fade-in duration-300">
@@ -132,22 +131,22 @@ export default function CartScreen() {
                 {/* Cart Items */}
                 <div className="lg:col-span-2 space-y-4">
                     {cart.items.map(item => {
-                        const isInsufficient = item.quantity > (item.product.stockQuantity ?? 0);
-                        const isUpdating = updatingId === item.product.id;
+                        const isInsufficient = item.quantity > (item.stockQuantity ?? 0);
+                        const isUpdating = updatingId === item.productId;
 
                         return (
                             <div
-                                key={item.product.id}
+                                key={item.productId}
                                 className={`bg-card rounded-2xl border shadow-sm p-4 flex gap-5 transition-all duration-200 hover:shadow-md ${isInsufficient ? 'border-destructive/50 ring-1 ring-destructive/20' : 'border-border hover:border-primary/30'
                                     } ${isUpdating ? 'opacity-50 pointer-events-none' : ''}`}
                             >
                                 <div
                                     className="w-24 h-24 bg-muted rounded-xl shrink-0 cursor-pointer overflow-hidden relative group"
-                                    onClick={() => navigate(`/product/${item.product.id}`)}
+                                    onClick={() => navigate(`/product/${item.productId}`)}
                                 >
                                     <img
-                                        src={item.product.imageURL}
-                                        alt={item.product.title}
+                                        src={item.productImage}
+                                        alt={item.productTitle}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                     />
                                 </div>
@@ -157,16 +156,16 @@ export default function CartScreen() {
                                         <div className="min-w-0">
                                             <h3
                                                 className="text-foreground text-base font-semibold line-clamp-2 cursor-pointer hover:text-primary transition-colors"
-                                                onClick={() => navigate(`/product/${item.product.id}`)}
+                                                onClick={() => navigate(`/product/${item.productId}`)}
                                             >
-                                                {item.product.title}
+                                                {item.productTitle}
                                             </h3>
                                             <p className="text-xs text-muted-foreground mt-1 capitalize font-medium">
-                                                {PRODUCT_TYPE_META[item.product.productType].label}
+                                                {PRODUCT_TYPE_META[item.productType].label}
                                             </p>
                                         </div>
                                         <button
-                                            onClick={() => handleRemoveItem(item.product.id)}
+                                            onClick={() => handleRemoveItem(item.productId)}
                                             className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-2 rounded-lg transition-colors shrink-0"
                                             title="Remove product"
                                         >
@@ -178,7 +177,7 @@ export default function CartScreen() {
                                         <div
                                             className="flex items-center border border-border bg-background rounded-lg overflow-hidden shadow-sm">
                                             <button
-                                                onClick={() => handleUpdateQuantity(item.product.id, item.quantity - 1)}
+                                                onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
                                                 disabled={item.quantity <= 1}
                                                 className="px-3 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors disabled:opacity-50"
                                             >−
@@ -191,7 +190,7 @@ export default function CartScreen() {
                                             </span>
 
                                             <button
-                                                onClick={() => handleUpdateQuantity(item.product.id, item.quantity + 1)}
+                                                onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
                                                 className="px-3 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                                             >+
                                             </button>
@@ -207,7 +206,7 @@ export default function CartScreen() {
                                         <div
                                             className="mt-3 flex items-center gap-1.5 text-destructive bg-destructive/5 px-3 py-1.5 rounded-md text-xs font-medium w-fit">
                                             <AlertTriangle size={14} />
-                                            <span>Exceeds stock! (Only {item.product.stockQuantity} left)</span>
+                                            <span>Exceeds stock! (Only {item.stockQuantity} left)</span>
                                         </div>
                                     )}
                                 </div>
@@ -224,9 +223,9 @@ export default function CartScreen() {
 
                         <div className="space-y-4 mb-6">
                             {cart.items.map(item => (
-                                <div key={item.product.id} className="flex justify-between text-sm">
+                                <div key={item.productId} className="flex justify-between text-sm">
                                     <span className="truncate pr-3 flex-1 text-muted-foreground">
-                                        {item.product.title} <span className="text-foreground font-medium ml-1">×{item.quantity}</span>
+                                        {item.productTitle} <span className="text-foreground font-medium ml-1">×{item.quantity}</span>
                                     </span>
                                     <span
                                         className="shrink-0 text-foreground font-medium">{formatVND(item.itemTotalPrice)}</span>

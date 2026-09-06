@@ -1,5 +1,5 @@
 import {ProductFieldRenderer} from "./ProductFieldRenderer";
-import type {Newspaper} from "../../../models/product.interface";
+import type {Newspaper} from "../../../models";
 import {InfoRow} from "./InfoRow";
 import {formatDate} from "../../../data/formatter";
 

@@ -1,5 +1,5 @@
 import type {ReactNode} from "react";
-import type {Product} from "../../../models/product.interface";
+import type {Product} from "../../../models";
 
 export abstract class ProductFieldRenderer<P extends Product> {
     abstract render(product: P): ReactNode;

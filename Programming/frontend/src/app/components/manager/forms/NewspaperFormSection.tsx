@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ProductFormSection, type FieldComponent } from './ProductFormSection';
-import type { Newspaper } from '../../../models/product.interface';
+import type { Newspaper } from '../../../models';
 
 // @ts-ignore
 export class NewspaperFormSection extends ProductFormSection<

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ProductFormSection, type FieldComponent } from './ProductFormSection';
-import type { Book, CoverType } from '../../../models/product.interface';
+import type { Book, CoverType } from '../../../models';
 
 // @ts-ignore
 export class BookFormSection extends ProductFormSection<

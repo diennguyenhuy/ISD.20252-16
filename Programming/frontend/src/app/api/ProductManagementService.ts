@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { ProductSummary, Product, ProductTypeName, CoverType, DiscType } from '../models/product.interface';
+import type { ProductSummary, Product, ProductTypeName, CoverType, DiscType } from '../models';
 
 const ProductManagementService = {
 

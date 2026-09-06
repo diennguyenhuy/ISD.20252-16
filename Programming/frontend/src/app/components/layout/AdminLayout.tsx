@@ -1,11 +1,12 @@
 import {Outlet, useNavigate, useLocation} from 'react-router';
-import {Users, ChevronRight, Menu, X, Sun, Moon, Shield} from 'lucide-react';
+import {Users, ChevronRight, Menu, X, Sun, Moon, Shield, Activity} from 'lucide-react';
 import {useState, useEffect} from 'react';
 import {useAuth} from '../../context/AuthContext';
 import SidebarUserProfile from '../shared/SibebarUserProfile';
 
 const NAV_ITEMS = [
-    {path: '/admin', label: 'User Management', icon: Users, exact: false}
+    {path: '/admin', label: 'User Management', icon: Users, exact: true},
+    {path: '/admin/logs', label: 'Security Logs', icon: Activity, exact: false},
 ];
 
 export default function AdminLayout() {

@@ -1,6 +1,6 @@
 import { Music2 } from 'lucide-react';
 import {ProductFieldRenderer} from "./ProductFieldRenderer";
-import type {CD, Track} from "../../../models/product.interface";
+import type {CD, Track} from "../../../models";
 import {InfoRow} from "./InfoRow";
 import {formatDate, formatDurationSeconds} from "../../../data/formatter";
 

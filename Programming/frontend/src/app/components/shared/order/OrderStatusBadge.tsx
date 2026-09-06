@@ -1,5 +1,6 @@
 import { CreditCard, CheckCircle, Clock, XCircle, X } from 'lucide-react';
-import type { OrderStatus } from '../../../models/order.interface';
+import type { OrderStatus } from '../../../models';
+import React from "react";
 
 export const ORDER_STATUS_CONFIG: Record<OrderStatus, {
     label: string;

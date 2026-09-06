@@ -7,11 +7,9 @@ import {
 
 import { useProductManagement } from './hooks/useProductManagement';
 import { formatVND } from '../../data/formatter';
-import type { Product } from '../../models/product.interface';
+import type { Product } from '../../models';
 
-import { ProductInfoTable } from '../shared/product/ProductInfoTable';
-import { ProductCreatorLine } from '../shared/product/ProductCreatorLine';
-import { PRODUCT_TYPE_META } from '../shared/product/productTypeMetadata';
+import { ProductInfoTable, ProductCreatorLine, PRODUCT_TYPE_META } from '../shared/product';
 import AdjustStockModal from './AdjustStockModal';
 
 export default function ManagerProductDetail() {

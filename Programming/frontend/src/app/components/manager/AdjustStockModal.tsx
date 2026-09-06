@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { X, Package, AlertCircle, Plus, Minus, CheckCircle2, Loader2 } from 'lucide-react';
 import { useProductManagement } from './hooks/useProductManagement';
-import type { ProductSummary } from '../../models/product.interface';
+import type { ProductSummary } from '../../models';
 
 interface Props {
     product: ProductSummary;

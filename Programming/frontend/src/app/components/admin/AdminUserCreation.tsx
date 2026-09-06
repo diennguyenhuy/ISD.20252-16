@@ -1,8 +1,8 @@
-import {useState} from 'react';
+import React, {useState} from 'react';
 import {useNavigate} from 'react-router';
-import {ArrowLeft, UserPlus, AlertCircle, ChevronDown, Loader2} from 'lucide-react';
-import {AdminService} from '../../api/AdminService';
-import type {UserRole} from "../../models/user.interface";
+import {ArrowLeft, UserPlus, AlertCircle, Loader2} from 'lucide-react';
+import AdminService from '../../api/AdminService';
+import type {UserRole} from "../../models";
 
 interface FormData {
     username: string;

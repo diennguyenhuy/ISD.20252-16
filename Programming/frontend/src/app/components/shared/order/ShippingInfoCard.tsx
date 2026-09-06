@@ -1,5 +1,5 @@
 import { MapPin, Phone, Truck, User, LucideMail } from 'lucide-react';
-import type { DeliveryInformation } from '../../../models/order.interface';
+import type { DeliveryInformation } from '../../../models';
 
 interface ShippingInfoCardProps {
     delivery: DeliveryInformation;

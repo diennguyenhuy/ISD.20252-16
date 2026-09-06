@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { UserRole, User } from "../models/user.interface";
+import type { UserRole, User } from "../models";
 import type { Page } from "./Page";
 
 export interface CreateUserPayload {
@@ -8,13 +8,7 @@ export interface CreateUserPayload {
     roles: string[];
 }
 
-export interface ChangePasswordPayload {
-    currentPassword: string;
-    newPassword: string;
-    confirmPassword: string;
-}
-
-export const AdminService = {
+const AdminService = {
     getUsers: (page = 0, size = 100) =>
         apiClient.get<Page<User>>(`/admin/users?page=${page}&size=${size}`),
 
@@ -43,10 +37,6 @@ export const AdminService = {
         apiClient.post(`/admin/users/${id}/reset-password`),
 
     updateEmail: (id: string, newEmail: string) =>
-        apiClient.put(`/admin/users/${id}/email-update`),
+        apiClient.put(`/admin/users/${id}/email-update?new-email=${newEmail}`),
 };
-
-export const ProfileService = {
-    changePassword: (data: ChangePasswordPayload) =>
-        apiClient.post('/profile/password', data),
-};
+export default AdminService;

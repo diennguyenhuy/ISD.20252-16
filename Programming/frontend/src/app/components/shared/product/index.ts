@@ -1,5 +1,6 @@
 import { BookOpen, Disc, FileText, Tv } from 'lucide-react';
-import type { ProductTypeName } from '../../../models/product.interface';
+import type { ProductTypeName } from '../../../models';
+import React from "react";
 
 export const PRODUCT_TYPE_META: Record<ProductTypeName, {
     label: string;
@@ -11,3 +12,6 @@ export const PRODUCT_TYPE_META: Record<ProductTypeName, {
     DVD:       { label: 'DVD',                icon: Tv,       color: 'bg-accent/50 text-accent-foreground border-accent' },
     Newspaper: { label: 'Newspaper/Magazine', icon: FileText, color: 'bg-muted text-muted-foreground border-border' },
 };
+
+export { ProductInfoTable } from './ProductInfoTable';
+export { ProductCreatorLine } from './ProductCreatorLine';

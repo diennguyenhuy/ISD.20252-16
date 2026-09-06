@@ -1,4 +1,4 @@
-import type {ProductSummary} from "./product.interface";
+import type {ProductTypeName} from "./product.interface";
 
 export interface Cart {
     items: CartItem[];
@@ -7,7 +7,12 @@ export interface Cart {
 }
 
 export interface CartItem {
-    product: ProductSummary;
+    productId: string;
+    productTitle: string;
+    stockQuantity: number;
+    productImage?: string;
+    productType: ProductTypeName;
     quantity: number;
+    unitPrice: number;
     itemTotalPrice: number;
 }

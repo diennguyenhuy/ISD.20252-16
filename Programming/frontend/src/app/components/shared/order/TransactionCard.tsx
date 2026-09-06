@@ -1,5 +1,5 @@
 import { Calendar, CreditCard, FileText, Hash } from 'lucide-react';
-import type { PaymentTransaction } from '../../../models/order.interface';
+import type { PaymentTransaction } from '../../../models';
 import { formatDateTime } from '../../../data/formatter';
 
 interface TransactionCardProps {

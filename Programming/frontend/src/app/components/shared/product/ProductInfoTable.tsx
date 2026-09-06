@@ -1,6 +1,6 @@
 import { FileText, Package } from 'lucide-react';
-import type { Product } from "../../../models/product.interface";
-import { productFieldRendererRegistry } from './ProductFieldRendererRegistry';
+import type { Product } from "../../../models";
+import { ProductFieldRendererRegistry } from './ProductFieldRendererRegistry';
 import { InfoRow } from './InfoRow';
 import {formatDateTime, formatVND} from "../../../data/formatter";
 
@@ -47,7 +47,7 @@ export function ProductInfoTable({ product, showManagerFields = false }: Product
                     Specific Information
                 </h3>
                 <div className="space-y-1">
-                    {productFieldRendererRegistry.renderFields(product)}
+                    {ProductFieldRendererRegistry.renderFields(product)}
                 </div>
             </div>
 

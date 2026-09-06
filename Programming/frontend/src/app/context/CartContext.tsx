@@ -1,6 +1,6 @@
 import React, {createContext, useContext, useState, useEffect, type ReactNode} from 'react';
 import CartService from '../api/CartService';
-import type {Cart} from '../models/cart.interface';
+import type {Cart} from '../models';
 
 interface CartContextType {
     cart: Cart | null;

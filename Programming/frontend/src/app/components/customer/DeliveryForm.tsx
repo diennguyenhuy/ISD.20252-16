@@ -6,7 +6,7 @@ import { useCart } from '../../context/CartContext';
 import OrderService from '../../api/OrderService';
 import { formatVND } from '../../data/formatter';
 import { provinces, provinceToWards } from '../../data/provinceData';
-import type { DeliveryInformation } from '../../models/order.interface';
+import type { DeliveryInformation } from '../../models';
 
 type FieldError = {
     [K in keyof DeliveryInformation]?: DeliveryInformation[K] | undefined;
@@ -360,17 +360,17 @@ export default function DeliveryForm() {
                         {/* Scrollable list so huge carts don't break the layout */}
                         <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                             {cart.items.map(item => (
-                                <div key={item.product.id} className="flex gap-3">
+                                <div key={item.productId} className="flex gap-3">
                                     <div
                                         className="w-16 h-16 bg-muted rounded-lg shrink-0 overflow-hidden border border-border">
                                         <img
-                                            src={item.product.imageURL}
-                                            alt={item.product.title}
+                                            src={item.productImage}
+                                            alt={item.productTitle}
                                             className="w-full h-full object-cover"
                                         />
                                     </div>
                                     <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                        <h4 className="text-sm font-semibold text-foreground line-clamp-1">{item.product.title}</h4>
+                                        <h4 className="text-sm font-semibold text-foreground line-clamp-1">{item.productTitle}</h4>
                                         <div className="flex justify-between items-center mt-1">
                                             <span className="text-xs text-muted-foreground">Qty: {item.quantity}</span>
                                             <span

@@ -1,5 +1,5 @@
 import {ProductFieldRenderer} from "./ProductFieldRenderer";
-import type {DVD} from "../../../models/product.interface";
+import type {DVD} from "../../../models";
 import {InfoRow} from "./InfoRow";
 import {formatDate, formatDurationMinutes} from "../../../data/formatter";
 

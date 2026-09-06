@@ -1,4 +1,4 @@
-import type {Product, ProductTypeName} from "../../../models/product.interface";
+import type {Product, ProductTypeName} from "../../../models";
 import type {ProductFieldRenderer} from "./ProductFieldRenderer";
 import type { ReactNode } from 'react';
 import {BookFieldRenderer} from "./BookFieldRenderer";
@@ -17,10 +17,8 @@ const RENDERER_MAP: RenderMap = {
     DVD: new DVDFieldRenderer(),
 };
 
-class ProductFieldRendererRegistry {
-    renderFields(product: Product): ReactNode {
+export const ProductFieldRendererRegistry = {
+    renderFields: (product: Product): ReactNode => {
         return RENDERER_MAP[product.productType].render(product);
     }
 }
-
-export const productFieldRendererRegistry = new ProductFieldRendererRegistry();

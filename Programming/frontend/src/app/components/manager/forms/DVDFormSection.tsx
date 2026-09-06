@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ProductFormSection, type FieldComponent } from './ProductFormSection';
-import type { DVD, DiscType } from '../../../models/product.interface';
+import type { DVD, DiscType } from '../../../models';
 
 // @ts-ignore
 export class DVDFormSection extends ProductFormSection<

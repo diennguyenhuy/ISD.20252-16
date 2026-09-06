@@ -1,3 +1,5 @@
+import type {ProductTypeName} from "./product.interface";
+
 export type OrderStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'REFUNDED';
 
 export interface Order {
@@ -18,11 +20,14 @@ export type OrderDraft = Pick<Order, 'items'> & Partial<Pick<Order, 'deliveryInf
 export interface OrderItem {
     readonly productId?: string;
     readonly productReferenceId: string;
-    productName: string;
+    productTitle: string;
     productImage?: string;
+    productType?: ProductTypeName;
     quantity: number;
     unitPrice: number;
+    itemTotalPrice: number;
     unitWeight: number;
+    itemTotalWeight: number;
 }
 
 export interface DeliveryInformation {

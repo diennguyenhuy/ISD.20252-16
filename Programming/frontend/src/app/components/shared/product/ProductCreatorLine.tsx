@@ -1,4 +1,4 @@
-import type { Book, CD, DVD, Newspaper, Product, ProductTypeName } from '../../../models/product.interface';
+import type { Book, CD, DVD, Newspaper, Product, ProductTypeName } from '../../../models';
 
 type CreatorExtractor = (product: Product) => string | undefined;
 

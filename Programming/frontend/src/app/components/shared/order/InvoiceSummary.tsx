@@ -1,4 +1,4 @@
-import type { Invoice } from '../../../models/order.interface';
+import type { Invoice } from '../../../models';
 import { formatVND } from '../../../data/formatter';
 
 interface InvoiceSummaryProps {

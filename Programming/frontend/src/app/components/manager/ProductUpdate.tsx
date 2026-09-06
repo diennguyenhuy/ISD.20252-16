@@ -5,7 +5,7 @@ import ProductManagementService from '../../api/ProductManagementService';
 import { extractErrorMessage } from "./hooks/useProductManagement";
 import { Field, inputClass } from './forms/FormField';
 import { useAllFormSections } from './forms/ProductFormSectionRegistry';
-import { type ProductTypeName, PRODUCT_TYPES } from '../../models/product.interface';
+import { type ProductTypeName, PRODUCT_TYPES } from '../../models';
 
 export default function ProductUpdate() {
     const { id } = useParams<{ id: string }>();

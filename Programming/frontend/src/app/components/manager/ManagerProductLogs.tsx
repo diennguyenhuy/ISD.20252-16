@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { Activity, Search, Loader2, ArrowRight, PackagePlus, Edit3, Trash2, ShieldAlert, ArchiveRestore, Layers, ExternalLink } from 'lucide-react';
 import { formatDateTime } from '../../data/formatter'; // Adjust path
-import AuditLogService from '../../api/AuditLogService'; // Adjust path
-import type { ProductLog, ProductAction } from '../../models/audit.interface'; // Adjust path
+import { ProductAuditLogService } from '../../api/AuditLogService'; // Adjust path
+import type { ProductLog, ProductAction } from '../../models'; // Adjust path
 
 // Visual configuration for different action types
 const ACTION_CONFIG: Record<ProductAction | 'STOCK_ADJUST', { color: string, icon: any, label: string }> = {
@@ -27,7 +27,7 @@ export default function ManagerProductLogs() {
 
     const fetchLogs = async () => {
         try {
-            const data = await AuditLogService.getAuditLogs();
+            const data = await ProductAuditLogService.getProductLogs();
             setLogs(data);
         } catch (err) {
             console.error("Failed to load audit logs:", err);

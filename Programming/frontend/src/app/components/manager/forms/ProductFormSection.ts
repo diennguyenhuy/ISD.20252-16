@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import type { ProductTypeName } from '../../../models/product.interface';
+import React, { type ReactNode } from 'react';
+import type { ProductTypeName } from '../../../models';
 
 export abstract class ProductFormSection<C, U> {
     abstract readonly productType: ProductTypeName;

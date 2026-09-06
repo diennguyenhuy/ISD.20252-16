@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ProductFormSection, type FieldComponent } from './ProductFormSection';
-import type { CD, Track } from '../../../models/product.interface';
+import type { CD, Track } from '../../../models';
 import { Plus, Trash2 } from 'lucide-react';
 
 export interface TrackFormRow {

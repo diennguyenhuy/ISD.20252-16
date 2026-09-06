@@ -3,7 +3,7 @@ import { useNavigate, useLocation, useSearchParams } from 'react-router';
 import { ShieldCheck, AlertCircle, ArrowLeft, Loader2, Shield, Package, Info } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { apiClient } from '../../api/client';
-import type { User } from "../../models/user.interface";
+import type { User } from "../../models";
 
 export default function Login() {
   const navigate = useNavigate();

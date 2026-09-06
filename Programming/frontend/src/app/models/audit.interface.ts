@@ -1,6 +1,7 @@
 interface AuditLogBase {
     readonly id: string;
     readonly timestamp: string;
+    readonly action: string;
 }
 
 interface ProductLogBase extends AuditLogBase {
@@ -18,11 +19,15 @@ export interface ProductUpdateLog extends ProductLogBase {
     readonly details: ProductEditDetail[];
 }
 
-export interface ProductEditDetail {
+export type ProductEditDetail = {
     readonly fieldName: string;
     readonly oldValue: string;
     readonly newValue: string;
-}
+} | {
+    readonly fieldName: string;
+    readonly removedValues: string[];
+    readonly addedValues: string[];
+};
 
 export type ProductAction = "CREATE" | "UPDATE" | "DELETE" | "DEACTIVATE" | "ACTIVATE" | "STOCK_ADJUST";
 
@@ -37,8 +42,19 @@ export interface AdminLog extends AuditLogBase {
     readonly action: UserAction;
     readonly adminId: string;
     readonly adminUsername: string;
+    readonly adminEmail: string;
     readonly affectedUserId: string;
     readonly affectedUsername: string;
+    readonly affectedUserEmail: string;
 }
 
 export type UserAction = "CREATE" | "ACTIVATE" | "DEACTIVATE" | "BLOCK" | "UNBLOCK" | "MODIFY_ROLE" | "RESET_PASSWORD" | "UPDATE_EMAIL";
+
+export interface OrderLog extends AuditLogBase {
+    readonly action: OrderAction;
+    readonly orderId: string;
+    readonly managerId?: string;
+    readonly managerUsername?: string;
+}
+
+export type OrderAction = "PLACE" | "APPROVE" | "REJECT" | "CANCEL" | "REFUND" | "CANCEL_REFUND" | "REJECT_REFUND";

@@ -3,9 +3,9 @@ import {useNavigate} from 'react-router';
 import {
     Search, Plus, UserCheck, UserX, Shield, ShieldOff, Eye, ChevronDown, Users, Loader2, AlertTriangle
 } from 'lucide-react';
-import {AdminService} from '../../api/AdminService';
+import AdminService from '../../api/AdminService';
 import {useAuth} from '../../context/AuthContext';
-import type {UserRole, User} from "../../models/user.interface";
+import type {UserRole, User} from "../../models";
 import {formatDate} from '../../data/formatter';
 
 const ROLE_LABELS: Record<UserRole | 'customer', string> = {
