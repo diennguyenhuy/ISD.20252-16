@@ -4,12 +4,9 @@ import com.hust.soict.ict.aims.exceptions.*;
 import com.hust.soict.ict.aims.dto.request.DeliveryRequest;
 import com.hust.soict.ict.aims.dto.response.order.OrderDraftResponse;
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
-import static com.hust.soict.ict.aims.dto.response.order.OrderMappers.*;
+import static com.hust.soict.ict.aims.dto.response.order.OrderMapper.*;
 import com.hust.soict.ict.aims.services.order.OrderService;
 import com.hust.soict.ict.aims.services.order.PlaceOrderService;
-import com.hust.soict.ict.aims.subsystems.PaymentInitiation;
-import com.hust.soict.ict.aims.subsystems.PaymentInitiationService;
-import com.hust.soict.ict.aims.subsystems.exception.PaymentException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,7 +23,6 @@ import java.util.UUID;
 public class OrderController {
     private final PlaceOrderService placeOrderService;
     private final OrderService orderService;
-    private final PaymentInitiationService paymentInitiationService;
 
     /**
      * POST /order - endpoint for request to place order. Return 201 if success
@@ -58,12 +54,6 @@ public class OrderController {
     @PostMapping("/invoice")
     public OrderDraftResponse getInvoice() {
         return map(placeOrderService.getInvoice());
-    }
-
-    @PostMapping("/payment/{method}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public PaymentInitiation initiatePayment(@PathVariable String method) throws PaymentException {
-        return paymentInitiationService.initiatePayment(method);
     }
 
     /**

@@ -1,38 +1,36 @@
 package com.hust.soict.ict.aims.dto.response.cart;
 
-import com.hust.soict.ict.aims.dto.response.product.ProductMappers;
 import com.hust.soict.ict.aims.models.cart.Cart;
 import com.hust.soict.ict.aims.models.cart.CartItem;
-import org.springframework.stereotype.Component;
 
-@Component
-public class CartMapper {
-    private final ProductMappers productMappers;
+public final class CartMapper {
+    private CartMapper() {}
 
-    private CartMapper(ProductMappers productMappers) {
-        this.productMappers = productMappers;
-    }
-
-    public CartResponse map(Cart cart) {
+    public static CartResponse map(Cart cart) {
         if (cart == null) {
             return null;
         }
 
         return new CartResponse(
-                cart.getItems().stream().map(this::map).toList(),
+                cart.getItems().stream().map(CartMapper::map).toList(),
                 cart.getTotalQuantity(),
                 cart.getTotalPrice()
         );
     }
 
-    public CartItemResponse map(CartItem cartItem) {
+    public static CartItemResponse map(CartItem cartItem) {
         if (cartItem == null) {
             return null;
         }
 
         return new CartItemResponse(
-                productMappers.mapSummary(cartItem.getProduct()),
+                cartItem.getProduct().getId(),
+                cartItem.getProduct().getTitle(),
+                cartItem.getProduct().getStockQuantity(),
+                cartItem.getProduct().getImageURL().orElse(null),
+                cartItem.getProduct().getClass().getSimpleName(),
                 cartItem.getQuantity(),
+                cartItem.getProduct().getCurrentPrice(),
                 cartItem.getItemTotalPrice()
         );
     }

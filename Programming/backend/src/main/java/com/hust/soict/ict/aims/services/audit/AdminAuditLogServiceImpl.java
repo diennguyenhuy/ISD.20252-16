@@ -13,6 +13,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 class AdminAuditLogServiceImpl implements AdminAuditLogService {
     private final AdminLogRepository adminLogRepository;
+    private static final int MAX_LOG = 100;
 
     @Override
     public List<AdminLog> getAdminAuditLogs() {
@@ -26,7 +27,7 @@ class AdminAuditLogServiceImpl implements AdminAuditLogService {
     public List<AdminLog> getAdminLogByUser(UUID userId) {
         return adminLogRepository.findAllByAdminId(userId).stream()
                 .sorted(Comparator.comparing(AdminLog::getTimestamp).reversed())
-                .limit(MAX_LOG)
+                .limit(MAX_LOG/5)
                 .toList();
     }
 }

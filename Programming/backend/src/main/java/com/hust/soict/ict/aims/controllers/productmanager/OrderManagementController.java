@@ -1,8 +1,8 @@
 package com.hust.soict.ict.aims.controllers.productmanager;
 
 import com.hust.soict.ict.aims.dto.response.order.OrderResponse;
-import com.hust.soict.ict.aims.dto.response.order.OrderMappers;
-import static com.hust.soict.ict.aims.dto.response.order.OrderMappers.*;
+import com.hust.soict.ict.aims.dto.response.order.OrderMapper;
+import static com.hust.soict.ict.aims.dto.response.order.OrderMapper.*;
 import com.hust.soict.ict.aims.exceptions.OrderApprovalException;
 import com.hust.soict.ict.aims.exceptions.OrderRefundException;
 import com.hust.soict.ict.aims.exceptions.OrderRejectionException;
@@ -33,7 +33,7 @@ public class OrderManagementController {
                     direction = Sort.Direction.ASC
             ) Pageable pageable
     ) {
-        return orderQueryService.getPendingOrders(pageable).map(OrderMappers::map);
+        return orderQueryService.getPendingOrders(pageable).map(OrderMapper::map);
     }
 
     @GetMapping
@@ -44,7 +44,7 @@ public class OrderManagementController {
                     direction = Sort.Direction.DESC
             ) Pageable pageable
     ) {
-        return orderQueryService.getOrders(status, pageable).map(OrderMappers::map);
+        return orderQueryService.getOrders(status, pageable).map(OrderMapper::map);
     }
 
     @GetMapping("/{orderId}")

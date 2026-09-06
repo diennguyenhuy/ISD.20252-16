@@ -1,9 +1,10 @@
 package com.hust.soict.ict.aims.dto.response.order;
 
 import com.hust.soict.ict.aims.models.entities.order.*;
+import com.hust.soict.ict.aims.models.entities.product.Product;
 
-public final class OrderMappers {
-    private OrderMappers() {}
+public final class OrderMapper {
+    private OrderMapper() {}
 
     public static OrderResponse map(final Order order) {
         if (order == null) {
@@ -12,7 +13,7 @@ public final class OrderMappers {
 
         return new OrderResponse(
                 order.getId(),
-                order.getItems().stream().map(OrderMappers::map).toList(),
+                order.getItems().stream().map(OrderMapper::map).toList(),
                 order.getStatus().name(),
                 order.getTotalWeight(),
                 order.getTotalItemCount(),
@@ -31,7 +32,7 @@ public final class OrderMappers {
 
         return new OrderDraftResponse(
                 draft.checkoutId,
-                draft.getItems().stream().map(OrderMappers::map).toList(),
+                draft.getItems().stream().map(OrderMapper::map).toList(),
                 map(draft.getDeliveryInformation()),
                 map(draft.getInvoice())
         );
@@ -42,22 +43,17 @@ public final class OrderMappers {
             return null;
         }
 
-        if (orderItem.getProduct() != null) {
-            return new OrderItemResponse(
-                    orderItem.getProduct().getId(),
-                    orderItem.getId().getProductReferenceId(),
-                    orderItem.getProductName(),
-                    orderItem.getProduct().getImageURL(),
-                    orderItem.getQuantity(),
-                    orderItem.getUnitPrice(),
-                    orderItem.getItemTotalPrice()
-            );
-        } else return new OrderItemResponse(
+        return new OrderItemResponse(
+                orderItem.getProduct().map(Product::getId).orElse(null),
                 orderItem.getId().getProductReferenceId(),
-                orderItem.getProductName(),
+                orderItem.getProductTitle(),
+                orderItem.getProduct().flatMap(Product::getImageURL).orElse(null),
+                orderItem.getProduct().map(Product::getClass).map(Class::getSimpleName).orElse(null),
                 orderItem.getQuantity(),
                 orderItem.getUnitPrice(),
-                orderItem.getItemTotalPrice()
+                orderItem.getItemTotalPrice(),
+                orderItem.getUnitWeight(),
+                orderItem.getItemTotalWeight()
         );
     }
 

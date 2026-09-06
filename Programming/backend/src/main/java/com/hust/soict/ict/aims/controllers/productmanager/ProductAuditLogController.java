@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/manager/logs")
+@RequestMapping("/manager/products/logs")
 @RequiredArgsConstructor
 public class ProductAuditLogController {
     private final ProductAuditLogService productAuditLogService;

@@ -23,7 +23,7 @@ public abstract class ProductMapper<P extends Product, D extends ProductDetail> 
         productDetail.setId(product.getId());
         productDetail.setTitle(product.getTitle());
         productDetail.setCategory(product.getCategory());
-        productDetail.setDescription(product.getDescription());
+        product.getDescription().ifPresent(productDetail::setDescription);
         productDetail.setHeight(product.getHeight());
         productDetail.setWidth(product.getWidth());
         productDetail.setLength(product.getLength());
@@ -33,7 +33,7 @@ public abstract class ProductMapper<P extends Product, D extends ProductDetail> 
         productDetail.setCurrentPrice(product.getCurrentPrice());
         productDetail.setStockQuantity(product.getStockQuantity());
         productDetail.setStatus(product.getStatus().name());
-        productDetail.setImageURL(product.getImageURL());
+        product.getImageURL().ifPresent(productDetail::setImageURL);
         productDetail.setCreatedAt(product.getCreatedAt());
         productDetail.setUpdatedAt(product.getUpdatedAt());
         productDetail.setProductType(productClass.getSimpleName());
@@ -55,7 +55,7 @@ public abstract class ProductMapper<P extends Product, D extends ProductDetail> 
                 product.getStockQuantity(),
                 productClass.getSimpleName(),
                 creators(product),
-                product.getImageURL(),
+                product.getImageURL().orElse(null),
                 product.getStatus().name()
         );
     }

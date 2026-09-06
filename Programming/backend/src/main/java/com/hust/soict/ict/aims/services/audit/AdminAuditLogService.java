@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface AdminAuditLogService {
-    int MAX_LOG = 100;
     List<AdminLog> getAdminAuditLogs();
     List<AdminLog> getAdminLogByUser(UUID userId);
 }

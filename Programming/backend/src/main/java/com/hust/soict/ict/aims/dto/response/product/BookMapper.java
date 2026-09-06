@@ -15,8 +15,8 @@ class BookMapper extends PrintableProductMapper<Book, BookDetail> {
     protected void mapPrintableProduct(Book product, BookDetail productDetail) {
         productDetail.setAuthors(product.getAuthors());
         productDetail.setCoverType(product.getCoverType().name());
-        productDetail.setNumberOfPages(product.getNumberOfPages());
-        productDetail.setGenre(product.getGenre());
+        product.getNumberOfPages().ifPresent(productDetail::setNumberOfPages);
+        product.getGenre().ifPresent(productDetail::setGenre);
     }
 
     @Override

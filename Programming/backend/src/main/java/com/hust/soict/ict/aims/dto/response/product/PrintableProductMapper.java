@@ -13,7 +13,7 @@ abstract class PrintableProductMapper<P extends PrintableProduct, D extends Prin
     protected final void mapProduct(P product, D productDetail) {
         productDetail.setPublisher(product.getPublisher());
         productDetail.setPublicationDate(product.getPublicationDate());
-        productDetail.setLanguage(product.getLanguage());
+        product.getLanguage().ifPresent(productDetail::setLanguage);
         mapPrintableProduct(product, productDetail);
     }
 

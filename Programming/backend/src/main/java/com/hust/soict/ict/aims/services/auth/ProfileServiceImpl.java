@@ -1,6 +1,10 @@
 package com.hust.soict.ict.aims.services.auth;
 
 import com.hust.soict.ict.aims.dto.request.ChangePasswordRequest;
+import com.hust.soict.ict.aims.exceptions.AccountNotFoundException;
+import com.hust.soict.ict.aims.exceptions.PasswordChangeConfirmationException;
+import com.hust.soict.ict.aims.exceptions.PasswordChangeOverlapException;
+import com.hust.soict.ict.aims.exceptions.PasswordNotCorrectException;
 import com.hust.soict.ict.aims.models.entities.user.User;
 import com.hust.soict.ict.aims.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 /**
@@ -41,24 +44,24 @@ class ProfileServiceImpl implements ProfileService {
      * @param userId  the ID of the authenticated user (from SecurityContext)
      * @param request the password change payload
      */
-    @Transactional
+    @Override
     public void changePassword(UUID userId, ChangePasswordRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException("User not found with ID: " + userId));
+                .orElseThrow(() -> new AccountNotFoundException("User not found with ID: " + userId));
 
         // 1. Verify current password
         if (!passwordEncoder.matches(request.currentPassword(), user.getHashedPassword())) {
-            throw new IllegalArgumentException("Current password is incorrect.");
+            throw new PasswordNotCorrectException();
         }
 
         // 2. Verify new password and confirmation match
         if (!request.newPassword().equals(request.confirmPassword())) {
-            throw new IllegalArgumentException("New password and confirmation do not match.");
+            throw new PasswordChangeConfirmationException();
         }
 
         // 3. Verify new password differs from current
         if (passwordEncoder.matches(request.newPassword(), user.getHashedPassword())) {
-            throw new IllegalArgumentException("New password must be different from the current password.");
+            throw new PasswordChangeOverlapException();
         }
 
         // 4. Hash and persist — updatePassword() also clears mustChangePassword
@@ -67,5 +70,14 @@ class ProfileServiceImpl implements ProfileService {
         userRepository.save(user);
 
         log.info("User {} ({}) changed their password.", user.getUsername(), user.getEmail());
+    }
+
+    @Override
+    public void changeUsername(UUID userId, String newUsername) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AccountNotFoundException("User not found with ID: " + userId));
+        user.setUsername(newUsername);
+        userRepository.save(user);
+        log.info("User {} ({}) changed their username.", user.getUsername(), user.getEmail());
     }
 }

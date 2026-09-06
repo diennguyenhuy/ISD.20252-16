@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import static com.hust.soict.ict.aims.dto.response.order.OrderMappers.*;
+import static com.hust.soict.ict.aims.dto.response.order.OrderMapper.*;
 
 @RestController
 @RequestMapping("/order/payment/vietqr")

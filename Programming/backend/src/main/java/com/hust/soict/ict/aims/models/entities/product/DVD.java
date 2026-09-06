@@ -61,6 +61,14 @@ public class DVD extends Product {
         return Collections.unmodifiableList(subtitles);
     }
 
+    public Optional<LocalDate> getReleaseDate() {
+        return Optional.ofNullable(releaseDate);
+    }
+
+    public Optional<String> getGenre() {
+        return Optional.ofNullable(genre);
+    }
+
     private DVD(Builder builder) {
         super(builder);
         this.releaseDate = builder.releaseDate;

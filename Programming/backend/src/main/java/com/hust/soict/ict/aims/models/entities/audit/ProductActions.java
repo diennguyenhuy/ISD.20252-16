@@ -41,24 +41,8 @@ public final class ProductActions {
             return ProductAction.UPDATE;
         }
 
-        @SuppressWarnings("unchecked")
-        public <T> void extractRequestedFieldNames(Object requestObject, Function<T, Boolean> definedPredicate) {
-            for (Class<?> clazz = requestObject.getClass(); clazz != Object.class; clazz = clazz.getSuperclass()) {
-                for (Field field : clazz.getDeclaredFields()) {
-                    if (Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) continue;
-
-                    try {
-                        field.setAccessible(true);
-                        String fieldName = field.getName();
-                        T value = (T) field.get(requestObject);
-                        if (definedPredicate.apply(value)) {
-                            requestedFieldNames.add(fieldName);
-                        }
-                    } catch (IllegalAccessException e) {
-                        System.out.println("[UNREACHABLE] Failed to access DTO field: " + field.getName() + ": " + e.getMessage());
-                    }
-                }
-            }
+        public void requestedFieldName(String fieldName) {
+            requestedFieldNames.add(fieldName);
         }
 
         public void extractOldValues(Product product) {
@@ -120,8 +104,8 @@ public final class ProductActions {
                 }
             }
         }
-        public ProductUpdateLog build(User manager, Product product) {
-            return new ProductUpdateLog(manager, product, editDetails, editArrayDetails);
+        public ProductLog build(User manager, Product product) {
+            return new ProductLog(manager, product, editDetails, editArrayDetails);
         }
     }
 

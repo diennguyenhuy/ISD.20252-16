@@ -14,6 +14,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 class ProductAuditLogServiceImpl implements ProductAuditLogService {
     private final ProductLogRepository productLogRepository;
+    private static final int MAX_LOG = 100;
 
     @Override
     @Transactional(readOnly = true)
@@ -28,7 +29,7 @@ class ProductAuditLogServiceImpl implements ProductAuditLogService {
     public List<ProductLog> getProductLogsByProductId(UUID productId) {
         return productLogRepository.findByProductId(productId).stream()
                 .sorted(Comparator.comparing(ProductLog::getTimestamp).reversed())
-                .limit(MAX_LOG)
+                .limit(MAX_LOG/5)
                 .toList();
     }
 }

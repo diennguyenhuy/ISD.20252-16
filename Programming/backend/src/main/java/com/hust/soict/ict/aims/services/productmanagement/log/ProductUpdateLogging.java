@@ -4,7 +4,7 @@ import com.hust.soict.ict.aims.dto.request.UpdateFieldRequest;
 import com.hust.soict.ict.aims.dto.request.UpdateProductRequest;
 import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
 import com.hust.soict.ict.aims.models.entities.audit.ProductActions;
-import com.hust.soict.ict.aims.models.entities.audit.ProductUpdateLog;
+import com.hust.soict.ict.aims.models.entities.audit.ProductLog;
 import com.hust.soict.ict.aims.models.entities.product.Product;
 import com.hust.soict.ict.aims.repositories.ProductLogRepository;
 import com.hust.soict.ict.aims.repositories.ProductRepository;
@@ -16,6 +16,8 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.UUID;
 
 @Component @Aspect
@@ -29,7 +31,21 @@ class ProductUpdateLogging {
     @Around(value = "@annotation(AuditUpdate) && args(id, dto)", argNames = "pjp,id,dto")
     Object log(ProceedingJoinPoint pjp, UUID id, UpdateProductRequest dto) throws Throwable {
         var logBuilder = ProductActions.UPDATE.get();
-        logBuilder.<UpdateFieldRequest<?>>extractRequestedFieldNames(dto, UpdateFieldRequest::isDefined);
+
+        for (Class<?> clazz = dto.getClass(); clazz != Object.class; clazz = clazz.getSuperclass()) {
+            for (Field field : clazz.getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) continue;
+
+                try {
+                    field.setAccessible(true);
+                    String fieldName = field.getName();
+                    var value = (UpdateFieldRequest<?>) field.get(dto);
+                    value.ifDefined(_ -> logBuilder.requestedFieldName(fieldName));
+                } catch (IllegalAccessException e) {
+                    System.out.println("[UNREACHABLE] Failed to access DTO field: " + field.getName() + ": " + e.getMessage());
+                }
+            }
+        }
 
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> {
@@ -43,7 +59,7 @@ class ProductUpdateLogging {
 
         logBuilder.extractNewValues(product);
 
-        ProductUpdateLog updateLog = logBuilder.build(authenticationFacade.getCurrentUser(), product);
+        ProductLog updateLog = logBuilder.build(authenticationFacade.getCurrentUser(), product);
 
         productLogRepository.save(updateLog);
 

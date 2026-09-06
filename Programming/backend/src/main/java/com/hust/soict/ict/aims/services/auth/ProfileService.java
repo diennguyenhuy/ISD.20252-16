@@ -6,4 +6,5 @@ import java.util.UUID;
 
 public interface ProfileService {
     void changePassword(UUID userId, ChangePasswordRequest request);
+    void changeUsername(UUID userId, String newUsername);
 }

@@ -14,10 +14,10 @@ class NewspaperMapper extends PrintableProductMapper<Newspaper, NewspaperDetail>
     @Override
     protected void mapPrintableProduct(Newspaper product, NewspaperDetail productDetail) {
         productDetail.setEditorInChief(product.getEditorInChief());
-        productDetail.setIssueNumber(product.getIssueNumber());
-        productDetail.setPublicationFrequency(product.getPublicationFrequency());
-        productDetail.setISSN(product.getISSN());
-        productDetail.setSections(product.getSections());
+        product.getIssueNumber().ifPresent(productDetail::setIssueNumber);
+        product.getPublicationFrequency().ifPresent(productDetail::setPublicationFrequency);
+        product.getISSN().ifPresent(productDetail::setISSN);
+        product.getSections().ifPresent(productDetail::setSections);
     }
 
     @Override

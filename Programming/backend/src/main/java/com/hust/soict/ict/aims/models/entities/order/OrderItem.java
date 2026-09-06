@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Entity
 @Table(
@@ -30,7 +31,7 @@ public class OrderItem {
     private Product product;
 
     @Column(nullable = false)
-    private String productName;
+    private String productTitle;
 
     @Column(nullable = false)
     private Integer quantity;
@@ -46,16 +47,19 @@ public class OrderItem {
     }
 
     @Transient
-    BigDecimal getItemTotalWeight() {
+    public BigDecimal getItemTotalWeight() {
         return unitWeight.multiply(BigDecimal.valueOf(quantity));
+    }
+
+    public Optional<Product> getProduct() {
+        return Optional.ofNullable(product);
     }
 
     OrderItem(CartItem cartItem, Order order) {
         this.order = order;
         this.product = cartItem.getProduct();
         this.id = new OrderItemKey(cartItem.getProduct().getId());
-
-        this.productName = cartItem.getProduct().getTitle();
+        this.productTitle = cartItem.getProduct().getTitle();
         this.unitPrice = cartItem.getProduct().getCurrentPrice();
         this.unitWeight = cartItem.getProduct().getWeight();
         this.quantity = cartItem.getQuantity();

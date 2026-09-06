@@ -13,8 +13,8 @@ class DVDMapper extends ProductMapper<DVD, DVDDetail> {
 
     @Override
     protected void mapProduct(DVD product, DVDDetail productDetail) {
-        productDetail.setReleaseDate(product.getReleaseDate());
-        productDetail.setGenre(product.getGenre());
+        product.getReleaseDate().ifPresent(productDetail::setReleaseDate);
+        product.getGenre().ifPresent(productDetail::setGenre);
         productDetail.setDiscType(product.getDiscType().name());
         productDetail.setDirector(product.getDirector());
         productDetail.setRuntime(product.getRuntime());

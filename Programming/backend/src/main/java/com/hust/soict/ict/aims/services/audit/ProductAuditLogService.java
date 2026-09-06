@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ProductAuditLogService {
-    int MAX_LOG = 100;
     List<ProductLog> getProductAuditLogs();
     List<ProductLog> getProductLogsByProductId(UUID productId);
 }

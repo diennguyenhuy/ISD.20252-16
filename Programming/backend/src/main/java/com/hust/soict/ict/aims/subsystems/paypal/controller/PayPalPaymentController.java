@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import static com.hust.soict.ict.aims.dto.response.order.OrderMappers.map;
+import static com.hust.soict.ict.aims.dto.response.order.OrderMapper.map;
 
 /**
  * HTTP entry point for the PayPal (credit-card) payment use case.
@@ -34,7 +34,7 @@ public class PayPalPaymentController {
     @PostMapping("/capture")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody OrderResponse capturePayment(
-            @RequestParam(name = "captureRequestToken")
+            @RequestParam(name = "token")
             @NotBlank String captureRequestToken
     ) throws PaymentException {
         return map(paypalPaymentService.capturePayment(captureRequestToken));

@@ -151,12 +151,8 @@ CREATE TABLE IF NOT EXISTS product_log(
     timestamp	        TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS product_update_log(
-    id      UUID PRIMARY KEY REFERENCES product_log(id) ON DELETE CASCADE
-);
-
 CREATE TABLE IF NOT EXISTS product_update_detail(
-    log_id          UUID REFERENCES product_update_log(id) ON DELETE CASCADE,
+    log_id          UUID REFERENCES product_log(id) ON DELETE CASCADE,
     field_name      VARCHAR(255),
     old_value       TEXT,
     new_value       TEXT,
@@ -164,7 +160,7 @@ CREATE TABLE IF NOT EXISTS product_update_detail(
 );
 
 CREATE TABLE IF NOT EXISTS product_update_array_detail(
-    log_id          UUID REFERENCES product_update_log(id) ON DELETE CASCADE,
+    log_id          UUID REFERENCES product_log(id) ON DELETE CASCADE,
     field_name      VARCHAR(255),
     removed_values  TEXT[],
     added_values    TEXT[],

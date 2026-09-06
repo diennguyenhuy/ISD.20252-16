@@ -24,7 +24,7 @@ public class Book extends PrintableProduct {
     @JdbcTypeCode(SqlTypes.ARRAY)
     @Column(name = "authors", nullable = false)
     @Setter
-    private List<String> authors = new ArrayList<>();
+    private List<String> authors;
 
     @Enumerated(EnumType.STRING)
     @Immutable
@@ -40,6 +40,14 @@ public class Book extends PrintableProduct {
 
     public List<String> getAuthors() {
         return Collections.unmodifiableList(authors);
+    }
+
+    public Optional<Integer> getNumberOfPages() {
+        return Optional.ofNullable(numberOfPages);
+    }
+
+    public Optional<String> getGenre() {
+        return Optional.ofNullable(genre);
     }
 
     private Book(Builder builder) {

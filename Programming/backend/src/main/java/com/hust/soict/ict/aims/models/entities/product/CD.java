@@ -51,6 +51,10 @@ public class CD extends Product {
         return Collections.unmodifiableList(tracks);
     }
 
+    public Optional<LocalDate> getReleaseDate() {
+        return Optional.ofNullable(releaseDate);
+    }
+
     private CD(Builder builder) {
         super(builder);
         this.releaseDate = builder.releaseDate;

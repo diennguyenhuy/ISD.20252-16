@@ -2,6 +2,7 @@ package com.hust.soict.ict.aims.models.entities.product;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Optional;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -27,6 +28,10 @@ public abstract class PrintableProduct extends Product {
     @Column(length = 50)
     @Setter
     private String language;
+
+    public Optional<String> getLanguage() {
+        return Optional.ofNullable(language);
+    }
 
     protected PrintableProduct(Builder<?> builder) {
         super(builder);

@@ -17,6 +17,7 @@ public class User extends VersionedEntity {
     }
 
     @Column(nullable = false)
+    @NonNull @Setter
     private String username;
 
     @Column(nullable = false, unique = true)

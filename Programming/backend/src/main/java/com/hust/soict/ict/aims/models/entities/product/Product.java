@@ -133,6 +133,14 @@ public abstract class Product extends VersionedEntity {
         status = Status.ACTIVE;
     }
 
+    public Optional<String> getDescription() {
+        return Optional.ofNullable(description);
+    }
+
+    public Optional<String> getImageURL() {
+        return Optional.ofNullable(imageURL);
+    }
+
     protected Product(Builder<?> builder) {
         this.title = Objects.requireNonNull(builder.title, "Product title cannot be null");
         this.category = Objects.requireNonNull(builder.category, "Product category cannot be null");

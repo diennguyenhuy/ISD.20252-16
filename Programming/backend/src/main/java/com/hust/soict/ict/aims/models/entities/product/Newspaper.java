@@ -35,10 +35,22 @@ public class Newspaper extends PrintableProduct {
     @JdbcTypeCode(SqlTypes.ARRAY)
     @Column(name = "sections")
     @Setter
-    private List<String> sections = new ArrayList<>();
+    private List<String> sections;
 
-    public List<String> getSections() {
-        return Collections.unmodifiableList(sections);
+    public Optional<List<String>> getSections() {
+        return Optional.ofNullable(sections == null ? null : Collections.unmodifiableList(sections));
+    }
+
+    public Optional<String> getISSN() {
+        return Optional.ofNullable(ISSN);
+    }
+
+    public Optional<String> getIssueNumber() {
+        return Optional.ofNullable(issueNumber);
+    }
+
+    public Optional<String> getPublicationFrequency() {
+        return Optional.ofNullable(publicationFrequency);
     }
 
     private Newspaper(Builder builder) {

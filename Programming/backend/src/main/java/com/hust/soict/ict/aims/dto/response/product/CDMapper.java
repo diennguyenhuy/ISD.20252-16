@@ -13,7 +13,7 @@ class CDMapper extends ProductMapper<CD, CDDetail> {
 
     @Override
     protected void mapProduct(CD product, CDDetail productDetail) {
-        productDetail.setReleaseDate(product.getReleaseDate());
+        product.getReleaseDate().ifPresent(productDetail::setReleaseDate);
         productDetail.setGenre(product.getGenre());
         productDetail.setArtists(product.getArtists());
         productDetail.setRecordLabel(product.getRecordLabel());

@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Immutable @Entity
@@ -38,6 +39,14 @@ public class OrderLog extends AuditLog {
         this(action, order);
         this.managerId = manager.getId();
         this.managerUsername = manager.getUsername();
+    }
+
+    public Optional<UUID> getManagerId() {
+        return Optional.ofNullable(managerId);
+    }
+
+    public Optional<String> getManagerUsername() {
+        return Optional.ofNullable(managerUsername);
     }
 
     @Override

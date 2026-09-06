@@ -50,7 +50,9 @@ class OrderManagementServiceImpl implements OrderQueryService, OrderManagementSe
                 .orElseThrow(() -> new OrderNotFoundException(id, Order.Status.PENDING.name()));
 
         order.approve(this::validateOrder);
-        order.getItems().forEach(i -> i.getProduct().updateStock(i.getProduct().getStockQuantity() - i.getQuantity()));
+        order.getItems().forEach(i -> i.getProduct().ifPresent(
+                p -> p.updateStock(p.getStockQuantity() - i.getQuantity())
+        ));
 
         applicationEventPublisher.publishEvent(new OrderApprovalEvent(order));
 
@@ -63,16 +65,18 @@ class OrderManagementServiceImpl implements OrderQueryService, OrderManagementSe
         Map<UUID, Record> insufficientQuantity = new HashMap<>();
         Map<UUID, String> missingProducts = new HashMap<>();
 
-        order.getItems().forEach(i -> {
-            if (i.getProduct() == null || i.getProduct().getStatus() != Product.Status.ACTIVE) {
-                missingProducts.put(i.getId().getProductReferenceId(), i.getProductName());
-                return;
-            }
-
-            if (i.getProduct().getStockQuantity() < i.getQuantity()) {
-                insufficientQuantity.put(i.getProduct().getId(), new Quantity(i.getProductName(), i.getQuantity(), i.getProduct().getStockQuantity()));
-            }
-        });
+        order.getItems().forEach(i -> i.getProduct().ifPresentOrElse(
+                p -> {
+                    if (p.getStatus() != Product.Status.ACTIVE) {
+                        missingProducts.put(i.getId().getProductReferenceId(), i.getProductTitle());
+                        return;
+                    }
+                    if (p.getStockQuantity() < i.getQuantity()) {
+                        insufficientQuantity.put(p.getId(), new Quantity(i.getProductTitle(), i.getQuantity(), p.getStockQuantity()));
+                    }
+                },
+                () -> missingProducts.put(i.getId().getProductReferenceId(), i.getProductTitle())
+        ));
 
         if (!insufficientQuantity.isEmpty() || !missingProducts.isEmpty()) {
             throw new OrderApprovalException(insufficientQuantity, missingProducts);

@@ -1,17 +1,17 @@
 package com.hust.soict.ict.aims.dto.response.order;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public record OrderItemResponse(
         UUID productId,
         UUID productReferenceId,
-        String productName,
+        String productTitle,
         String productImage,
+        String productType,
         int quantity,
         long unitPrice,
-        long itemTotalPrice
-) {
-    public OrderItemResponse(UUID productReferenceId, String productName, int quantity, long unitPrice, long itemTotalPrice) {
-        this(null, productReferenceId, productName, null, quantity, unitPrice, itemTotalPrice);
-    }
-}
+        long itemTotalPrice,
+        BigDecimal unitWeight,
+        BigDecimal itemTotalWeight
+) {}

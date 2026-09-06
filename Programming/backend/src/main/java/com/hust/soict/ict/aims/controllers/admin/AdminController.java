@@ -92,7 +92,7 @@ public class AdminController {
     @PutMapping("/{userId}/email-update")
     public UserResponse updateEmail(
             @PathVariable UUID userId,
-            @RequestParam(name = "newEmail")
+            @RequestParam(name = "new-email")
             @NotBlank
             String newEmail
     ) {
