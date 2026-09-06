@@ -36,6 +36,9 @@ public class ProductLog extends AuditLog {
     private String productTitle;
 
     ProductLog(User manager, Product product, ProductAction action) {
+        if (action == ProductAction.UPDATE) {
+            throw new IllegalArgumentException("Must specify field difference with " + ProductAction.UPDATE + " audit logging. Hint: Use the other constructor.");
+        }
         super();
         this.managerId = manager.getId();
         this.managerUsername = manager.getUsername();

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
-import PayByCreditCardService from '../../api/PayByCreditCardService';
+import { PayByCreditCardService } from '../../api/payment';
 
 /**
  * PayPal return handler (route: /checkout/payment/paypal/callback).

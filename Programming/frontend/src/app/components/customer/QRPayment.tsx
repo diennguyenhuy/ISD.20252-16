@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
-import { CreditCard, X, Smartphone, CheckCircle2, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { CreditCard, X, CheckCircle2, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import QRCode from 'qrcode';
-import PayOrderService from '../../api/PayOrderService';
 import OrderService from '../../api/OrderService';
-import type { QRCodeResponse } from '../../models/payment.interface';
+import { PayOrderService, type QRCodeResponse } from '../../api/payment';
 
 type ConfirmState =
     | 'idle'        // waiting for user to click
