@@ -2,25 +2,14 @@ package com.hust.soict.ict.aims.payment.vietqr.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class VietQRPaymentStatus {
-    @JsonProperty("status")
-    private String status;
-    
-    @JsonProperty("message")
-    private String message;
-    
-    public VietQRPaymentStatus() {}
-    
-    public VietQRPaymentStatus(String status, String message) {
-        this.status = status;
-        this.message = message;
-    }
-
+public record VietQRPaymentStatus(
+        @JsonProperty("status")
+        String status,
+        @JsonProperty("message")
+        String message
+) {
     // Helper methods
     public boolean isCompleted() {
         return "COMPLETED".equalsIgnoreCase(status) || "SUCCESS".equalsIgnoreCase(status);
@@ -35,4 +24,3 @@ public class VietQRPaymentStatus {
         return String.format("PaymentStatus{status='%s', message='%s'}", status, message);
     }
 }
-

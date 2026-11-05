@@ -43,15 +43,15 @@ class PayPalGatewayFacade implements PayPalRedirectGateway, PayPalRefundGateway 
     public PayPalPaymentInitiation createPayment(String orderId, long totalAmount) throws PaymentException {
 
         var amount = new PayPalApiModel.Amount(
-                props.getCurrency(),
+                props.currency(),
                 amountConverter.toProviderValue(totalAmount));
 
         // reference_id AND custom_id carry the AIMS order id so we can verify it on capture.
         var unit = new PayPalApiModel.PurchaseUnit(orderId, orderId, amount, null);
 
         var appCtx = new PayPalApiModel.ApplicationContext(
-                props.getReturnUrl(), props.getCancelUrl(),
-                "PAY_NOW", "NO_SHIPPING", props.getBrandName());
+                props.returnUrl(), props.cancelUrl(),
+                "PAY_NOW", "NO_SHIPPING", props.brandName());
 
         var request = new PayPalApiModel.CreateOrderRequest("CAPTURE", List.of(unit), appCtx);
 
@@ -110,7 +110,7 @@ class PayPalGatewayFacade implements PayPalRedirectGateway, PayPalRefundGateway 
 
         // Currency is a gateway-only concern: VND → configured currency (USD), hidden here.
         var amount = new PayPalApiModel.Amount(
-                props.getCurrency(),
+                props.currency(),
                 amountConverter.toProviderValue(vndAmount));
         var request = new PayPalApiModel.RefundRequest(amount);
 

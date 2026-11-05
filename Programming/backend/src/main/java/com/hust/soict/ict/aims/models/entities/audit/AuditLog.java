@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @MappedSuperclass
 @Immutable
-public abstract class AuditLog {
+public abstract class AuditLog<A extends Enum<A>> {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false)
@@ -24,5 +24,5 @@ public abstract class AuditLog {
     @Column(nullable = false, updatable = false)
     private Instant timestamp;
 
-    public abstract Enum<?> getAction();
+    public abstract A getAction();
 }

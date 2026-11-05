@@ -56,7 +56,7 @@ paypal:
   # PayPal sandbox does not settle VND, so AIMS VND prices are converted for the
   # gateway only. Adjust rate as needed; the converted value never leaves the subsystem.
   currency: USD
-  vnd-to-currency-rate: 25000
+  vnd-to-currency-rate: 26000
 
   brand-name: AIMS
 

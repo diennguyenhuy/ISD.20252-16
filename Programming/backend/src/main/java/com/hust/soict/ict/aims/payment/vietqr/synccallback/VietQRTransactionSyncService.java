@@ -13,8 +13,8 @@ import java.time.Instant;
 class VietQRTransactionSyncService {
     public VietQRTransactionSyncResponse handleSync(VietQRTransactionSyncRequest request) {
         log.info("[VietQR-Sync] Received transaction-sync: transactionId={} orderId={} amount={} transType={}",
-                request.getTransactionId(), request.getOrderId(),
-                request.getAmount(), request.getTransType());
+                request.transactionId(), request.orderId(),
+                request.amount(), request.transType());
 
         // Print the full object to the console so we can see EVERYTHING VietQR sent
         System.out.println("=== FULL WEBHOOK PAYLOAD FROM VIETQR ===");
@@ -22,24 +22,24 @@ class VietQRTransactionSyncService {
         System.out.println("========================================");
 
         // Only process credit transactions (money received)
-        if (!"C".equalsIgnoreCase(request.getTransType())) {
-            log.warn("[VietQR-Sync] Ignoring non-credit transaction: transType={}", request.getTransType());
-            return errorResponse("Transaction type not supported: " + request.getTransType());
+        if (!"C".equalsIgnoreCase(request.transType())) {
+            log.warn("[VietQR-Sync] Ignoring non-credit transaction: transType={}", request.transType());
+            return errorResponse("Transaction type not supported: " + request.transType());
         }
 
         // Validate amount
-        if (request.getAmount() == null || request.getAmount() <= 0) {
-            log.warn("[VietQR-Sync] Invalid amount: {}", request.getAmount());
+        if (request.amount() == null || request.amount() <= 0) {
+            log.warn("[VietQR-Sync] Invalid amount: {}", request.amount());
             return errorResponse("Invalid transaction amount");
         }
-        Instant transactionTimestamp = (request.getTransactionTime() != null)
-                ? Instant.ofEpochMilli(request.getTransactionTime())
+        Instant transactionTimestamp = (request.transactionTime() != null)
+                ? Instant.ofEpochMilli(request.transactionTime())
                 : Instant.now();
 
         log.info("[VietQR-Sync] Processed webhook successfully for transactionId={}",
-                request.getTransactionId());
+                request.transactionId());
 
-        return successResponse(request.getTransactionId());
+        return successResponse(request.transactionId());
     }
 
 

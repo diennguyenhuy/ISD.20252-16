@@ -27,7 +27,7 @@ class PayPalPaymentsClient {
 
     PayPalPaymentsClient(PayPalProperties props, PayPalAuthClient authClient) {
         this.authClient = authClient;
-        this.restClient = RestClient.builder().baseUrl(props.getBaseUrl()).build();
+        this.restClient = RestClient.builder().baseUrl(props.baseUrl()).build();
     }
 
     /**

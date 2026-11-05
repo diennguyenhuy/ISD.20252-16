@@ -1,18 +1,14 @@
 package com.hust.soict.ict.aims.payment.vietqr;
 
-class QRTestCallbackRequest {
-    private final String bankAccount;
-    private final String content;
-    private final long amount;
-    private final String bankCode;
-    private final String transType;
-    QRTestCallbackRequest(String bankAccount, String content, long amount,
-                          String bankCode) {
-        this.bankAccount = bankAccount;
-        this.content = content;
-        this.amount = amount;
-        this.bankCode = bankCode;
-        this.transType = "C";
+record QRTestCallbackRequest(
+        String bankAccount,
+        String content,
+        long amount,
+        String bankCode,
+        String transType
+) {
+    QRTestCallbackRequest(String bankAccount, String content, long amount, String bankCode) {
+        this(bankAccount, content, amount, bankCode, "C");
     }
     /**
      * Builds the JSON request string for the VietQR test callback API.

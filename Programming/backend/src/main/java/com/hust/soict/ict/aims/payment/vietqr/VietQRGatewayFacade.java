@@ -39,7 +39,7 @@ class VietQRGatewayFacade implements VietQRPaymentGateway {
 
         try {
             // Get new token
-            QRAccessTokenRequest request = new QRAccessTokenRequest(props.getUsername(), props.getPassword());
+            QRAccessTokenRequest request = new QRAccessTokenRequest(props.username(), props.password());
             String authHeader = request.buildAuthorizationHeader();
 
             String responseString = boundary.getAccessToken(authHeader);
@@ -51,8 +51,8 @@ class VietQRGatewayFacade implements VietQRPaymentGateway {
                 throw new InvalidTokenException("Failed to get valid access token");
             }
 
-            this.accessToken = response.getAccessToken();
-            this.tokenExpiryTime = System.currentTimeMillis() + (response.getExpiresIn() * 1000L);
+            this.accessToken = response.accessToken();
+            this.tokenExpiryTime = System.currentTimeMillis() + (response.expiresIn() * 1000L);
 
             return this.accessToken;
         } catch (InterruptedException e) {
@@ -83,7 +83,7 @@ class VietQRGatewayFacade implements VietQRPaymentGateway {
 
             // Create request with bank info from config
             QRGenerateRequest request = new QRGenerateRequest(
-                    props.getBankCode(), props.getAccountNo(), props.getAccountName(),
+                    props.bankCode(), props.accountNo(), props.accountName(),
                     content, totalAmount, orderId);
             String requestString = request.buildRequestString();
 
@@ -114,7 +114,7 @@ class VietQRGatewayFacade implements VietQRPaymentGateway {
 
             // Create status check request
             QRTestCallbackRequest request = new QRTestCallbackRequest(
-                    props.getAccountNo(), content, totalAmount, props.getBankCode()
+                    props.accountNo(), content, totalAmount, props.bankCode()
             );
             String requestString = request.buildRequestString();
             String response = boundary.checkPaymentStatus(token, requestString);

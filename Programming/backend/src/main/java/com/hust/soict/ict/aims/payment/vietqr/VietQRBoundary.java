@@ -24,7 +24,7 @@ class VietQRBoundary {
     String getAccessToken(String authorizationHeader)
             throws IOException, InterruptedException {
 
-        String url = props.getApiBaseUrl() + GET_TOKEN_URL;
+        String url = props.apiBaseUrl() + GET_TOKEN_URL;
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .header("Authorization", authorizationHeader)
@@ -41,7 +41,7 @@ class VietQRBoundary {
     String generateQRCode(String accessToken, String requestString)
             throws IOException, InterruptedException {
 
-        String url = props.getApiBaseUrl() + GENERATE_QR_URL;
+        String url = props.apiBaseUrl() + GENERATE_QR_URL;
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .header("Content-Type", "application/json")
@@ -59,7 +59,7 @@ class VietQRBoundary {
     String checkPaymentStatus(String accessToken, String requestString)
             throws IOException, InterruptedException {
 
-        String callbackUrl = props.getApiBaseUrl().replace("/vqr/api", TEST_CALLBACK_URL);
+        String callbackUrl = props.apiBaseUrl().replace("/vqr/api", TEST_CALLBACK_URL);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(callbackUrl))

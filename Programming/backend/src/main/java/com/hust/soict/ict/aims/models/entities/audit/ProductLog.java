@@ -18,7 +18,7 @@ import java.util.UUID;
 @Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ProductLog extends AuditLog {
+public class ProductLog extends AuditLog<ProductAction> {
     @Column(nullable = false, updatable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private ProductAction action;

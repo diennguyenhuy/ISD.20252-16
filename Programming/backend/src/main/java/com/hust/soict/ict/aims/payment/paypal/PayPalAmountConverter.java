@@ -22,7 +22,7 @@ class PayPalAmountConverter {
     /** e.g. 250_000 VND with rate 25_000 → "10.00" */
     String toProviderValue(Long vndAmount) {
         return BigDecimal.valueOf(vndAmount)
-                .divide(BigDecimal.valueOf(props.getVndToCurrencyRate()), 2, RoundingMode.HALF_UP)
+                .divide(BigDecimal.valueOf(props.vndToCurrencyRate()), 2, RoundingMode.HALF_UP)
                 .toPlainString();
     }
 }

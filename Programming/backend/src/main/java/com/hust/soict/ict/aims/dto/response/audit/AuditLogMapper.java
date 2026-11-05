@@ -4,7 +4,7 @@ import com.hust.soict.ict.aims.models.entities.audit.AuditLog;
 
 import java.util.function.Supplier;
 
-public abstract class AuditLogMapper<L extends AuditLog, R extends AuditLogResponse> {
+public abstract class AuditLogMapper<L extends AuditLog<?>, R extends AuditLogResponse> {
     private final Supplier<R> responseSupplier;
     final Class<L> logClass;
 

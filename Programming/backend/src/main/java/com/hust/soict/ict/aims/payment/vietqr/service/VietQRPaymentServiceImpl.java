@@ -38,7 +38,7 @@ class VietQRPaymentServiceImpl extends PaymentService implements VietQRPaymentSe
 
         VietQRPaymentStatus paymentStatus = qrPaymentGateway.checkPaymentStatus(order.checkoutId.toString(), order.getTotalAmount());
         if (!paymentStatus.isCompleted()) {
-            throw new PaymentException("Payment verification failed. VietQR status: " + paymentStatus.getStatus());
+            throw new PaymentException("Payment verification failed. VietQR status: " + paymentStatus.status());
         }
         log.info("[PayOrderService] VietQR confirmed COMPLETED — creating PaymentTransaction");
         return finalizePayment("ORD" + order.checkoutId);

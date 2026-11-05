@@ -24,14 +24,14 @@ class PayPalAuthClient {
 
     PayPalAuthClient(PayPalProperties props) {
         this.props = props;
-        this.restClient = RestClient.builder().baseUrl(props.getBaseUrl()).build();
+        this.restClient = RestClient.builder().baseUrl(props.baseUrl()).build();
     }
 
     String getAccessToken() {
         try {
             PayPalApiModel.TokenResponse token = restClient.post()
                     .uri("/v1/oauth2/token")
-                    .headers(h -> h.setBasicAuth(props.getClientId(), props.getClientSecret()))
+                    .headers(h -> h.setBasicAuth(props.clientId(), props.clientSecret()))
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                     .body("grant_type=client_credentials")
                     .retrieve()

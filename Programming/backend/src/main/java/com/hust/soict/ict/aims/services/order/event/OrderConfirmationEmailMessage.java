@@ -1,12 +1,13 @@
 package com.hust.soict.ict.aims.services.order.event;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
+import org.springframework.stereotype.Component;
+
 import com.hust.soict.ict.aims.models.entities.order.Order;
 import com.hust.soict.ict.aims.models.entities.order.PaymentTransaction;
 import com.hust.soict.ict.aims.services.notification.email.EmailMessage;
-import org.springframework.stereotype.Component;
-
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 
 class OrderConfirmationEmailMessage implements EmailMessage<OrderSuccessEvent> {
     private final Order order;
@@ -81,7 +82,7 @@ class OrderConfirmationEmailMessage implements EmailMessage<OrderSuccessEvent> {
 
         order.getItems().forEach(item ->
                 sb.append("<tr style='border-bottom: 1px solid #f4f4f5;'>")
-                        .append("<td style='padding: 15px 0; font-weight: 600; color: #3f3f46;'>").append(item.getProductName()).append("</td>")
+                        .append("<td style='padding: 15px 0; font-weight: 600; color: #3f3f46;'>").append(item.getProductTitle()).append("</td>")
                         .append("<td style='padding: 15px 0; text-align: center; color: #71717a;'>x").append(item.getQuantity()).append("</td>")
                         .append("<td style='padding: 15px 0; text-align: right; color: #3f3f46; font-weight: 500;'>")
                         .append(String.format("%,d", item.getItemTotalPrice())).append(" ₫</td>")

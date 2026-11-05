@@ -1,28 +1,18 @@
 package com.hust.soict.ict.aims.payment.vietqr;
 
-import lombok.Getter;
-
-@Getter
-class QRGenerateRequest {
-    private String bankCode;
-    private String bankAccount;
-    private String userBankName;
-    private String content;
-    private int qrType; // qrType: 0=dynamic, 1=static, 3=semi-dynamic
-    private long amount;
-    private String orderId;
-    private String transType;
-    
-    QRGenerateRequest(String bankCode, String bankAccount, String userBankName,
-                             String content, long amount, String orderId) {
-        this.bankCode = bankCode;
-        this.bankAccount = bankAccount;
-        this.userBankName = userBankName;
-        this.content = content;
-        this.amount = amount;
-        this.orderId = orderId;
-        this.qrType = 0;  // Dynamic QR
-        this.transType = "C";  // Credit (receiving money)
+record QRGenerateRequest(
+        String bankCode,
+        String bankAccount,
+        String userBankName,
+        String content,
+        int qrType,
+        long amount,
+        String orderId,
+        String transType
+) {
+    QRGenerateRequest(String bankCode, String bankAccount, String userBankName, String content, long amount, String orderId) {
+        // Dynamic QR
+        this(bankCode, bankAccount, userBankName, content, 0, amount, orderId, "C");  // Credit (receiving money)
     }
     
     String buildRequestString() {

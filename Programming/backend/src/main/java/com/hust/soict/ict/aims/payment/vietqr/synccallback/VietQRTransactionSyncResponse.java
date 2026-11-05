@@ -1,24 +1,14 @@
 package com.hust.soict.ict.aims.payment.vietqr.synccallback;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class VietQRTransactionSyncResponse {
-    @JsonProperty("error")
-    private boolean error;
-
-    @JsonProperty("errorReason")
-    private String errorReason;
-
-    @JsonProperty("toastMessage")
-    private String toastMessage;
-
-    @JsonProperty("object")
-    private VietQRTransactionSyncObject object;
-}
-
+public record VietQRTransactionSyncResponse(
+        @JsonProperty("error")
+        boolean error,
+        @JsonProperty("errorReason")
+        String errorReason,
+        @JsonProperty("toastMessage")
+        String toastMessage,
+        @JsonProperty("object")
+        VietQRTransactionSyncObject object
+) {}

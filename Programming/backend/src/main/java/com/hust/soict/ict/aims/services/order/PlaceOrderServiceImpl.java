@@ -1,18 +1,25 @@
 package com.hust.soict.ict.aims.services.order;
 
-import com.hust.soict.ict.aims.context.CartContext;
-import com.hust.soict.ict.aims.dto.request.DeliveryRequest;
-import com.hust.soict.ict.aims.exceptions.*;
-import com.hust.soict.ict.aims.models.entities.order.*;
-import com.hust.soict.ict.aims.context.OrderDraftContext;
-import com.hust.soict.ict.aims.services.order.deliveryfee.DeliveryFeeCalculationMethod;
-import com.hust.soict.ict.aims.services.order.deliveryfee.DeliveryFeeCalculator;
-import com.hust.soict.ict.aims.services.order.event.OrderSuccessEvent;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+
+import com.hust.soict.ict.aims.context.CartContext;
+import com.hust.soict.ict.aims.context.OrderDraftContext;
+import com.hust.soict.ict.aims.dto.request.DeliveryRequest;
+import com.hust.soict.ict.aims.exceptions.EmptyCartException;
+import com.hust.soict.ict.aims.exceptions.NotEnoughStockException;
+import com.hust.soict.ict.aims.exceptions.OrderNotCompleteException;
+import com.hust.soict.ict.aims.exceptions.OrderNotPlacedException;
+import com.hust.soict.ict.aims.exceptions.ProductNotFoundException;
+import com.hust.soict.ict.aims.models.entities.order.Invoice;
+import com.hust.soict.ict.aims.models.entities.order.Order;
+import com.hust.soict.ict.aims.services.order.deliveryfee.DeliveryFeeCalculationMethod;
+import com.hust.soict.ict.aims.services.order.deliveryfee.DeliveryFeeCalculator;
+import com.hust.soict.ict.aims.services.order.event.OrderSuccessEvent;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +32,7 @@ class PlaceOrderServiceImpl implements PlaceOrderService {
     private final CartContext cartContext;
     private final OrderDraftContext orderDraftContext;
 
+    @Override
     public Order.Draft placeOrder() throws EmptyCartException, NotEnoughStockException, ProductNotFoundException {
         log.debug("Placing order...");
         log.debug("Checking stock availability...");
@@ -41,6 +49,7 @@ class PlaceOrderServiceImpl implements PlaceOrderService {
         return draftOrder;
     }
 
+    @Override
     public Order.Draft submitDeliveryInformation(DeliveryRequest deliveryRequest) {
         log.debug("Submitting delivery request...");
         Order.Draft draftOrder = orderDraftContext.getDraftOrder();
@@ -64,6 +73,7 @@ class PlaceOrderServiceImpl implements PlaceOrderService {
         return draftOrder;
     }
 
+    @Override
     public Order.Draft getInvoice() {
         log.debug("Creating invoice...");
         Order.Draft draftOrder = orderDraftContext.getDraftOrder();
@@ -74,6 +84,7 @@ class PlaceOrderServiceImpl implements PlaceOrderService {
         return draftOrder;
     }
 
+    @Override
     public void cancelOrder() {
         log.debug("Canceling order...");
         orderDraftContext.clearDraftOrder();
@@ -81,7 +92,7 @@ class PlaceOrderServiceImpl implements PlaceOrderService {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    void clearContext(OrderSuccessEvent __) {
+    void clearContext(@SuppressWarnings("unused") OrderSuccessEvent __) {
         cartContext.getOrCreateCart().clear();
         orderDraftContext.clearDraftOrder();
     }

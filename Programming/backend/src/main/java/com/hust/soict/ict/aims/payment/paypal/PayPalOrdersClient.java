@@ -23,7 +23,7 @@ class PayPalOrdersClient {
 
     PayPalOrdersClient(PayPalProperties props, PayPalAuthClient authClient) {
         this.authClient = authClient;
-        this.restClient = RestClient.builder().baseUrl(props.getBaseUrl()).build();
+        this.restClient = RestClient.builder().baseUrl(props.baseUrl()).build();
     }
 
     PayPalApiModel.OrderResponse createOrder(PayPalApiModel.CreateOrderRequest request) {

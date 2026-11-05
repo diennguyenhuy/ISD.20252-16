@@ -13,7 +13,7 @@ import java.util.UUID;
 @Table(name = "admin_log")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class AdminLog extends AuditLog {
+public class AdminLog extends AuditLog<UserAction> {
     @Column(nullable = false, updatable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private UserAction action;
